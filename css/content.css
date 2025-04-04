@@ -28,6 +28,6 @@
 .space-inbetween.container{    
     border: solid black 1px;
     column-count: 3;
-    column-gap: 170px;    
+    column-gap: 150px;    
     border: none;
 }
