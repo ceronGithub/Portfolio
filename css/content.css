@@ -1,0 +1,33 @@
+.content{    
+    margin: 0;
+    padding : 0;
+    box-sizing:  border-box;
+    font-family: 'Poppins', sans-serif;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+    min-height: 100vh;  
+    background: black;
+    background-size:  cover;
+    background-position: center;
+    
+    animation: scrolling ease-in-out;
+    animation-timeline: view();
+    animation-range: entry 0% cover 50%;
+}
+@keyframes scrolling{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;        
+    }
+}
+
+.space-inbetween.container{    
+    border: solid black 1px;
+    column-count: 3;
+    column-gap: 170px;    
+    border: none;
+}

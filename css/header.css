@@ -1,0 +1,26 @@
+#header{
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+    min-height: 100vh;  
+    background: url(/portfolio/images/code.jpg);
+    background-size:  cover;
+    background-position: center;   
+}
+
+.boxHeader {
+    position: relative;
+    border-radius: 20px;
+    transform-style: preserve-3d;
+}
+.boxHeader .card{
+    position: flex;
+    background: rgba(39, 36, 36, 0.5);
+    width: 150vh;
+    height: 400px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-top: 1px solid rgba(255, 255, 255, .75); 
+    border-left: 1px solid rgba(255, 255, 255, .75);
+    border-radius: 20px;
+}

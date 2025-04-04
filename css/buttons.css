@@ -1,0 +1,84 @@
+/*NOTE: TO REMEMBER
+    * :hover - a suedo class or suedo code
+    * transition - transition should always be on class.
+    */
+    .sub-btn{
+        background-color: rgb(199, 0, 0);
+        color: wheat;
+        border: none;        
+        /* height: 36px;
+        width: auto;         */
+        border-radius: 2px;
+        cursor: pointer;
+        transition: opacity .5s;
+        /*
+        *inside space between text and border (padding)
+        */
+        padding: 10px 15px 10px 15px;
+    }
+
+    /*HOVER
+    :hover - is a suedo class
+    */
+    .sub-btn:hover{
+        opacity: .8;
+    }
+
+    .sub-btn:active{
+        opacity: .4;
+    }
+
+    .join-btn{
+        background-color: white;
+        border-color: rgb(32, 32, 201);
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 2px;
+        color: rgb(32, 32, 201);
+        /* height: 36px;
+        width: auto; */
+        cursor: pointer;
+        margin-left: 8px;
+        margin-right: 8px;
+        transition: background-color .15s, color .15s;
+        /*
+        *inside space between text and border (padding)
+        */
+        padding: 10px 15px 10px 15px;
+    }
+    .join-btn:hover{
+        background-color: rgb(32, 32, 201);
+        color: white;
+    }
+
+    .join-btn:active{
+        opacity: .4;
+    }
+
+
+    .tweet-btn{
+        background-color: rgb(11, 11, 133);
+        color: white;
+        border-style: none;
+        /* height: 36px;
+        width: auto; */
+        border-radius: 18px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        transition: box-shadow .15s;
+
+        /*
+        *inside space between text and border (padding)
+        */
+        padding: 10px 15px 10px 15px;
+    }
+
+    .tweet-btn:hover{
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, .15);
+    }
+
+    .tweet-btn:active{
+        opacity: .4;
+    }
+    

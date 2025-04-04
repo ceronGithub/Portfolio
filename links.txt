@@ -1,0 +1,6 @@
+font-awesome (icons)
+https://cdnjs.com/libraries/font-awesome
+
+css length units
+https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Values_and_Units/Numeric_data_types#absolute_length_units
+https://www.w3schools.com/cssref/css_units.php

@@ -1,0 +1,125 @@
+.glassBox{
+    position: relative;
+    border-radius: 20px;
+    transform-style: preserve-3d;    
+}
+
+.glassBox .glassCard{
+    position: relative;
+    background: rgba(255, 255, 255, 0.5);
+    width: 300px;
+    min-height: 400px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-top: 1px solid rgba(255, 255, 255, .75);
+    border-left: 1px solid rgba(255, 255, 255, .75);
+    border-radius: 20px;
+}
+
+.glassElements{
+    position: absolute;
+    top: 50px;
+    left: -30px;
+    width: 100px;
+    height: 100px;
+    transform: translateZ(80px);    
+    background: rgba(255, 255, 255, .1);
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-top: 1px solid rgba(255, 255, 255, .75);
+    border-left: 1px solid rgba(255, 255, 255, .75);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, .5);
+}
+.glassElements i{    
+    content: '';
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    align-items: center;      
+    font-size: 80px;
+    padding: 10px 10px;      
+}
+.glassElements i::before{
+    opacity: 0;
+    transition: .5s;
+}
+
+.glassBox:hover .glassElements i::before{
+    opacity: 1;
+}
+
+.glassElements.personImg{
+    top: 0;
+    left: initial;
+    right: 30px;
+    width: 140px;
+    height: 120px;
+    padding: 10px;
+    transform: translateZ(120px);
+}
+
+.glassElements.personImg img{
+    position: absolute;
+    height: calc(100% - 20px);
+    width: calc(100% - 20px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-top: 1px solid rgba(255, 255, 255, .75);
+    border-left: 1px solid rgba(255, 255, 255, .75);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, .5);
+    opacity: 0;
+    transition: .5s;
+}
+.glassBox:hover .glassElements.personImg img{
+    opacity: 1;
+}
+
+.glassElements.personName{
+    top: 235px;
+    left: initial;
+    right: 10px;
+    width: 100%;
+    padding: 10px;
+    text-align: right;
+    transform: translateZ(100px);
+    background: transparent;
+    backdrop-filter: blur(0px);
+    border: none;
+    box-shadow: none;
+    color: #644651;
+    opacity: 0;
+    transition: .5s;    
+    transition-delay: .25s;
+}
+.glassBox:hover .glassElements.personName{
+    top: 125px;
+    opacity: 1;
+}
+
+.glassElements.content{
+    top: initial;
+    left: initial;
+    bottom: 0;
+    right: -20px;
+    width: 85%;
+    min-height: 200px;
+    padding: 10px;    
+    transform: translateZ(180px);
+    text-align: center;
+    display: relative;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+}
+.glassElements.content p{
+    position: relative;
+    color: 644651;
+    font-size: 0.85em;
+    transition: .5s;
+    opacity: 0;
+    transition-delay: .5s;
+}
+.glassBox:hover .glassElements.content p{
+    opacity: 1;
+}
