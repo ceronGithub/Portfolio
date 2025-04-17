@@ -1,0 +1,25 @@
+.header-element{
+    position: relative;    
+    width: 100%;
+    height: 100vh;
+    background-color: #000000;
+}
+
+.wave-footer {
+    position: absolute;
+    bottom: 0;    
+    width: 100%;
+    overflow: hidden;      
+}
+
+.wave-footer svg {
+    position: relative;
+    display: block;
+    width: calc(176% + 1.3px);
+    height: 400px;
+    transform: rotateY(180deg);
+}
+
+.wave-footer .shape-fill {
+    fill: #522546;
+}

@@ -1,0 +1,104 @@
+img#farmer{
+    position: absolute;
+    top: 33vh;     
+    left: 2vw; 
+    width: 350px;
+    height: 350px;    
+    background-repeat: no-repeat;
+    background-position: center;    
+    background-size: cover;
+    object-fit: cover;    
+    border-radius: 50%;    
+    z-index: 1;               
+    animation: bouncing-one 2s .5s ease-in-out infinite;
+}
+
+#circle-below-one{
+    position: absolute;
+    top: 80vh;     
+    left: 4vw;
+    height: 60px;
+    width: 300px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #410445, #A5158C);
+    z-index: 0;        
+    transition: .5s ease-in-out;
+}
+
+img#farmer:hover ~ #circle-below-one{
+    box-shadow: 0 0 5px #410445, 0 0 25px #A5158C, 0px 0px 50px #410445, 0 0 100px #A5158C;
+}
+
+
+
+
+
+img#software-developer{
+    position: absolute;
+    top: 35vh;     
+    left: 70vw; 
+    width: 400px;
+    height: 400px;    
+    background-repeat: no-repeat;
+    background-position: center;    
+    background-size: cover;
+    object-fit: cover;
+    z-index: 3;
+    animation: bouncing 2s ease-in-out infinite;
+}
+
+#circle-below{
+    position: absolute;
+    top: 77vh;     
+    left: 70vw;
+    height: 90px;
+    width: 400px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #410445, #A5158C);
+    z-index: 2;    
+    transition: .5s ease-in-out;
+}
+
+img#software-developer:hover + #circle-below{
+    box-shadow: 0 0 5px #410445, 0 0 25px #A5158C, 0 0 50px #410445, 0 0 100px #A5158C;
+}
+
+@keyframes bouncing{
+    0%{
+        top: 35vh;
+    }
+    50%{
+        top: 34vh;
+    }
+    100%{
+        top: 35vh;
+    }
+}
+
+@keyframes bouncing-one{
+    0%{
+        top: 33vh;
+    }
+    50%{
+        top: 32vh;
+    }
+    100%{
+        top: 33vh;
+    }
+}
+#me{
+    position: absolute;
+    top: 20vh;
+    left: 36vw;
+    width: 25vw;
+    height: 50vh;   
+    border-radius: 100%; 
+    background-repeat: no-repeat;
+    background-position: center;    
+    background-size: contain;
+    object-fit: cover;
+    padding: 10px;
+    /* border: 2px solid red;    */
+    z-index: 1;
+}
+
