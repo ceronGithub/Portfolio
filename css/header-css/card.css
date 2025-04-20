@@ -1,12 +1,13 @@
 .card{
-    position: relative;    
+    position: absolute;    
     float: left;
     top: 0;     
     left: 0;
     width: 100%;
     height: 100vh;
-    /* background: rebeccapurple;  */
     z-index: 2;
+    background: black;
+    transition: background .5s .5s ease-out;        
 }
 
 .card-element{
@@ -19,9 +20,6 @@
     height: 40vh;    
     background: linear-gradient(to top right, #410445, #A5158C);
     border-radius: 8px;
-
-    /* opacity: 0;*/
-    /* animation: show reverse .25s ease-out forwards; */
 }
 .card-element-one{
     position: absolute;
@@ -34,6 +32,8 @@
     background: linear-gradient(to top right, #410445, #A5158C);
     border-radius: 8px;    
 }
+
+
 
 .card-element img{
     position: absolute;
@@ -63,8 +63,7 @@
     height: 46%;    
     float: left;
     top: 0;
-    left: 0;    
-    /* border: 2px solid red; */
+    left: 0;        
 }
 .card-title-one{
     position: absolute;    
@@ -72,8 +71,7 @@
     height: 46%;    
     float: left;
     top: 0;
-    left: 0;
-    /* border: 2px solid red; */
+    left: 0;    
 }
 
 
@@ -93,9 +91,15 @@
     float: left;
     bottom: 0;
     justify-content: center;
-    align-items: center;
-    /* border: 2px solid rebeccapurple; */
+    align-items: center;    
 }
+
+
+img#software-developer:hover ~ #left-slide > .card{
+    background: transparent; 
+}
+
+
 
 h1{    
     text-align: center;
@@ -117,26 +121,3 @@ span{
 }
 
 
-@keyframes show{
-    from{
-        opacity: 0;
-    }
-    to{
-        opacity: 1;
-    }
-}
-
-@keyframes stay{
-    100%{
-        opacity: 1;
-    }
-}
-
-@keyframes hide{
-    from{
-        opacity: 1;
-    }
-    to{
-        opacity: 0;
-    }
-}

@@ -5,9 +5,11 @@
     top: 10vh;
     width: 0%;
     height: 90vh;
-    background: rgba(0, 0, 0, 0.9);    
+    /* background: rgba(0, 0, 0, 0.9);*/
+    background: black;
     box-shadow: 0px 0px 50px 30px rgba(0, 0, 0, .9);    
 
+    transition: .5s ease-in-out;
     backdrop-filter: blur(5px);            
     overflow: hidden;
 }
@@ -15,14 +17,15 @@
 
 img#software-developer:hover ~ #left-slide
 {            
-    transition: .5s ease-in;
     width: 69%;
     z-index: 5;
+    background: black !important; 
 }
 
-img#software-developer:not(hover) ~ #left-slide
-{
-    transition: 1s .5s ease-out;    
-    width: 0%;
+img#software-developer:not(:hover) ~ #left-slide
+{       
+    /* width: 0%; */
     z-index: 5;
+    background: black !important;
+    transition: 1s 1s ease-out; 
 }
