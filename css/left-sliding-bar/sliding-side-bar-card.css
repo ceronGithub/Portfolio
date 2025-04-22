@@ -18,18 +18,18 @@
     left: 2vw;
     width: 65%;
     height: 40vh;    
-    background: linear-gradient(to top right, #410445, #A5158C);
+    background: linear-gradient(to top right, #FF2DF1, #F6DC43);
     border-radius: 8px;
 }
 .card-element-one{
     position: absolute;
     float: left;
     left: 0;
-    top: 51vh;
+    top: 55vh;
     left: 2vw;
     width: 65vw;
-    height: 35vh;
-    background: linear-gradient(to top right, #410445, #A5158C);
+    height: 28vh;
+    background: linear-gradient(to bottom right, #FF2DF1, #F6DC43);
     border-radius: 8px;    
 }
 
@@ -45,15 +45,14 @@
     transition: 2s ease-in-out;
     border-radius: 50%;    
 }
-.card-element-one img{
+.card-element-one .icon{
     position: absolute;
     float: right;
     right: 0px;
     top: -24vh;
     width: 20vw;
     height: 40vh;    
-    transition: 2s ease-in-out;  
-    /* border: 2px solid red;    */
+    transition: 2s ease-in-out;      
 }
 
 
@@ -67,32 +66,69 @@
 }
 .card-title-one{
     position: absolute;    
-    width: 69%;
-    height: 46%;    
+    width: 71%;
+    height: 40%;    
     float: left;
     top: 0;
-    left: 0;    
+    left: 0;     
 }
 
 
 .card-word{
     position: absolute;    
     width: 100%;
-    height: 50%;    
+    height: 55%;    
     float: left;
     bottom: 0;
     justify-content: center;
     align-items: center;
+    /* border: 1px solid red;     */
 }
 .card-word-one{
-    position: absolute;    
+    position: relative;    
     width: 100%;
     height: 50%;    
     float: left;
-    bottom: 0;
-    justify-content: center;
-    align-items: center;    
+    left: 0;
+    bottom: 0; 
+    top: 12vh;    
 }
+
+
+.card-word-one ul{
+    position: absolute;
+    display: flex;
+    top: 50%;
+    left: 50%;    
+    transform: translate(-50%,-50%);
+    border-radius: 8px;        
+}
+.card-word-one ul li{
+    list-style: none;
+    margin: 0 5px;     
+    text-align: center;
+}
+
+.card-word-one ul li .fa-brands, .fa-solid{      
+    font-size: 30px;
+    padding-bottom: 5px;         
+}
+
+.card-word-one ul li .icons{        
+    height: 30px;
+    width: 30px;
+}
+
+.card-word-one ul li span{
+    color: white;
+}
+
+.card-word-one ul li .fa-brands, .fa-solid, .icons{
+    line-height: 30px;
+}
+
+
+
 
 
 img#software-developer:hover ~ #left-slide > .card{
@@ -101,23 +137,20 @@ img#software-developer:hover ~ #left-slide > .card{
 
 
 
-h1{    
+h1{         
+    white-space: nowrap;
+    color: white;
     text-align: center;
     position: absolute;
     display: block;
     left: 50%;
-    top: 50%;   
+    top: 50%;
     transform: translate(-50%,-50%);
 }
 
 p{    
-    text-align: center;
-    padding: 30px 5px;
+    text-align: justify;
+    position: absolute;
+    padding: 15px 30px;
     color: white;
 }
-
-span{
-    color: #410445;    
-}
-
-
