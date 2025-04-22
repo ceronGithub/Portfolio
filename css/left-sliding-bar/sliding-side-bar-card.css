@@ -10,6 +10,10 @@
     transition: background .5s .5s ease-out;        
 }
 
+img#software-developer:hover ~ #left-slide > .card-left{
+    background: transparent; 
+}
+
 .card-element-left{
     position: absolute;
     float: left;
@@ -129,28 +133,3 @@
 
 
 
-
-
-img#software-developer:hover ~ #left-slide > .card-left{
-    background: transparent; 
-}
-
-
-
-h1{         
-    white-space: nowrap;
-    color: white;
-    text-align: center;
-    position: absolute;
-    display: block;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-}
-
-p{    
-    text-align: justify;
-    position: absolute;
-    padding: 15px 30px;
-    color: white;
-}

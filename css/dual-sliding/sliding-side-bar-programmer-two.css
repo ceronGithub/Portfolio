@@ -5,10 +5,11 @@
     top: 10vh;
     width: 0%;
     height: 90vh;
-    background: rgba(255, 255, 255, .1);
-    box-shadow: 20px 20px 50px 50px rgba(0, 0, 0, .5);
-    backdrop-filter: blur(5px);
-    transition: .5s ease-in-out;    
+    background: black;
+    box-shadow: 20px 20px 50px 50px rgba(0, 0, 0, .4);    
+
+    transition: .5s ease-in-out;
+    overflow: hidden;
 }
 
 #left-left-slide{
@@ -18,32 +19,40 @@
     top: 10vh;
     width: 0%;
     height: 90vh;
-    background: rgba(255, 255, 255, .1);
-    box-shadow: 20px 20px 50px 20px rgba(0, 0, 0, .5);
-    backdrop-filter: blur(5px);
-    transition: .5s ease-in-out;  
-    z-index: 5;  
+    background: black;
+    box-shadow: 20px 20px 50px 20px rgba(0, 0, 0, .4);
+    
+    transition: .5s ease-in-out;
+    overflow: hidden;  
 }
 
 img#me:hover ~ #right-right-slide
 {
     width: 36.5%;
-    z-index: 5;    
+    z-index: 5;   
+    background: black !important; 
 }
 
 img#me:hover ~ #left-left-slide
 {
     width: 35%;
-    z-index: 5;    
+    z-index: 5; 
+    background: black !important;   
 }
 
-img#me:not(hover) ~ #right-right-slide
-{   
-    width: 0%;
+
+
+img#me:not(:hover) ~ #right-right-slide
+{       
     z-index: 5;
+    background: black !important;
+    transition: 1s 1s ease-out;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, .1);
 }
-img#me:not(hover) ~ #left-left-slide
-{   
-    width: 0%;
+img#me:not(:hover) ~ #left-left-slide
+{       
     z-index: 5;
+    background: black !important;
+    transition: 1s 1s ease-out;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, .1);
 }
