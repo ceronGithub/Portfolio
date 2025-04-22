@@ -1,4 +1,4 @@
-.card{
+.card-left{
     position: absolute;    
     float: left;
     top: 0;     
@@ -10,7 +10,7 @@
     transition: background .5s .5s ease-out;        
 }
 
-.card-element{
+.card-element-left{
     position: absolute;
     float: left;
     left: 0;
@@ -21,7 +21,7 @@
     background: linear-gradient(to top right, #FF2DF1, #F6DC43);
     border-radius: 8px;
 }
-.card-element-one{
+.card-element-left-one{
     position: absolute;
     float: left;
     left: 0;
@@ -35,7 +35,7 @@
 
 
 
-.card-element img{
+.card-element-left .left-image{
     position: absolute;
     float: right;
     right: 0px;
@@ -45,7 +45,7 @@
     transition: 2s ease-in-out;
     border-radius: 50%;    
 }
-.card-element-one .icon{
+.card-element-left-one .icon{
     position: absolute;
     float: right;
     right: 0px;
@@ -56,7 +56,7 @@
 }
 
 
-.card-title{
+.card-title-left{
     position: absolute;    
     width: 67%;
     height: 46%;    
@@ -64,7 +64,7 @@
     top: 0;
     left: 0;        
 }
-.card-title-one{
+.card-title-left-one{
     position: absolute;    
     width: 71%;
     height: 40%;    
@@ -74,7 +74,7 @@
 }
 
 
-.card-word{
+.card-word-left{
     position: absolute;    
     width: 100%;
     height: 55%;    
@@ -84,7 +84,7 @@
     align-items: center;
     /* border: 1px solid red;     */
 }
-.card-word-one{
+.card-word-left-one{
     position: relative;    
     width: 100%;
     height: 50%;    
@@ -95,7 +95,7 @@
 }
 
 
-.card-word-one ul{
+.card-word-left-one ul{
     position: absolute;
     display: flex;
     top: 50%;
@@ -103,27 +103,27 @@
     transform: translate(-50%,-50%);
     border-radius: 8px;        
 }
-.card-word-one ul li{
+.card-word-left-one ul li{
     list-style: none;
     margin: 0 5px;     
     text-align: center;
 }
 
-.card-word-one ul li .fa-brands, .fa-solid{      
+.card-word-left-one ul li .fa-brands, .fa-solid{      
     font-size: 30px;
     padding-bottom: 5px;         
 }
 
-.card-word-one ul li .icons{        
+.card-word-left-one ul li .icons{        
     height: 30px;
     width: 30px;
 }
 
-.card-word-one ul li span{
+.card-word-left-one ul li span{
     color: white;
 }
 
-.card-word-one ul li .fa-brands, .fa-solid, .icons{
+.card-word-left-one ul li .fa-brands, .fa-solid, .icons{
     line-height: 30px;
 }
 
@@ -131,7 +131,7 @@
 
 
 
-img#software-developer:hover ~ #left-slide > .card{
+img#software-developer:hover ~ #left-slide > .card-left{
     background: transparent; 
 }
 
