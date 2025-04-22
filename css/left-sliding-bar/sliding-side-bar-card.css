@@ -114,13 +114,13 @@ img#software-developer:hover ~ #left-slide > .card-left{
 }
 
 .card-word-left-one ul li .fa-brands, .fa-solid{      
-    font-size: 30px;
+    font-size: 20px;
     padding-bottom: 5px;         
 }
 
 .card-word-left-one ul li .icons{        
-    height: 30px;
-    width: 30px;
+    height: 20px;
+    width: 20px;
 }
 
 .card-word-left-one ul li span{
@@ -128,7 +128,7 @@ img#software-developer:hover ~ #left-slide > .card-left{
 }
 
 .card-word-left-one ul li .fa-brands, .fa-solid, .icons{
-    line-height: 30px;
+    line-height: 20px;
 }
 
 
