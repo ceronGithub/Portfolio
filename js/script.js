@@ -67,21 +67,55 @@ function type() {
 
 setTimeout(type, 1200);
 
-// ─── Scroll Reveal ────────────────────────
+// ─── Scroll Reveal: Fade-In + Fade-Out ────────────
 const revealEls = document.querySelectorAll('.reveal');
+let lastScrollY = window.scrollY;
+let ticking = false;
+
+// Update scroll direction on every scroll
+window.addEventListener('scroll', () => {
+  lastScrollY = window.scrollY;
+}, { passive: true });
 
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
+    const el = entry.target;
+
     if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
+      // Element entering viewport — fade IN
+      el.classList.remove('fade-out-up', 'fade-out-down');
+      el.classList.add('visible');
+    } else {
+      // Element leaving viewport — fade OUT with direction
+      if (el.classList.contains('visible')) {
+        const rect = entry.boundingClientRect;
+        // If element is above viewport (scrolled past), fade up
+        // If element is below viewport (haven't reached), fade down
+        if (rect.top < 0) {
+          el.classList.remove('visible');
+          el.classList.add('fade-out-up');
+        } else {
+          el.classList.remove('visible');
+          el.classList.add('fade-out-down');
+        }
+      }
     }
   });
 }, {
   threshold: 0.12,
-  rootMargin: '0px 0px -50px 0px'
+  rootMargin: '0px 0px -40px 0px'
 });
 
 revealEls.forEach(el => revealObserver.observe(el));
+
+// ─── Staggered children animation ──────────
+document.querySelectorAll('.cert-grid, .about-cards, .projects-grid, .contact-links, .about-stats').forEach(container => {
+  const children = container.querySelectorAll('.cert-card, .info-card, .project-card, .contact-item, .stat-item');
+  children.forEach((child, i) => {
+    child.style.transitionDelay = `${i * 0.08}s`;
+  });
+});
+
 
 // ─── Skill Bar Animation ──────────────────
 const skillFills = document.querySelectorAll('.skill-fill');
@@ -177,9 +211,39 @@ if (profileImg) {
   }
 }
 
+// ─── Auto-sort: Ongoing cards always on top ──
+function sortProjects() {
+  const grid = document.getElementById('projectsGrid');
+  if (!grid) return;
+  const cards = Array.from(grid.querySelectorAll('.project-card'));
+
+  cards.sort((a, b) => {
+    const aOngoing = a.querySelector('.ongoing-badge') ? 1 : 0;
+    const bOngoing = b.querySelector('.ongoing-badge') ? 1 : 0;
+    return bOngoing - aOngoing; // ongoing first
+  });
+
+  // Re-append in sorted order
+  cards.forEach(card => grid.appendChild(card));
+}
+
+sortProjects();
+
 // ─── Project Filter Tabs ──────────────────
 const filterBtns = document.querySelectorAll('.filter-btn');
 const projectCards = document.querySelectorAll('.project-card[data-category]');
+const projectsGrid = document.getElementById('projectsGrid');
+
+// Sort: ongoing first, then by DOM order
+function sortProjects() {
+  const cards = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]'));
+  const ongoing = cards.filter(c => c.querySelector('.ongoing-badge'));
+  const rest = cards.filter(c => !c.querySelector('.ongoing-badge'));
+  [...ongoing, ...rest].forEach(card => projectsGrid.appendChild(card));
+}
+
+// Run sort on load
+sortProjects();
 
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -202,6 +266,9 @@ filterBtns.forEach(btn => {
         card.classList.add('hidden');
       }
     });
+
+    // Re-sort after filter so ongoing always stays on top
+    sortProjects();
   });
 });
 const toolTags = document.querySelectorAll('.tool-tag');
