@@ -211,66 +211,44 @@ if (profileImg) {
   }
 }
 
-// ─── Auto-sort: Ongoing cards always on top ──
-function sortProjects() {
-  const grid = document.getElementById('projectsGrid');
-  if (!grid) return;
-  const cards = Array.from(grid.querySelectorAll('.project-card'));
-
-  cards.sort((a, b) => {
-    const aOngoing = a.querySelector('.ongoing-badge') ? 1 : 0;
-    const bOngoing = b.querySelector('.ongoing-badge') ? 1 : 0;
-    return bOngoing - aOngoing; // ongoing first
-  });
-
-  // Re-append in sorted order
-  cards.forEach(card => grid.appendChild(card));
-}
-
-sortProjects();
-
-// ─── Project Filter Tabs ──────────────────
-const filterBtns = document.querySelectorAll('.filter-btn');
-const projectCards = document.querySelectorAll('.project-card[data-category]');
+// ─── Project Filter Tabs + Sort ───────────
 const projectsGrid = document.getElementById('projectsGrid');
+const filterBtns   = document.querySelectorAll('.filter-btn');
 
-// Sort: ongoing first, then by DOM order
-function sortProjects() {
-  const cards = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]'));
+function sortProjectCards() {
+  if (!projectsGrid) return;
+  const cards = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]:not(.hidden)'));
   const ongoing = cards.filter(c => c.querySelector('.ongoing-badge'));
-  const rest = cards.filter(c => !c.querySelector('.ongoing-badge'));
+  const rest    = cards.filter(c => !c.querySelector('.ongoing-badge'));
   [...ongoing, ...rest].forEach(card => projectsGrid.appendChild(card));
 }
 
-// Run sort on load
-sortProjects();
+function filterProjects(filter) {
+  const allCards = projectsGrid.querySelectorAll('.project-card[data-category]');
+  allCards.forEach(card => {
+    const cat  = card.getAttribute('data-category');
+    const show = filter === 'all' || cat === filter;
+    if (show) {
+      card.classList.remove('hidden');
+      card.classList.add('fade-in');
+      setTimeout(() => card.classList.remove('fade-in'), 500);
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  sortProjectCards();
+}
 
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
-    const filter = btn.getAttribute('data-filter');
-
-    // Update active button
     filterBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    // Filter cards
-    projectCards.forEach(card => {
-      const category = card.getAttribute('data-category');
-      const show = filter === 'all' || category === filter;
-
-      if (show) {
-        card.classList.remove('hidden');
-        card.classList.add('fade-in');
-        setTimeout(() => card.classList.remove('fade-in'), 500);
-      } else {
-        card.classList.add('hidden');
-      }
-    });
-
-    // Re-sort after filter so ongoing always stays on top
-    sortProjects();
+    filterProjects(btn.getAttribute('data-filter'));
   });
 });
+
+// Initial sort on page load
+sortProjectCards();
 const toolTags = document.querySelectorAll('.tool-tag');
 toolTags.forEach((tag, i) => {
   tag.style.transitionDelay = `${i * 0.03}s`;
