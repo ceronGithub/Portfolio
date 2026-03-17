@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
-</head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <body>
 
   <!-- ===== NAVBAR ===== -->
@@ -21,6 +21,7 @@
       <li><a href="#about" class="nav-link">About</a></li>
       <li><a href="#skills" class="nav-link">Skills</a></li>
       <li><a href="#projects" class="nav-link">Projects</a></li>
+      <li><a href="#experience" class="nav-link">Experience</a></li>
       <li><a href="#certifications" class="nav-link">Certifications</a></li>
       <li><a href="#contact" class="nav-link">Contact</a></li>
     </ul>
@@ -560,140 +561,485 @@
     </div>
   </section>
 
+  <!-- ===== EXPERIENCE SECTION ===== -->
+  <section class="experience" id="experience">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">// experience</span>
+        <h2 class="section-title">Work Experience</h2>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-spine"></div>
+
+        <!-- Job 1: HTECT CORP — Nov 2022 – Oct 2023 (newest) -->
+        <div class="timeline-item reveal" data-side="left">
+          <div class="timeline-dot"><span class="dot-icon">💻</span></div>
+          <div class="timeline-card">
+            <div class="tc-header">
+              <div class="tc-title-wrap">
+                <h3 class="tc-role">Junior Programmer</h3>
+                <span class="tc-stack">(Laravel Dev.)</span>
+                <span class="tc-badge tc-badge--fulltime">Full Time</span>
+              </div>
+              <div class="tc-meta">
+                <span class="tc-company">HTECT CORP.</span>
+                <span class="tc-date">Nov 2022 – Oct 2023</span>
+              </div>
+            </div>
+            <p class="tc-desc">Developed and maintained Laravel framework web applications at a dynamic software development firm specializing in custom solutions. Collaborated with senior developers in Agile sprints — designing, testing, and deploying responsive, high-performance applications. Integrated automated testing frameworks that reduced bug reports and contributed to more stable releases. Participated in code reviews and delivered constructive feedback to improve overall code quality and maintainability.</p>
+            <div class="tc-tags">
+              <span class="tc-tag">Laravel</span>
+              <span class="tc-tag">PHP</span>
+              <span class="tc-tag">MySQL</span>
+              <span class="tc-tag">Agile</span>
+              <span class="tc-tag">Git</span>
+              <span class="tc-tag">Testing</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job 2: GRUPPO EMS CORP — Jun 2022 – Oct 2022 -->
+        <div class="timeline-item reveal" data-side="right">
+          <div class="timeline-dot"><span class="dot-icon">🖥️</span></div>
+          <div class="timeline-card">
+            <div class="tc-header">
+              <div class="tc-title-wrap">
+                <h3 class="tc-role">System Developer</h3>
+                <span class="tc-stack">(.NET Dev.)</span>
+                <span class="tc-badge tc-badge--fulltime">Full Time</span>
+              </div>
+              <div class="tc-meta">
+                <span class="tc-company">GRUPPO EMS CORP.</span>
+                <span class="tc-date">Jun 2022 – Oct 2022</span>
+              </div>
+            </div>
+            <p class="tc-desc">Completed structured ASP.NET training and developed a C# .NET MVC web application supporting internal HR operations — including employee performance evaluation, attendance management, and ID-based QR code timekeeping. Designed and developed tracking systems for shuttle services and private vehicle usage. Partnered with the HR department to integrate applications with the company's central database, ensuring data consistency and system reliability across all departments.</p>
+            <div class="tc-tags">
+              <span class="tc-tag">C# .NET</span>
+              <span class="tc-tag">ASP.NET MVC</span>
+              <span class="tc-tag">SQL Server</span>
+              <span class="tc-tag">QR Code</span>
+              <span class="tc-tag">HR Systems</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job 3: Western Digital — Oct 2019 – Apr 2022 -->
+        <div class="timeline-item reveal" data-side="left">
+          <div class="timeline-dot"><span class="dot-icon">⚙️</span></div>
+          <div class="timeline-card">
+            <div class="tc-header">
+              <div class="tc-title-wrap">
+                <h3 class="tc-role">Test Engineering Tech III</h3>
+                <span class="tc-stack">(Dept. Specialist)</span>
+                <span class="tc-badge tc-badge--fulltime">Full Time</span>
+              </div>
+              <div class="tc-meta">
+                <span class="tc-company">Western Digital</span>
+                <span class="tc-date">Oct 2019 – Apr 2022</span>
+              </div>
+            </div>
+            <p class="tc-desc">Managed hands-on operation and technical maintenance of Slider Fab machinery at one of the world's leading data storage companies — ensuring peak performance through systematic inspections and 5S methodology. Leveraged Excel macros to process complex machine performance data and conduct deep-dive analyses identifying root causes of recurring failures. Resolved a critical machine issue within two weeks, drastically outperforming standard resolution timelines and enabling the facility to consistently meet weekly production targets.</p>
+            <div class="tc-tags">
+              <span class="tc-tag">Data Analysis</span>
+              <span class="tc-tag">Excel Macros</span>
+              <span class="tc-tag">5S Methodology</span>
+              <span class="tc-tag">Troubleshooting</span>
+              <span class="tc-tag">Technical Maintenance</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job 4: Conduent — Mar 2018 – Aug 2018 (oldest) -->
+        <div class="timeline-item reveal" data-side="right">
+          <div class="timeline-dot"><span class="dot-icon">🔍</span></div>
+          <div class="timeline-card">
+            <div class="tc-header">
+              <div class="tc-title-wrap">
+                <h3 class="tc-role">Software Quality Assurance</h3>
+                <span class="tc-stack">(QA Engineer)</span>
+                <span class="tc-badge tc-badge--fulltime">Full Time</span>
+              </div>
+              <div class="tc-meta">
+                <span class="tc-company">Conduent</span>
+                <span class="tc-date">Mar 2018 – Aug 2018</span>
+              </div>
+            </div>
+            <p class="tc-desc">Handled comprehensive QA testing for client websites — ensuring peak functionality, usability, and technical performance across diverse digital environments. Developed step-by-step testing procedures in Microsoft Excel to standardize website validation and maintain high quality-control benchmarks. Evaluated UI/UX designs for usability and accessibility, rigorously tested responsiveness across multiple devices and screen sizes, and documented findings in detailed professional QA reports for the development team.</p>
+            <div class="tc-tags">
+              <span class="tc-tag">QA Testing</span>
+              <span class="tc-tag">UI/UX Review</span>
+              <span class="tc-tag">Test Documentation</span>
+              <span class="tc-tag">Cross-Device Testing</span>
+              <span class="tc-tag">Excel</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EXPERIENCE SECTION ===== -->
+  <section class="experience" id="experience">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">// experience</span>
+        <h2 class="section-title">Work History</h2>
+      </div>
+
+      <div class="timeline">
+
+        <!-- Experience 1: HTECT CORP -->
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-card">
+            <div class="timeline-card-header">
+              <div class="timeline-left">
+                <span class="timeline-company">HTECT CORP.</span>
+                <h3 class="timeline-role">Junior Programmer <span class="role-tech">(Laravel Dev.)</span></h3>
+              </div>
+              <div class="timeline-right">
+                <span class="timeline-date">
+                  <span class="date-icon">📅</span> Nov 2022 – Oct 2023
+                </span>
+                <span class="timeline-badge fulltime">Full Time</span>
+              </div>
+            </div>
+            <p class="timeline-desc">Worked at a dynamic software development firm specializing in custom solutions, focusing on Laravel framework applications. Collaborated with senior developers to design, develop, and test web applications ensuring high performance and responsiveness across platforms.</p>
+            <ul class="timeline-highlights">
+              <li>Participated in Agile sprint planning and daily stand-ups</li>
+              <li>Optimized existing code and deployed major projects ahead of schedule</li>
+              <li>Integrated automated testing frameworks to reduce bug reports</li>
+              <li>Conducted code reviews and provided constructive feedback</li>
+            </ul>
+            <div class="timeline-tags">
+              <span class="tl-tag">Laravel</span>
+              <span class="tl-tag">PHP</span>
+              <span class="tl-tag">Agile</span>
+              <span class="tl-tag">Web Development</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Experience 2: GRUPPO EMS CORP -->
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-card">
+            <div class="timeline-card-header">
+              <div class="timeline-left">
+                <span class="timeline-company">GRUPPO EMS CORP.</span>
+                <h3 class="timeline-role">System Developer <span class="role-tech">(.NET Dev.)</span></h3>
+              </div>
+              <div class="timeline-right">
+                <span class="timeline-date">
+                  <span class="date-icon">📅</span> Jun 2022 – Oct 2022
+                </span>
+                <span class="timeline-badge fulltime">Full Time</span>
+              </div>
+            </div>
+            <p class="timeline-desc">Completed structured training in ASP.NET web development, successfully adapting to the organization's technology stack and earning multiple Udemy certifications to strengthen technical expertise.</p>
+            <ul class="timeline-highlights">
+              <li>Developed a C# .NET MVC web app for employee performance evaluation and attendance management</li>
+              <li>Implemented automated timekeeping via ID-based QR code scanning</li>
+              <li>Designed tracking systems for shuttle services and private vehicle usage</li>
+              <li>Integrated applications with the company's central database for data consistency</li>
+            </ul>
+            <div class="timeline-tags">
+              <span class="tl-tag">C# .NET</span>
+              <span class="tl-tag">ASP.NET MVC</span>
+              <span class="tl-tag">QR Integration</span>
+              <span class="tl-tag">SQL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Experience 3: Western Digital -->
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-card">
+            <div class="timeline-card-header">
+              <div class="timeline-left">
+                <span class="timeline-company">Western Digital</span>
+                <h3 class="timeline-role">Test Engineering Dept. <span class="role-tech">Tech III</span></h3>
+              </div>
+              <div class="timeline-right">
+                <span class="timeline-date">
+                  <span class="date-icon">📅</span> Oct 2019 – Apr 2022
+                </span>
+                <span class="timeline-badge fulltime">Full Time</span>
+              </div>
+            </div>
+            <p class="timeline-desc">Handled hands-on operation and technical maintenance of Slider Fab machinery, ensuring peak performance through systematic inspections and periodic cleaning at one of the world's leading data storage companies.</p>
+            <ul class="timeline-highlights">
+              <li>Leveraged Excel macros to process complex machine performance data and identify root causes</li>
+              <li>Resolved a critical machine issue within 2 weeks, outperforming standard resolution timelines</li>
+              <li>Implemented 5S methodologies to sustain a high-efficiency workspace</li>
+              <li>Built the Slider Data Mapping tool to visualize machine performance datasets</li>
+            </ul>
+            <div class="timeline-tags">
+              <span class="tl-tag">Data Analysis</span>
+              <span class="tl-tag">Excel Macros</span>
+              <span class="tl-tag">C# WinForms</span>
+              <span class="tl-tag">5S Methodology</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Experience 4: Conduent -->
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-card">
+            <div class="timeline-card-header">
+              <div class="timeline-left">
+                <span class="timeline-company">Conduent</span>
+                <h3 class="timeline-role">Software Quality Assurance <span class="role-tech">(QA)</span></h3>
+              </div>
+              <div class="timeline-right">
+                <span class="timeline-date">
+                  <span class="date-icon">📅</span> Mar 2018 – Aug 2018
+                </span>
+                <span class="timeline-badge fulltime">Full Time</span>
+              </div>
+            </div>
+            <p class="timeline-desc">Handled comprehensive software quality assurance testing for developed websites, ensuring peak functionality, usability, and technical performance across diverse digital environments.</p>
+            <ul class="timeline-highlights">
+              <li>Developed step-by-step testing procedures using Microsoft Excel to standardize validation</li>
+              <li>Prepared detailed QA reports documenting test results, findings, and recommendations</li>
+              <li>Evaluated UI/UX designs for usability, accessibility, and user experience consistency</li>
+              <li>Tested website responsiveness across multiple devices and screen sizes</li>
+            </ul>
+            <div class="timeline-tags">
+              <span class="tl-tag">QA Testing</span>
+              <span class="tl-tag">UI/UX Testing</span>
+              <span class="tl-tag">Test Documentation</span>
+              <span class="tl-tag">Responsiveness</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ===== CERTIFICATIONS SECTION ===== -->
   <section class="certifications" id="certifications">
     <div class="container">
       <div class="section-header reveal">
         <span class="section-tag">// certifications</span>
         <h2 class="section-title">Credentials</h2>
+        <p class="cert-subtitle">Hover over a card to flip it — click <strong>View Certificate</strong> to open the PDF.</p>
       </div>
 
-      <div class="cert-grid">
+      <div class="cert-flip-grid">
 
-        <!-- Cert 1 -->
-        <div class="cert-card reveal">
-          <div class="cert-icon-wrap">
-            <span class="cert-icon">🎓</span>
-          </div>
-          <div class="cert-body">
-            <div class="cert-header">
-              <span class="cert-issuer">Udemy</span>
-              <span class="cert-date">Jun 15, 2022</span>
+        <!-- Cert 1: C# Basics -->
+        <div class="cert-flip-wrap reveal">
+          <div class="cert-flip-card">
+            <!-- Smoke particles -->
+            <div class="smoke-container">
+              <span class="smoke s1"></span><span class="smoke s2"></span>
+              <span class="smoke s3"></span><span class="smoke s4"></span>
+              <span class="smoke s5"></span>
             </div>
-            <h4 class="cert-title">C# Basics for Beginners: Learn C# Fundamentals by Coding</h4>
-            <p class="cert-author">by Mosh Hamedani</p>
-            <p class="cert-desc">Foundational C# programming covering object-oriented concepts, data types, control structures, exception handling, and debugging techniques.</p>
-            <div class="cert-badge">
-              <span class="cert-tag">C#</span>
-              <span class="cert-tag">OOP</span>
-              <span class="cert-tag">Programming</span>
+            <!-- Front -->
+            <div class="cert-front">
+              <div class="cert-front-glow"></div>
+              <div class="cert-front-icon">🎓</div>
+              <div class="cert-front-issuer">Udemy</div>
+              <h4 class="cert-front-title">C# Basics for Beginners: Learn C# Fundamentals by Coding</h4>
+              <p class="cert-front-author">Mosh Hamedani</p>
+              <div class="cert-front-date">Jun 15, 2022 &nbsp;·&nbsp; 5.5 hrs</div>
+              <div class="cert-front-tags">
+                <span class="cert-tag">C#</span><span class="cert-tag">OOP</span><span class="cert-tag">Programming</span>
+              </div>
+              <div class="cert-flip-hint">Hover to flip ↺</div>
+            </div>
+            <!-- Back -->
+            <div class="cert-back">
+              <div class="cert-back-label">Certificate of Completion</div>
+              <div class="cert-back-preview">
+                <canvas data-pdf="certificates/Csharp_1.pdf" class="pdf-canvas"></canvas>
+              </div>
+              <a href="certificates/Csharp_certificate.pdf" target="_blank" class="cert-view-btn">
+                📄 View Certificate
+              </a>
+              <div class="cert-back-id">UC-ba2da9eb-5e6c-417c-9ec8-dda55964b3df</div>
             </div>
           </div>
         </div>
 
-        <!-- Cert 2 -->
-        <div class="cert-card reveal">
-          <div class="cert-icon-wrap">
-            <span class="cert-icon">🎓</span>
-          </div>
-          <div class="cert-body">
-            <div class="cert-header">
-              <span class="cert-issuer">Udemy</span>
-              <span class="cert-date">Jun 16, 2022</span>
+        <!-- Cert 2: C# Intermediate -->
+        <div class="cert-flip-wrap reveal">
+          <div class="cert-flip-card">
+            <div class="smoke-container">
+              <span class="smoke s1"></span><span class="smoke s2"></span>
+              <span class="smoke s3"></span><span class="smoke s4"></span>
+              <span class="smoke s5"></span>
             </div>
-            <h4 class="cert-title">C# Intermediate: Classes, Interfaces, and OOP</h4>
-            <p class="cert-author">by Mosh Hamedani</p>
-            <p class="cert-desc">Advanced object-oriented programming covering encapsulation, inheritance, polymorphism, design patterns, and C# library integration for scalable software.</p>
-            <div class="cert-badge">
-              <span class="cert-tag">C#</span>
-              <span class="cert-tag">Interfaces</span>
-              <span class="cert-tag">Design Patterns</span>
+            <div class="cert-front">
+              <div class="cert-front-glow"></div>
+              <div class="cert-front-icon">🎓</div>
+              <div class="cert-front-issuer">Udemy</div>
+              <h4 class="cert-front-title">C# Intermediate: Classes, Interfaces and OOP</h4>
+              <p class="cert-front-author">Mosh Hamedani</p>
+              <div class="cert-front-date">Jun 16, 2022 &nbsp;·&nbsp; 6 hrs</div>
+              <div class="cert-front-tags">
+                <span class="cert-tag">C#</span><span class="cert-tag">Interfaces</span><span class="cert-tag">Design Patterns</span>
+              </div>
+              <div class="cert-flip-hint">Hover to flip ↺</div>
             </div>
-          </div>
-        </div>
-
-        <!-- Cert 3 -->
-        <div class="cert-card reveal">
-          <div class="cert-icon-wrap">
-            <span class="cert-icon">🔧</span>
-          </div>
-          <div class="cert-body">
-            <div class="cert-header">
-              <span class="cert-issuer">Udemy</span>
-              <span class="cert-date">Jun 17, 2022</span>
-            </div>
-            <h4 class="cert-title">GitHub Ultimate: Master Git &amp; GitHub – Beginner to Expert</h4>
-            <p class="cert-author">by Jayson Taylor</p>
-            <p class="cert-desc">Comprehensive version control mastery — Git commands, branching strategies, repository management, issue tracking, and collaborative pull request workflows.</p>
-            <div class="cert-badge">
-              <span class="cert-tag">Git</span>
-              <span class="cert-tag">GitHub</span>
-              <span class="cert-tag">Version Control</span>
+            <div class="cert-back">
+              <div class="cert-back-label">Certificate of Completion</div>
+              <div class="cert-back-preview">
+                <canvas data-pdf="certificates/Csharp_certificate.pdf" class="pdf-canvas"></canvas>
+              </div>
+              <a href="certificates/Csharp_1.pdf" target="_blank" class="cert-view-btn">
+                📄 View Certificate
+              </a>
+              <div class="cert-back-id">UC-62dc1b40-9d5f-464c-95ba-e20d7f2c6569</div>
             </div>
           </div>
         </div>
 
-        <!-- Cert 4 -->
-        <div class="cert-card reveal">
-          <div class="cert-icon-wrap">
-            <span class="cert-icon">🎨</span>
-          </div>
-          <div class="cert-body">
-            <div class="cert-header">
-              <span class="cert-issuer">Udemy</span>
-              <span class="cert-date">Feb 10, 2026</span>
+        <!-- Cert 3: GitHub Ultimate -->
+        <div class="cert-flip-wrap reveal">
+          <div class="cert-flip-card">
+            <div class="smoke-container">
+              <span class="smoke s1"></span><span class="smoke s2"></span>
+              <span class="smoke s3"></span><span class="smoke s4"></span>
+              <span class="smoke s5"></span>
             </div>
-            <h4 class="cert-title">The Modern Flexbox, Grid, Sass &amp; Animations Developer Course</h4>
-            <p class="cert-author">by Muslim Helalee</p>
-            <p class="cert-desc">Advanced responsive web design mastering fluid layouts, Sass stylesheet management, and dynamic CSS animations to build modern, industry-standard frontends.</p>
-            <div class="cert-badge">
-              <span class="cert-tag">CSS</span>
-              <span class="cert-tag">Flexbox</span>
-              <span class="cert-tag">Grid</span>
-              <span class="cert-tag">Sass</span>
+            <div class="cert-front">
+              <div class="cert-front-glow"></div>
+              <div class="cert-front-icon">🔧</div>
+              <div class="cert-front-issuer">Udemy</div>
+              <h4 class="cert-front-title">GitHub Ultimate: Master Git and GitHub — Beginner to Expert</h4>
+              <p class="cert-front-author">Jason Taylor</p>
+              <div class="cert-front-date">Jun 17, 2022 &nbsp;·&nbsp; 6.5 hrs</div>
+              <div class="cert-front-tags">
+                <span class="cert-tag">Git</span><span class="cert-tag">GitHub</span><span class="cert-tag">Version Control</span>
+              </div>
+              <div class="cert-flip-hint">Hover to flip ↺</div>
             </div>
-          </div>
-        </div>
-
-        <!-- Cert 5 -->
-        <div class="cert-card reveal">
-          <div class="cert-icon-wrap">
-            <span class="cert-icon">🤝</span>
-          </div>
-          <div class="cert-body">
-            <div class="cert-header">
-              <span class="cert-issuer">YourVABuddy</span>
-              <span class="cert-date">Feb 25, 2026</span>
-            </div>
-            <h4 class="cert-title">Virtual Assistant Training (VA 101)</h4>
-            <p class="cert-author">YourVABuddy Program</p>
-            <p class="cert-desc">Comprehensive remote administrative support training covering time management, organization, communication, Asana, Google Workspace, and client relationship management.</p>
-            <div class="cert-badge">
-              <span class="cert-tag">VA</span>
-              <span class="cert-tag">Asana</span>
-              <span class="cert-tag">Remote Work</span>
+            <div class="cert-back">
+              <div class="cert-back-label">Certificate of Completion</div>
+              <div class="cert-back-preview">
+                <canvas data-pdf="certificates/GITHUB.pdf" class="pdf-canvas"></canvas>
+              </div>
+              <a href="certificates/GITHUB.pdf" target="_blank" class="cert-view-btn">
+                📄 View Certificate
+              </a>
+              <div class="cert-back-id">UC-22fa7761-05e4-4f22-bd9a-93da98c5ef76</div>
             </div>
           </div>
         </div>
 
-        <!-- Cert 6 -->
-        <div class="cert-card reveal">
-          <div class="cert-icon-wrap">
-            <span class="cert-icon">🤖</span>
-          </div>
-          <div class="cert-body">
-            <div class="cert-header">
-              <span class="cert-issuer">Udemy</span>
-              <span class="cert-date">Mar 9, 2026</span>
+        <!-- Cert 4: Modern Flexbox -->
+        <div class="cert-flip-wrap reveal">
+          <div class="cert-flip-card">
+            <div class="smoke-container">
+              <span class="smoke s1"></span><span class="smoke s2"></span>
+              <span class="smoke s3"></span><span class="smoke s4"></span>
+              <span class="smoke s5"></span>
             </div>
-            <h4 class="cert-title">Build Any App, Game or Website with AI</h4>
-            <p class="cert-author">by Ivan Lourenço Gomes</p>
-            <p class="cert-desc">Vibe Coding Bootcamp — building real apps, games, and websites using modern AI tools: Replit, Claude, Lovable, Supabase, Firebase, and GitHub for deployment.</p>
-            <div class="cert-badge">
-              <span class="cert-tag">AI Dev</span>
-              <span class="cert-tag">Lovable</span>
-              <span class="cert-tag">Supabase</span>
-              <span class="cert-tag">Vibe Coding</span>
+            <div class="cert-front">
+              <div class="cert-front-glow"></div>
+              <div class="cert-front-icon">🎨</div>
+              <div class="cert-front-issuer">Udemy</div>
+              <h4 class="cert-front-title">The Modern Flexbox, Grid, Sass &amp; Animations Developer Course</h4>
+              <p class="cert-front-author">Muslim Helalee</p>
+              <div class="cert-front-date">Feb 10, 2026 &nbsp;·&nbsp; 48.5 hrs</div>
+              <div class="cert-front-tags">
+                <span class="cert-tag">CSS</span><span class="cert-tag">Flexbox</span><span class="cert-tag">Grid</span><span class="cert-tag">Sass</span>
+              </div>
+              <div class="cert-flip-hint">Hover to flip ↺</div>
+            </div>
+            <div class="cert-back">
+              <div class="cert-back-label">Certificate of Completion</div>
+              <div class="cert-back-preview">
+                <canvas data-pdf="certificates/responsiveness.pdf" class="pdf-canvas"></canvas>
+              </div>
+              <a href="certificates/responsiveness.pdf" target="_blank" class="cert-view-btn">
+                📄 View Certificate
+              </a>
+              <div class="cert-back-id">UC-1b32e9c3-a440-46b5-aec6-11d9cac27b9c</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cert 5: VA Training (no PDF — training only) -->
+        <div class="cert-flip-wrap reveal">
+          <div class="cert-flip-card cert-no-pdf">
+            <div class="smoke-container">
+              <span class="smoke s1"></span><span class="smoke s2"></span>
+              <span class="smoke s3"></span><span class="smoke s4"></span>
+              <span class="smoke s5"></span>
+            </div>
+            <div class="cert-front">
+              <div class="cert-front-glow"></div>
+              <div class="cert-front-icon">🤝</div>
+              <div class="cert-front-issuer">YourVABuddy</div>
+              <h4 class="cert-front-title">Virtual Assistant Training (VA 101)</h4>
+              <p class="cert-front-author">YourVABuddy Program</p>
+              <div class="cert-front-date">Feb 25, 2026 &nbsp;·&nbsp; Training</div>
+              <div class="cert-front-tags">
+                <span class="cert-tag">VA</span><span class="cert-tag">Asana</span><span class="cert-tag">Remote Work</span>
+              </div>
+              <div class="cert-flip-hint">Hover to flip ↺</div>
+            </div>
+            <div class="cert-back cert-back-training">
+              <div class="cert-back-label">Professional Training</div>
+              <div class="cert-training-note">
+                <span class="cert-training-icon">🏅</span>
+                <p>Completed the full VA 101 training program at YourVABuddy, covering time management, client relations, Asana, Trello, and Google Workspace workflows.</p>
+                <p class="cert-training-note-sub">No formal certificate issued — training completed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cert 6: Vibe Coding / Build with AI -->
+        <div class="cert-flip-wrap reveal">
+          <div class="cert-flip-card">
+            <div class="smoke-container">
+              <span class="smoke s1"></span><span class="smoke s2"></span>
+              <span class="smoke s3"></span><span class="smoke s4"></span>
+              <span class="smoke s5"></span>
+            </div>
+            <div class="cert-front">
+              <div class="cert-front-glow"></div>
+              <div class="cert-front-icon">🤖</div>
+              <div class="cert-front-issuer">Udemy</div>
+              <h4 class="cert-front-title">Vibe Coding Bootcamp: Build Any App, Game or Website with AI</h4>
+              <p class="cert-front-author">Ivan Lourenço Gomes</p>
+              <div class="cert-front-date">Mar 9, 2026 &nbsp;·&nbsp; 4 hrs</div>
+              <div class="cert-front-tags">
+                <span class="cert-tag">AI Dev</span><span class="cert-tag">Lovable</span><span class="cert-tag">Vibe Coding</span>
+              </div>
+              <div class="cert-flip-hint">Hover to flip ↺</div>
+            </div>
+            <div class="cert-back">
+              <div class="cert-back-label">Certificate of Completion</div>
+              <div class="cert-back-preview">
+                <canvas data-pdf="certificates/vide%20coding.pdf" class="pdf-canvas"></canvas>
+              </div>
+              <a href="certificates/vide%20coding.pdf" target="_blank" class="cert-view-btn">
+                📄 View Certificate
+              </a>
+              <div class="cert-back-id">UC-bbee5475-d4b5-4b3a-988f-ca4587484add</div>
             </div>
           </div>
         </div>
@@ -752,6 +1098,13 @@
             <div class="contact-details">
               <span class="contact-label">Facebook</span>
               <span class="contact-value">Ceron Matthew Calsena</span>
+            </div>
+          </a>
+          <a href="https://www.onlinejobs.ph/jobseekers/info/4794065" target="_blank" class="contact-item">
+            <div class="contact-icon">OLJ</div>
+            <div class="contact-details">
+              <span class="contact-label">OnlineJobs.ph</span>
+              <span class="contact-value">View My Profile</span>
             </div>
           </a>
         </div>

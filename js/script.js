@@ -295,3 +295,51 @@ const toolsObserver = new IntersectionObserver((entries) => {
 
 const toolsSection = document.querySelector('.tools-section');
 if (toolsSection) toolsObserver.observe(toolsSection);
+
+// ─── PDF.js Certificate Preview ───────────
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function renderPDFCanvas(wrap) {
+  const canvas = wrap.querySelector('.pdf-canvas');
+  if (!canvas || canvas.dataset.rendered) return;
+  canvas.dataset.rendered = 'true';
+
+  const pdfPath = canvas.getAttribute('data-pdf');
+  const preview = wrap.querySelector('.cert-back-preview');
+  if (preview) preview.innerHTML = '<div class="pdf-loading">⏳ Loading...</div>';
+
+  pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
+    pdf.getPage(1).then(page => {
+      if (preview) preview.innerHTML = '';
+      const newCanvas = document.createElement('canvas');
+      newCanvas.className = 'pdf-canvas rendered';
+      if (preview) preview.appendChild(newCanvas);
+
+      const scale = preview ? (preview.clientWidth / page.getViewport({ scale: 1 }).width) * 1.5 : 1.2;
+      const viewport = page.getViewport({ scale: Math.max(scale, 0.8) });
+      const ctx = newCanvas.getContext('2d');
+      newCanvas.width  = viewport.width;
+      newCanvas.height = viewport.height;
+
+      page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+        newCanvas.style.opacity = '1';
+      });
+    });
+  }).catch(() => {
+    if (preview) preview.innerHTML = '<div class="pdf-error">📄 Preview unavailable<br><small>Click View Certificate below</small></div>';
+  });
+}
+
+// Lazy render on first hover
+document.querySelectorAll('.cert-flip-wrap').forEach(wrap => {
+  let rendered = false;
+  wrap.addEventListener('mouseenter', () => {
+    if (!rendered && typeof pdfjsLib !== 'undefined') {
+      rendered = true;
+      setTimeout(() => renderPDFCanvas(wrap), 400);
+    }
+  });
+});
