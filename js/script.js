@@ -177,7 +177,33 @@ if (profileImg) {
   }
 }
 
-// ─── Tool tags stagger animation ──────────
+// ─── Project Filter Tabs ──────────────────
+const filterBtns = document.querySelectorAll('.filter-btn');
+const projectCards = document.querySelectorAll('.project-card[data-category]');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filter = btn.getAttribute('data-filter');
+
+    // Update active button
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Filter cards
+    projectCards.forEach(card => {
+      const category = card.getAttribute('data-category');
+      const show = filter === 'all' || category === filter;
+
+      if (show) {
+        card.classList.remove('hidden');
+        card.classList.add('fade-in');
+        setTimeout(() => card.classList.remove('fade-in'), 500);
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  });
+});
 const toolTags = document.querySelectorAll('.tool-tag');
 toolTags.forEach((tag, i) => {
   tag.style.transitionDelay = `${i * 0.03}s`;

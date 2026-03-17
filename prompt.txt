@@ -1,0 +1,172 @@
+create a professional, modern web developer portfolio website using HTML, CSS, and JavaScript. The design must be clean, visually stunning, and suitable for a senior frontend developer portfolio.
+📁 Project Structure:
+* `index.html`
+* `css/style.css`
+* `js/script.js`
+* `images/profile.jpg` (use my uploaded image)
+🎨 Design Requirements:
+* Color theme: black (#0d0d0d), white (#ffffff), orange (#ff7a00), yellow (#ffd000)
+* Use orange → yellow gradients for accents
+* Style: modern, minimal, clean, slightly futuristic
+* Typography: Google Fonts (Poppins or Inter)
+🧑‍💻 Sections:
+1. Hero Section
+* Fullscreen layout
+* Profile image (use uploaded image)
+* Circular image with glowing gradient border
+* Name + “Web Developer”
+* Animated typing text
+* CTA button
+* Background with parallax layers
+2. About Section
+* Short professional introduction
+* Fade-in animation on scroll
+* Slight parallax movement
+3. Skills Section
+* Skill cards or progress bars
+* Animated fill using CSS
+* Hover effects
+4. Projects Section
+* Responsive grid layout
+* Project cards with image, title, description, button
+* Hover effects: lift, scale, glow
+5. Contact Section
+* Email and social links
+* Animated underline hover effects
+✨ Animations & Effects:
+CSS Animations:
+* Fade-in and slide-up effects
+* Staggered animations using delays
+* Smooth transitions (0.3s–0.5s)
+* Gradient animated text
+* Glowing buttons and hover effects
+* Floating elements using keyframes
+Parallax Effects (IMPORTANT):
+Use JavaScript + CSS for:
+* Multi-layer parallax in hero section (background, mid, foreground)
+* Scroll-based parallax using `transform: translateY`
+* Optional mouse movement parallax
+🧠 JavaScript Requirements (`script.js`):
+* Handle scroll events
+* Apply parallax effects
+* Add/remove classes for animations on scroll
+* Keep JavaScript minimal (only for interactivity and parallax)
+💫 UI Details:
+* Glassmorphism or soft shadow cards (optional)
+* Gradient borders and glow effects
+* Smooth scrolling behavior
+* Clean spacing and layout
+📱 Responsiveness:
+* Fully responsive (mobile, tablet, desktop)
+* Use Flexbox and CSS Grid
+📌 Code Rules:
+* Separate HTML, CSS, and JS files
+* Link CSS and JS properly
+* Use semantic HTML5
+* Use CSS variables for colors
+* Clean, well-structured code
+* No frameworks (pure HTML, CSS, JS only)
+🎯 Goal:
+Build a high-end, visually impressive portfolio website with smooth animations, parallax depth, and a modern UI — similar to premium developer portfolios.
+
+ask me the links to my projects. for project section.
+
+
+PORTFOLIO BUILD — CARRY-OVER CONTEXT
+Name: Ceron Matthew Calsena
+Role: Web Developer
+Email: ceroncalsena@gmail.com
+Social Links:
+
+GitHub: https://github.com/ceronGithub
+LinkedIn: https://sg.linkedin.com/in/ceron-matthew-calseña-984134295
+OLJ: https://www.onlinejobs.ph/jobseekers/info/4794065
+
+Design Specs:
+
+Colors: black (#0d0d0d), white (#ffffff), orange (#ff7a00), yellow (#ffd000)
+Orange → yellow gradients for accents
+Style: modern, minimal, clean, slightly futuristic
+Font: Google Fonts — Poppins or Inter
+Separate files: index.html, css/style.css, js/script.js
+No frameworks — pure HTML, CSS, JS only
+
+Sections: Hero, About, Skills, Projects (6 cards), Contact
+Profile Image to use: Image 11 (illustrated/vector art — file: Gemini_Generated_Image_2nziqp2nziqp2nzi-Photoroom.png) OR Image 14 (Gemini_Generated_Image_9kcyvf9kcyvf9kcy__1_.png) — confirm which one
+Project Images available (uploaded, to be used as project card thumbnails — user to assign):
+
+2e697a89 (beach/waves)
+8eb66ced (Taal volcano view)
+9b914f3e (man with husky)
+39c21ce5 (sushi food)
+1756a83a (sunset beach)
+532470d9 (couple selfie)
+a1446ba4 (mountain road front)
+fff718a1 (mountain road back)
+
+⚠️ STILL NEEDED FROM USER:
+
+✅ Name, email, socials — done
+❌ 6 project titles, descriptions, and links — NOT yet provided
+❌ Profile photo selection — Image 11 or 14?
+❌ Which uploaded photos to use for which project cards
+
+
+
+project details : 
+
+project 1
+
+title : archivil-plan.
+
+url : archivil-estimation.netlify.app
+
+description :  BOQ concrete estimation, floor plan dimension estimation, create floor plan according to user requirements.
+
+
+
+project 2
+
+title : email-automation.
+
+url : hv-mailer.netlify.app
+
+description : help business owner to pass an email to person who book to the resort with just few clicks.
+
+
+
+project 3 :
+
+title : resort booking.
+
+url : message me directly how to view the project.
+
+description : book keeping for private resort.
+
+
+
+project 4 : 
+
+title : mail vault
+
+status : end-contract, freelance.
+
+url : matth-el-mail-vault.netlify.app
+
+description : allow user to collect all emails to a certain range of date.
+
+
+
+project 5 :
+
+title : PDF extractor 
+
+status : on-contract, freelance.
+
+url : matth-el-pdf-extractor-v1.netlify.app
+
+description : capture text according to keywords. on uploaded pdf files.
+
+
+
+check the file i uploaded thats my CV. add section for tools expertise

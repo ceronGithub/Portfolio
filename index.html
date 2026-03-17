@@ -314,16 +314,32 @@
       <div class="section-header reveal">
         <span class="section-tag">// projects</span>
         <h2 class="section-title">Featured Work</h2>
-        <p class="projects-subtitle">All projects were built for real clients and are protected under a Non-Disclosure Agreement. Descriptions highlight the problem solved, solution delivered, and tech used. Request access to learn more.</p>
+        <p class="projects-subtitle">Every project here was built to solve a real problem — for clients and for myself. Details on client work are kept confidential, but if you have a similar challenge, I'd love to build the solution for you.</p>
       </div>
 
-      <div class="projects-grid">
+      <!-- Filter Tabs -->
+      <div class="filter-tabs reveal">
+        <button class="filter-btn active" data-filter="all">
+          <span>All</span>
+          <span class="filter-count" id="count-all">6</span>
+        </button>
+        <button class="filter-btn" data-filter="client">
+          <span>Client Work</span>
+          <span class="filter-count" id="count-client">5</span>
+        </button>
+        <button class="filter-btn" data-filter="personal">
+          <span>Personal</span>
+          <span class="filter-count" id="count-personal">1</span>
+        </button>
+      </div>
 
-        <!-- Project 1: PDF Automator -->
-        <article class="project-card reveal">
+      <div class="projects-grid" id="projectsGrid">
+
+        <!-- Project 1: Archivil-Plan — Mar 15, 2026 – Present -->
+        <article class="project-card reveal" data-category="client">
           <div class="project-img-wrap">
             <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">📄</span>
+              <span class="project-icon">🏗️</span>
             </div>
             <div class="project-nda-overlay">
               <div class="nda-lock-icon">🔒</div>
@@ -333,22 +349,23 @@
           <div class="project-body">
             <div class="project-card-header">
               <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
+                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span><span class="ptag">Claude AI</span>
               </div>
-              <span class="nda-badge">
-                <span class="nda-lock">🔒</span> NDA
-              </span>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <span class="ongoing-badge">🔄 Ongoing</span>
+                <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+              </div>
             </div>
-            <h3 class="project-title">PDF Automator</h3>
+            <h3 class="project-title">Archivil-Plan</h3>
             <div class="project-meta">
-              <span class="meta-item">📅 Feb 2026 – Present</span>
+              <span class="meta-item">📅 Mar 15, 2026 – Present</span>
               <span class="meta-item">💼 Freelance</span>
             </div>
-            <p class="project-desc">Built a high-performance client-side web app that processes up to 2,000 PDF files simultaneously. Engineered keyword extraction (Multiple, Single, Extract All), a smart mapping algorithm, and direct Excel export — all browser-side for full data privacy and security.</p>
+            <p class="project-desc">Construction estimation still done manually with a ruler and a spreadsheet? I built a web tool that lets you <strong>upload a floor plan image and instantly get measurable data</strong> — no manual measuring needed. It maps the layout into scatter-based coordinates, calculates Bill of Quantities (BOQ) for materials like cement, and exports everything into a clean Excel report ready for your contractor or client.</p>
             <div class="project-result">
-              <span class="result-label">✅ Outcome:</span> Reduced client's manual document processing time by over 80%.
+              <span class="result-label">💡 Perfect for:</span> Architects, engineers, contractors, and property developers who want faster, more accurate construction estimates — without the manual grind.
             </div>
-            <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — PDF Automator&body=Hi Ceron, I'd like to learn more about your PDF Automator project. Could you share more details?" class="btn-request-access">
+            <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — Archivil-Plan&body=Hi Ceron, I'd like to learn more about your Archivil-Plan project. Could you share more details?" class="btn-request-access">
               <span class="lock-icon">🔒</span>
               Request Access
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -356,47 +373,10 @@
           </div>
         </article>
 
-        <!-- Project 2: Auto Mailer -->
-        <article class="project-card reveal">
+        <!-- Project 2: Booking Record System — Mar 2026 -->
+        <article class="project-card reveal" data-category="client">
           <div class="project-img-wrap">
             <div class="project-img-placeholder" style="--card-color:#ffd000;">
-              <span class="project-icon">📧</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🔒</div>
-              <span class="nda-overlay-text">Client Project</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
-              </div>
-              <span class="nda-badge">
-                <span class="nda-lock">🔒</span> NDA
-              </span>
-            </div>
-            <h3 class="project-title">Auto Mailer</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Feb–Mar 2026</span>
-              <span class="meta-item">💼 Freelance</span>
-            </div>
-            <p class="project-desc">Designed a web app that fully automates the email sending workflow. Integrated with the client's Gmail, auto-attaches images based on selection, and sends with minimal input — eliminating the need to open multiple tabs or repeat manual steps every time.</p>
-            <div class="project-result">
-              <span class="result-label">✅ Outcome:</span> Saved client 15+ minutes per day on repetitive email tasks.
-            </div>
-            <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — Auto Mailer&body=Hi Ceron, I'd like to learn more about your Auto Mailer project. Could you share more details?" class="btn-request-access">
-              <span class="lock-icon">🔒</span>
-              Request Access
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </article>
-
-        <!-- Project 3: Booking Record System -->
-        <article class="project-card reveal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
               <span class="project-icon">🏨</span>
             </div>
             <div class="project-nda-overlay">
@@ -409,18 +389,16 @@
               <div class="project-tags">
                 <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
               </div>
-              <span class="nda-badge">
-                <span class="nda-lock">🔒</span> NDA
-              </span>
+              <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
             </div>
             <h3 class="project-title">Booking Record System</h3>
             <div class="project-meta">
               <span class="meta-item">📅 Mar 2026</span>
               <span class="meta-item">💼 Private Resort</span>
             </div>
-            <p class="project-desc">Developed a calendar-based reservation management system for a private family resort. Staff can record, update, and retrieve guest bookings digitally — with integrated data analysis features for reviewing reservation patterns and optimizing occupancy.</p>
+            <p class="project-desc">Paper booking logs cause missed reservations, double bookings, and lost revenue — and searching through them wastes everyone's time. I replaced that chaos with a <strong>clean, calendar-based digital system</strong> where staff can log, update, and pull up any reservation instantly. It also analyzes booking patterns so the resort can make smarter decisions on pricing and availability.</p>
             <div class="project-result">
-              <span class="result-label">✅ Outcome:</span> Replaced paper-based logs entirely, improving booking accuracy and staff efficiency.
+              <span class="result-label">💡 Perfect for:</span> Resorts, homestays, salons, clinics — any business that takes bookings and still relies on paper or messy spreadsheets.
             </div>
             <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — Booking Record System&body=Hi Ceron, I'd like to learn more about your Booking Record System project. Could you share more details?" class="btn-request-access">
               <span class="lock-icon">🔒</span>
@@ -430,10 +408,117 @@
           </div>
         </article>
 
-        <!-- Project 4: Slider Data Mapping -->
-        <article class="project-card reveal">
+        <!-- Project 3: Auto Mailer — Feb–Mar 2026 -->
+        <article class="project-card reveal" data-category="client">
+          <div class="project-img-wrap">
+            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
+              <span class="project-icon">📧</span>
+            </div>
+            <div class="project-nda-overlay">
+              <div class="nda-lock-icon">🔒</div>
+              <span class="nda-overlay-text">Client Project</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <div class="project-card-header">
+              <div class="project-tags">
+                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
+              </div>
+              <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+            </div>
+            <h3 class="project-title">Auto Mailer</h3>
+            <div class="project-meta">
+              <span class="meta-item">📅 Feb–Mar 2026</span>
+              <span class="meta-item">💼 Freelance</span>
+            </div>
+            <p class="project-desc">Sending the same emails every single day is silently draining your team's time. I automated the entire process — open the app, fill in a few fields, hit send. No switching tabs, no logging into Gmail, no manually attaching files every time. Images attach automatically based on your selection. <strong>What used to take 10 minutes now takes 10 seconds.</strong></p>
+            <div class="project-result">
+              <span class="result-label">💡 Perfect for:</span> Small businesses, VAs, and sales teams who send repetitive emails daily and want their time back.
+            </div>
+            <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — Auto Mailer&body=Hi Ceron, I'd like to learn more about your Auto Mailer project. Could you share more details?" class="btn-request-access">
+              <span class="lock-icon">🔒</span>
+              Request Access
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Project 4: PDF Automator — Feb 2026 – Present -->
+        <article class="project-card reveal" data-category="client">
           <div class="project-img-wrap">
             <div class="project-img-placeholder" style="--card-color:#ffd000;">
+              <span class="project-icon">📄</span>
+            </div>
+            <div class="project-nda-overlay">
+              <div class="nda-lock-icon">🔒</div>
+              <span class="nda-overlay-text">Client Project</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <div class="project-card-header">
+              <div class="project-tags">
+                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <span class="ongoing-badge">🔄 Ongoing</span>
+                <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+              </div>
+            </div>
+            <h3 class="project-title">PDF Automator</h3>
+            <div class="project-meta">
+              <span class="meta-item">📅 Feb 2026 – Present</span>
+              <span class="meta-item">💼 Freelance</span>
+            </div>
+            <p class="project-desc">Tired of manually digging through hundreds of PDFs just to find one piece of information? I built a tool that lets you scan <strong>up to 2,000 documents in seconds</strong> — right in your browser, no installs, no data leaks. Your files never leave your computer. Whether you need one keyword or everything extracted at once, this tool handles it and exports clean results straight to Excel.</p>
+            <div class="project-result">
+              <span class="result-label">💡 Perfect for:</span> Businesses drowning in paperwork, legal teams, researchers, or anyone who needs data pulled from documents — fast.
+            </div>
+            <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — PDF Automator&body=Hi Ceron, I'd like to learn more about your PDF Automator project. Could you share more details?" class="btn-request-access">
+              <span class="lock-icon">🔒</span>
+              Request Access
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Project 5: MailVault — 2026 (Personal) -->
+        <article class="project-card project-card--personal reveal" data-category="personal">
+          <div class="project-img-wrap">
+            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
+              <span class="project-icon">📬</span>
+            </div>
+            <div class="project-personal-overlay">
+              <a href="https://matth-el-mail-vault.netlify.app/" target="_blank" class="project-link-btn">View Live Site →</a>
+            </div>
+          </div>
+          <div class="project-body">
+            <div class="project-card-header">
+              <div class="project-tags">
+                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span><span class="ptag">Google Script</span>
+              </div>
+              <span class="personal-badge">✨ Personal</span>
+            </div>
+            <h3 class="project-title">MailVault</h3>
+            <div class="project-meta">
+              <span class="meta-item">📅 2026</span>
+              <span class="meta-item">🛠️ Self-Built</span>
+            </div>
+            <p class="project-desc">Most email collection tools send your subscribers' data to third-party servers you don't control. I built MailVault differently — it collects emails <strong>directly into your own Google Sheet</strong> using Google Apps Script, with zero third-party dependencies. Your list is yours, period. Clean form, instant capture, full ownership.</p>
+            <div class="project-result">
+              <span class="result-label">💡 Why it matters:</span> No monthly fees, no vendor lock-in, no privacy concerns — just a fast, private, self-owned email list.
+            </div>
+            <div class="personal-project-links">
+              <a href="https://matth-el-mail-vault.netlify.app/" target="_blank" class="plink-live">
+                🌐 Live Site →
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 6: Slider Data Mapping — Dec 2020 -->
+        <article class="project-card reveal" data-category="client">
+          <div class="project-img-wrap">
+            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
               <span class="project-icon">📊</span>
             </div>
             <div class="project-nda-overlay">
@@ -446,18 +531,16 @@
               <div class="project-tags">
                 <span class="ptag">C#</span><span class="ptag">WinForms</span><span class="ptag">Excel</span>
               </div>
-              <span class="nda-badge">
-                <span class="nda-lock">🔒</span> NDA
-              </span>
+              <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
             </div>
             <h3 class="project-title">Slider Data Mapping</h3>
             <div class="project-meta">
               <span class="meta-item">📅 Dec 2020 – Jul 2021</span>
               <span class="meta-item">💼 Western Digital</span>
             </div>
-            <p class="project-desc">Built a C# WinForms desktop tool for Western Digital's Test Engineering team. Imports Excel spreadsheets and transforms complex machine performance datasets into interactive scatter-point visualizations — enabling engineers to identify trends, root causes, and export structured reports.</p>
+            <p class="project-desc">Raw machine data trapped in endless spreadsheet rows tells engineers nothing at a glance. I built a desktop tool that <strong>transforms those datasets into clear, interactive visual charts</strong> — so patterns, anomalies, and root causes jump out immediately. The team went from hours of manual analysis to actionable insights in minutes, and used it to resolve a critical production issue in under 2 weeks.</p>
             <div class="project-result">
-              <span class="result-label">✅ Outcome:</span> Accelerated machine performance analysis and contributed to resolving a critical production issue within 2 weeks.
+              <span class="result-label">💡 Perfect for:</span> Engineering teams, manufacturers, or any business sitting on data they can't easily interpret or act on.
             </div>
             <a href="mailto:ceroncalsena@gmail.com?subject=Request Access — Slider Data Mapping&body=Hi Ceron, I'd like to learn more about your Slider Data Mapping project. Could you share more details?" class="btn-request-access">
               <span class="lock-icon">🔒</span>
@@ -471,7 +554,7 @@
 
       <!-- Trust note -->
       <div class="projects-trust-note reveal">
-        <p>🔐 All projects are protected under client confidentiality agreements. Descriptions are shared with permission. For a full walkthrough, demos, or case studies — <a href="mailto:ceroncalsena@gmail.com" class="trust-link">reach out directly</a>.</p>
+        <p>🔐 Client projects are kept confidential out of respect for my clients. But if you're facing a similar problem — inefficient workflows, manual tasks eating your time, or data you can't make sense of — <a href="mailto:ceroncalsena@gmail.com" class="trust-link">let's talk and build your solution</a>.</p>
       </div>
 
     </div>

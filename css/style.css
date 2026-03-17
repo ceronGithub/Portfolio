@@ -739,6 +739,75 @@ section { padding: 7rem 0; }
 }
 
 /* ===================================
+   FILTER TABS
+=================================== */
+.filter-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 50px;
+  background: var(--dark2);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-btn:hover {
+  border-color: rgba(255,122,0,0.4);
+  color: rgba(255,255,255,0.85);
+}
+
+.filter-btn.active {
+  background: var(--gradient);
+  border-color: transparent;
+  color: var(--black);
+  box-shadow: var(--glow-sm);
+}
+
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(0,0,0,0.2);
+  transition: var(--transition);
+}
+
+.filter-btn.active .filter-count {
+  background: rgba(0,0,0,0.25);
+  color: var(--black);
+}
+
+/* Card hide/show animation */
+.project-card.hidden {
+  display: none;
+}
+
+.project-card.fade-in {
+  animation: cardFadeIn 0.4s ease both;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ===================================
    PROJECTS SECTION
 =================================== */
 .projects { background: var(--dark); }
@@ -1010,6 +1079,114 @@ section { padding: 7rem 0; }
 }
 
 .trust-link:hover::after { width: 100%; }
+
+/* Ongoing badge */
+.ongoing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 50px;
+  background: rgba(0, 200, 130, 0.08);
+  border: 1px solid rgba(0, 200, 130, 0.3);
+  color: #00c882;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  animation: ongoingPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes ongoingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,130,0); }
+  50% { box-shadow: 0 0 8px 2px rgba(0,200,130,0.2); }
+}
+
+/* Personal project card variant */
+.project-card--personal {
+  border-color: rgba(255,208,0,0.15);
+}
+
+.project-card--personal:hover {
+  border-color: rgba(255,208,0,0.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 15px rgba(255,208,0,0.2);
+}
+
+.personal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 50px;
+  background: rgba(255,208,0,0.1);
+  border: 1px solid rgba(255,208,0,0.35);
+  color: var(--yellow);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.project-personal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.project-card:hover .project-personal-overlay { opacity: 1; }
+
+.project-link-btn {
+  padding: 0.7rem 1.75rem;
+  background: var(--gradient);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 50px;
+  transition: var(--transition);
+  transform: translateY(10px);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.project-card:hover .project-link-btn {
+  transform: translateY(0);
+  box-shadow: var(--glow-sm);
+}
+
+.personal-project-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.plink-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: var(--yellow);
+  position: relative;
+  transition: color var(--transition);
+}
+
+.plink-live::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 1.5px;
+  background: var(--gradient);
+  transition: width var(--transition);
+}
+
+.plink-live:hover::after { width: 100%; }
 
 /* ===================================
    CERTIFICATIONS SECTION
