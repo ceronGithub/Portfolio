@@ -1439,18 +1439,7 @@ section { padding: 7rem 0; }
 }
 
 /* Responsive */
-@media (max-width: 600px) {
-  .timeline-item {
-    grid-template-columns: 24px 1fr;
-    gap: 0 1rem;
-  }
-  .timeline-card-header {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-  .timeline-right { align-items: flex-start; }
-  .timeline-card { padding: 1.25rem; margin-bottom: 1.5rem; }
-}
+/* Responsive styles moved to css/media-queries.css */
 
 /* ===================================
    CERTIFICATIONS — FLIP CARDS + SMOKE
@@ -1797,16 +1786,7 @@ section { padding: 7rem 0; }
   margin-bottom: 0.75rem;
 }
 
-/* Responsive */
-@media (max-width: 960px) {
-  .cert-flip-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 600px) {
-  .cert-flip-grid { grid-template-columns: 1fr; }
-  .cert-flip-wrap { height: 300px; }
-  .cert-education { flex-direction: column; gap: 1rem; padding: 1.5rem; }
-}
+/* Responsive styles moved to css/media-queries.css */
 
 /* ===================================
    CONTACT SECTION
@@ -1951,75 +1931,6 @@ section { padding: 7rem 0; }
 
 /* ===================================
    RESPONSIVE
+   All media queries moved to:
+   css/media-queries.css
 =================================== */
-@media (max-width: 1024px) {
-  .hero-content { gap: 3rem; }
-  .about-grid { gap: 3rem; }
-  .profile-ring { width: 220px; height: 220px; }
-}
-
-@media (max-width: 768px) {
-  .navbar { padding: 1rem 1.5rem; }
-
-  .hamburger { display: flex; }
-
-  .nav-links {
-    position: fixed;
-    top: 0; right: -100%;
-    width: 70%; max-width: 320px;
-    height: 100vh;
-    background: rgba(13,13,13,0.97);
-    backdrop-filter: blur(20px);
-    flex-direction: column;
-    justify-content: center;
-    gap: 2rem;
-    transition: right var(--transition);
-    z-index: 999;
-    border-left: 1px solid rgba(255,255,255,0.08);
-    padding: 2rem;
-  }
-
-  .nav-links.open { right: 0; }
-  .nav-link { font-size: 1.1rem; }
-
-  .hero-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 2.5rem;
-  }
-
-  .hero-cta { justify-content: center; }
-
-  .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-  .about-cards { grid-template-columns: 1fr 1fr; }
-
-  .skills-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-  .hosting-bars { grid-template-columns: 1fr; gap: 1rem; }
-  .skills-grid-single { padding: 1.5rem; }
-
-  .projects-grid { grid-template-columns: 1fr; }
-  .project-card-header { flex-direction: column; align-items: flex-start; }
-  .projects-trust-note { padding: 1rem; font-size: 0.8rem; }
-  .cert-grid { grid-template-columns: 1fr 1fr; }
-  .cert-education { flex-direction: column; gap: 1rem; padding: 1.5rem; }
-
-  .contact-links { grid-template-columns: 1fr; }
-  .contact-links .contact-item:last-child { grid-column: 1; max-width: 100%; }
-
-  .footer-inner { flex-direction: column; text-align: center; }
-
-  .profile-ring { width: 200px; height: 200px; }
-
-  section { padding: 5rem 0; }
-}
-
-@media (max-width: 480px) {
-  .container { padding: 0 1.25rem; }
-  .hero { padding: 5rem 1.25rem 3rem; }
-  .hero-name { font-size: 2rem; }
-  .about-stats { gap: 1.5rem; }
-  .about-cards { grid-template-columns: 1fr; }
-  .hero-cta { flex-direction: column; align-items: center; }
-  .btn { width: 100%; justify-content: center; }
-  .cert-grid { grid-template-columns: 1fr; }
-}
