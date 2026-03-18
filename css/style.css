@@ -44,6 +44,8 @@ ul { list-style: none; }
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* ===================================
@@ -616,7 +618,20 @@ section { padding: 7rem 0; }
 /* ===================================
    ABOUT SECTION
 =================================== */
-.about { background: var(--dark); }
+.about {
+  background:
+    linear-gradient(105deg, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.92) 55%, rgba(10,10,15,0.75) 100%),
+    url('../images/backgrounds/bg-about.png') left center / 40% auto no-repeat fixed;
+  position: relative;
+}
+.about::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, var(--dark) 0%, transparent 12%, transparent 88%, var(--dark) 100%),
+    radial-gradient(ellipse 40% 70% at 95% 50%, rgba(255,106,0,0.06), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
 
 .about-grid {
   display: grid;
@@ -727,7 +742,19 @@ section { padding: 7rem 0; }
 /* ===================================
    SKILLS SECTION
 =================================== */
-.skills { background: var(--black); }
+.skills {
+  background:
+    linear-gradient(180deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.85) 35%, rgba(5,5,5,0.85) 65%, rgba(5,5,5,0.97) 100%),
+    url('../images/backgrounds/bg-skills.png') center 75% / 100% auto no-repeat fixed;
+  position: relative;
+}
+.skills::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(255,190,0,0.05), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
 
 .skills-grid {
   display: grid;
@@ -915,7 +942,20 @@ section { padding: 7rem 0; }
 /* ===================================
    PROJECTS SECTION
 =================================== */
-.projects { background: var(--dark); }
+.projects {
+  background:
+    linear-gradient(180deg, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.87) 40%, rgba(10,10,15,0.87) 60%, rgba(10,10,15,0.97) 100%),
+    url('../images/backgrounds/bg-projects.png') center 10% / 50% auto no-repeat fixed;
+  position: relative;
+}
+.projects::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 20%, rgba(255,106,0,0.05), transparent 65%),
+    radial-gradient(ellipse 100% 30% at 50% 0%, rgba(5,5,5,0.6), transparent 100%);
+  pointer-events: none; z-index: 0;
+}
 
 .projects-subtitle {
   margin-top: 1rem;
@@ -1296,7 +1336,20 @@ section { padding: 7rem 0; }
 /* ===================================
    EXPERIENCE / TIMELINE SECTION
 =================================== */
-.experience { background: var(--dark); }
+.experience {
+  background:
+    linear-gradient(90deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.90) 50%, rgba(5,5,5,0.72) 100%),
+    url('../images/backgrounds/bg-experience.jpg') right center / 500px auto no-repeat fixed;
+  position: relative;
+}
+.experience::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, var(--dark) 0%, transparent 12%, transparent 88%, var(--dark) 100%),
+    radial-gradient(ellipse 50% 60% at 100% 50%, rgba(255,190,0,0.04), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
 
 .timeline {
   position: relative;
@@ -1524,7 +1577,20 @@ section { padding: 7rem 0; }
 /* ===================================
    CERTIFICATIONS — FLIP CARDS + SMOKE
 =================================== */
-.certifications { background: var(--black); }
+.certifications {
+  background:
+    linear-gradient(160deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.88) 50%, rgba(5,5,5,0.97) 100%),
+    url('../images/backgrounds/bg-certifications.png') center 70% / 100% auto no-repeat fixed;
+  position: relative;
+}
+.certifications::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, var(--black) 0%, transparent 12%, transparent 88%, var(--black) 100%),
+    radial-gradient(ellipse 60% 50% at 50% 80%, rgba(255,106,0,0.04), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
 
 .cert-subtitle {
   margin-top: 0.75rem;
@@ -2027,7 +2093,20 @@ section { padding: 7rem 0; }
 /* ===================================
    CONTACT SECTION
 =================================== */
-.contact { background: var(--black); }
+.contact {
+  background:
+    linear-gradient(170deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.90) 45%, rgba(5,5,5,0.75) 100%),
+    url('../images/backgrounds/bg-contact.jpg') right bottom / 480px auto no-repeat fixed;
+  position: relative;
+}
+.contact::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, var(--black) 0%, transparent 12%, transparent 88%, var(--black) 100%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(255,106,0,0.05), transparent 65%);
+  pointer-events: none; z-index: 0;
+}
 
 .contact-content { max-width: 750px; }
 
