@@ -1,121 +1,137 @@
 /* =============================================
    PORTFOLIO JS — Ceron Matthew Calsena
+   Debugged & Cleaned
 ============================================= */
 
 // ─── Navbar Scroll Effect ─────────────────
 const navbar = document.getElementById('navbar');
+if (navbar) {
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+}
 
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 50);
-});
+// ─── Logo Typing Animation ────────────────
+const logoEl = document.getElementById('logoTyped');
+const logoWords = ['VA + Dev', 'Web Dev', 'CMC', 'Desktop Dev'];
+let lIdx = 0, lChar = 0, lDeleting = false;
+
+function typeLogo() {
+  if (!logoEl) return;
+  const word = logoWords[lIdx];
+
+  if (lDeleting) {
+    lChar--;
+    logoEl.textContent = word.substring(0, lChar);
+  } else {
+    lChar++;
+    logoEl.textContent = word.substring(0, lChar);
+  }
+
+  let delay = lDeleting ? 80 : 130;
+
+  if (!lDeleting && lChar === word.length) {
+    // Finished typing — pause then delete
+    delay = 2500;
+    lDeleting = true;
+  } else if (lDeleting && lChar === 0) {
+    // Finished deleting — move to next word
+    lDeleting = false;
+    lIdx = (lIdx + 1) % logoWords.length;
+    delay = 400;
+  }
+
+  setTimeout(typeLogo, delay);
+}
+
+// CMC shown in HTML — start cycling to next words after 2.5s
+setTimeout(() => {
+  lDeleting = true;
+  lChar = 3; // start deleting 'CMC'
+  typeLogo();
+}, 2500);
 
 // ─── Hamburger Menu ───────────────────────
 const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
+const navLinks  = document.getElementById('navLinks');
 
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  navLinks.classList.toggle('open');
-});
-
-// Close nav on link click
-navLinks.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    navLinks.classList.remove('open');
+if (hamburger && navLinks) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    navLinks.classList.toggle('open');
   });
-});
 
-// ─── Typing Animation ─────────────────────
+  navLinks.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      navLinks.classList.remove('open');
+    });
+  });
+}
+
+// ─── Hero Typing Animation ─────────────────
 const roles = [
-  'PHP Developer',
-  'VA Specialist',
+  'VA Support',
   'AI Workflow Dev',
-  'Laravel Engineer',
-  'Automation Expert',
-  'Web Developer'
+  'AI Automation',
+  'Laravel Developer',
+  'PHP Developer',  
+  'Web Developer',
+  'Desktop Developer'
 ];
 
-let roleIndex = 0;
-let charIndex = 0;
+let roleIndex  = 0;
+let charIndex  = 0;
 let isDeleting = false;
-const typedEl = document.getElementById('typedText');
+const typedEl  = document.getElementById('typedText');
 
 function type() {
+  if (!typedEl) return;
   const current = roles[roleIndex];
-  if (isDeleting) {
-    typedEl.textContent = current.substring(0, charIndex - 1);
-    charIndex--;
-  } else {
-    typedEl.textContent = current.substring(0, charIndex + 1);
-    charIndex++;
-  }
+  typedEl.textContent = isDeleting
+    ? current.substring(0, charIndex - 1)
+    : current.substring(0, charIndex + 1);
+  isDeleting ? charIndex-- : charIndex++;
 
   let delay = isDeleting ? 60 : 110;
-
   if (!isDeleting && charIndex === current.length) {
-    delay = 1800;
-    isDeleting = true;
+    delay = 1800; isDeleting = true;
   } else if (isDeleting && charIndex === 0) {
     isDeleting = false;
     roleIndex = (roleIndex + 1) % roles.length;
     delay = 400;
   }
-
   setTimeout(type, delay);
 }
-
 setTimeout(type, 1200);
 
-// ─── Scroll Reveal: Fade-In + Fade-Out ────────────
+// ─── Scroll Reveal: Fade-In + Fade-Out ────
 const revealEls = document.querySelectorAll('.reveal');
-let lastScrollY = window.scrollY;
-let ticking = false;
-
-// Update scroll direction on every scroll
-window.addEventListener('scroll', () => {
-  lastScrollY = window.scrollY;
-}, { passive: true });
 
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     const el = entry.target;
-
     if (entry.isIntersecting) {
-      // Element entering viewport — fade IN
       el.classList.remove('fade-out-up', 'fade-out-down');
       el.classList.add('visible');
-    } else {
-      // Element leaving viewport — fade OUT with direction
-      if (el.classList.contains('visible')) {
-        const rect = entry.boundingClientRect;
-        // If element is above viewport (scrolled past), fade up
-        // If element is below viewport (haven't reached), fade down
-        if (rect.top < 0) {
-          el.classList.remove('visible');
-          el.classList.add('fade-out-up');
-        } else {
-          el.classList.remove('visible');
-          el.classList.add('fade-out-down');
-        }
-      }
+    } else if (el.classList.contains('visible')) {
+      const rect = entry.boundingClientRect;
+      el.classList.remove('visible');
+      el.classList.add(rect.top < 0 ? 'fade-out-up' : 'fade-out-down');
     }
   });
-}, {
-  threshold: 0.12,
-  rootMargin: '0px 0px -40px 0px'
-});
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
 revealEls.forEach(el => revealObserver.observe(el));
 
-// ─── Staggered children animation ──────────
-document.querySelectorAll('.cert-grid, .about-cards, .projects-grid, .contact-links, .about-stats').forEach(container => {
-  const children = container.querySelectorAll('.cert-card, .info-card, .project-card, .contact-item, .stat-item');
+// ─── Staggered Children Animation ──────────
+document.querySelectorAll('.cert-flip-grid, .about-cards, .projects-grid, .contact-links, .about-stats').forEach(container => {
+  // Bug fix: updated selector from cert-grid → cert-flip-grid
+  const children = container.querySelectorAll('.cert-flip-wrap, .info-card, .project-card, .contact-item, .stat-item');
   children.forEach((child, i) => {
     child.style.transitionDelay = `${i * 0.08}s`;
   });
 });
-
 
 // ─── Skill Bar Animation ──────────────────
 const skillFills = document.querySelectorAll('.skill-fill');
@@ -125,10 +141,7 @@ const skillObserver = new IntersectionObserver((entries) => {
     if (entry.isIntersecting) {
       const fill = entry.target;
       const targetWidth = fill.getAttribute('data-width');
-      // Slight delay so reveal animation completes first
-      setTimeout(() => {
-        fill.style.width = targetWidth + '%';
-      }, 300);
+      setTimeout(() => { fill.style.width = targetWidth + '%'; }, 300);
       skillObserver.unobserve(fill);
     }
   });
@@ -143,40 +156,33 @@ const layerOrbs = document.getElementById('layerOrbs');
 const layerFg   = document.getElementById('layerFg');
 
 function applyParallax() {
-  const scrollY = window.scrollY;
   if (!layerBg) return;
-
+  const scrollY = window.scrollY;
   layerBg.style.transform   = `translateY(${scrollY * 0.15}px)`;
   layerGrid.style.transform = `translateY(${scrollY * 0.08}px)`;
   layerOrbs.style.transform = `translateY(${scrollY * 0.12}px)`;
   if (layerFg) layerFg.style.transform = `translateY(${scrollY * 0.05}px)`;
 }
-
 window.addEventListener('scroll', applyParallax, { passive: true });
 
-// ─── Mouse Move Parallax (Hero only) ──────
+// ─── Mouse Parallax (Hero only) ──────────
 const hero = document.getElementById('hero');
-
-hero.addEventListener('mousemove', (e) => {
-  const rect = hero.getBoundingClientRect();
-  const cx = (e.clientX - rect.left) / rect.width  - 0.5;
-  const cy = (e.clientY - rect.top)  / rect.height - 0.5;
-
-  if (layerOrbs) {
-    layerOrbs.style.transform = `translate(${cx * 20}px, ${cy * 20}px)`;
-  }
-  if (layerGrid) {
-    layerGrid.style.transform = `translate(${cx * 8}px, ${cy * 8}px)`;
-  }
-});
-
-hero.addEventListener('mouseleave', () => {
-  if (layerOrbs) layerOrbs.style.transform = '';
-  if (layerGrid) layerGrid.style.transform = '';
-});
+if (hero) {
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) / rect.width  - 0.5;
+    const cy = (e.clientY - rect.top)  / rect.height - 0.5;
+    if (layerOrbs) layerOrbs.style.transform = `translate(${cx * 20}px, ${cy * 20}px)`;
+    if (layerGrid) layerGrid.style.transform = `translate(${cx * 8}px, ${cy * 8}px)`;
+  });
+  hero.addEventListener('mouseleave', () => {
+    if (layerOrbs) layerOrbs.style.transform = '';
+    if (layerGrid) layerGrid.style.transform = '';
+  });
+}
 
 // ─── Active Nav Link on Scroll ─────────────
-const sections = document.querySelectorAll('section[id]');
+const sections    = document.querySelectorAll('section[id]');
 const allNavLinks = document.querySelectorAll('.nav-link');
 
 const sectionObserver = new IntersectionObserver((entries) => {
@@ -184,27 +190,21 @@ const sectionObserver = new IntersectionObserver((entries) => {
     if (entry.isIntersecting) {
       const id = entry.target.getAttribute('id');
       allNavLinks.forEach(link => {
-        link.style.color = link.getAttribute('href') === `#${id}`
-          ? 'var(--orange)'
-          : '';
+        link.style.color = link.getAttribute('href') === `#${id}` ? 'var(--orange)' : '';
       });
     }
   });
 }, { threshold: 0.4 });
+sections.forEach(s => sectionObserver.observe(s));
 
-sections.forEach(section => sectionObserver.observe(section));
-
-// ─── Smooth profile image fallback ─────────
-const profileImg = document.querySelector('.profile-img');
+// ─── Profile Image Fallback ─────────────
+const profileImg         = document.querySelector('.profile-img');
 const profilePlaceholder = document.querySelector('.profile-placeholder');
-
 if (profileImg) {
   profileImg.addEventListener('error', () => {
     profileImg.style.display = 'none';
     if (profilePlaceholder) profilePlaceholder.style.display = 'flex';
   });
-
-  // Check if already broken (cached error)
   if (!profileImg.complete || profileImg.naturalWidth === 0) {
     profileImg.style.display = 'none';
     if (profilePlaceholder) profilePlaceholder.style.display = 'flex';
@@ -212,22 +212,22 @@ if (profileImg) {
 }
 
 // ─── Project Filter Tabs + Sort ───────────
+// Bug fix: added null guard on filterProjects for projectsGrid
 const projectsGrid = document.getElementById('projectsGrid');
 const filterBtns   = document.querySelectorAll('.filter-btn');
 
 function sortProjectCards() {
   if (!projectsGrid) return;
-  const cards = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]:not(.hidden)'));
+  const cards   = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]:not(.hidden)'));
   const ongoing = cards.filter(c => c.querySelector('.ongoing-badge'));
   const rest    = cards.filter(c => !c.querySelector('.ongoing-badge'));
   [...ongoing, ...rest].forEach(card => projectsGrid.appendChild(card));
 }
 
 function filterProjects(filter) {
-  const allCards = projectsGrid.querySelectorAll('.project-card[data-category]');
-  allCards.forEach(card => {
-    const cat  = card.getAttribute('data-category');
-    const show = filter === 'all' || cat === filter;
+  if (!projectsGrid) return;  // Bug fix: null guard
+  projectsGrid.querySelectorAll('.project-card[data-category]').forEach(card => {
+    const show = filter === 'all' || card.getAttribute('data-category') === filter;
     if (show) {
       card.classList.remove('hidden');
       card.classList.add('fade-in');
@@ -246,9 +246,9 @@ filterBtns.forEach(btn => {
     filterProjects(btn.getAttribute('data-filter'));
   });
 });
-
-// Initial sort on page load
 sortProjectCards();
+
+// ─── Tool Tags Stagger Animation ──────────
 const toolTags = document.querySelectorAll('.tool-tag');
 toolTags.forEach((tag, i) => {
   tag.style.transitionDelay = `${i * 0.03}s`;
@@ -256,9 +256,10 @@ toolTags.forEach((tag, i) => {
   tag.style.transform = 'translateY(10px)';
 });
 
-const toolsObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
+const toolsSection = document.querySelector('.tools-section');
+if (toolsSection) {
+  const toolsObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
       toolTags.forEach((tag, i) => {
         setTimeout(() => {
           tag.style.opacity = '1';
@@ -268,67 +269,22 @@ const toolsObserver = new IntersectionObserver((entries) => {
       });
       toolsObserver.disconnect();
     }
-  });
-}, { threshold: 0.2 });
-
-const toolsSection = document.querySelector('.tools-section');
-if (toolsSection) toolsObserver.observe(toolsSection);
-
-// ─── PDF.js Certificate Preview ───────────
-if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }, { threshold: 0.2 });
+  toolsObserver.observe(toolsSection);
 }
 
-function renderPDFCanvas(wrap) {
-  const canvas = wrap.querySelector('.pdf-canvas');
-  if (!canvas || canvas.dataset.rendered) return;
-  canvas.dataset.rendered = 'true';
+// ─── Certificate Image Previews ───────────
+// Bug fix: removed PDF.js canvas code — certs now use static JPG previews
+// No JS needed for cert previews (pure HTML img tags)
 
-  const pdfPath = canvas.getAttribute('data-pdf');
-  const preview = wrap.querySelector('.cert-back-preview');
-  if (preview) preview.innerHTML = '<div class="pdf-loading">⏳ Loading...</div>';
-
-  pdfjsLib.getDocument(pdfPath).promise.then(pdf => {
-    pdf.getPage(1).then(page => {
-      if (preview) preview.innerHTML = '';
-      const newCanvas = document.createElement('canvas');
-      newCanvas.className = 'pdf-canvas rendered';
-      if (preview) preview.appendChild(newCanvas);
-
-      const scale = preview ? (preview.clientWidth / page.getViewport({ scale: 1 }).width) * 1.5 : 1.2;
-      const viewport = page.getViewport({ scale: Math.max(scale, 0.8) });
-      const ctx = newCanvas.getContext('2d');
-      newCanvas.width  = viewport.width;
-      newCanvas.height = viewport.height;
-
-      page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-        newCanvas.style.opacity = '1';
-      });
-    });
-  }).catch(() => {
-    if (preview) preview.innerHTML = '<div class="pdf-error">📄 Preview unavailable<br><small>Click View Certificate below</small></div>';
-  });
-}
-
-// Lazy render on first hover
-document.querySelectorAll('.cert-flip-wrap').forEach(wrap => {
-  let rendered = false;
-  wrap.addEventListener('mouseenter', () => {
-    if (!rendered && typeof pdfjsLib !== 'undefined') {
-      rendered = true;
-      setTimeout(() => renderPDFCanvas(wrap), 400);
-    }
-  });
-});
-// ─── Resume Image Viewer ───────────────────────────
+// ─── Resume Image Viewer ──────────────────
 (function() {
-  const img      = document.getElementById('resumePageImg');
-  const prevBtn  = document.getElementById('prevPage');
-  const nextBtn  = document.getElementById('nextPage');
-  const pageNum  = document.getElementById('pageNum');
-  const TOTAL    = 11;
-  let   curr     = 1;
+  const img     = document.getElementById('resumePageImg');
+  const prevBtn = document.getElementById('prevPage');
+  const nextBtn = document.getElementById('nextPage');
+  const pageNum = document.getElementById('pageNum');
+  const TOTAL   = 11;
+  let   curr    = 1;
 
   if (!img) return;
 
@@ -349,14 +305,14 @@ document.querySelectorAll('.cert-flip-wrap').forEach(wrap => {
   if (prevBtn) prevBtn.addEventListener('click', () => goToPage(curr - 1));
   if (nextBtn) nextBtn.addEventListener('click', () => goToPage(curr + 1));
 
-  // Keyboard arrow navigation when resume section is visible
+  // Keyboard navigation when resume section is visible
   document.addEventListener('keydown', e => {
     const section = document.getElementById('resume');
     if (!section) return;
     const rect = section.getBoundingClientRect();
-    const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    if (!inView) return;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(curr + 1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToPage(curr - 1);
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(curr + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToPage(curr - 1);
+    }
   });
 })();
