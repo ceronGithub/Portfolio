@@ -263,7 +263,19 @@ form?.addEventListener('submit', async e => {
     const docRef = await addDoc(collection(db, COL), payload);
     console.log('[CMC] Comment saved! ID:', docRef.id);
 
-    if (formSuccess) formSuccess.style.display = 'flex';
+    if (formSuccess) {
+      formSuccess.style.display  = 'flex';
+      formSuccess.style.opacity  = '1';
+      formSuccess.style.transition = 'opacity 0.5s ease';
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        formSuccess.style.opacity = '0';
+        setTimeout(() => {
+          formSuccess.style.display = 'none';
+          formSuccess.style.opacity = '1';
+        }, 500);
+      }, 3000);
+    }
     form.reset();
 
     // Reset rating UI
