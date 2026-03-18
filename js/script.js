@@ -321,3 +321,42 @@ document.querySelectorAll('.cert-flip-wrap').forEach(wrap => {
     }
   });
 });
+// ─── Resume Image Viewer ───────────────────────────
+(function() {
+  const img      = document.getElementById('resumePageImg');
+  const prevBtn  = document.getElementById('prevPage');
+  const nextBtn  = document.getElementById('nextPage');
+  const pageNum  = document.getElementById('pageNum');
+  const TOTAL    = 11;
+  let   curr     = 1;
+
+  if (!img) return;
+
+  function goToPage(n) {
+    curr = Math.max(1, Math.min(n, TOTAL));
+    const pad = String(curr).padStart(2, '0');
+    img.style.opacity = '0';
+    img.src = `resume_previews/page-${pad}.jpg`;
+    img.alt = `Resume Page ${curr}`;
+    img.onload = () => { img.style.opacity = '1'; };
+    if (pageNum) pageNum.textContent = curr;
+    if (prevBtn) prevBtn.disabled = (curr <= 1);
+    if (nextBtn) nextBtn.disabled = (curr >= TOTAL);
+  }
+
+  img.style.transition = 'opacity 0.3s ease';
+
+  if (prevBtn) prevBtn.addEventListener('click', () => goToPage(curr - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => goToPage(curr + 1));
+
+  // Keyboard arrow navigation when resume section is visible
+  document.addEventListener('keydown', e => {
+    const section = document.getElementById('resume');
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    if (!inView) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(curr + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToPage(curr - 1);
+  });
+})();
