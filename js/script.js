@@ -155,15 +155,25 @@ const layerGrid = document.getElementById('layerGrid');
 const layerOrbs = document.getElementById('layerOrbs');
 const layerFg   = document.getElementById('layerFg');
 
+let ticking = false;
+let lastScrollY = 0;
+
 function applyParallax() {
   if (!layerBg) return;
-  const scrollY = window.scrollY;
-  layerBg.style.transform   = `translateY(${scrollY * 0.15}px)`;
-  layerGrid.style.transform = `translateY(${scrollY * 0.08}px)`;
-  layerOrbs.style.transform = `translateY(${scrollY * 0.12}px)`;
-  if (layerFg) layerFg.style.transform = `translateY(${scrollY * 0.05}px)`;
+  layerBg.style.transform   = `translateY(${lastScrollY * 0.15}px)`;
+  layerGrid.style.transform = `translateY(${lastScrollY * 0.08}px)`;
+  layerOrbs.style.transform = `translateY(${lastScrollY * 0.12}px)`;
+  if (layerFg) layerFg.style.transform = `translateY(${lastScrollY * 0.05}px)`;
+  ticking = false;
 }
-window.addEventListener('scroll', applyParallax, { passive: true });
+
+window.addEventListener('scroll', () => {
+  lastScrollY = window.scrollY;
+  if (!ticking) {
+    requestAnimationFrame(applyParallax);
+    ticking = true;
+  }
+}, { passive: true });
 
 // ─── Mouse Parallax (Hero only) ──────────
 const hero = document.getElementById('hero');
