@@ -130,3 +130,12 @@
   .cert-grid  { grid-template-columns: 1fr; }
   .cert-flip-grid { grid-template-columns: 1fr; }
 }
+/* ===================================
+   Form Row — Mobile Stack Fix
+=================================== */
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
