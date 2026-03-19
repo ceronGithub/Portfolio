@@ -105,22 +105,20 @@ function type() {
 }
 setTimeout(type, 1200);
 
-// ─── Scroll Reveal: Fade-In + Fade-Out ────
+// ─── Scroll Reveal: Fade-In Only ────────
+// Fix: removed fade-out logic — it caused sections to disappear on mobile
+// when IntersectionObserver triggered on small screens mid-scroll.
 const revealEls = document.querySelectorAll('.reveal');
 
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    const el = entry.target;
     if (entry.isIntersecting) {
-      el.classList.remove('fade-out-up', 'fade-out-down');
-      el.classList.add('visible');
-    } else if (el.classList.contains('visible')) {
-      const rect = entry.boundingClientRect;
-      el.classList.remove('visible');
-      el.classList.add(rect.top < 0 ? 'fade-out-up' : 'fade-out-down');
+      entry.target.classList.remove('fade-out-up', 'fade-out-down');
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target); // once visible, stays visible
     }
   });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
 
 revealEls.forEach(el => revealObserver.observe(el));
 
