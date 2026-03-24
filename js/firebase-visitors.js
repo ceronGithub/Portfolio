@@ -33,27 +33,49 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
+// Use localStorage (persists across sessions) + date key so each
+// calendar day gets counted once per browser, even across page reloads.
 function hasVisitedToday() {
-  return sessionStorage.getItem('cmc_visited') === todayKey();
+  try {
+    return localStorage.getItem('cmc_visited') === todayKey();
+  } catch {
+    return false; // private/incognito may block localStorage
+  }
 }
 
 function markVisited() {
-  sessionStorage.setItem('cmc_visited', todayKey());
+  try {
+    localStorage.setItem('cmc_visited', todayKey());
+  } catch { /* ignore */ }
 }
 
 // ─── Record visit ────────────────────────────────
 async function recordVisit() {
-  if (hasVisitedToday()) return;
-  markVisited();
+  if (hasVisitedToday()) {
+    console.log('[CMC Visitors] Already counted today — skipping.');
+    return;
+  }
 
   const key = todayKey();
   const ref = doc(db, COL, key);
-  const snap = await getDoc(ref);
 
-  if (snap.exists()) {
-    await updateDoc(ref, { count: increment(1) });
-  } else {
-    await setDoc(ref, { count: 1, date: key });
+  try {
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      await updateDoc(ref, { count: increment(1) });
+    } else {
+      await setDoc(ref, { count: 1, date: key });
+    }
+    // Only mark as visited AFTER the write succeeds
+    markVisited();
+    console.log('[CMC Visitors] Visit recorded for', key);
+  } catch (err) {
+    // Do NOT mark as visited so it retries on next load
+    console.error('[CMC Visitors] Failed to record visit:', err.code, err.message);
+    if (err.code === 'permission-denied') {
+      console.error('[CMC Visitors] ⚠️  Firestore rules are blocking writes to the "visitors" collection. Go to Firebase Console → Firestore → Rules and allow read/write for this collection.');
+    }
+    throw err; // re-throw so init() can show error state
   }
 }
 
@@ -407,7 +429,12 @@ async function init() {
     }
 
   } catch (err) {
-    console.warn('[CMC Visitors] Error:', err);
+    console.error('[CMC Visitors] Init error:', err.code || err.message);
+    // Show a subtle error state in the widget count area
+    const countEl = document.getElementById('vcCount');
+    const pillEl  = document.getElementById('vcTodayPill');
+    if (countEl) countEl.textContent = '--';
+    if (pillEl)  { pillEl.textContent = 'Error'; pillEl.style.color = '#ff4444'; }
   }
 }
 
