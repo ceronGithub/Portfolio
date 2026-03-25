@@ -1,1 +1,9 @@
 claude ai - facebookceron@gmail.com
+firebase - developerceron@gmail.com
+
+things to improve on the new module calendar.
+when someone schedule an appointment. remove the mailto. thats now working. And add to book an appointment module. how can i reach you. dropdown : viber, whatsapp, messanger, telegram, skype, phone number. then textfield with place holder. set a password so others cannot edit the content. all data here will be stored in firebase. preperfed time starts at 8:00 AM till 10:00 PM. all fields must be filled. And when someone already booked on certain time. remove that time on the preperfed time.
+
+when owner click the schedule date. display all details, in a modal with "x" on top-right corner.
+
+on dashboard sticky footer running text : display check appointment/s(display all appooinments on a current date details to display : name, and purpose)

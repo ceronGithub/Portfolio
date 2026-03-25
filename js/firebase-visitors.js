@@ -29,8 +29,12 @@ const db  = getFirestore(app);
 const COL = 'visitors';
 
 // ─── Helpers ─────────────────────────────────────
+// Use Philippine Time (UTC+8) so the day resets at midnight PH time,
+// not midnight UTC (which would be 8:00 AM PH — causing wrong date keys).
 function todayKey() {
-  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const now = new Date();
+  const phTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+  return phTime.toISOString().slice(0, 10); // "YYYY-MM-DD" in PH time
 }
 
 // Use localStorage (persists across sessions) + date key so each
@@ -127,7 +131,7 @@ function buildChart(data) {
     const isToday = d.date === todayKey();
     const fill    = isToday ? 'url(#histGradToday)' : 'url(#histGrad)';
     const stroke  = isToday ? 'rgba(255,154,60,0.7)' : 'rgba(255,106,0,0.2)';
-    const dayIdx  = new Date(d.date + 'T00:00:00').getDay();
+    const dayIdx  = new Date(d.date + 'T00:00:00+08:00').getDay(); // PH timezone
     const dayLbl  = days[dayIdx];
     const countLbl = d.count > 0
       ? `<text x="${x + binW/2}" y="${barY - 2}" text-anchor="middle" font-size="6.5" font-weight="600" fill="${isToday ? '#ff9a3c' : 'rgba(255,255,255,0.5)'}">${d.count}</text>`
@@ -318,6 +322,61 @@ function injectStyles() {
       color: #fff;
     }
 
+    /* Appointment Button */
+    .vc-appt-wrap {
+      margin-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 10px;
+    }
+    .vc-appt-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, rgba(255,106,0,0.18), rgba(255,180,0,0.12));
+      border: 1px solid rgba(255,140,0,0.35);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: 'Poppins', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    .vc-appt-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,180,0,0.15), rgba(255,106,0,0.1));
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .vc-appt-btn:hover::before { opacity: 1; }
+    .vc-appt-btn:hover {
+      border-color: rgba(255,180,0,0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255,106,0,0.25);
+    }
+    .vc-appt-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .vc-appt-text {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,200,80,0.95);
+      letter-spacing: 0.04em;
+      flex: 1;
+      text-align: left;
+      text-transform: uppercase;
+    }
+    .vc-appt-arrow {
+      font-size: 11px;
+      color: rgba(255,180,0,0.7);
+      transition: transform 0.2s;
+    }
+    .vc-appt-btn:hover .vc-appt-arrow { transform: translateX(3px); }
+
     /* Mobile */
     @media (max-width: 480px) {
       #vc-widget {
@@ -368,6 +427,15 @@ function buildWidget() {
       </div>
     </div>
 
+    <!-- Appointment Button -->
+    <div class="vc-appt-wrap" id="vc-appt-wrap">
+      <button class="vc-appt-btn" id="vcApptBtn">
+        <span class="vc-appt-icon">📅</span>
+        <span class="vc-appt-text">Schedule Appointment</span>
+        <span class="vc-appt-arrow">→</span>
+      </button>
+    </div>
+
     <!-- Collapsed state -->
     <div class="vc-collapsed-inner">
       <div class="vc-pulse-dot"></div>
@@ -383,6 +451,11 @@ function buildWidget() {
     collapsed = !collapsed;
     wrap.classList.toggle('vc-collapsed', collapsed);
     document.getElementById('vcToggle').textContent = collapsed ? '+' : '−';
+  });
+
+  // Appointment button
+  document.getElementById('vcApptBtn').addEventListener('click', () => {
+    window.open('appointment.html', '_blank');
   });
 
   return wrap;
