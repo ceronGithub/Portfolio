@@ -431,7 +431,7 @@ function buildWidget() {
     <div class="vc-appt-wrap" id="vc-appt-wrap">
       <button class="vc-appt-btn" id="vcApptBtn">
         <span class="vc-appt-icon">📅</span>
-        <span class="vc-appt-text">Under maintenance</span>
+        <span class="vc-appt-text">Make an Appointment</span>
         <span class="vc-appt-arrow">→</span>
       </button>
     </div>
