@@ -6,11 +6,22 @@
   <title>Schedule an Appointment — CMC</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/appointment.css"/>
+
+  <!-- Firebase importmap so ES modules resolve correctly on any server -->
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app":       "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+    }
+  }
+  </script>
 </head>
 <body>
 
   <div id="cosmos"></div>
 
+  <!-- HEADER -->
   <header class="page-header">
     <a href="index.html" class="back-btn">← Back</a>
     <button class="owner-btn" id="ownerBtn">🔐 Owner</button>
@@ -20,12 +31,14 @@
     <div class="header-divider"></div>
   </header>
 
+  <!-- YEAR SELECTOR -->
   <div class="year-bar">
     <button class="year-btn" id="prevYear">‹</button>
     <div class="year-display" id="yearDisplay">2026</div>
     <button class="year-btn" id="nextYear">›</button>
   </div>
 
+  <!-- 12-MONTH CALENDAR GRID -->
   <div class="calendar-grid" id="calGrid"></div>
 
   <!-- BOOKING MODAL -->
@@ -102,7 +115,7 @@
     </div>
   </div>
 
-  <!-- STICKY FOOTER -->
+  <!-- STICKY FOOTER TICKER -->
   <div class="sticky-footer">
     <div class="footer-label">📅 Today's Appts</div>
     <div class="footer-track">

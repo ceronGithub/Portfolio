@@ -3,12 +3,8 @@
    CMC Portfolio · 2026
 ============================================ */
 
-import { initializeApp, getApps }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import {
-  getFirestore, collection, doc,
-  addDoc, deleteDoc, onSnapshot
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { initializeApp, getApps }   from 'firebase/app';
+import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 
 // ── Firebase ─────────────────────────────────────────
 const firebaseConfig = {

@@ -431,7 +431,7 @@ function buildWidget() {
     <div class="vc-appt-wrap" id="vc-appt-wrap">
       <button class="vc-appt-btn" id="vcApptBtn">
         <span class="vc-appt-icon">📅</span>
-        <span class="vc-appt-text">Schedule Appointment</span>
+        <span class="vc-appt-text">Under maintenance</span>
         <span class="vc-appt-arrow">→</span>
       </button>
     </div>
@@ -455,7 +455,8 @@ function buildWidget() {
 
   // Appointment button
   document.getElementById('vcApptBtn').addEventListener('click', () => {
-    window.open('appointment.html', '_blank');
+    // window.open('appointment.html', '_blank');
+    window.location.href = 'appointment.html';
   });
 
   return wrap;
