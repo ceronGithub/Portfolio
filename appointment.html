@@ -45,8 +45,19 @@
   <div class="modal-overlay" id="bookOv">
     <div class="modal">
       <button class="modal-close" id="bookClose">×</button>
-      <div id="bookForm">
+
+      <!-- DAY VIEW: existing appointments + add button -->
+      <div id="dayView">
         <div class="modal-date-label" id="bookDateLbl">Selected Date</div>
+        <h2 class="modal-title">📅 <span id="dayViewTitle">Appointments</span></h2>
+        <div id="dayApptList"></div>
+        <button class="modal-submit" id="showBookFormBtn" style="margin-top:16px;">➕ Add Appointment</button>
+      </div>
+
+      <!-- BOOKING FORM (hidden by default) -->
+      <div id="bookForm" style="display:none;">
+        <button class="back-to-day-btn" id="backToDayBtn">← Back</button>
+        <div class="modal-date-label" id="bookDateLbl2"></div>
         <h2 class="modal-title">Book an <span>Appointment</span></h2>
         <div class="mf"><label class="ml">Full Name <span class="req">*</span></label><input class="mi" id="bName" placeholder="e.g. Juan dela Cruz"/></div>
         <div class="mf"><label class="ml">Email Address <span class="req">*</span></label><input type="email" class="mi" id="bEmail" placeholder="you@email.com"/></div>
@@ -89,6 +100,13 @@
         <div class="modal-success-icon">🎉</div>
         <h3>Appointment Booked!</h3>
         <p>Your slot is reserved.<br>I'll reach out via your preferred contact soon.<br><br>Looking forward to connecting!</p>
+      </div>
+
+      <!-- Always-visible footer button -->
+      <div class="modal-book-footer">
+        <button class="modal-book-footer-btn" id="bookAnotherBtn" style="display:none;">
+          📅 Book Another Appointment
+        </button>
       </div>
     </div>
   </div>

@@ -534,3 +534,156 @@ body  {
   .back-btn { font-size: 10px; }
   .owner-btn { font-size: 10px; padding: 6px 10px; }
 }
+
+/* ── CALENDAR DAY PILLS ──────────────────── */
+.cal-day {
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px 2px;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: unset;
+}
+/* Days without pills keep square shape */
+.cal-day:not(:has(.cal-day-pills)) {
+  aspect-ratio: 1;
+  padding: 0;
+}
+.cal-day-num {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.cal-day-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+.cal-day-pill {
+  display: block;
+  font-size: 7px;
+  font-weight: 600;
+  background: rgba(255, 106, 0, 0.2);
+  border: 1px solid rgba(255, 154, 60, 0.35);
+  color: var(--orange2);
+  border-radius: 3px;
+  padding: 1px 3px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+.cal-day.today .cal-day-pill {
+  background: rgba(0,0,0,0.2);
+  border-color: rgba(0,0,0,0.2);
+  color: rgba(0,0,0,0.7);
+}
+.cal-day.fully-booked .cal-day-pill {
+  background: rgba(255,68,68,0.15);
+  border-color: rgba(255,68,68,0.3);
+  color: rgba(255,100,100,0.9);
+}
+
+/* ── MODAL BOOK FOOTER BTN ───────────────── */
+.modal-book-footer {
+  position: sticky;
+  bottom: 0;
+  padding-top: 14px;
+  margin-top: 6px;
+  background: linear-gradient(transparent, #111 30%);
+  pointer-events: none;
+}
+.modal-book-footer-btn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 208, 0, 0.35);
+  border-radius: 12px;
+  color: var(--yellow);
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+  pointer-events: all;
+}
+.modal-book-footer-btn:hover {
+  background: rgba(255, 208, 0, 0.08);
+  border-color: var(--yellow);
+  transform: translateY(-1px);
+}
+
+/* ── DAY VIEW ────────────────────────────── */
+.day-appt-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,208,0,.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.day-appt-item:last-child { margin-bottom: 0; }
+.day-appt-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--yellow);
+  background: rgba(255,208,0,.1);
+  border: 1px solid rgba(255,208,0,.2);
+  border-radius: 8px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.day-appt-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.day-appt-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.day-appt-topic {
+  font-size: 11px;
+  color: rgba(255,255,255,.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.day-appt-empty {
+  text-align: center;
+  padding: 24px 0 16px;
+  color: rgba(255,255,255,.3);
+  font-size: 13px;
+}
+
+/* Back button in booking form */
+.back-to-day-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.4);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  cursor: pointer;
+  padding: 0 0 14px 0;
+  transition: color .2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+.back-to-day-btn:hover { color: var(--yellow); }

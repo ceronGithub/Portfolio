@@ -292,10 +292,7 @@ function buildCals(year) {
 
     // Day cells
     for (let d = 1; d <= daysInMonth; d++) {
-      const el  = document.createElement('div');
-      el.className = 'cal-day';
-      el.textContent = d;
-
+      // ── Declarations first ──
       const dow     = new Date(year, mi, d).getDay();
       const key     = dKey(year, mi, d);
       const dayBks  = bookings[key] || [];
@@ -304,11 +301,37 @@ function buildCals(year) {
       const isPast  = year < tY || (year === tY && mi < tM) || (year === tY && mi === tM && d < tD);
       const isToday = year === tY && mi === tM && d === tD;
 
-      if (dow === 0)        el.classList.add('sunday');
-      if (isPast)           el.classList.add('past');
-      if (isToday)          el.classList.add('today');
+      // ── Build cell ──
+      const el = document.createElement('div');
+      el.className = 'cal-day';
+
+      // Day number
+      const dayNum = document.createElement('span');
+      dayNum.className = 'cal-day-num';
+      dayNum.textContent = d;
+      el.appendChild(dayNum);
+
+      // Show booked time pills if any bookings exist
+      if (dayBks.length > 0) {
+        const pills = document.createElement('div');
+        pills.className = 'cal-day-pills';
+        const sortedBks = [...dayBks].sort(
+          (a, b) => ALL_TIMES.indexOf(a.time) - ALL_TIMES.indexOf(b.time)
+        );
+        sortedBks.forEach(b => {
+          const pill = document.createElement('span');
+          pill.className = 'cal-day-pill';
+          pill.textContent = b.time;
+          pills.appendChild(pill);
+        });
+        el.appendChild(pills);
+      }
+
+      if (dow === 0)         el.classList.add('sunday');
+      if (isPast)            el.classList.add('past');
+      if (isToday)           el.classList.add('today');
       if (dayBks.length > 0) el.classList.add('has-booking');
-      if (isFull)           el.classList.add('fully-booked');
+      if (isFull)            el.classList.add('fully-booked');
 
       if (!isPast) {
         el.addEventListener('click', () => {
@@ -360,23 +383,75 @@ function buildFooter() {
 }
 
 // ══════════════════════════════════════════════
-//  BOOKING MODAL
+//  DAY VIEW — shows existing appointments first,
+//  then "Add Appointment" button at the bottom
 // ══════════════════════════════════════════════
 function openBooking(y, m, d, el, booked, isFull) {
-  if (isFull) {
-    alert('This date is fully booked. Please choose another date.');
-    return;
-  }
-
   // Highlight selected day
   document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
   el.classList.add('selected');
   selDate = { y, m, d };
 
-  // Set date label
-  document.getElementById('bookDateLbl').textContent = `📅 ${MONTHS[m]} ${d}, ${y}`;
+  const key      = dKey(y, m, d);
+  const dayBks   = bookings[key] || [];
+  const dateStr  = `${MONTHS[m]} ${d}, ${y}`;
 
-  // Populate only available time slots
+  // Set date label
+  document.getElementById('bookDateLbl').textContent  = `📅 ${dateStr}`;
+  document.getElementById('bookDateLbl2').textContent = `📅 ${dateStr}`;
+  const titleEl = document.getElementById('dayViewTitle');
+  if (titleEl) titleEl.textContent = dateStr;
+
+  // ── Build existing appointments list ──
+  const listEl = document.getElementById('dayApptList');
+  listEl.innerHTML = '';
+
+  if (dayBks.length > 0) {
+    const sorted = [...dayBks].sort(
+      (a, b) => ALL_TIMES.indexOf(a.time) - ALL_TIMES.indexOf(b.time)
+    );
+    sorted.forEach(b => {
+      const item = document.createElement('div');
+      item.className = 'day-appt-item';
+      item.innerHTML = `
+        <div class="day-appt-time">${b.time}</div>
+        <div class="day-appt-info">
+          <span class="day-appt-name">${b.name}</span>
+          <span class="day-appt-topic">${b.topic}</span>
+        </div>`;
+      listEl.appendChild(item);
+    });
+  } else {
+    listEl.innerHTML = '<div class="day-appt-empty">No appointments yet on this date.</div>';
+  }
+
+  // ── Show/hide Add button based on availability ──
+  const addBtn = document.getElementById('showBookFormBtn');
+  if (isFull) {
+    addBtn.textContent = '🔴 Fully Booked';
+    addBtn.disabled = true;
+    addBtn.style.opacity = '0.5';
+  } else {
+    addBtn.textContent = '➕ Add Appointment';
+    addBtn.disabled = false;
+    addBtn.style.opacity = '1';
+  }
+
+  // ── Reset: show day view, hide form & success ──
+  document.getElementById('dayView').style.display    = 'block';
+  document.getElementById('bookForm').style.display   = 'none';
+  document.getElementById('bookOk').style.display     = 'none';
+  document.getElementById('bookAnotherBtn').style.display = 'none';
+  openOverlay('bookOv');
+}
+
+// ── Show booking form when Add button clicked ──
+document.getElementById('showBookFormBtn').addEventListener('click', () => {
+  const key    = dKey(selDate.y, selDate.m, selDate.d);
+  const dayBks = bookings[key] || [];
+  const booked = dayBks.map(b => b.time);
+
+  // Populate available time slots
   const sel = document.getElementById('bTime');
   sel.innerHTML = '<option value="">Select time</option>';
   ALL_TIMES.forEach(t => {
@@ -399,10 +474,16 @@ function openBooking(y, m, d, el, booked, isFull) {
     e.classList.remove('err');
   });
 
+  document.getElementById('dayView').style.display  = 'none';
   document.getElementById('bookForm').style.display = 'block';
   document.getElementById('bookOk').style.display   = 'none';
-  openOverlay('bookOv');
-}
+});
+
+// ── Back to day view from form ──
+document.getElementById('backToDayBtn').addEventListener('click', () => {
+  document.getElementById('dayView').style.display  = 'block';
+  document.getElementById('bookForm').style.display = 'none';
+});
 
 document.getElementById('bookSubmit').addEventListener('click', async () => {
   // Validate all required fields
@@ -443,6 +524,8 @@ document.getElementById('bookSubmit').addEventListener('click', async () => {
 
     document.getElementById('bookForm').style.display = 'none';
     document.getElementById('bookOk').style.display   = 'block';
+    document.getElementById('dayView').style.display  = 'none';
+    document.getElementById('bookAnotherBtn').style.display = 'block';
 
   } catch (err) {
     console.error('[CMC Appt] Submit error:', err);
@@ -576,8 +659,21 @@ document.getElementById('nextYear').addEventListener('click', () => {
 //  BOOT — calendars render immediately, then
 //  Firebase updates them once data arrives
 // ══════════════════════════════════════════════
+// "Book Another" → back to day view refreshed
+document.getElementById('bookAnotherBtn').addEventListener('click', () => {
+  if (!selDate) return;
+  const { y, m, d } = selDate;
+  const key     = dKey(y, m, d);
+  const dayBks  = bookings[key] || [];
+  const booked  = dayBks.map(b => b.time);
+  const isFull  = booked.length >= ALL_TIMES.length;
+  const el      = document.querySelector('.cal-day.selected');
+  if (el) openBooking(y, m, d, el, booked, isFull);
+  else closeOverlay('bookOv');
+});
+
 document.getElementById('yearDisplay').textContent = curYear;
 buildCosmos();
-buildCals(curYear);   // ← render immediately with empty bookings
-buildFooter();        // ← show footer immediately
-listenBookings();     // ← Firebase will refresh both once connected
+buildCals(curYear);   // render immediately with empty bookings
+buildFooter();        // show footer immediately
+listenBookings();     // Firebase refreshes both once connected
