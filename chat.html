@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Let's Chat — CMC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/chat.css"/>
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app":       "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+    }
+  }
+  </script>
+</head>
+<body>
+
+<div id="cosmos"></div>
+
+<!-- TOP NAV -->
+<nav class="chat-topnav">
+  <div class="nav-col-btns">
+    <a href="appointment.html" class="nav-col-btn">📅 Appointment</a>
+    <a href="index.html"       class="nav-col-btn">🏠 Homepage</a>
+  </div>
+  <div class="chat-nav-title">
+    <span class="chat-nav-tag">💬 CMC · Talk</span>
+    <div class="chat-nav-heading">Let's Chat</div>
+  </div>
+  <button class="owner-btn" id="ownerBtn">🔐 Owner</button>
+</nav>
+
+<!-- LAYOUT -->
+<div class="chat-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="chat-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Conversations</div>
+      <input class="sidebar-search" id="sidebarSearch" placeholder="Search by name..."/>
+    </div>
+
+    <!-- Visitor return banner (shown if visitor has existing convo) -->
+    <div class="visitor-return-banner" id="returnBanner">
+      <div class="vrb-label">Welcome back!</div>
+      <div class="vrb-name" id="returnName">—</div>
+      <button class="vrb-btn" id="returnBtn">Continue My Conversation →</button>
+    </div>
+
+    <div class="convo-list" id="convoList">
+      <!-- JS populated -->
+    </div>
+
+    <button class="sidebar-new-btn" id="newConvoBtn">✉️ Start a Conversation</button>
+  </aside>
+
+  <!-- MAIN CHAT AREA -->
+  <main class="chat-main" id="chatMain">
+
+    <!-- Empty state -->
+    <div class="chat-empty" id="chatEmpty">
+      <div class="chat-empty-icon">💬</div>
+      <h3>No conversation selected</h3>
+      <p>Click "Start a Conversation" to reach out, or select one from the left.</p>
+    </div>
+
+    <!-- Active chat (hidden until selected) -->
+    <div id="chatActive" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+
+      <!-- Chat header -->
+      <div class="chat-header" id="chatHeader">
+        <div class="chat-header-info">
+          <div class="chat-header-avatar" id="chatHeaderAvatar">?</div>
+          <div>
+            <div class="chat-header-name" id="chatHeaderName">—</div>
+            <div class="chat-header-sub" id="chatHeaderSub">—</div>
+          </div>
+        </div>
+        <!-- Owner-only actions (hidden for visitors) -->
+        <div class="chat-header-actions" id="ownerActions" style="display:none;">
+          <select class="tag-select" id="tagSelect">
+            <option value="new">🟡 New</option>
+            <option value="read">⚪ Read</option>
+            <option value="replied">🟢 Replied</option>
+            <option value="starred">🟠 Starred</option>
+            <option value="closed">🔴 Closed</option>
+          </select>
+          <button class="chat-action-btn danger" id="deleteConvoBtn">🗑 Delete</button>
+        </div>
+      </div>
+
+      <!-- Messages / confidential -->
+      <div id="chatMessagesWrap" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+        <!-- Visitor sees blurred confidential -->
+        <div class="chat-confidential" id="chatConfidential" style="display:none;">
+          <div class="chat-confidential-inner">
+            <div class="confidential-icon">🔒</div>
+            <div class="confidential-text">Confidential</div>
+            <div class="confidential-sub">Message details are private. You can send a message below and the owner will reply.</div>
+          </div>
+        </div>
+        <!-- Owner sees actual messages -->
+        <div class="chat-messages" id="chatMessages" style="display:none;"></div>
+      </div>
+
+      <!-- Input area -->
+      <div class="chat-input-area" id="chatInputArea">
+        <textarea class="chat-input" id="chatInput" placeholder="Type a message..." rows="1"></textarea>
+        <button class="chat-send-btn" id="chatSendBtn">➤</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- NEW CONVERSATION MODAL -->
+<div class="modal-overlay" id="newConvoModal">
+  <div class="modal">
+    <button class="modal-close" id="newConvoClose">×</button>
+    <div class="modal-tag">💬 New Conversation</div>
+    <h2 class="modal-title">Say <span>Hello!</span></h2>
+    <div class="mf"><label class="ml">Full Name <span class="req">*</span></label><input class="mi" id="ncName" placeholder="e.g. Juan dela Cruz"/></div>
+    <div class="mf"><label class="ml">Email Address <span class="req">*</span></label><input type="email" class="mi" id="ncEmail" placeholder="you@email.com"/></div>
+    <div class="mf"><label class="ml">Phone Number <span class="req">*</span></label><input class="mi" id="ncPhone" placeholder="+63 9XX XXX XXXX"/></div>
+    <div class="mf"><label class="ml">Your Message <span class="req">*</span></label><input class="mi" id="ncMessage" placeholder="What would you like to know?"/></div>
+    <button class="modal-submit" id="ncSubmit">Start Conversation →</button>
+  </div>
+</div>
+
+<!-- OWNER LOGIN MODAL -->
+<div class="modal-overlay" id="ownerLoginModal">
+  <div class="modal" style="max-width:340px;">
+    <button class="modal-close" id="ownerLoginClose">×</button>
+    <div class="modal-tag">🔐 Owner Access</div>
+    <h2 class="modal-title">Enter <span>Password</span></h2>
+    <div class="mf"><label class="ml">Password</label><input type="password" class="mi" id="ownerPass" placeholder="••••••" autocomplete="current-password"/></div>
+    <div class="pin-err" id="pinErr">❌ Incorrect password.</div>
+    <button class="modal-submit" id="ownerLoginSubmit">Unlock →</button>
+  </div>
+</div>
+
+<script type="module" src="js/chat.js"></script>
+</body>
+</html>

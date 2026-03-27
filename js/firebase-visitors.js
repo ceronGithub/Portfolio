@@ -377,12 +377,58 @@ function injectStyles() {
     }
     .vc-appt-btn:hover .vc-appt-arrow { transform: translateX(3px); }
 
+    /* Chat Button */
+    .vc-chat-wrap {
+      margin-top: 6px;
+    }
+    .vc-chat-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, rgba(80,180,255,0.12), rgba(0,200,180,0.08));
+      border: 1px solid rgba(80,180,255,0.3);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: 'Poppins', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    .vc-chat-btn:hover {
+      border-color: rgba(80,200,255,0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0,180,255,0.2);
+    }
+    .vc-chat-icon { font-size: 14px; flex-shrink: 0; }
+    .vc-chat-text {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(100,210,255,0.95);
+      letter-spacing: 0.04em;
+      flex: 1;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
     /* Mobile */
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       #vc-widget {
         bottom: 16px;
-        right: 16px;
-        width: 210px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: 260px;
+        margin-left: auto;
+      }
+    }
+    @media (max-width: 380px) {
+      #vc-widget {
+        right: 8px;
+        left: 8px;
+        max-width: none;
+        width: auto;
       }
     }
   `;
@@ -431,7 +477,16 @@ function buildWidget() {
     <div class="vc-appt-wrap" id="vc-appt-wrap">
       <button class="vc-appt-btn" id="vcApptBtn">
         <span class="vc-appt-icon">📅</span>
-        <span class="vc-appt-text">Make an Appointment</span>
+        <span class="vc-appt-text">Schedule Appointment</span>
+        <span class="vc-appt-arrow">→</span>
+      </button>
+    </div>
+
+    <!-- Chat floating button -->
+    <div class="vc-chat-wrap">
+      <button class="vc-chat-btn" id="vcChatBtn">
+        <span class="vc-chat-icon">💬</span>
+        <span class="vc-chat-text">Let's Chat</span>
         <span class="vc-appt-arrow">→</span>
       </button>
     </div>
@@ -455,8 +510,12 @@ function buildWidget() {
 
   // Appointment button
   document.getElementById('vcApptBtn').addEventListener('click', () => {
-    // window.open('appointment.html', '_blank');
-    window.location.href = 'appointment.html';
+    window.open('appointment.html', '_blank');
+  });
+
+  // Chat button
+  document.getElementById('vcChatBtn').addEventListener('click', () => {
+    window.open('chat.html', '_blank');
   });
 
   return wrap;

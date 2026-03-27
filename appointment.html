@@ -6,6 +6,7 @@
   <title>Schedule an Appointment — CMC</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/appointment.css"/>
+  <link rel="stylesheet" href="css/floating-badge.css"/>
 
   <!-- Firebase importmap so ES modules resolve correctly on any server -->
   <script type="importmap">
@@ -17,13 +18,16 @@
   }
   </script>
 </head>
-<body>
+<body class="page-appointment">
 
   <div id="cosmos"></div>
 
   <!-- HEADER -->
   <header class="page-header">
-    <a href="index.html" class="back-btn">← Back</a>
+    <div class="nav-col-btns">
+      <a href="index.html" class="nav-col-btn">🏠 Homepage</a>
+      <a href="chat.html" class="nav-col-btn">💬 Let's Chat</a>
+    </div>
     <button class="owner-btn" id="ownerBtn">🔐 Owner</button>
     <div class="header-tag">📅 CMC · Appointments</div>
     <h1 class="header-title">Schedule an<br><span>Appointment</span></h1>
@@ -139,6 +143,14 @@
     <div class="footer-track">
       <div class="footer-run" id="footerRun"><span class="f-empty">Loading...</span></div>
     </div>
+  </div>
+
+  <!-- ===== FLOATING BADGE ===== -->
+  <div class="floating-badge">
+    <a href="chat.html" class="fb-btn fb-msg">
+      <div class="fb-btn-icon">💬</div>
+      <span>Let's Talk</span>
+    </a>
   </div>
 
   <script type="module" src="js/appointment.js"></script>
