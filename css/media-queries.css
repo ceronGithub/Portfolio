@@ -47,15 +47,30 @@
     background: rgba(13,13,13,0.97);
     backdrop-filter: blur(20px);
     flex-direction: column;
-    justify-content: center;
-    gap: 2rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0;
     transition: right var(--transition);
     z-index: 999;
     border-left: 1px solid rgba(255,255,255,0.08);
-    padding: 2rem;
+    padding: 5rem 2rem 2rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,106,0,0.4) transparent;
   }
+  .nav-links::-webkit-scrollbar { width: 3px; }
+  .nav-links::-webkit-scrollbar-thumb { background: rgba(255,106,0,0.4); border-radius: 3px; }
   .nav-links.open { right: 0; }
-  .nav-link { font-size: 1.1rem; }
+  .nav-links li { width: 100%; }
+  .nav-link {
+    font-size: 1.1rem;
+    display: block;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    width: 100%;
+  }
+  .nav-links li:last-child .nav-link { border-bottom: none; }
 
   /* Hero */
   .hero-content {
