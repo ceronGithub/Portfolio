@@ -2510,12 +2510,6 @@ section { padding: 7rem 0; }
   margin-bottom: 2.5rem;
 }
 
-/* OLJ — 5th item spans full width */
-.contact-links .contact-item:last-child {
-  grid-column: 1 / -1;
-  max-width: 50%;
-}
-
 .contact-item {
   display: flex;
   align-items: center;
