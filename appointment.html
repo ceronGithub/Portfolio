@@ -51,15 +51,15 @@
       <button class="modal-close" id="bookClose">×</button>
 
       <!-- DAY VIEW: existing appointments + add button -->
-      <div id="dayView">
+      <div id="dayView" style="display:none;">
         <div class="modal-date-label" id="bookDateLbl">Selected Date</div>
         <h2 class="modal-title">📅 <span id="dayViewTitle">Appointments</span></h2>
         <div id="dayApptList"></div>
         <button class="modal-submit" id="showBookFormBtn" style="margin-top:16px;">➕ Add Appointment</button>
       </div>
 
-      <!-- BOOKING FORM (hidden by default) -->
-      <div id="bookForm" style="display:none;">
+      <!-- BOOKING FORM (shown by default) -->
+      <div id="bookForm">
         <button class="back-to-day-btn" id="backToDayBtn">← Back</button>
         <div class="modal-date-label" id="bookDateLbl2"></div>
         <h2 class="modal-title">Book an <span>Appointment</span></h2>
@@ -74,6 +74,7 @@
               <option value="WhatsApp">💬 WhatsApp</option>
               <option value="Messenger">💙 Messenger</option>
               <option value="Telegram">✈️ Telegram</option>
+              <option value="Zoom">🎥 Zoom</option>
               <option value="Skype">🔵 Skype</option>
               <option value="Phone">📞 Phone Number</option>
             </select>
@@ -98,12 +99,15 @@
           </div>
         </div>
         <div class="mf"><label class="ml">Additional Notes <span class="req">*</span></label><textarea class="mta" id="bNotes" placeholder="Any details you'd like me to know beforehand..."></textarea></div>
-        <button class="modal-submit" id="bookSubmit">Confirm Appointment →</button>
+        <button class="modal-submit" id="bookSubmit">📅 Add to Google Calendar</button>
       </div>
       <div class="modal-success" id="bookOk">
         <div class="modal-success-icon">🎉</div>
         <h3>Appointment Booked!</h3>
         <p>Your slot is reserved.<br>I'll reach out via your preferred contact soon.<br><br>Looking forward to connecting!</p>
+        <a id="gcalLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:0.5rem;margin-top:1rem;padding:0.75rem 1.5rem;background:rgba(66,133,244,0.15);border:1px solid rgba(66,133,244,0.4);border-radius:8px;color:#fff;text-decoration:none;font-size:0.85rem;font-family:inherit;font-weight:600;transition:background 0.2s;">
+          📅 Open in Google Calendar
+        </a>
       </div>
 
       <!-- Always-visible footer button -->

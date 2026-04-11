@@ -396,60 +396,11 @@ function openBooking(y, m, d, el, booked, isFull) {
   const dayBks   = bookings[key] || [];
   const dateStr  = `${MONTHS[m]} ${d}, ${y}`;
 
-  // Set date label
+  // Set date labels
   document.getElementById('bookDateLbl').textContent  = `📅 ${dateStr}`;
   document.getElementById('bookDateLbl2').textContent = `📅 ${dateStr}`;
   const titleEl = document.getElementById('dayViewTitle');
   if (titleEl) titleEl.textContent = dateStr;
-
-  // ── Build existing appointments list ──
-  const listEl = document.getElementById('dayApptList');
-  listEl.innerHTML = '';
-
-  if (dayBks.length > 0) {
-    const sorted = [...dayBks].sort(
-      (a, b) => ALL_TIMES.indexOf(a.time) - ALL_TIMES.indexOf(b.time)
-    );
-    sorted.forEach(b => {
-      const item = document.createElement('div');
-      item.className = 'day-appt-item';
-      item.innerHTML = `
-        <div class="day-appt-time">${b.time}</div>
-        <div class="day-appt-info">
-          <span class="day-appt-name">${b.name}</span>
-          <span class="day-appt-topic">${b.topic}</span>
-        </div>`;
-      listEl.appendChild(item);
-    });
-  } else {
-    listEl.innerHTML = '<div class="day-appt-empty">No appointments yet on this date.</div>';
-  }
-
-  // ── Show/hide Add button based on availability ──
-  const addBtn = document.getElementById('showBookFormBtn');
-  if (isFull) {
-    addBtn.textContent = '🔴 Fully Booked';
-    addBtn.disabled = true;
-    addBtn.style.opacity = '0.5';
-  } else {
-    addBtn.textContent = '➕ Add Appointment';
-    addBtn.disabled = false;
-    addBtn.style.opacity = '1';
-  }
-
-  // ── Reset: show day view, hide form & success ──
-  document.getElementById('dayView').style.display    = 'block';
-  document.getElementById('bookForm').style.display   = 'none';
-  document.getElementById('bookOk').style.display     = 'none';
-  document.getElementById('bookAnotherBtn').style.display = 'none';
-  openOverlay('bookOv');
-}
-
-// ── Show booking form when Add button clicked ──
-document.getElementById('showBookFormBtn').addEventListener('click', () => {
-  const key    = dKey(selDate.y, selDate.m, selDate.d);
-  const dayBks = bookings[key] || [];
-  const booked = dayBks.map(b => b.time);
 
   // Populate available time slots
   const sel = document.getElementById('bTime');
@@ -474,9 +425,30 @@ document.getElementById('showBookFormBtn').addEventListener('click', () => {
     e.classList.remove('err');
   });
 
+  // Skip day view — go straight to booking form
+  document.getElementById('dayView').style.display    = 'none';
+  document.getElementById('bookForm').style.display   = isFull ? 'none' : 'block';
+  document.getElementById('bookOk').style.display     = 'none';
+  document.getElementById('bookAnotherBtn').style.display = 'none';
+
+  // If fully booked show a message instead
+  if (isFull) {
+    document.getElementById('dayView').style.display = 'block';
+    const listEl = document.getElementById('dayApptList');
+    listEl.innerHTML = '<div class="day-appt-empty">🔴 This date is fully booked.</div>';
+    const addBtn = document.getElementById('showBookFormBtn');
+    addBtn.textContent = '🔴 Fully Booked';
+    addBtn.disabled = true;
+    addBtn.style.opacity = '0.5';
+  }
+
+  openOverlay('bookOv');
+}
+
+// ── Show booking form when Add button clicked (fully-booked fallback) ──
+document.getElementById('showBookFormBtn').addEventListener('click', () => {
   document.getElementById('dayView').style.display  = 'none';
   document.getElementById('bookForm').style.display = 'block';
-  document.getElementById('bookOk').style.display   = 'none';
 });
 
 // ── Back to day view from form ──
@@ -509,30 +481,91 @@ document.getElementById('bookSubmit').addEventListener('click', async () => {
   btn.disabled    = true;
   btn.textContent = 'Booking...';
 
+  // Grab form values
+  const bookerName  = document.getElementById('bName').value.trim();
+  const bookerEmail = document.getElementById('bEmail').value.trim();
+  const method      = document.getElementById('bMethod').value;
+  const contact     = document.getElementById('bContact').value.trim();
+  const time        = document.getElementById('bTime').value;
+  const topic       = document.getElementById('bTopic').value;
+  const notes       = document.getElementById('bNotes').value.trim();
+
   try {
     await addDoc(collection(db, COL), {
       date:     dKey(selDate.y, selDate.m, selDate.d),
-      name:     document.getElementById('bName').value.trim(),
-      email:    document.getElementById('bEmail').value.trim(),
-      method:   document.getElementById('bMethod').value,
-      contact:  document.getElementById('bContact').value.trim(),
-      time:     document.getElementById('bTime').value,
-      topic:    document.getElementById('bTopic').value,
-      notes:    document.getElementById('bNotes').value.trim(),
+      name:     bookerName,
+      email:    bookerEmail,
+      method,
+      contact,
+      time,
+      topic,
+      notes,
       bookedAt: new Date().toISOString()
     });
 
+    // ── Build Google Calendar URL ──────────────────────
+    function gcalDateTime(y, m, d, timeStr) {
+      // Parse "10:00 AM" → hours/minutes
+      const [hhmm, ampm] = timeStr.split(' ');
+      let [hh, mm] = hhmm.split(':').map(Number);
+      if (ampm === 'PM' && hh !== 12) hh += 12;
+      if (ampm === 'AM' && hh === 12) hh = 0;
+      const pad = n => String(n).padStart(2, '0');
+      const mo  = pad(m + 1);
+      const dd  = pad(d);
+      const start = `${y}${mo}${dd}T${pad(hh)}${pad(mm)}00`;
+      // End = start + 1 hour
+      const endHh = (hh + 1) % 24;
+      const end   = `${y}${mo}${dd}T${pad(endHh)}${pad(mm)}00`;
+      return { start, end };
+    }
+
+    const { start, end } = gcalDateTime(selDate.y, selDate.m, selDate.d, time);
+    const eventTitle   = encodeURIComponent(`Appointment with Ceron Matthew — ${topic}`);
+    const eventDetails = encodeURIComponent(
+      `Booker: ${bookerName}\nEmail: ${bookerEmail}\nContact via ${method}: ${contact}\nNotes: ${notes}`
+    );
+    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${start}/${end}&details=${eventDetails}`;
+
+    // Set the dynamic link on the success screen
+    const gcalLink = document.getElementById('gcalLink');
+    if (gcalLink) gcalLink.href = gcalUrl;
+
+    // Auto-open Google Calendar in new tab
+    window.open(gcalUrl, '_blank');
+
+    // ── Show success screen ────────────────────────────
     document.getElementById('bookForm').style.display = 'none';
     document.getElementById('bookOk').style.display   = 'block';
     document.getElementById('dayView').style.display  = 'none';
     document.getElementById('bookAnotherBtn').style.display = 'block';
+
+    // ── Highlight the booked date on the calendar ──────
+    if (selDate) {
+      document.querySelectorAll('.cal-day').forEach(cell => {
+        const num = cell.querySelector('.cal-day-num');
+        if (num && parseInt(num.textContent) === selDate.d) {
+          const card = cell.closest('.cal-card');
+          if (card) {
+            const monthCards = Array.from(document.querySelectorAll('.cal-card'));
+            if (monthCards.indexOf(card) === selDate.m) {
+              cell.classList.add('just-booked');
+              cell.classList.add('has-booking');
+            }
+          }
+        }
+      });
+    }
+
+    // ── Update footer ticker immediately ───────────────
+    buildFooter();
 
   } catch (err) {
     console.error('[CMC Appt] Submit error:', err);
     alert('Booking failed: ' + (err.message || 'Please try again.'));
   } finally {
     btn.disabled    = false;
-    btn.textContent = 'Confirm Appointment →';
+    btn.textContent = '📅 Add to Google Calendar';
   }
 });
 
