@@ -589,6 +589,24 @@ function openOwnerView(y, m, d) {
     list.innerHTML = '<div class="appt-empty">No appointments on this date.</div>';
   } else {
     sorted.forEach(b => {
+      // Build Google Calendar search URL for this event
+      function gcalDateStr(dateKey, timeStr) {
+        const [yr, mo, dy] = dateKey.split('-');
+        const [hhmm, ampm] = timeStr.split(' ');
+        let [hh, mm] = hhmm.split(':').map(Number);
+        if (ampm === 'PM' && hh !== 12) hh += 12;
+        if (ampm === 'AM' && hh === 12) hh = 0;
+        const pad = n => String(n).padStart(2, '0');
+        const start = `${yr}${mo}${dy}T${pad(hh)}${pad(mm)}00`;
+        const endHh  = (hh + 1) % 24;
+        const end    = `${yr}${mo}${dy}T${pad(endHh)}${pad(mm)}00`;
+        return { start, end };
+      }
+      const dateKey  = dKey(y, m, d);
+      const { start, end } = gcalDateStr(dateKey, b.time);
+      const gcalSearchUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent('Appointment with Ceron Matthew')}`;
+      const gcalEventUrl  = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`Appointment with Ceron Matthew — ${b.topic}`)}&dates=${start}/${end}`;
+
       const card = document.createElement('div');
       card.className = 'appt-card';
       card.innerHTML = `
@@ -600,16 +618,40 @@ function openOwnerView(y, m, d) {
         <div class="appt-row"><span class="appt-lbl">Contact</span><span class="appt-val">${b.method}: ${b.contact}</span></div>
         <div class="appt-row"><span class="appt-lbl">Topic</span><span class="appt-val">${b.topic}</span></div>
         <div class="appt-row"><span class="appt-lbl">Notes</span><span class="appt-val">${b.notes}</span></div>
-        <button class="del-btn" data-id="${b.id}" data-y="${y}" data-m="${m}" data-d="${d}">🗑 Remove</button>`;
+        <div class="appt-actions">
+          <button class="del-btn" data-id="${b.id}" data-y="${y}" data-m="${m}" data-d="${d}" data-gcal="${gcalSearchUrl}">🗑 Remove</button>
+        </div>
+        <div class="gcal-remove-hint" id="gcal-hint-${b.id}" style="display:none;margin-top:0.6rem;padding:0.6rem 0.75rem;background:rgba(66,133,244,0.1);border:1px solid rgba(66,133,244,0.3);border-radius:8px;font-size:0.78rem;line-height:1.6;">
+          ✅ Removed from portfolio.<br>
+          <a href="${gcalSearchUrl}" target="_blank" style="color:#4fc3f7;font-weight:600;text-decoration:none;">📅 Open Google Calendar to delete the event →</a>
+        </div>`;
       list.appendChild(card);
     });
 
     list.querySelectorAll('.del-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Remove this appointment?')) return;
+        if (!confirm('Remove this appointment? You\'ll also be prompted to delete it from Google Calendar.')) return;
         try {
-          await deleteDoc(doc(db, COL, btn.dataset.id));
-          openOwnerView(+btn.dataset.y, +btn.dataset.m, +btn.dataset.d);
+          const id = btn.dataset.id;
+          await deleteDoc(doc(db, COL, id));
+
+          // Show the Google Calendar removal hint instead of refreshing
+          btn.disabled = true;
+          btn.textContent = '✅ Removed';
+          btn.style.opacity = '0.5';
+          const hint = document.getElementById(`gcal-hint-${id}`);
+          if (hint) hint.style.display = 'block';
+
+          // Auto-open Google Calendar after short delay
+          setTimeout(() => {
+            window.open(btn.dataset.gcal, '_blank');
+          }, 600);
+
+          // Refresh owner view after 2s
+          setTimeout(() => {
+            openOwnerView(+btn.dataset.y, +btn.dataset.m, +btn.dataset.d);
+          }, 2000);
+
         } catch (err) {
           alert('Delete failed: ' + err.message);
         }
