@@ -300,7 +300,7 @@ if (toolsSection) {
     curr = Math.max(1, Math.min(n, TOTAL));
     const pad = String(curr).padStart(2, '0');
     img.style.opacity = '0';
-    img.src = `resume_previews/page-${pad}.jpg`;
+    img.src = `resume_previews/ENHANCE CURRICULUM VITAE_${pad}.jpg`;
     img.alt = `Resume Page ${curr}`;
     img.onload = () => { img.style.opacity = '1'; };
     if (pageNum) pageNum.textContent = curr;
