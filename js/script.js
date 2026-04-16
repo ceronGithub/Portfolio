@@ -291,7 +291,7 @@ if (toolsSection) {
   const prevBtn = document.getElementById('prevPage');
   const nextBtn = document.getElementById('nextPage');
   const pageNum = document.getElementById('pageNum');
-  const TOTAL   = 11;
+  const TOTAL   = 6;
   let   curr    = 1;
 
   if (!img) return;
