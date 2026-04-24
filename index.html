@@ -1,1438 +1,2394 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ceron Matthew Calsena | VA + Developer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/media-queries.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ceron Matthew Calsena | VA + Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/media-queries.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  </head>
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-logo">
+        <span class="logo-bracket">&lt;</span
+        ><span id="logoTyped" class="logo-typed">CMC</span
+        ><span class="logo-bracket">/&gt;</span>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#hero" class="nav-link">Home</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#skills" class="nav-link">Skills</a></li>
+        <li><a href="#projects" class="nav-link">Projects</a></li>
+        <li><a href="#games" class="nav-link">Games</a></li>
+        <li><a href="#experience" class="nav-link">Experience</a></li>
+        <li><a href="#certifications" class="nav-link">Certifications</a></li>
+        <li><a href="#comments" class="nav-link">Reviews</a></li>
+        <li><a href="#resume" class="nav-link">Resume</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
 
-  <!-- ===== NAVBAR ===== -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-logo">
-      <span class="logo-bracket">&lt;</span><span id="logoTyped" class="logo-typed">CMC</span><span class="logo-bracket">/&gt;</span>
-    </div>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#hero" class="nav-link">Home</a></li>
-      <li><a href="#about" class="nav-link">About</a></li>
-      <li><a href="#skills" class="nav-link">Skills</a></li>
-      <li><a href="#projects" class="nav-link">Projects</a></li>
-      <li><a href="#games" class="nav-link">Games</a></li>
-      <li><a href="#experience" class="nav-link">Experience</a></li>
-      <li><a href="#certifications" class="nav-link">Certifications</a></li>
-      <li><a href="#comments" class="nav-link">Reviews</a></li>
-      <li><a href="#resume" class="nav-link">Resume</a></li>
-      <li><a href="#contact" class="nav-link">Contact</a></li>
-    </ul>
-    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero" id="hero">
+      <div class="parallax-layer layer-bg" id="layerBg"></div>
+      <div class="parallax-layer layer-grid" id="layerGrid"></div>
+      <div class="parallax-layer layer-orbs" id="layerOrbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+      </div>
 
-  <!-- ===== HERO SECTION ===== -->
-  <section class="hero" id="hero">
-    <div class="parallax-layer layer-bg" id="layerBg"></div>
-    <div class="parallax-layer layer-grid" id="layerGrid"></div>
-    <div class="parallax-layer layer-orbs" id="layerOrbs">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-    </div>
-
-    <div class="hero-content">
-      <div class="profile-wrapper" id="layerFg">
-        <div class="profile-ring">
-          <div class="profile-img-wrap">
-            <img src="images/profile.jpg" alt="Ceron Matthew Calsena" class="profile-img"
-              onerror="this.style.display='none';document.querySelector('.profile-placeholder').style.display='flex'"/>
-            <div class="profile-placeholder">CMC</div>
+      <div class="hero-content">
+        <div class="profile-wrapper" id="layerFg">
+          <div class="profile-ring">
+            <div class="profile-img-wrap">
+              <img
+                src="images/profile.jpg"
+                alt="Ceron Matthew Calsena"
+                class="profile-img"
+                onerror="
+                  this.style.display = 'none';
+                  document.querySelector('.profile-placeholder').style.display =
+                    'flex';
+                "
+              />
+              <div class="profile-placeholder">CMC</div>
+            </div>
+          </div>
+          <div class="status-badge">
+            <span class="status-dot"></span> Available for Work
           </div>
         </div>
-        <div class="status-badge">
-          <span class="status-dot"></span> Available for Work
-        </div>
-      </div>
 
-      <div class="hero-text">
-        <p class="hero-greeting">Hello, I'm</p>
-        <h1 class="hero-name">
-          Ceron Matthew<br>
-          <span class="name-highlight">Calsena</span>
-        </h1>
-        <div class="hero-roles">
-          <span class="role-prefix">I'm a </span>
-          <span class="typed-text" id="typedText"></span>
-          <span class="cursor-blink">|</span>
-        </div>
-        <p class="hero-tagline">"You Lead. <span class="tagline-accent">I Handle the Rest.</span>"</p>
-        <div class="hero-cta">
-          <a href="#projects" class="btn btn-primary">
-            <span>View My Work</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <a href="#contact" class="btn btn-outline">Get In Touch</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-scroll-hint">
-      <span>Scroll Down</span>
-      <div class="scroll-line"></div>
-    </div>
-  </section>
-
-  <!-- ===== ABOUT SECTION ===== -->
-  <section class="about" id="about">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME </span></span></span>
-        <h2 class="section-title">Who I Am</h2>
-      </div>
-      <div class="about-grid">
-        <div class="about-text reveal">
-          <p class="about-lead">
-            A versatile <span class="text-accent">PHP Developer</span>, <span class="text-accent">Automation &amp; AI Workflow Specialist</span>, and <span class="text-accent">VA Assistant</span> based in the Philippines.
+        <div class="hero-text">
+          <p class="hero-greeting">Hello, I'm</p>
+          <h1 class="hero-name">
+            Ceron Matthew<br />
+            <span class="name-highlight">Calsena</span>
+          </h1>
+          <div class="hero-roles">
+            <span class="role-prefix">I'm a </span>
+            <span class="typed-text" id="typedText"></span>
+            <span class="cursor-blink">|</span>
+          </div>
+          <p class="hero-tagline">
+            "You Lead. <span class="tagline-accent">I Handle the Rest.</span>"
           </p>
-          <p class="about-body">
-            With a Bachelor's in Computer Science from De La Salle University Dasmariñas and hands-on experience across Laravel, .NET, HTML/CSS/JS, and AI tools — I bridge the gap between technical execution and business productivity.
-          </p>
-          <p class="about-body">
-            My mission: <em>to empower businesses through efficient virtual assistance, innovative automation solutions, and precise data-driven insights</em> — so you can focus on what truly matters.
-          </p>
-          <div class="about-stats">
-            <div class="stat-item">
-              <span class="stat-number">6+</span>
-              <span class="stat-label">Years Exp.</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">10+</span>
-              <span class="stat-label">Projects Built</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">5+</span>
-              <span class="stat-label">Certifications</span>
-            </div>
-          </div>
-        </div>
-        <div class="about-cards reveal">
-          <div class="info-card">
-            <div class="info-icon">🎓</div>
-            <div>
-              <h4>Education</h4>
-              <p>BS Computer Science<br><em>DLSU-D, 2018</em></p>
-            </div>
-          </div>
-          <div class="info-card">
-            <div class="info-icon">💼</div>
-            <div>
-              <h4>Latest Role</h4>
-              <!-- <p>Web App Developer<br><em>Archivil-Plan / Streetwise PH / Freelance</em></p> -->
-              <p>Currently developing a self-project</p>
-            </div>
-          </div>
-          <div class="info-card">
-            <div class="info-icon">📍</div>
-            <div>
-              <h4>Location</h4>
-              <p>Gen. Trias, Cavite<br><em>Philippines</em></p>
-            </div>
-          </div>
-          <div class="info-card">
-            <div class="info-icon">⚡</div>
-            <div>
-              <h4>Specialty</h4>
-              <p>VA + Dev + AI Automation<br><em>End-to-end solutions</em></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== SKILLS SECTION ===== -->
-  <section class="skills" id="skills">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">SKILLS · SKILLS · SKILLS · SKILLS · SKILLS · SKILLS · SKILLS </span></span></span>
-        <h2 class="section-title">What I Do</h2>
-      </div>
-      <!-- Row 1: Technical + VA -->
-      <div class="skills-grid">
-        <div class="skills-column reveal">
-          <h3 class="skills-col-title">Technical Skills</h3>
-          <div class="skill-bars">
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>PHP / Laravel</span><span class="skill-pct">85%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="85"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>HTML / CSS / JS</span><span class="skill-pct">90%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="90"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>C# / .NET</span><span class="skill-pct">75%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="75"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>MySQL / MariaDB</span><span class="skill-pct">80%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Supabase</span><span class="skill-pct">78%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="78"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Firebase</span><span class="skill-pct">75%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="75"></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="skills-column reveal">
-          <h3 class="skills-col-title">VA &amp; Productivity</h3>
-          <div class="skill-bars">
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>General Support</span><span class="skill-pct">80%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Executive Support</span><span class="skill-pct">70%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="70"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Microsoft Office 365</span><span class="skill-pct">90%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="90"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Asana</span><span class="skill-pct">85%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="85"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Data Analysis</span><span class="skill-pct">82%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="82"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Digital Marketing</span><span class="skill-pct">78%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="78"></div></div>
-            </div>
+          <div class="hero-cta">
+            <a href="#projects" class="btn btn-primary">
+              <span>View My Work</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a href="#contact" class="btn btn-outline">Get In Touch</a>
           </div>
         </div>
       </div>
 
-      <!-- Row 2: AI Automation + AI Video -->
-      <div class="skills-grid skills-grid-row2">
-        <div class="skills-column reveal">
-          <h3 class="skills-col-title">
-            <span class="col-icon">🤖</span> AI Automation
-          </h3>
-          <div class="skill-bars">
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Claude AI</span><span class="skill-pct">90%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="90"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>ChatGPT</span><span class="skill-pct">80%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Gemini</span><span class="skill-pct">80%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Lovable</span><span class="skill-pct">70%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="70"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Kimi</span><span class="skill-pct">75%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="75"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Replit</span><span class="skill-pct">70%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="70"></div></div>
-            </div>
-          </div>
+      <div class="hero-scroll-hint">
+        <span>Scroll Down</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT SECTION ===== -->
+    <section class="about" id="about">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME · ABOUT ME
+                · ABOUT ME
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">Who I Am</h2>
         </div>
-        <div class="skills-column reveal">
-          <h3 class="skills-col-title">
-            <span class="col-icon">🎬</span> AI Video &amp; Animation
-          </h3>
-          <div class="skill-bars">
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>ElevenLabs</span><span class="skill-pct">80%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Suno</span><span class="skill-pct">80%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="80"></div></div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-info"><span>Hailuo AI</span><span class="skill-pct">78%</span></div>
-              <div class="skill-track"><div class="skill-fill" data-width="78"></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Row 3: Web Hosting (full width) -->
-      <div class="skills-grid-single reveal">
-        <h3 class="skills-col-title">
-          <span class="col-icon">🌐</span> Web Hosting &amp; Deployment
-        </h3>
-        <div class="hosting-bars">
-          <div class="skill-bar-item">
-            <div class="skill-info"><span>Netlify</span><span class="skill-pct">90%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-width="90"></div></div>
-          </div>
-          <div class="skill-bar-item">
-            <div class="skill-info"><span>GitHub Pages</span><span class="skill-pct">85%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-width="85"></div></div>
-          </div>
-          <div class="skill-bar-item">
-            <div class="skill-info"><span>Render</span><span class="skill-pct">78%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-width="78"></div></div>
-          </div>
-          <div class="skill-bar-item">
-            <div class="skill-info"><span>InfinityFree</span><span class="skill-pct">70%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-width="70"></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="tools-section reveal">
-        <h3 class="skills-col-title" style="text-align:center;margin-bottom:1.5rem;">Tools &amp; Platforms</h3>
-        <div class="tools-tags">
-          <span class="tool-tag">Laravel</span><span class="tool-tag">PHP</span>
-          <span class="tool-tag">HTML5</span><span class="tool-tag">CSS3</span>
-          <span class="tool-tag">JavaScript</span><span class="tool-tag">C# .NET</span>
-          <span class="tool-tag">MySQL</span><span class="tool-tag">Firebase</span>
-          <span class="tool-tag">Supabase</span><span class="tool-tag">Bootstrap</span>
-          <span class="tool-tag">Claude AI</span><span class="tool-tag">ChatGPT</span>
-          <span class="tool-tag">Gemini</span><span class="tool-tag">Lovable</span>
-          <span class="tool-tag">Kimi</span><span class="tool-tag">Replit</span>
-          <span class="tool-tag">ElevenLabs</span><span class="tool-tag">Suno</span>
-          <span class="tool-tag">Hailuo AI</span><span class="tool-tag">Netlify</span>
-          <span class="tool-tag">GitHub Pages</span><span class="tool-tag">Render</span>
-          <span class="tool-tag">InfinityFree</span><span class="tool-tag">Asana</span>
-          <span class="tool-tag">Git / GitHub</span><span class="tool-tag">Canva</span>
-          <span class="tool-tag">EmailJS</span><span class="tool-tag">VS Code</span>
-          <span class="tool-tag">Node.js</span><span class="tool-tag">MongoDB Atlas</span>
-          <span class="tool-tag">PayMongo</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== PROJECTS SECTION ===== -->
-  <section class="projects" id="projects">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">PROJECTS · PROJECTS · PROJECTS · PROJECTS · PROJECTS · PROJECTS · PROJECTS </span></span></span>
-        <h2 class="section-title">Featured Work</h2>
-        <p class="projects-subtitle">Every project here was built to solve a real problem — for clients and for myself. Details on client work are kept confidential, but if you have a similar challenge, I'd love to build the solution for you.</p>
-      </div>
-
-      <!-- Filter Tabs -->
-      <div class="filter-tabs reveal">
-        <button class="filter-btn active" data-filter="all">
-          <span>All</span>
-          <span class="filter-count" id="count-all">11</span>
-        </button>
-        <button class="filter-btn" data-filter="client">
-          <span>Client Work</span>
-          <span class="filter-count" id="count-client">6</span>
-        </button>
-        <button class="filter-btn" data-filter="personal">
-          <span>Personal</span>
-          <span class="filter-count" id="count-personal">5</span>
-        </button>
-      </div>
-
-      <div class="projects-grid" id="projectsGrid">
-
-        <!-- Project 1: StreetWisePH — Mar 17, 2026 – Present -->
-        <article class="project-card reveal" data-category="client">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ffd000;">
-              <span class="project-icon">🛍️</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🌐</div>
-              <span class="nda-overlay-text">Live — View Only</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span><span class="ptag">Firebase</span><span class="ptag">Netlify</span>
+        <div class="about-grid">
+          <div class="about-text reveal">
+            <p class="about-lead">
+              A versatile <span class="text-accent">PHP Developer</span>,
+              <span class="text-accent"
+                >Automation &amp; AI Workflow Specialist</span
+              >, and <span class="text-accent">VA Assistant</span> based in the
+              Philippines.
+            </p>
+            <p class="about-body">
+              With a Bachelor's in Computer Science from De La Salle University
+              Dasmariñas and hands-on experience across Laravel, .NET,
+              HTML/CSS/JS, and AI tools — I bridge the gap between technical
+              execution and business productivity.
+            </p>
+            <p class="about-body">
+              My mission:
+              <em
+                >to empower businesses through efficient virtual assistance,
+                innovative automation solutions, and precise data-driven
+                insights</em
+              >
+              — so you can focus on what truly matters.
+            </p>
+            <div class="about-stats">
+              <div class="stat-item">
+                <span class="stat-number">6+</span>
+                <span class="stat-label">Years Exp.</span>
               </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                <span class="ongoing-badge">🔄 Ongoing checking of owner</span>
-                <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+              <div class="stat-item">
+                <span class="stat-number">10+</span>
+                <span class="stat-label">Projects Built</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">5+</span>
+                <span class="stat-label">Certifications</span>
               </div>
             </div>
-            <h3 class="project-title">StreetWise PH</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 17, 2026 – Present</span>
-              <span class="meta-item">💼 Freelance</span>
-              <span class="meta-item">🏢 Miguelito</span>
+          </div>
+          <div class="about-cards reveal">
+            <div class="info-card">
+              <div class="info-icon">🎓</div>
+              <div>
+                <h4>Education</h4>
+                <p>BS Computer Science<br /><em>DLSU-D, 2018</em></p>
+              </div>
             </div>
-            <p class="project-desc">Running a retail business on paper is a recipe for errors and lost sales. I built a <strong>digital operations system for StreetWise PH</strong> — a clothing &amp; vape retail store — that automates inventory tracking, monitors stock levels in real time, and records every transaction digitally. Sales analysis features give the owner clear visibility into performance trends, helping them make smarter business decisions every day.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Perfect for:</span> Small retail businesses still relying on handwritten records who want to go digital, reduce errors, and understand their sales data.
+            <div class="info-card">
+              <div class="info-icon">💼</div>
+              <div>
+                <h4>Latest Role</h4>
+                <!-- <p>Web App Developer<br><em>Archivil-Plan / Streetwise PH / Freelance</em></p> -->
+                <p>Currently developing a self-project</p>
+              </div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:0.75rem;">
-              <a href="https://streetwise-ph.netlify.app/" target="_blank" class="btn-request-access" style="border-color:rgba(255,208,0,0.4);color:var(--yellow);">
-                <span class="lock-icon">🌐</span>
-                View Live Site
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </a>
-              <p style="font-size:0.72rem;color:rgba(255,255,255,0.35);font-style:italic;line-height:1.6;">
-                ⚠️ This project is currently undergoing an Owner Verification Check to ensure security and compliance — shared on portfolio with owner's permission.
+            <div class="info-card">
+              <div class="info-icon">📍</div>
+              <div>
+                <h4>Location</h4>
+                <p>Gen. Trias, Cavite<br /><em>Philippines</em></p>
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="info-icon">⚡</div>
+              <div>
+                <h4>Specialty</h4>
+                <p>
+                  VA + Dev + AI Automation<br /><em>End-to-end solutions</em>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SKILLS SECTION ===== -->
+    <section class="skills" id="skills">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >SKILLS · SKILLS · SKILLS · SKILLS · SKILLS · SKILLS · SKILLS
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">What I Do</h2>
+        </div>
+        <!-- Row 1: Technical + VA -->
+        <div class="skills-grid">
+          <div class="skills-column reveal">
+            <h3 class="skills-col-title">Technical Skills</h3>
+            <div class="skill-bars">
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>PHP / Laravel</span><span class="skill-pct">85%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="85"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>HTML / CSS / JS</span><span class="skill-pct">90%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="90"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>C# / .NET</span><span class="skill-pct">75%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="75"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>MySQL / MariaDB</span><span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="80"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Supabase</span><span class="skill-pct">78%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="78"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Firebase</span><span class="skill-pct">75%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="75"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="skills-column reveal">
+            <h3 class="skills-col-title">VA &amp; Productivity</h3>
+            <div class="skill-bars">
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>General Support</span><span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="80"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Executive Support</span
+                  ><span class="skill-pct">70%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="70"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Microsoft Office 365</span
+                  ><span class="skill-pct">90%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="90"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Asana</span><span class="skill-pct">85%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="85"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Data Analysis</span><span class="skill-pct">82%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="82"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Digital Marketing</span
+                  ><span class="skill-pct">78%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="78"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: AI Automation + AI Video -->
+        <div class="skills-grid skills-grid-row2">
+          <div class="skills-column reveal">
+            <h3 class="skills-col-title">
+              <span class="col-icon">🤖</span> AI Automation
+            </h3>
+            <div class="skill-bars">
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Claude AI</span><span class="skill-pct">90%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="90"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>ChatGPT</span><span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="80"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Gemini</span><span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="80"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Lovable</span><span class="skill-pct">70%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="70"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Kimi</span><span class="skill-pct">75%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="75"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Replit</span><span class="skill-pct">70%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="70"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="skills-column reveal">
+            <h3 class="skills-col-title">
+              <span class="col-icon">🎬</span> AI Video &amp; Animation
+            </h3>
+            <div class="skill-bars">
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>ElevenLabs</span><span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="80"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Suno</span><span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="80"></div>
+                </div>
+              </div>
+              <div class="skill-bar-item">
+                <div class="skill-info">
+                  <span>Hailuo AI</span><span class="skill-pct">78%</span>
+                </div>
+                <div class="skill-track">
+                  <div class="skill-fill" data-width="78"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Web Hosting (full width) -->
+        <div class="skills-grid-single reveal">
+          <h3 class="skills-col-title">
+            <span class="col-icon">🌐</span> Web Hosting &amp; Deployment
+          </h3>
+          <div class="hosting-bars">
+            <div class="skill-bar-item">
+              <div class="skill-info">
+                <span>Netlify</span><span class="skill-pct">90%</span>
+              </div>
+              <div class="skill-track">
+                <div class="skill-fill" data-width="90"></div>
+              </div>
+            </div>
+            <div class="skill-bar-item">
+              <div class="skill-info">
+                <span>GitHub Pages</span><span class="skill-pct">85%</span>
+              </div>
+              <div class="skill-track">
+                <div class="skill-fill" data-width="85"></div>
+              </div>
+            </div>
+            <div class="skill-bar-item">
+              <div class="skill-info">
+                <span>Render</span><span class="skill-pct">78%</span>
+              </div>
+              <div class="skill-track">
+                <div class="skill-fill" data-width="78"></div>
+              </div>
+            </div>
+            <div class="skill-bar-item">
+              <div class="skill-info">
+                <span>InfinityFree</span><span class="skill-pct">70%</span>
+              </div>
+              <div class="skill-track">
+                <div class="skill-fill" data-width="70"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tools-section reveal">
+          <h3
+            class="skills-col-title"
+            style="text-align: center; margin-bottom: 1.5rem"
+          >
+            Tools &amp; Platforms
+          </h3>
+          <div class="tools-tags">
+            <span class="tool-tag">Laravel</span
+            ><span class="tool-tag">PHP</span>
+            <span class="tool-tag">HTML5</span
+            ><span class="tool-tag">CSS3</span>
+            <span class="tool-tag">JavaScript</span
+            ><span class="tool-tag">C# .NET</span>
+            <span class="tool-tag">MySQL</span
+            ><span class="tool-tag">Firebase</span>
+            <span class="tool-tag">Supabase</span
+            ><span class="tool-tag">Bootstrap</span>
+            <span class="tool-tag">Claude AI</span
+            ><span class="tool-tag">ChatGPT</span>
+            <span class="tool-tag">Gemini</span
+            ><span class="tool-tag">Lovable</span>
+            <span class="tool-tag">Kimi</span
+            ><span class="tool-tag">Replit</span>
+            <span class="tool-tag">ElevenLabs</span
+            ><span class="tool-tag">Suno</span>
+            <span class="tool-tag">Hailuo AI</span
+            ><span class="tool-tag">Netlify</span>
+            <span class="tool-tag">GitHub Pages</span
+            ><span class="tool-tag">Render</span>
+            <span class="tool-tag">InfinityFree</span
+            ><span class="tool-tag">Asana</span>
+            <span class="tool-tag">Git / GitHub</span
+            ><span class="tool-tag">Canva</span>
+            <span class="tool-tag">EmailJS</span
+            ><span class="tool-tag">VS Code</span>
+            <span class="tool-tag">Node.js</span
+            ><span class="tool-tag">MongoDB Atlas</span>
+            <span class="tool-tag">PayMongo</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROJECTS SECTION ===== -->
+    <section class="projects" id="projects">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >PROJECTS · PROJECTS · PROJECTS · PROJECTS · PROJECTS · PROJECTS
+                · PROJECTS
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">Featured Work</h2>
+          <p class="projects-subtitle">
+            Every project here was built to solve a real problem — for clients
+            and for myself. Details on client work are kept confidential, but if
+            you have a similar challenge, I'd love to build the solution for
+            you.
+          </p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs reveal">
+          <button class="filter-btn active" data-filter="all">
+            <span>All</span>
+            <span class="filter-count" id="count-all">11</span>
+          </button>
+          <button class="filter-btn" data-filter="client">
+            <span>Client Work</span>
+            <span class="filter-count" id="count-client">6</span>
+          </button>
+          <button class="filter-btn" data-filter="personal">
+            <span>Personal</span>
+            <span class="filter-count" id="count-personal">5</span>
+          </button>
+        </div>
+
+        <div class="projects-grid" id="projectsGrid">
+          <!-- Project 1: StreetWisePH — Mar 17, 2026 – Present -->
+          <article class="project-card reveal" data-category="client">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ffd000"
+              >
+                <span class="project-icon">🛍️</span>
+              </div>
+              <div class="project-nda-overlay">
+                <div class="nda-lock-icon">🌐</div>
+                <span class="nda-overlay-text">Live — View Only</span>
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span
+                  ><span class="ptag">Firebase</span
+                  ><span class="ptag">Netlify</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    gap: 0.5rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <span class="ongoing-badge"
+                    >🔄 Ongoing checking of owner</span
+                  >
+                  <span class="nda-badge"
+                    ><span class="nda-lock">🔒</span> NDA</span
+                  >
+                </div>
+              </div>
+              <h3 class="project-title">StreetWise PH</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 17, 2026 – Present</span>
+                <span class="meta-item">💼 Freelance</span>
+                <span class="meta-item">🏢 Miguelito</span>
+              </div>
+              <p class="project-desc">
+                Running a retail business on paper is a recipe for errors and
+                lost sales. I built a
+                <strong>digital operations system for StreetWise PH</strong> — a
+                clothing &amp; vape retail store — that automates inventory
+                tracking, monitors stock levels in real time, and records every
+                transaction digitally. Sales analysis features give the owner
+                clear visibility into performance trends, helping them make
+                smarter business decisions every day.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Perfect for:</span> Small retail
+                businesses still relying on handwritten records who want to go
+                digital, reduce errors, and understand their sales data.
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem">
+                <a
+                  href="https://streetwise-ph.netlify.app/"
+                  target="_blank"
+                  class="btn-request-access"
+                  style="
+                    border-color: rgba(255, 208, 0, 0.4);
+                    color: var(--yellow);
+                  "
+                >
+                  <span class="lock-icon">🌐</span>
+                  View Live Site
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </a>
+                <p
+                  style="
+                    font-size: 0.72rem;
+                    color: rgba(255, 255, 255, 0.35);
+                    font-style: italic;
+                    line-height: 1.6;
+                  "
+                >
+                  ⚠️ This project is currently undergoing an Owner Verification
+                  Check to ensure security and compliance — shared on portfolio
+                  with owner's permission.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 2: Archivil-Plan — Mar 15, 2026 – Present -->
+          <article class="project-card reveal" data-category="client">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">🏗️</span>
+              </div>
+              <div class="project-nda-overlay">
+                <div class="nda-lock-icon">🔒</div>
+                <span class="nda-overlay-text">Client Project</span>
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span
+                  ><span class="ptag">Claude AI</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="ongoing-badge">🔄 Ongoing, But On Hold</span>
+                  <span class="nda-badge"
+                    ><span class="nda-lock">🔒</span> NDA</span
+                  >
+                </div>
+              </div>
+              <h3 class="project-title">Archivil-Plan</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 15, 2026 – Present</span>
+                <span class="meta-item">💼 Freelance</span>
+                <span class="meta-item">🏢 Civil And Archi A.</span>
+              </div>
+              <p class="project-desc">
+                Construction estimation still done manually with a ruler and a
+                spreadsheet? I built a web tool that lets you
+                <strong
+                  >upload a floor plan image and instantly get measurable
+                  data</strong
+                >
+                — no manual measuring needed. It maps the layout into
+                scatter-based coordinates, calculates Bill of Quantities (BOQ)
+                for materials like cement, and exports everything into a clean
+                Excel report ready for your contractor or client.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Perfect for:</span> Architects,
+                engineers, contractors, and property developers who want faster,
+                more accurate construction estimates — without the manual grind.
+              </div>
+              <div
+                class="btn-request-access"
+                style="cursor: default; opacity: 0.6; pointer-events: none"
+              >
+                <span class="lock-icon">🔒</span>
+                Locked
+              </div>
+              <p
+                style="
+                  margin-top: 15px;
+                  font-size: 0.72rem;
+                  color: rgba(255, 255, 255, 0.35);
+                  font-style: italic;
+                  line-height: 1.6;
+                "
+              >
+                ⚠️ shared on portfolio with owner's permission.
               </p>
             </div>
-          </div>
-        </article>
+          </article>
 
-        <!-- Project 2: Archivil-Plan — Mar 15, 2026 – Present -->
-        <article class="project-card reveal" data-category="client">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">🏗️</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🔒</div>
-              <span class="nda-overlay-text">Client Project</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span><span class="ptag">Claude AI</span>
+          <!-- Project 2: PDF Automator — Feb 2026 – Present 🔄 -->
+          <article class="project-card reveal" data-category="client">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ffd000"
+              >
+                <span class="project-icon">📄</span>
               </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <span class="ongoing-badge">🔄 Ongoing, But On Hold</span>
-                <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+              <div class="project-nda-overlay">
+                <div class="nda-lock-icon">🔒</div>
+                <span class="nda-overlay-text">Client Project</span>
               </div>
             </div>
-            <h3 class="project-title">Archivil-Plan</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 15, 2026 – Present</span>
-              <span class="meta-item">💼 Freelance</span>
-              <span class="meta-item">🏢 Civil And Archi A.</span>
-            </div>
-            <p class="project-desc">Construction estimation still done manually with a ruler and a spreadsheet? I built a web tool that lets you <strong>upload a floor plan image and instantly get measurable data</strong> — no manual measuring needed. It maps the layout into scatter-based coordinates, calculates Bill of Quantities (BOQ) for materials like cement, and exports everything into a clean Excel report ready for your contractor or client.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Perfect for:</span> Architects, engineers, contractors, and property developers who want faster, more accurate construction estimates — without the manual grind.
-            </div>
-            <div class="btn-request-access" style="cursor:default;opacity:0.6;    pointer-events:none;">
-              <span class="lock-icon">🔒</span>
-              Locked
-            </div>   
-            <p style="margin-top:15px;font-size:0.72rem;color:rgba(255,255,255,0.35);font-style:italic;line-height:1.6;">
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="nda-badge"
+                    ><span class="nda-lock">🔒</span> NDA</span
+                  >
+                </div>
+              </div>
+              <h3 class="project-title">PDF Automator</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Feb 2026 – Mar 21 2026</span>
+                <span class="meta-item">💼 Freelance</span>
+                <span class="meta-item">🏢 Liza De Veyra</span>
+              </div>
+              <p class="project-desc">
+                Tired of manually digging through hundreds of PDFs just to find
+                one piece of information? I built a tool that lets you scan
+                <strong>up to 2,000 documents in seconds</strong> — right in
+                your browser, no installs, no data leaks. Your files never leave
+                your computer. Whether you need one keyword or everything
+                extracted at once, this tool handles it and exports clean
+                results straight to Excel.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Perfect for:</span> Businesses
+                drowning in paperwork, legal teams, researchers, or anyone who
+                needs data pulled from documents — fast.
+              </div>
+              <div
+                class="btn-request-access"
+                style="cursor: default; opacity: 0.6; pointer-events: none"
+              >
+                <span class="lock-icon">🔒</span>
+                Locked
+              </div>
+              <p
+                style="
+                  margin-top: 15px;
+                  font-size: 0.72rem;
+                  color: rgba(255, 255, 255, 0.35);
+                  font-style: italic;
+                  line-height: 1.6;
+                "
+              >
                 ⚠️ shared on portfolio with owner's permission.
-            </p>         
-          </div>
-        </article>
+              </p>
+            </div>
+          </article>
 
-        <!-- Project 2: PDF Automator — Feb 2026 – Present 🔄 -->
-        <article class="project-card reveal" data-category="client">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ffd000;">
-              <span class="project-icon">📄</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🔒</div>
-              <span class="nda-overlay-text">Client Project</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
+          <!-- Project 3: Booking Record System — Mar 2026 -->
+          <article class="project-card reveal" data-category="client">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">🏨</span>
               </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+              <div class="project-nda-overlay">
+                <div class="nda-lock-icon">🔒</div>
+                <span class="nda-overlay-text">Client Project</span>
               </div>
             </div>
-            <h3 class="project-title">PDF Automator</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Feb 2026 – Mar 21 2026</span>
-              <span class="meta-item">💼 Freelance</span>
-              <span class="meta-item">🏢 Liza De Veyra</span>
-            </div>
-            <p class="project-desc">Tired of manually digging through hundreds of PDFs just to find one piece of information? I built a tool that lets you scan <strong>up to 2,000 documents in seconds</strong> — right in your browser, no installs, no data leaks. Your files never leave your computer. Whether you need one keyword or everything extracted at once, this tool handles it and exports clean results straight to Excel.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Perfect for:</span> Businesses drowning in paperwork, legal teams, researchers, or anyone who needs data pulled from documents — fast.
-            </div>
-            <div class="btn-request-access" style="cursor:default;opacity:0.6;pointer-events:none;">
-              <span class="lock-icon">🔒</span>
-              Locked
-            </div>
-            <p style="margin-top:15px;font-size:0.72rem;color:rgba(255,255,255,0.35);font-style:italic;line-height:1.6;">
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span>
+                </div>
+                <span class="nda-badge"
+                  ><span class="nda-lock">🔒</span> NDA</span
+                >
+              </div>
+              <h3 class="project-title">Booking Record System</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 2026</span>
+                <span class="meta-item">💼 Freelance</span>
+                <span class="meta-item">🏢 Victorias Haven private resort</span>
+              </div>
+              <p class="project-desc">
+                Paper booking logs cause missed reservations, double bookings,
+                and lost revenue — and searching through them wastes everyone's
+                time. I replaced that chaos with a
+                <strong>clean, calendar-based digital system</strong> where
+                staff can log, update, and pull up any reservation instantly. It
+                also analyzes booking patterns so the resort can make smarter
+                decisions on pricing and availability.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Perfect for:</span> Resorts,
+                homestays, salons, clinics — any business that takes bookings
+                and still relies on paper or messy spreadsheets.
+              </div>
+              <div
+                class="btn-request-access"
+                style="cursor: default; opacity: 0.6; pointer-events: none"
+              >
+                <span class="lock-icon">🔒</span>
+                Locked
+              </div>
+              <p
+                style="
+                  margin-top: 15px;
+                  font-size: 0.72rem;
+                  color: rgba(255, 255, 255, 0.35);
+                  font-style: italic;
+                  line-height: 1.6;
+                "
+              >
                 ⚠️ shared on portfolio with owner's permission.
-            </p>
-          </div>
-        </article>
+              </p>
+            </div>
+          </article>
 
-        <!-- Project 3: Booking Record System — Mar 2026 -->
-        <article class="project-card reveal" data-category="client">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">🏨</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🔒</div>
-              <span class="nda-overlay-text">Client Project</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
+          <!-- Project 4: Auto Mailer — Feb–Mar 2026 -->
+          <article class="project-card reveal" data-category="client">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ffd000"
+              >
+                <span class="project-icon">📧</span>
               </div>
-              <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
+              <div class="project-nda-overlay">
+                <div class="nda-lock-icon">🔒</div>
+                <span class="nda-overlay-text">Client Project</span>
+              </div>
             </div>
-            <h3 class="project-title">Booking Record System</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 2026</span>
-              <span class="meta-item">💼 Freelance</span>
-              <span class="meta-item">🏢 Victorias Haven private resort</span>
-            </div>
-            <p class="project-desc">Paper booking logs cause missed reservations, double bookings, and lost revenue — and searching through them wastes everyone's time. I replaced that chaos with a <strong>clean, calendar-based digital system</strong> where staff can log, update, and pull up any reservation instantly. It also analyzes booking patterns so the resort can make smarter decisions on pricing and availability.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Perfect for:</span> Resorts, homestays, salons, clinics — any business that takes bookings and still relies on paper or messy spreadsheets.
-            </div>
-            <div class="btn-request-access" style="cursor:default;opacity:0.6;pointer-events:none;">
-              <span class="lock-icon">🔒</span>
-              Locked
-            </div>
-            <p style="margin-top:15px;font-size:0.72rem;color:rgba(255,255,255,0.35);font-style:italic;line-height:1.6;">
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span>
+                </div>
+                <span class="nda-badge"
+                  ><span class="nda-lock">🔒</span> NDA</span
+                >
+              </div>
+              <h3 class="project-title">Auto Mailer</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Feb–Mar 2026</span>
+                <span class="meta-item">💼 Freelance</span>
+                <span class="meta-item">🏢 Victorias Haven private resort</span>
+              </div>
+              <p class="project-desc">
+                Sending the same emails every single day is silently draining
+                your team's time. I automated the entire process — open the app,
+                fill in a few fields, hit send. No switching tabs, no logging
+                into Gmail, no manually attaching files every time. Images
+                attach automatically based on your selection.
+                <strong
+                  >What used to take 10 minutes now takes 10 seconds.</strong
+                >
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Perfect for:</span> Small
+                businesses, VAs, and sales teams who send repetitive emails
+                daily and want their time back.
+              </div>
+              <div
+                class="btn-request-access"
+                style="cursor: default; opacity: 0.6; pointer-events: none"
+              >
+                <span class="lock-icon">🔒</span>
+                Locked
+              </div>
+              <p
+                style="
+                  margin-top: 15px;
+                  font-size: 0.72rem;
+                  color: rgba(255, 255, 255, 0.35);
+                  font-style: italic;
+                  line-height: 1.6;
+                "
+              >
                 ⚠️ shared on portfolio with owner's permission.
-            </p>
-          </div>
-        </article>
+              </p>
+            </div>
+          </article>
 
-        <!-- Project 4: Auto Mailer — Feb–Mar 2026 -->
-        <article class="project-card reveal" data-category="client">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ffd000;">
-              <span class="project-icon">📧</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🔒</div>
-              <span class="nda-overlay-text">Client Project</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span>
+          <!-- Project 5: MailVault — 2026 (Personal) -->
+          <article
+            class="project-card project-card--personal reveal"
+            data-category="personal"
+          >
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">📬</span>
               </div>
-              <span class="nda-badge"><span class="nda-lock">🔒</span> NDA</span>
-            </div>
-            <h3 class="project-title">Auto Mailer</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Feb–Mar 2026</span>
-              <span class="meta-item">💼 Freelance</span>
-              <span class="meta-item">🏢 Victorias Haven private resort</span>
-            </div>
-            <p class="project-desc">Sending the same emails every single day is silently draining your team's time. I automated the entire process — open the app, fill in a few fields, hit send. No switching tabs, no logging into Gmail, no manually attaching files every time. Images attach automatically based on your selection. <strong>What used to take 10 minutes now takes 10 seconds.</strong></p>
-            <div class="project-result">
-              <span class="result-label">💡 Perfect for:</span> Small businesses, VAs, and sales teams who send repetitive emails daily and want their time back.
-            </div>
-            <div class="btn-request-access" style="cursor:default;opacity:0.6;pointer-events:none;">
-              <span class="lock-icon">🔒</span>
-              Locked
-            </div>
-            <p style="margin-top:15px;font-size:0.72rem;color:rgba(255,255,255,0.35);font-style:italic;line-height:1.6;">
-                ⚠️ shared on portfolio with owner's permission.
-            </p>
-          </div>
-        </article>
-
-        <!-- Project 5: MailVault — 2026 (Personal) -->
-        <article class="project-card project-card--personal reveal" data-category="personal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">📬</span>
-            </div>
-            <div class="project-personal-overlay">
-              <a href="https://matth-el-mail-vault.netlify.app/" target="_blank" class="project-link-btn">View Live Site →</a>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span><span class="ptag">Google Script</span>
-              </div>
-              <span class="personal-badge">✨ Personal</span>
-            </div>
-            <h3 class="project-title">MailVault</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 2026</span>
-              <span class="meta-item">🛠️ Self-Built</span>
-            </div>
-            <p class="project-desc">Most email collection tools send your subscribers' data to third-party servers you don't control. I built MailVault differently — it collects emails <strong>directly into your own Google Sheet</strong> using Google Apps Script, with zero third-party dependencies. Your list is yours, period. Clean form, instant capture, full ownership.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Why it matters:</span> No monthly fees, no vendor lock-in, no privacy concerns — just a fast, private, self-owned email list.
-            </div>
-            <div class="personal-project-links">
-              <a href="https://matth-el-mail-vault.netlify.app/" target="_blank" class="plink-live">
-                🌐 Live Site →
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- Project 6: Slider Data Mapping — Dec 2020 -->
-        <article class="project-card reveal" data-category="client">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">📊</span>
-            </div>
-            <div class="project-nda-overlay">
-              <div class="nda-lock-icon">🔒</div>
-              <span class="nda-overlay-text">Client Project</span>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">C#</span><span class="ptag">WinForms</span><span class="ptag">Excel</span>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://matth-el-mail-vault.netlify.app/"
+                  target="_blank"
+                  class="project-link-btn"
+                  >View Live Site →</a
+                >
               </div>
             </div>
-            <h3 class="project-title">Slider Data Mapping</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Dec 2020 – Jul 2021</span>
-              <span class="meta-item">💼 Special Project</span>
-              <span class="meta-item">🏢 Western Digital</span>
-            </div>
-            <p class="project-desc">Raw machine data trapped in endless spreadsheet rows tells engineers nothing at a glance. I built a desktop tool that <strong>transforms those datasets into clear, interactive visual charts</strong> — so patterns, anomalies, and root causes jump out immediately. The team went from hours of manual analysis to actionable insights in minutes, and used it to resolve a critical production issue in under 2 weeks.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Perfect for:</span> Engineering teams, manufacturers, or any business sitting on data they can't easily interpret or act on.
-            </div>
-            <div style="margin-top:0.75rem;padding:0.85rem 1rem;background:rgba(255,255,255,0.05);border-left:3px solid rgba(255,208,0,0.5);border-radius:6px;font-size:0.78rem;color:rgba(255,255,255,0.6);line-height:1.7;font-style:italic;">
-              📝 I cannot disclose the desktop application's full features, but it can read raw Excel files and flat data — converting them into graphs. It can also export to Excel and PDF. If you want, give me a project and I'll build it — then rate the finished work after.
-            </div>
-          </div>
-        </article>
-
-        <!-- ResortHub PH — Apr 2026 (Personal, Ongoing) -->
-        <article class="project-card project-card--personal reveal" data-category="personal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">🏖️</span>
-            </div>
-            <div class="project-personal-overlay">
-              <a href="https://resorthubph.onrender.com" target="_blank" class="project-link-btn">View Live Site →</a>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">Laravel 11</span><span class="ptag">PHP 8.3</span><span class="ptag">Supabase</span><span class="ptag">Tailwind</span><span class="ptag">PayMongo</span><span class="ptag">Node.js</span><span class="ptag">Render</span>
-              </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <span class="ongoing-badge">🔄 Ongoing</span>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span
+                  ><span class="ptag">Google Script</span>
+                </div>
                 <span class="personal-badge">✨ Personal</span>
               </div>
-            </div>
-            <h3 class="project-title">ResortHub PH</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 29, 2026 – Present</span>
-              <span class="meta-item">🛠️ Self-Built</span>
-            </div>
-            <p class="project-desc">A specialized booking ecosystem designed to professionalize the informal private resort industry in the Philippines. Functions as a <strong>high-trust intermediary</strong> between resort owners and seekers — eliminating "Ghost Resort" scams and uncoordinated calendar management. The core architecture uses a <strong>Hard Paywall &amp; Information Masking</strong> strategy: sensitive property details (exact name, house number, owner contact) are programmatically hidden until a verified platform fee is confirmed via secure backend webhooks. A <strong>"7-Day Freshness" protocol</strong> requires owners to upload live in-app photos to stay visible in search results, and a <strong>Confirmation Pulse engine</strong> facilitates a real-time availability check — ensuring owners manually confirm a date before seekers can proceed to payment. Transforms the traditionally chaotic Facebook-based booking method into a secure, organized, professional digital experience.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Tech highlights:</span> Laravel 11 policy-based data masking, Supabase Realtime Broadcast for the 5-minute availability pulse, Row Level Security (RLS), and PayMongo Server-to-Server webhooks supporting GCash, Maya, and QRPh.
-            </div>
-            <div class="project-result" style="border-color:rgba(255,68,68,0.2);background:rgba(255,68,68,0.05);">
-              <span class="result-label" style="color:#ff6b6b;">⚠️ Note:</span> If the live site is slow to load, Render's free tier may be spinning up the server. Give it 30–60 seconds and refresh.
-            </div>
-            <div class="personal-project-links">
-              <a href="https://resorthubph.onrender.com" target="_blank" class="plink-live">
-                🌐 Live Site →
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- Project 10: CV-Builder — Mar 2026 (Personal, Under Development) -->
-        <article class="project-card project-card--personal reveal" data-category="personal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ffd000;">
-              <span class="project-icon">📝</span>
-            </div>
-            <div class="project-personal-overlay">
-              <a href="https://matth-el-cv-builder.lovable.app/editor" target="_blank" class="project-link-btn">View Live Site →</a>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">Lovable</span><span class="ptag">AI-Powered</span>
+              <h3 class="project-title">MailVault</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 2026</span>
+                <span class="meta-item">🛠️ Self-Built</span>
               </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <span class="ongoing-badge">🔧 Ongoing Development</span>
+              <p class="project-desc">
+                Most email collection tools send your subscribers' data to
+                third-party servers you don't control. I built MailVault
+                differently — it collects emails
+                <strong>directly into your own Google Sheet</strong> using
+                Google Apps Script, with zero third-party dependencies. Your
+                list is yours, period. Clean form, instant capture, full
+                ownership.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Why it matters:</span> No monthly
+                fees, no vendor lock-in, no privacy concerns — just a fast,
+                private, self-owned email list.
+              </div>
+              <div class="personal-project-links">
+                <a
+                  href="https://matth-el-mail-vault.netlify.app/"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🌐 Live Site →
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 6: Slider Data Mapping — Dec 2020 -->
+          <article class="project-card reveal" data-category="client">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">📊</span>
+              </div>
+              <div class="project-nda-overlay">
+                <div class="nda-lock-icon">🔒</div>
+                <span class="nda-overlay-text">Client Project</span>
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">C#</span><span class="ptag">WinForms</span
+                  ><span class="ptag">Excel</span>
+                </div>
+              </div>
+              <h3 class="project-title">Slider Data Mapping</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Dec 2020 – Jul 2021</span>
+                <span class="meta-item">💼 Special Project</span>
+                <span class="meta-item">🏢 Western Digital</span>
+              </div>
+              <p class="project-desc">
+                Raw machine data trapped in endless spreadsheet rows tells
+                engineers nothing at a glance. I built a desktop tool that
+                <strong
+                  >transforms those datasets into clear, interactive visual
+                  charts</strong
+                >
+                — so patterns, anomalies, and root causes jump out immediately.
+                The team went from hours of manual analysis to actionable
+                insights in minutes, and used it to resolve a critical
+                production issue in under 2 weeks.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Perfect for:</span> Engineering
+                teams, manufacturers, or any business sitting on data they can't
+                easily interpret or act on.
+              </div>
+              <div
+                style="
+                  margin-top: 0.75rem;
+                  padding: 0.85rem 1rem;
+                  background: rgba(255, 255, 255, 0.05);
+                  border-left: 3px solid rgba(255, 208, 0, 0.5);
+                  border-radius: 6px;
+                  font-size: 0.78rem;
+                  color: rgba(255, 255, 255, 0.6);
+                  line-height: 1.7;
+                  font-style: italic;
+                "
+              >
+                📝 I cannot disclose the desktop application's full features,
+                but it can read raw Excel files and flat data — converting them
+                into graphs. It can also export to Excel and PDF. If you want,
+                give me a project and I'll build it — then rate the finished
+                work after.
+              </div>
+            </div>
+          </article>
+
+          <!-- ResortHub PH — Apr 2026 (Personal, Ongoing) -->
+          <article
+            class="project-card project-card--personal reveal"
+            data-category="personal"
+          >
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">🏖️</span>
+              </div>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://resorthubph.onrender.com"
+                  target="_blank"
+                  class="project-link-btn"
+                  >View Live Site →</a
+                >
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">Laravel 11</span
+                  ><span class="ptag">PHP 8.3</span
+                  ><span class="ptag">Supabase</span
+                  ><span class="ptag">Tailwind</span
+                  ><span class="ptag">PayMongo</span
+                  ><span class="ptag">Node.js</span
+                  ><span class="ptag">Render</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="ongoing-badge">🔄 Ongoing</span>
+                  <span class="personal-badge">✨ Personal</span>
+                </div>
+              </div>
+              <h3 class="project-title">ResortHub PH</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 29, 2026 – Present</span>
+                <span class="meta-item">🛠️ Self-Built</span>
+              </div>
+              <p class="project-desc">
+                A specialized booking ecosystem designed to professionalize the
+                informal private resort industry in the Philippines. Functions
+                as a <strong>high-trust intermediary</strong> between resort
+                owners and seekers — eliminating "Ghost Resort" scams and
+                uncoordinated calendar management. The core architecture uses a
+                <strong>Hard Paywall &amp; Information Masking</strong>
+                strategy: sensitive property details (exact name, house number,
+                owner contact) are programmatically hidden until a verified
+                platform fee is confirmed via secure backend webhooks. A
+                <strong>"7-Day Freshness" protocol</strong> requires owners to
+                upload live in-app photos to stay visible in search results, and
+                a <strong>Confirmation Pulse engine</strong> facilitates a
+                real-time availability check — ensuring owners manually confirm
+                a date before seekers can proceed to payment. Transforms the
+                traditionally chaotic Facebook-based booking method into a
+                secure, organized, professional digital experience.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Tech highlights:</span> Laravel 11
+                policy-based data masking, Supabase Realtime Broadcast for the
+                5-minute availability pulse, Row Level Security (RLS), and
+                PayMongo Server-to-Server webhooks supporting GCash, Maya, and
+                QRPh.
+              </div>
+              <div
+                class="project-result"
+                style="
+                  border-color: rgba(255, 68, 68, 0.2);
+                  background: rgba(255, 68, 68, 0.05);
+                "
+              >
+                <span class="result-label" style="color: #ff6b6b"
+                  >⚠️ Note:</span
+                >
+                If the live site is slow to load, Render's free tier may be
+                spinning up the server. Give it 30–60 seconds and refresh.
+              </div>
+              <div class="personal-project-links">
+                <a
+                  href="https://resorthubph.onrender.com"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🌐 Live Site →
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 10: CV-Builder — Mar 2026 (Personal, Under Development) -->
+          <article
+            class="project-card project-card--personal reveal"
+            data-category="personal"
+          >
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ffd000"
+              >
+                <span class="project-icon">📝</span>
+              </div>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://matth-el-cv-builder.lovable.app/editor"
+                  target="_blank"
+                  class="project-link-btn"
+                  >View Live Site →</a
+                >
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">Lovable</span
+                  ><span class="ptag">AI-Powered</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="ongoing-badge">🔧 Ongoing Development</span>
+                  <span class="personal-badge">✨ Personal</span>
+                </div>
+              </div>
+              <h3 class="project-title">CV Builder</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 23, 2026</span>
+                <span class="meta-item">🛠️ Self-Built</span>
+              </div>
+              <p class="project-desc">
+                A modern CV Builder powered by <strong>Lovable + AI</strong>,
+                designed to help users create professional resumes with ease.
+                Features an intuitive interface for inputting personal details,
+                skills, and work experience while generating clean, structured
+                layouts in real time. AI-driven assistance enhances content
+                generation and layout suggestions — reducing manual formatting
+                effort and producing polished, professional CV outputs.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Why it matters:</span> Simplifies
+                resume creation for anyone — just fill in your info, and the app
+                handles the formatting, structure, and design.
+              </div>
+              <div class="personal-project-links">
+                <a
+                  href="https://cv-builder-matth-el.lovable.app"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🌐 Live Site →
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 9: Apocrypha Bible — Mar 2026 (Personal, Ongoing) -->
+          <article
+            class="project-card project-card--personal reveal"
+            data-category="personal"
+          >
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">📖</span>
+              </div>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://matth-el-bible.netlify.app/"
+                  target="_blank"
+                  class="project-link-btn"
+                  >View Live Site →</a
+                >
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">HTML</span><span class="ptag">CSS</span
+                  ><span class="ptag">JavaScript</span
+                  ><span class="ptag">Books API</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="ongoing-badge">🔧 Ongoing Development</span>
+                  <span class="personal-badge">✨ Personal</span>
+                </div>
+              </div>
+              <h3 class="project-title">Apocrypha Bible</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 23, 2026 – Present</span>
+                <span class="meta-item">🛠️ Self-Built</span>
+              </div>
+              <p class="project-desc">
+                An interactive Bible web application designed for
+                <strong>deeper engagement and community-driven learning</strong
+                >. Users can read verses and share personal insights through a
+                comment section for each passage — fostering discussion and
+                diverse interpretations. Includes the Apocrypha, additional
+                readings, and historical context for a comprehensive study
+                experience.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Why it matters:</span> Built for
+                both casual readers and serious learners — organized,
+                accessible, and designed to grow with its community.
+              </div>
+              <div class="personal-project-links">
+                <a
+                  href="https://matth-el-bible.netlify.app/"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🌐 Live Site →
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 8: Mini-Ecoms — Mar 2026 (Personal) -->
+          <article
+            class="project-card project-card--personal reveal"
+            data-category="personal"
+          >
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ffd000"
+              >
+                <span class="project-icon">🛒</span>
+              </div>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://mini-ecoms.onrender.com"
+                  target="_blank"
+                  class="project-link-btn"
+                  >View Live Site →</a
+                >
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">PHP</span
+                  ><span class="ptag">Laravel 8</span
+                  ><span class="ptag">Node.js</span
+                  ><span class="ptag">Supabase</span
+                  ><span class="ptag">Render</span>
+                </div>
                 <span class="personal-badge">✨ Personal</span>
               </div>
-            </div>
-            <h3 class="project-title">CV Builder</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 23, 2026</span>
-              <span class="meta-item">🛠️ Self-Built</span>
-            </div>
-            <p class="project-desc">A modern CV Builder powered by <strong>Lovable + AI</strong>, designed to help users create professional resumes with ease. Features an intuitive interface for inputting personal details, skills, and work experience while generating clean, structured layouts in real time. AI-driven assistance enhances content generation and layout suggestions — reducing manual formatting effort and producing polished, professional CV outputs.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Why it matters:</span> Simplifies resume creation for anyone — just fill in your info, and the app handles the formatting, structure, and design.
-            </div>
-            <div class="personal-project-links">
-              <a href="https://cv-builder-matth-el.lovable.app" target="_blank" class="plink-live">
-                🌐 Live Site →
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- Project 9: Apocrypha Bible — Mar 2026 (Personal, Ongoing) -->
-        <article class="project-card project-card--personal reveal" data-category="personal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">📖</span>
-            </div>
-            <div class="project-personal-overlay">
-              <a href="https://matth-el-bible.netlify.app/" target="_blank" class="project-link-btn">View Live Site →</a>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">HTML</span><span class="ptag">CSS</span><span class="ptag">JavaScript</span><span class="ptag">Books API</span>
+              <h3 class="project-title">Mini-Ecoms</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 23 – 27, 2026</span>
+                <span class="meta-item">🛠️ Self-Built</span>
               </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <span class="ongoing-badge">🔧 Ongoing Development</span>
-                <span class="personal-badge">✨ Personal</span>
+              <p class="project-desc">
+                Developed a mini e-commerce web application to demonstrate my
+                full-stack capabilities using
+                <strong>Laravel 8 and Node.js</strong>. The app supports both
+                admin and guest access — admins can manage products (add, edit,
+                delete) and customize homepage content, while guests can browse
+                listings, view product details, and complete a simple checkout.
+                Built to showcase backend logic, database integration, and
+                real-world UI flow.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Why it matters:</span> A complete
+                end-to-end e-commerce demo — CRUD, role-based access, and a
+                working checkout, all in one deployable app.
               </div>
-            </div>
-            <h3 class="project-title">Apocrypha Bible</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 23, 2026 – Present</span>
-              <span class="meta-item">🛠️ Self-Built</span>
-            </div>
-            <p class="project-desc">An interactive Bible web application designed for <strong>deeper engagement and community-driven learning</strong>. Users can read verses and share personal insights through a comment section for each passage — fostering discussion and diverse interpretations. Includes the Apocrypha, additional readings, and historical context for a comprehensive study experience.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Why it matters:</span> Built for both casual readers and serious learners — organized, accessible, and designed to grow with its community.
-            </div>
-            <div class="personal-project-links">
-              <a href="https://matth-el-bible.netlify.app/" target="_blank" class="plink-live">
-                🌐 Live Site →
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- Project 8: Mini-Ecoms — Mar 2026 (Personal) -->
-        <article class="project-card project-card--personal reveal" data-category="personal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ffd000;">
-              <span class="project-icon">🛒</span>
-            </div>
-            <div class="project-personal-overlay">
-              <a href="https://mini-ecoms.onrender.com" target="_blank" class="project-link-btn">View Live Site →</a>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">PHP</span><span class="ptag">Laravel 8</span><span class="ptag">Node.js</span><span class="ptag">Supabase</span><span class="ptag">Render</span>
+              <div
+                class="project-result"
+                style="
+                  border-color: rgba(255, 68, 68, 0.2);
+                  background: rgba(255, 68, 68, 0.05);
+                "
+              >
+                <span class="result-label" style="color: #ff6b6b"
+                  >⚠️ Note:</span
+                >
+                If you encounter an error on the live site, the Supabase
+                database may have paused due to inactivity. It resumes
+                automatically after a short wait, or contact me to manually wake
+                it up.
               </div>
-              <span class="personal-badge">✨ Personal</span>
-            </div>
-            <h3 class="project-title">Mini-Ecoms</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 23 – 27, 2026</span>
-              <span class="meta-item">🛠️ Self-Built</span>
-            </div>
-            <p class="project-desc">Developed a mini e-commerce web application to demonstrate my full-stack capabilities using <strong>Laravel 8 and Node.js</strong>. The app supports both admin and guest access — admins can manage products (add, edit, delete) and customize homepage content, while guests can browse listings, view product details, and complete a simple checkout. Built to showcase backend logic, database integration, and real-world UI flow.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Why it matters:</span> A complete end-to-end e-commerce demo — CRUD, role-based access, and a working checkout, all in one deployable app.
-            </div>
-            <div class="project-result" style="border-color:rgba(255,68,68,0.2);background:rgba(255,68,68,0.05);">
-              <span class="result-label" style="color:#ff6b6b;">⚠️ Note:</span> If you encounter an error on the live site, the Supabase database may have paused due to inactivity. It resumes automatically after a short wait, or contact me to manually wake it up.
-            </div>
-            <div class="personal-project-links">
-              <a href="https://mini-ecoms.onrender.com" target="_blank" class="plink-live">
-                🌐 Live Site →
-              </a>
-            </div>
-          </div>
-        </article>
-
-      </div>
-
-      <!-- Trust note -->
-      <div class="projects-trust-note reveal">
-        <p>🔐 Client projects are kept confidential out of respect for my clients. But if you're facing a similar problem — inefficient workflows, manual tasks eating your time, or data you can't make sense of — <a href="chat.html" target="_blank" class="trust-link">let's talk and build your solution</a>.</p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ===== GAMES SECTION ===== -->
-  <section class="games" id="games">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · </span></span></span>
-        <h2 class="section-title">Games I Built</h2>
-        <p class="projects-subtitle">Full-stack games engineered from scratch — real architecture, real performance, real stakes.</p>
-      </div>
-
-      <div class="projects-grid">
-
-        <!-- Game 1: The Void Ascension -->
-        <article class="project-card project-card--personal reveal">
-          <div class="project-img-wrap">
-            <div class="project-img-placeholder" style="--card-color:#ff7a00;">
-              <span class="project-icon">⚔️</span>
-            </div>
-            <div class="project-personal-overlay">
-              <a href="https://clustered-mmorpg.onrender.com" target="_blank" class="project-link-btn">Play Now →</a>
-            </div>
-          </div>
-          <div class="project-body">
-            <div class="project-card-header">
-              <div class="project-tags">
-                <span class="ptag">MongoDB atlas</span><span class="ptag">Node.js</span><span class="ptag">React</span><span class="ptag">TypeScript</span><span class="ptag">WebSocket</span><span class="ptag">Render</span>
-              </div>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <span class="ongoing-badge">🔄 Ongoing</span>
-                <span class="personal-badge">🎮 MMORPG</span>
+              <div class="personal-project-links">
+                <a
+                  href="https://mini-ecoms.onrender.com"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🌐 Live Site →
+                </a>
               </div>
             </div>
-            <h3 class="project-title">The Void Ascension</h3>
-            <div class="project-meta">
-              <span class="meta-item">📅 Mar 28, 2026 – Present</span>
-              <span class="meta-item">🛠️ Self-Built</span>
-            </div>
-            <p class="project-desc">A <strong>high-performance, 900-level RPG engine</strong> built to handle massive entity management and a high-stakes player economy. Supports a 60-unit real-time army across 50 world maps, with complex mathematical scaling and low-latency data persistence. Features a horde system where 50 "Scrapper" minions inherit 50% of player attributes in real-time, a unified algorithmic scaling engine, and a server-side <strong>15% Shatter Risk mechanic</strong> — permanent item destruction on death — driving strategic gameplay stakes.</p>
-            <div class="project-result">
-              <span class="result-label">💡 Tech highlights:</span> Scalable MongoDB schema for 900-level progression, WebSocket-driven real-time combat, cloud background workers for async game logic, and a risk-based economy system built for long-term player engagement.
-            </div>
-            <div class="project-result" style="border-color:rgba(255,68,68,0.2);background:rgba(255,68,68,0.05);">
-              <span class="result-label" style="color:#ff6b6b;">⚠️ Note:</span> If the live site is slow to load, Render's free tier may be spinning up. Give it 30–60 seconds and refresh.
-            </div>
-            <div class="personal-project-links">
-              <a href="https://clustered-mmorpg.onrender.com" target="_blank" class="plink-live">
-                🎮 Play Now →
-              </a>
-            </div>
-          </div>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== EXPERIENCE SECTION ===== -->
-  <section class="experience" id="experience">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">EXPERIENCE · EXPERIENCE · EXPERIENCE · EXPERIENCE · EXPERIENCE · EXPERIENCE · EXPERIENCE</span></span></span>
-        <h2 class="section-title">Work Experience</h2>
-      </div>
-
-      <div class="timeline">
-        <div class="timeline-spine"></div>
-
-        <!-- Job 1: HTECT CORP — Nov 2022 – Oct 2023 (newest) -->
-        <div class="timeline-item reveal" data-side="left">
-          <div class="timeline-dot"><span class="dot-icon">💻</span></div>
-          <div class="timeline-card">
-            <div class="tc-header">
-              <div class="tc-title-wrap">
-                <h3 class="tc-role">Junior Programmer</h3>
-                <span class="tc-stack">(Laravel Dev.)</span>
-                <span class="tc-badge tc-badge--fulltime">Full Time</span>
-              </div>
-              <div class="tc-meta">
-                <span class="tc-company">HTECT CORP.</span>
-                <span class="tc-date">Nov 2022 – Oct 2023</span>
-              </div>
-            </div>
-            <p class="tc-desc">Developed and maintained Laravel framework web applications at a dynamic software development firm specializing in custom solutions. Collaborated with senior developers in Agile sprints — designing, testing, and deploying responsive, high-performance applications. Integrated automated testing frameworks that reduced bug reports and contributed to more stable releases. Participated in code reviews and delivered constructive feedback to improve overall code quality and maintainability.</p>
-            <div class="tc-tags">
-              <span class="tc-tag">Laravel</span>
-              <span class="tc-tag">PHP</span>
-              <span class="tc-tag">MySQL</span>
-              <span class="tc-tag">Agile</span>
-              <span class="tc-tag">Git</span>
-              <span class="tc-tag">Testing</span>
-            </div>
-          </div>
+          </article>
         </div>
 
-        <!-- Job 2: GRUPPO EMS CORP — Jun 2022 – Oct 2022 -->
-        <div class="timeline-item reveal" data-side="right">
-          <div class="timeline-dot"><span class="dot-icon">🖥️</span></div>
-          <div class="timeline-card">
-            <div class="tc-header">
-              <div class="tc-title-wrap">
-                <h3 class="tc-role">System Developer</h3>
-                <span class="tc-stack">(.NET Dev.)</span>
-                <span class="tc-badge tc-badge--fulltime">Full Time</span>
-              </div>
-              <div class="tc-meta">
-                <span class="tc-company">GRUPPO EMS CORP.</span>
-                <span class="tc-date">Jun 2022 – Oct 2022</span>
-              </div>
-            </div>
-            <p class="tc-desc">Completed structured ASP.NET training and developed a C# .NET MVC web application supporting internal HR operations — including employee performance evaluation, attendance management, and ID-based QR code timekeeping. Designed and developed tracking systems for shuttle services and private vehicle usage. Partnered with the HR department to integrate applications with the company's central database, ensuring data consistency and system reliability across all departments.</p>
-            <div class="tc-tags">
-              <span class="tc-tag">C# .NET</span>
-              <span class="tc-tag">ASP.NET MVC</span>
-              <span class="tc-tag">SQL Server</span>
-              <span class="tc-tag">QR Code</span>
-              <span class="tc-tag">HR Systems</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Job 3: Western Digital — Oct 2019 – Apr 2022 -->
-        <div class="timeline-item reveal" data-side="left">
-          <div class="timeline-dot"><span class="dot-icon">⚙️</span></div>
-          <div class="timeline-card">
-            <div class="tc-header">
-              <div class="tc-title-wrap">
-                <h3 class="tc-role">Test Engineering Tech III</h3>
-                <span class="tc-stack">(Dept. Specialist)</span>
-                <span class="tc-badge tc-badge--fulltime">Full Time</span>
-              </div>
-              <div class="tc-meta">
-                <span class="tc-company">Western Digital</span>
-                <span class="tc-date">Oct 2019 – Apr 2022</span>
-              </div>
-            </div>
-            <p class="tc-desc">Managed hands-on operation and technical maintenance of Slider Fab machinery at one of the world's leading data storage companies — ensuring peak performance through systematic inspections and 5S methodology. Leveraged Excel macros to process complex machine performance data and conduct deep-dive analyses identifying root causes of recurring failures. Resolved a critical machine issue within two weeks, drastically outperforming standard resolution timelines and enabling the facility to consistently meet weekly production targets.</p>
-            <div class="tc-tags">
-              <span class="tc-tag">Data Analysis</span>
-              <span class="tc-tag">Excel Macros</span>
-              <span class="tc-tag">5S Methodology</span>
-              <span class="tc-tag">Troubleshooting</span>
-              <span class="tc-tag">Technical Maintenance</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Job 4: Conduent — Mar 2018 – Aug 2018 (oldest) -->
-        <div class="timeline-item reveal" data-side="right">
-          <div class="timeline-dot"><span class="dot-icon">🔍</span></div>
-          <div class="timeline-card">
-            <div class="tc-header">
-              <div class="tc-title-wrap">
-                <h3 class="tc-role">Software Quality Assurance</h3>
-                <span class="tc-stack">(QA Engineer)</span>
-                <span class="tc-badge tc-badge--fulltime">Full Time</span>
-              </div>
-              <div class="tc-meta">
-                <span class="tc-company">Conduent</span>
-                <span class="tc-date">Mar 2018 – Aug 2018</span>
-              </div>
-            </div>
-            <p class="tc-desc">Handled comprehensive QA testing for client websites — ensuring peak functionality, usability, and technical performance across diverse digital environments. Developed step-by-step testing procedures in Microsoft Excel to standardize website validation and maintain high quality-control benchmarks. Evaluated UI/UX designs for usability and accessibility, rigorously tested responsiveness across multiple devices and screen sizes, and documented findings in detailed professional QA reports for the development team.</p>
-            <div class="tc-tags">
-              <span class="tc-tag">QA Testing</span>
-              <span class="tc-tag">UI/UX Review</span>
-              <span class="tc-tag">Test Documentation</span>
-              <span class="tc-tag">Cross-Device Testing</span>
-              <span class="tc-tag">Excel</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== EXPERIENCE SECTION ===== -->
-
-  <!-- ===== CERTIFICATIONS SECTION ===== -->
-  <section class="certifications" id="certifications">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">CERTIFICATES · CERTIFICATES · CERTIFICATES · CERTIFICATES · CERTIFICATES · CERTIFICATES · CERTIFICATES<span class="section-tag">// certifications</span> GRID · VIBE CODING BOOTCAMP · VA 101 · YOURVABUDDY · </span></span></span>
-        <h2 class="section-title">Credentials</h2>
-        <p class="cert-subtitle">Hover over a card to flip it — click <strong>View Certificate</strong> to open the PDF.</p>
-      </div>
-
-      <div class="cert-flip-grid">
-
-        <!-- Cert 1: C# Basics -->
-        <div class="cert-flip-wrap reveal">
-          <div class="cert-flip-card">
-            <!-- Smoke particles -->
-            <div class="smoke-container">
-              <span class="smoke s1"></span><span class="smoke s2"></span>
-              <span class="smoke s3"></span><span class="smoke s4"></span>
-              <span class="smoke s5"></span>
-            </div>
-            <!-- Front -->
-            <div class="cert-front">
-              <div class="cert-front-glow"></div>
-              <div class="cert-front-icon">🎓</div>
-              <div class="cert-front-issuer">Udemy</div>
-              <h4 class="cert-front-title">C# Basics for Beginners: Learn C# Fundamentals by Coding</h4>
-              <p class="cert-front-author">Mosh Hamedani</p>
-              <div class="cert-front-date">Jun 15, 2022 &nbsp;·&nbsp; 5.5 hrs</div>
-              <div class="cert-front-tags">
-                <span class="cert-tag">C#</span><span class="cert-tag">OOP</span><span class="cert-tag">Programming</span>
-              </div>
-              <div class="cert-flip-hint">Hover to flip ↺</div>
-            </div>
-            <!-- Back -->
-            <div class="cert-back">
-              <div class="cert-back-label">Certificate of Completion</div>
-              <div class="cert-back-preview">
-                <img src="certificates/previews/csharp_basics-1.jpg" class="cert-preview-img" alt="C# Basics Certificate" loading="lazy"/>
-              </div>
-              <a href="certificates/Csharp_1.pdf" target="_blank" class="cert-view-btn">
-                📄 View Certificate
-              </a>
-              <div class="cert-back-id">UC-ba2da9eb-5e6c-417c-9ec8-dda55964b3df</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cert 2: C# Intermediate -->
-        <div class="cert-flip-wrap reveal">
-          <div class="cert-flip-card">
-            <div class="smoke-container">
-              <span class="smoke s1"></span><span class="smoke s2"></span>
-              <span class="smoke s3"></span><span class="smoke s4"></span>
-              <span class="smoke s5"></span>
-            </div>
-            <div class="cert-front">
-              <div class="cert-front-glow"></div>
-              <div class="cert-front-icon">🎓</div>
-              <div class="cert-front-issuer">Udemy</div>
-              <h4 class="cert-front-title">C# Intermediate: Classes, Interfaces and OOP</h4>
-              <p class="cert-front-author">Mosh Hamedani</p>
-              <div class="cert-front-date">Jun 16, 2022 &nbsp;·&nbsp; 6 hrs</div>
-              <div class="cert-front-tags">
-                <span class="cert-tag">C#</span><span class="cert-tag">Interfaces</span><span class="cert-tag">Design Patterns</span>
-              </div>
-              <div class="cert-flip-hint">Hover to flip ↺</div>
-            </div>
-            <div class="cert-back">
-              <div class="cert-back-label">Certificate of Completion</div>
-              <div class="cert-back-preview">
-                <img src="certificates/previews/csharp_intermediate-1.jpg" class="cert-preview-img" alt="C# Intermediate Certificate" loading="lazy"/>
-              </div>
-              <a href="certificates/Csharp_certificate.pdf" target="_blank" class="cert-view-btn">
-                📄 View Certificate
-              </a>
-              <div class="cert-back-id">UC-62dc1b40-9d5f-464c-95ba-e20d7f2c6569</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cert 3: GitHub Ultimate -->
-        <div class="cert-flip-wrap reveal">
-          <div class="cert-flip-card">
-            <div class="smoke-container">
-              <span class="smoke s1"></span><span class="smoke s2"></span>
-              <span class="smoke s3"></span><span class="smoke s4"></span>
-              <span class="smoke s5"></span>
-            </div>
-            <div class="cert-front">
-              <div class="cert-front-glow"></div>
-              <div class="cert-front-icon">🔧</div>
-              <div class="cert-front-issuer">Udemy</div>
-              <h4 class="cert-front-title">GitHub Ultimate: Master Git and GitHub — Beginner to Expert</h4>
-              <p class="cert-front-author">Jason Taylor</p>
-              <div class="cert-front-date">Jun 17, 2022 &nbsp;·&nbsp; 6.5 hrs</div>
-              <div class="cert-front-tags">
-                <span class="cert-tag">Git</span><span class="cert-tag">GitHub</span><span class="cert-tag">Version Control</span>
-              </div>
-              <div class="cert-flip-hint">Hover to flip ↺</div>
-            </div>
-            <div class="cert-back">
-              <div class="cert-back-label">Certificate of Completion</div>
-              <div class="cert-back-preview">
-                <img src="certificates/previews/github-1.jpg" class="cert-preview-img" alt="GitHub Certificate" loading="lazy"/>
-              </div>
-              <a href="certificates/GITHUB.pdf" target="_blank" class="cert-view-btn">
-                📄 View Certificate
-              </a>
-              <div class="cert-back-id">UC-22fa7761-05e4-4f22-bd9a-93da98c5ef76</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cert 4: Modern Flexbox -->
-        <div class="cert-flip-wrap reveal">
-          <div class="cert-flip-card">
-            <div class="smoke-container">
-              <span class="smoke s1"></span><span class="smoke s2"></span>
-              <span class="smoke s3"></span><span class="smoke s4"></span>
-              <span class="smoke s5"></span>
-            </div>
-            <div class="cert-front">
-              <div class="cert-front-glow"></div>
-              <div class="cert-front-icon">🎨</div>
-              <div class="cert-front-issuer">Udemy</div>
-              <h4 class="cert-front-title">The Modern Flexbox, Grid, Sass &amp; Animations Developer Course</h4>
-              <p class="cert-front-author">Muslim Helalee</p>
-              <div class="cert-front-date">Feb 10, 2026 &nbsp;·&nbsp; 48.5 hrs</div>
-              <div class="cert-front-tags">
-                <span class="cert-tag">CSS</span><span class="cert-tag">Flexbox</span><span class="cert-tag">Grid</span><span class="cert-tag">Sass</span>
-              </div>
-              <div class="cert-flip-hint">Hover to flip ↺</div>
-            </div>
-            <div class="cert-back">
-              <div class="cert-back-label">Certificate of Completion</div>
-              <div class="cert-back-preview">
-                <img src="certificates/previews/flexbox_grid-1.jpg" class="cert-preview-img" alt="Flexbox Grid Certificate" loading="lazy"/>
-              </div>
-              <a href="certificates/responsiveness.pdf" target="_blank" class="cert-view-btn">
-                📄 View Certificate
-              </a>
-              <div class="cert-back-id">UC-1b32e9c3-a440-46b5-aec6-11d9cac27b9c</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cert 5: VA Training (no PDF — training only) -->
-        <div class="cert-flip-wrap reveal">
-          <div class="cert-flip-card cert-no-pdf">
-            <div class="smoke-container">
-              <span class="smoke s1"></span><span class="smoke s2"></span>
-              <span class="smoke s3"></span><span class="smoke s4"></span>
-              <span class="smoke s5"></span>
-            </div>
-            <div class="cert-front">
-              <div class="cert-front-glow"></div>
-              <div class="cert-front-icon">🤝</div>
-              <div class="cert-front-issuer">YourVABuddy</div>
-              <h4 class="cert-front-title">Virtual Assistant Training (VA 101)</h4>
-              <p class="cert-front-author">YourVABuddy Program</p>
-              <div class="cert-front-date">Feb 25, 2026 &nbsp;·&nbsp; Training</div>
-              <div class="cert-front-tags">
-                <span class="cert-tag">VA</span><span class="cert-tag">Asana</span><span class="cert-tag">Remote Work</span>
-              </div>
-              <div class="cert-flip-hint">Hover to flip ↺</div>
-            </div>
-            <div class="cert-back cert-back-training">
-              <div class="cert-back-label">Professional Training</div>
-              <div class="cert-training-note">
-                <span class="cert-training-icon">🏅</span>
-                <p>Completed the full VA 101 training program at YourVABuddy, covering time management, client relations, Asana, Trello, and Google Workspace workflows.</p>
-                <p class="cert-training-note-sub">No formal certificate issued — training completed.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cert 6: Vibe Coding / Build with AI -->
-        <div class="cert-flip-wrap reveal">
-          <div class="cert-flip-card">
-            <div class="smoke-container">
-              <span class="smoke s1"></span><span class="smoke s2"></span>
-              <span class="smoke s3"></span><span class="smoke s4"></span>
-              <span class="smoke s5"></span>
-            </div>
-            <div class="cert-front">
-              <div class="cert-front-glow"></div>
-              <div class="cert-front-icon">🤖</div>
-              <div class="cert-front-issuer">Udemy</div>
-              <h4 class="cert-front-title">Vibe Coding Bootcamp: Build Any App, Game or Website with AI</h4>
-              <p class="cert-front-author">Ivan Lourenço Gomes</p>
-              <div class="cert-front-date">Mar 9, 2026 &nbsp;·&nbsp; 4 hrs</div>
-              <div class="cert-front-tags">
-                <span class="cert-tag">AI Dev</span><span class="cert-tag">Lovable</span><span class="cert-tag">Vibe Coding</span>
-              </div>
-              <div class="cert-flip-hint">Hover to flip ↺</div>
-            </div>
-            <div class="cert-back">
-              <div class="cert-back-label">Certificate of Completion</div>
-              <div class="cert-back-preview">
-                <img src="certificates/previews/vibe_coding-1.jpg" class="cert-preview-img" alt="Vibe Coding Certificate" loading="lazy"/>
-              </div>
-              <a href="certificates/vide%20coding.pdf" target="_blank" class="cert-view-btn">
-                📄 View Certificate
-              </a>
-              <div class="cert-back-id">UC-bbee5475-d4b5-4b3a-988f-ca4587484add</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Education highlight -->
-      <div class="cert-education reveal">
-        <div class="edu-icon">🏛️</div>
-        <div class="edu-body">
-          <div class="edu-meta">
-            <span class="cert-issuer">De La Salle University Dasmariñas (DLSU-D)</span>
-            <span class="cert-date">2013 – 2018</span>
-          </div>
-          <h4 class="edu-title">Bachelor of Science in Computer Science</h4>
-          <p class="edu-desc">Bachelor of Science in Computer Science, De La Salle University Dasmariñas (DLSU-D) - Graduated with honors, honing skills in software development, algorithms, and database management. Completed comprehensive projects that enhanced problem-solving abilities and teamwork experience. Developed a strong foundation in programming languages such as Java, C# Winform, Android, iOS, HTML, CSS, JS. Engaged in industry-relevant internships, applying theoretical knowledge in real-world scenarios, and fostering a deep understanding of emerging technologies. This rigorous academic training prepares me to excel in dynamic tech environments and contributes to my career goal of becoming a software engineer.</p>
+        <!-- Trust note -->
+        <div class="projects-trust-note reveal">
+          <p>
+            🔐 Client projects are kept confidential out of respect for my
+            clients. But if you're facing a similar problem — inefficient
+            workflows, manual tasks eating your time, or data you can't make
+            sense of —
+            <a href="chat.html" target="_blank" class="trust-link"
+              >let's talk and build your solution</a
+            >.
+          </p>
         </div>
       </div>
+    </section>
 
-    </div>
-  </section>
+    <!-- ===== GAMES SECTION ===== -->
+    <section class="games" id="games">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES ·
+                GAMES · GAMES ·
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">Games I Built</h2>
+          <p class="projects-subtitle">
+            Full-stack games engineered from scratch — real architecture, real
+            performance, real stakes.
+          </p>
+        </div>
 
-  <!-- ===== COMMENTS SECTION ===== -->
-  <section class="comments-section" id="comments">
-    <div class="container">
-
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">TESTIMONIALS · FEEDBACK · REVIEWS · GUEST COMMENTS · RATE MY WORK · TESTIMONIALS · FEEDBACK · REVIEWS · </span></span></span>
-        <h2 class="section-title">What They Say</h2>
+        <div class="projects-grid">
+          <!-- Game 1: The Void Ascension -->
+          <article class="project-card project-card--personal reveal">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">⚔️</span>
+              </div>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://clustered-mmorpg.onrender.com"
+                  target="_blank"
+                  class="project-link-btn"
+                  >Play Now →</a
+                >
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">MongoDB atlas</span
+                  ><span class="ptag">Node.js</span
+                  ><span class="ptag">React</span
+                  ><span class="ptag">TypeScript</span
+                  ><span class="ptag">WebSocket</span
+                  ><span class="ptag">Render</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="ongoing-badge">🔄 Ongoing</span>
+                  <span class="personal-badge">🎮 MMORPG</span>
+                </div>
+              </div>
+              <h3 class="project-title">The Void Ascension</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 28, 2026 – Present</span>
+                <span class="meta-item">🛠️ Self-Built</span>
+              </div>
+              <p class="project-desc">
+                A <strong>high-performance, 900-level RPG engine</strong> built
+                to handle massive entity management and a high-stakes player
+                economy. Supports a 60-unit real-time army across 50 world maps,
+                with complex mathematical scaling and low-latency data
+                persistence. Features a horde system where 50 "Scrapper" minions
+                inherit 50% of player attributes in real-time, a unified
+                algorithmic scaling engine, and a server-side
+                <strong>15% Shatter Risk mechanic</strong> — permanent item
+                destruction on death — driving strategic gameplay stakes.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Tech highlights:</span> Scalable
+                MongoDB schema for 900-level progression, WebSocket-driven
+                real-time combat, cloud background workers for async game logic,
+                and a risk-based economy system built for long-term player
+                engagement.
+              </div>
+              <div
+                class="project-result"
+                style="
+                  border-color: rgba(255, 68, 68, 0.2);
+                  background: rgba(255, 68, 68, 0.05);
+                "
+              >
+                <span class="result-label" style="color: #ff6b6b"
+                  >⚠️ Note:</span
+                >
+                If the live site is slow to load, Render's free tier may be
+                spinning up. Give it 30–60 seconds and refresh.
+              </div>
+              <div class="personal-project-links">
+                <a
+                  href="https://clustered-mmorpg.onrender.com"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🎮 Play Now →
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
+    </section>
 
-      <!-- ── Carousel Display ─────────────────────── -->
-      <div class="comments-carousel-wrap reveal">
-        <div class="comments-carousel" id="commentsCarousel">
-          <!-- JS populated -->
-          <div class="comments-empty" id="commentsEmpty">
-            <div class="comments-empty-icon">💬</div>
-            <p>No comments yet. Be the first to leave a review!</p>
-          </div>
+    <!-- ===== EXPERIENCE SECTION ===== -->
+    <section class="experience" id="experience">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >EXPERIENCE · EXPERIENCE · EXPERIENCE · EXPERIENCE · EXPERIENCE
+                · EXPERIENCE · EXPERIENCE</span
+              ></span
+            ></span
+          >
+          <h2 class="section-title">Work Experience</h2>
         </div>
-        <div class="carousel-controls">
-          <button class="carousel-btn" id="carouselPrev" aria-label="Previous">&#8592;</button>
-          <div class="carousel-dots" id="carouselDots"></div>
-          <button class="carousel-btn" id="carouselNext" aria-label="Next">&#8594;</button>
+
+        <div class="timeline">
+          <div class="timeline-spine"></div>
+
+          <!-- Job 1: HTECT CORP — Nov 2022 – Oct 2023 (newest) -->
+          <div class="timeline-item reveal" data-side="left">
+            <div class="timeline-dot"><span class="dot-icon">💻</span></div>
+            <div class="timeline-card">
+              <div class="tc-header">
+                <div class="tc-title-wrap">
+                  <h3 class="tc-role">Junior Programmer</h3>
+                  <span class="tc-stack">(Laravel Dev.)</span>
+                  <span class="tc-badge tc-badge--fulltime">Full Time</span>
+                </div>
+                <div class="tc-meta">
+                  <span class="tc-company">HTECT CORP.</span>
+                  <span class="tc-date">Nov 2022 – Oct 2023</span>
+                </div>
+              </div>
+              <p class="tc-desc">
+                Developed and maintained Laravel framework web applications at a
+                dynamic software development firm specializing in custom
+                solutions. Collaborated with senior developers in Agile sprints
+                — designing, testing, and deploying responsive, high-performance
+                applications. Integrated automated testing frameworks that
+                reduced bug reports and contributed to more stable releases.
+                Participated in code reviews and delivered constructive feedback
+                to improve overall code quality and maintainability.
+              </p>
+              <div class="tc-tags">
+                <span class="tc-tag">Laravel</span>
+                <span class="tc-tag">PHP</span>
+                <span class="tc-tag">MySQL</span>
+                <span class="tc-tag">Agile</span>
+                <span class="tc-tag">Git</span>
+                <span class="tc-tag">Testing</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job 2: GRUPPO EMS CORP — Jun 2022 – Oct 2022 -->
+          <div class="timeline-item reveal" data-side="right">
+            <div class="timeline-dot"><span class="dot-icon">🖥️</span></div>
+            <div class="timeline-card">
+              <div class="tc-header">
+                <div class="tc-title-wrap">
+                  <h3 class="tc-role">System Developer</h3>
+                  <span class="tc-stack">(.NET Dev.)</span>
+                  <span class="tc-badge tc-badge--fulltime">Full Time</span>
+                </div>
+                <div class="tc-meta">
+                  <span class="tc-company">GRUPPO EMS CORP.</span>
+                  <span class="tc-date">Jun 2022 – Oct 2022</span>
+                </div>
+              </div>
+              <p class="tc-desc">
+                Completed structured ASP.NET training and developed a C# .NET
+                MVC web application supporting internal HR operations —
+                including employee performance evaluation, attendance
+                management, and ID-based QR code timekeeping. Designed and
+                developed tracking systems for shuttle services and private
+                vehicle usage. Partnered with the HR department to integrate
+                applications with the company's central database, ensuring data
+                consistency and system reliability across all departments.
+              </p>
+              <div class="tc-tags">
+                <span class="tc-tag">C# .NET</span>
+                <span class="tc-tag">ASP.NET MVC</span>
+                <span class="tc-tag">SQL Server</span>
+                <span class="tc-tag">QR Code</span>
+                <span class="tc-tag">HR Systems</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job 3: Western Digital — Oct 2019 – Apr 2022 -->
+          <div class="timeline-item reveal" data-side="left">
+            <div class="timeline-dot"><span class="dot-icon">⚙️</span></div>
+            <div class="timeline-card">
+              <div class="tc-header">
+                <div class="tc-title-wrap">
+                  <h3 class="tc-role">Test Engineering Tech III</h3>
+                  <span class="tc-stack">(Dept. Specialist)</span>
+                  <span class="tc-badge tc-badge--fulltime">Full Time</span>
+                </div>
+                <div class="tc-meta">
+                  <span class="tc-company">Western Digital</span>
+                  <span class="tc-date">Oct 2019 – Apr 2022</span>
+                </div>
+              </div>
+              <p class="tc-desc">
+                Managed hands-on operation and technical maintenance of Slider
+                Fab machinery at one of the world's leading data storage
+                companies — ensuring peak performance through systematic
+                inspections and 5S methodology. Leveraged Excel macros to
+                process complex machine performance data and conduct deep-dive
+                analyses identifying root causes of recurring failures. Resolved
+                a critical machine issue within two weeks, drastically
+                outperforming standard resolution timelines and enabling the
+                facility to consistently meet weekly production targets.
+              </p>
+              <div class="tc-tags">
+                <span class="tc-tag">Data Analysis</span>
+                <span class="tc-tag">Excel Macros</span>
+                <span class="tc-tag">5S Methodology</span>
+                <span class="tc-tag">Troubleshooting</span>
+                <span class="tc-tag">Technical Maintenance</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job 4: Conduent — Mar 2018 – Aug 2018 (oldest) -->
+          <div class="timeline-item reveal" data-side="right">
+            <div class="timeline-dot"><span class="dot-icon">🔍</span></div>
+            <div class="timeline-card">
+              <div class="tc-header">
+                <div class="tc-title-wrap">
+                  <h3 class="tc-role">Software Quality Assurance</h3>
+                  <span class="tc-stack">(QA Engineer)</span>
+                  <span class="tc-badge tc-badge--fulltime">Full Time</span>
+                </div>
+                <div class="tc-meta">
+                  <span class="tc-company">Conduent</span>
+                  <span class="tc-date">Mar 2018 – Aug 2018</span>
+                </div>
+              </div>
+              <p class="tc-desc">
+                Handled comprehensive QA testing for client websites — ensuring
+                peak functionality, usability, and technical performance across
+                diverse digital environments. Developed step-by-step testing
+                procedures in Microsoft Excel to standardize website validation
+                and maintain high quality-control benchmarks. Evaluated UI/UX
+                designs for usability and accessibility, rigorously tested
+                responsiveness across multiple devices and screen sizes, and
+                documented findings in detailed professional QA reports for the
+                development team.
+              </p>
+              <div class="tc-tags">
+                <span class="tc-tag">QA Testing</span>
+                <span class="tc-tag">UI/UX Review</span>
+                <span class="tc-tag">Test Documentation</span>
+                <span class="tc-tag">Cross-Device Testing</span>
+                <span class="tc-tag">Excel</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <!-- ── Add Comment Form ─────────────────────── -->
-      <div class="comment-form-wrap reveal">
-        <div class="comment-form-header">
-          <h3 class="comment-form-title">Leave a Review</h3>
-          <p class="comment-form-sub">Your feedback means a lot. All fields marked <span class="req-star">*</span> are required.</p>
+    <!-- ===== EXPERIENCE SECTION ===== -->
+
+    <!-- ===== CERTIFICATIONS SECTION ===== -->
+    <section class="certifications" id="certifications">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >CERTIFICATES · CERTIFICATES · CERTIFICATES · CERTIFICATES ·
+                CERTIFICATES · CERTIFICATES · CERTIFICATES<span
+                  class="section-tag"
+                  >// certifications</span
+                >
+                GRID · VIBE CODING BOOTCAMP · VA 101 · YOURVABUDDY ·
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">Credentials</h2>
+          <p class="cert-subtitle">
+            Hover over a card to flip it — click
+            <strong>View Certificate</strong> to open the PDF.
+          </p>
         </div>
 
-        <form class="comment-form" id="commentForm" novalidate>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Full Name <span class="req-star">*</span></label>
-              <input type="text" id="cf-name" class="form-input" placeholder="e.g. Juan dela Cruz" required maxlength="60" />
-              <span class="form-error" id="err-name"></span>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email Address <span class="req-star">*</span></label>
-              <input type="email" id="cf-email" class="form-input" placeholder="e.g. juan@email.com" required maxlength="100" />
-              <span class="form-error" id="err-email"></span>
+        <div class="cert-flip-grid">
+          <!-- Cert 1: C# Basics -->
+          <div class="cert-flip-wrap reveal">
+            <div class="cert-flip-card">
+              <!-- Smoke particles -->
+              <div class="smoke-container">
+                <span class="smoke s1"></span><span class="smoke s2"></span>
+                <span class="smoke s3"></span><span class="smoke s4"></span>
+                <span class="smoke s5"></span>
+              </div>
+              <!-- Front -->
+              <div class="cert-front">
+                <div class="cert-front-glow"></div>
+                <div class="cert-front-icon">🎓</div>
+                <div class="cert-front-issuer">Udemy</div>
+                <h4 class="cert-front-title">
+                  C# Basics for Beginners: Learn C# Fundamentals by Coding
+                </h4>
+                <p class="cert-front-author">Mosh Hamedani</p>
+                <div class="cert-front-date">
+                  Jun 15, 2022 &nbsp;·&nbsp; 5.5 hrs
+                </div>
+                <div class="cert-front-tags">
+                  <span class="cert-tag">C#</span
+                  ><span class="cert-tag">OOP</span
+                  ><span class="cert-tag">Programming</span>
+                </div>
+                <div class="cert-flip-hint">Hover to flip ↺</div>
+              </div>
+              <!-- Back -->
+              <div class="cert-back">
+                <div class="cert-back-label">Certificate of Completion</div>
+                <div class="cert-back-preview">
+                  <img
+                    src="certificates/previews/csharp_basics-1.jpg"
+                    class="cert-preview-img"
+                    alt="C# Basics Certificate"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href="certificates/Csharp_1.pdf"
+                  target="_blank"
+                  class="cert-view-btn"
+                >
+                  📄 View Certificate
+                </a>
+                <div class="cert-back-id">
+                  UC-ba2da9eb-5e6c-417c-9ec8-dda55964b3df
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Project / Task Accomplished <span class="req-star">*</span></label>
-            <input type="text" id="cf-project" class="form-input" placeholder="e.g. PDF Automator, VA Support, Auto Mailer..." required maxlength="100" />
-            <span class="form-error" id="err-project"></span>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Rating <span class="req-star">*</span> <span class="rating-value-display" id="ratingDisplay">50%</span></label>
-            <div class="rating-slider-wrap">
-              <span class="rating-min">1%</span>
-              <input type="range" id="cf-rating" class="rating-slider" min="1" max="100" value="50" />
-              <span class="rating-max">100%</span>
+          <!-- Cert 2: C# Intermediate -->
+          <div class="cert-flip-wrap reveal">
+            <div class="cert-flip-card">
+              <div class="smoke-container">
+                <span class="smoke s1"></span><span class="smoke s2"></span>
+                <span class="smoke s3"></span><span class="smoke s4"></span>
+                <span class="smoke s5"></span>
+              </div>
+              <div class="cert-front">
+                <div class="cert-front-glow"></div>
+                <div class="cert-front-icon">🎓</div>
+                <div class="cert-front-issuer">Udemy</div>
+                <h4 class="cert-front-title">
+                  C# Intermediate: Classes, Interfaces and OOP
+                </h4>
+                <p class="cert-front-author">Mosh Hamedani</p>
+                <div class="cert-front-date">
+                  Jun 16, 2022 &nbsp;·&nbsp; 6 hrs
+                </div>
+                <div class="cert-front-tags">
+                  <span class="cert-tag">C#</span
+                  ><span class="cert-tag">Interfaces</span
+                  ><span class="cert-tag">Design Patterns</span>
+                </div>
+                <div class="cert-flip-hint">Hover to flip ↺</div>
+              </div>
+              <div class="cert-back">
+                <div class="cert-back-label">Certificate of Completion</div>
+                <div class="cert-back-preview">
+                  <img
+                    src="certificates/previews/csharp_intermediate-1.jpg"
+                    class="cert-preview-img"
+                    alt="C# Intermediate Certificate"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href="certificates/Csharp_certificate.pdf"
+                  target="_blank"
+                  class="cert-view-btn"
+                >
+                  📄 View Certificate
+                </a>
+                <div class="cert-back-id">
+                  UC-62dc1b40-9d5f-464c-95ba-e20d7f2c6569
+                </div>
+              </div>
             </div>
-            <div class="rating-bar-track">
-              <div class="rating-bar-fill" id="ratingBarFill" style="width:50%"></div>
+          </div>
+
+          <!-- Cert 3: GitHub Ultimate -->
+          <div class="cert-flip-wrap reveal">
+            <div class="cert-flip-card">
+              <div class="smoke-container">
+                <span class="smoke s1"></span><span class="smoke s2"></span>
+                <span class="smoke s3"></span><span class="smoke s4"></span>
+                <span class="smoke s5"></span>
+              </div>
+              <div class="cert-front">
+                <div class="cert-front-glow"></div>
+                <div class="cert-front-icon">🔧</div>
+                <div class="cert-front-issuer">Udemy</div>
+                <h4 class="cert-front-title">
+                  GitHub Ultimate: Master Git and GitHub — Beginner to Expert
+                </h4>
+                <p class="cert-front-author">Jason Taylor</p>
+                <div class="cert-front-date">
+                  Jun 17, 2022 &nbsp;·&nbsp; 6.5 hrs
+                </div>
+                <div class="cert-front-tags">
+                  <span class="cert-tag">Git</span
+                  ><span class="cert-tag">GitHub</span
+                  ><span class="cert-tag">Version Control</span>
+                </div>
+                <div class="cert-flip-hint">Hover to flip ↺</div>
+              </div>
+              <div class="cert-back">
+                <div class="cert-back-label">Certificate of Completion</div>
+                <div class="cert-back-preview">
+                  <img
+                    src="certificates/previews/github-1.jpg"
+                    class="cert-preview-img"
+                    alt="GitHub Certificate"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href="certificates/GITHUB.pdf"
+                  target="_blank"
+                  class="cert-view-btn"
+                >
+                  📄 View Certificate
+                </a>
+                <div class="cert-back-id">
+                  UC-22fa7761-05e4-4f22-bd9a-93da98c5ef76
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Your Comment <span class="req-star">*</span></label>
-            <textarea id="cf-comment" class="form-textarea" placeholder="Share your experience working with Ceron..." required maxlength="500" rows="4"></textarea>
-            <div class="form-char-count"><span id="charCount">0</span>/500</div>
-            <span class="form-error" id="err-comment"></span>
+          <!-- Cert 4: Modern Flexbox -->
+          <div class="cert-flip-wrap reveal">
+            <div class="cert-flip-card">
+              <div class="smoke-container">
+                <span class="smoke s1"></span><span class="smoke s2"></span>
+                <span class="smoke s3"></span><span class="smoke s4"></span>
+                <span class="smoke s5"></span>
+              </div>
+              <div class="cert-front">
+                <div class="cert-front-glow"></div>
+                <div class="cert-front-icon">🎨</div>
+                <div class="cert-front-issuer">Udemy</div>
+                <h4 class="cert-front-title">
+                  The Modern Flexbox, Grid, Sass &amp; Animations Developer
+                  Course
+                </h4>
+                <p class="cert-front-author">Muslim Helalee</p>
+                <div class="cert-front-date">
+                  Feb 10, 2026 &nbsp;·&nbsp; 48.5 hrs
+                </div>
+                <div class="cert-front-tags">
+                  <span class="cert-tag">CSS</span
+                  ><span class="cert-tag">Flexbox</span
+                  ><span class="cert-tag">Grid</span
+                  ><span class="cert-tag">Sass</span>
+                </div>
+                <div class="cert-flip-hint">Hover to flip ↺</div>
+              </div>
+              <div class="cert-back">
+                <div class="cert-back-label">Certificate of Completion</div>
+                <div class="cert-back-preview">
+                  <img
+                    src="certificates/previews/flexbox_grid-1.jpg"
+                    class="cert-preview-img"
+                    alt="Flexbox Grid Certificate"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href="certificates/responsiveness.pdf"
+                  target="_blank"
+                  class="cert-view-btn"
+                >
+                  📄 View Certificate
+                </a>
+                <div class="cert-back-id">
+                  UC-1b32e9c3-a440-46b5-aec6-11d9cac27b9c
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="form-footer">
-            <p class="form-privacy">🔒 Your email is used for verification only and will not be publicly displayed.</p>
-            <button type="submit" class="btn btn-primary comment-submit-btn" id="commentSubmitBtn">
-              <span id="submitBtnText">Submit Review</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <!-- Cert 5: VA Training (no PDF — training only) -->
+          <div class="cert-flip-wrap reveal">
+            <div class="cert-flip-card cert-no-pdf">
+              <div class="smoke-container">
+                <span class="smoke s1"></span><span class="smoke s2"></span>
+                <span class="smoke s3"></span><span class="smoke s4"></span>
+                <span class="smoke s5"></span>
+              </div>
+              <div class="cert-front">
+                <div class="cert-front-glow"></div>
+                <div class="cert-front-icon">🤝</div>
+                <div class="cert-front-issuer">YourVABuddy</div>
+                <h4 class="cert-front-title">
+                  Virtual Assistant Training (VA 101)
+                </h4>
+                <p class="cert-front-author">YourVABuddy Program</p>
+                <div class="cert-front-date">
+                  Feb 25, 2026 &nbsp;·&nbsp; Training
+                </div>
+                <div class="cert-front-tags">
+                  <span class="cert-tag">VA</span
+                  ><span class="cert-tag">Asana</span
+                  ><span class="cert-tag">Remote Work</span>
+                </div>
+                <div class="cert-flip-hint">Hover to flip ↺</div>
+              </div>
+              <div class="cert-back cert-back-training">
+                <div class="cert-back-label">Professional Training</div>
+                <div class="cert-training-note">
+                  <span class="cert-training-icon">🏅</span>
+                  <p>
+                    Completed the full VA 101 training program at YourVABuddy,
+                    covering time management, client relations, Asana, Trello,
+                    and Google Workspace workflows.
+                  </p>
+                  <p class="cert-training-note-sub">
+                    No formal certificate issued — training completed.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cert 6: Vibe Coding / Build with AI -->
+          <div class="cert-flip-wrap reveal">
+            <div class="cert-flip-card">
+              <div class="smoke-container">
+                <span class="smoke s1"></span><span class="smoke s2"></span>
+                <span class="smoke s3"></span><span class="smoke s4"></span>
+                <span class="smoke s5"></span>
+              </div>
+              <div class="cert-front">
+                <div class="cert-front-glow"></div>
+                <div class="cert-front-icon">🤖</div>
+                <div class="cert-front-issuer">Udemy</div>
+                <h4 class="cert-front-title">
+                  Vibe Coding Bootcamp: Build Any App, Game or Website with AI
+                </h4>
+                <p class="cert-front-author">Ivan Lourenço Gomes</p>
+                <div class="cert-front-date">
+                  Mar 9, 2026 &nbsp;·&nbsp; 4 hrs
+                </div>
+                <div class="cert-front-tags">
+                  <span class="cert-tag">AI Dev</span
+                  ><span class="cert-tag">Lovable</span
+                  ><span class="cert-tag">Vibe Coding</span>
+                </div>
+                <div class="cert-flip-hint">Hover to flip ↺</div>
+              </div>
+              <div class="cert-back">
+                <div class="cert-back-label">Certificate of Completion</div>
+                <div class="cert-back-preview">
+                  <img
+                    src="certificates/previews/vibe_coding-1.jpg"
+                    class="cert-preview-img"
+                    alt="Vibe Coding Certificate"
+                    loading="lazy"
+                  />
+                </div>
+                <a
+                  href="certificates/vide%20coding.pdf"
+                  target="_blank"
+                  class="cert-view-btn"
+                >
+                  📄 View Certificate
+                </a>
+                <div class="cert-back-id">
+                  UC-bbee5475-d4b5-4b3a-988f-ca4587484add
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Education highlight -->
+        <div class="cert-education reveal">
+          <div class="edu-icon">🏛️</div>
+          <div class="edu-body">
+            <div class="edu-meta">
+              <span class="cert-issuer"
+                >De La Salle University Dasmariñas (DLSU-D)</span
+              >
+              <span class="cert-date">2013 – 2018</span>
+            </div>
+            <h4 class="edu-title">Bachelor of Science in Computer Science</h4>
+            <p class="edu-desc">
+              Bachelor of Science in Computer Science, De La Salle University
+              Dasmariñas (DLSU-D) - Graduated with honors, honing skills in
+              software development, algorithms, and database management.
+              Completed comprehensive projects that enhanced problem-solving
+              abilities and teamwork experience. Developed a strong foundation
+              in programming languages such as Java, C# Winform, Android, iOS,
+              HTML, CSS, JS. Engaged in industry-relevant internships, applying
+              theoretical knowledge in real-world scenarios, and fostering a
+              deep understanding of emerging technologies. This rigorous
+              academic training prepares me to excel in dynamic tech
+              environments and contributes to my career goal of becoming a
+              software engineer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== COMMENTS SECTION ===== -->
+    <section class="comments-section" id="comments">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >TESTIMONIALS · FEEDBACK · REVIEWS · GUEST COMMENTS · RATE MY
+                WORK · TESTIMONIALS · FEEDBACK · REVIEWS ·
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">What They Say</h2>
+        </div>
+
+        <!-- ── Carousel Display ─────────────────────── -->
+        <div class="comments-carousel-wrap reveal">
+          <div class="comments-carousel" id="commentsCarousel">
+            <!-- JS populated -->
+            <div class="comments-empty" id="commentsEmpty">
+              <div class="comments-empty-icon">💬</div>
+              <p>No comments yet. Be the first to leave a review!</p>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button
+              class="carousel-btn"
+              id="carouselPrev"
+              aria-label="Previous"
+            >
+              &#8592;
+            </button>
+            <div class="carousel-dots" id="carouselDots"></div>
+            <button class="carousel-btn" id="carouselNext" aria-label="Next">
+              &#8594;
             </button>
           </div>
-
-          <div class="form-success" id="formSuccess">
-            <span>✅</span>
-            <p>Thank you! Your review has been submitted successfully.</p>
-          </div>
-          <div class="form-error-global" id="formErrorGlobal"></div>
-
-        </form>
-      </div>
-
-    </div>
-  </section>
-  <section class="resume-section" id="resume">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run">RESUME · RESUME · RESUME · RESUME · RESUME · RESUME · RESUME</span></span></span>
-        <h2 class="section-title">My Resume</h2>
-      </div>
-
-      <div class="resume-wrapper reveal">
-
-        <!-- Top action bar -->
-        <div class="resume-topbar">
-          <div class="resume-topbar-info">
-            <span class="resume-icon">📄</span>
-            <div>
-              <p class="resume-filename">ENHANCE_CURRICULUM_VITAE.pdf</p>
-              <p class="resume-meta">Ceron Matthew P. Calsena · Updated 2026</p>
-            </div>
-          </div>          
-          <div class="resume-actions">
-            <a href="ENHANCE_CV_ceron.pdf" target="_blank" class="resume-btn resume-btn-view">
-              <span>🔍 Full View</span>
-            </a>
-            <a href="ENHANCE_CV_ceron.pdf" download="ENHANCE_CV_ceron.pdf" class="resume-btn resume-btn-download">
-              <span>⬇ Download</span>
-            </a>
-          </div>       
-          <div class="resume-topbar-info">
-            <span class="resume-icon">📄</span>
-            <div>
-              <p class="resume-filename">ENHANCE_ATS.pdf</p>
-              <p class="resume-meta">Ceron Matthew P. Calsena · Updated 2026</p>
-            </div>
-          </div>
-          <div class="resume-actions">
-            <a href="ENHANCE_ATS_ceron.pdf" target="_blank" class="resume-btn resume-btn-view">
-              <span>🔍 Full View</span>
-            </a>
-            <a href="ENHANCE_ATS_ceron.pdf" download="ENHANCE_ATS_ceron.pdf" class="resume-btn resume-btn-download">
-              <span>⬇ Download</span>
-            </a>
-          </div>   
-          <div class="resume-topbar-info">
-            <span class="resume-icon">📄</span>
-            <div>
-              <p class="resume-filename">ATS.pdf</p>
-              <p class="resume-meta">Ceron Matthew P. Calsena · Updated 2026</p>
-            </div>
-          </div>
-          <div class="resume-actions">
-            <a href="ATS.pdf" target="_blank" class="resume-btn resume-btn-view">
-              <span>🔍 Full View</span>
-            </a>
-            <a href="ATS.pdf" download="ATS.pdf" class="resume-btn resume-btn-download">
-              <span>⬇ Download</span>
-            </a>
-          </div>  
         </div>
 
-        <!-- Image-based PDF Viewer -->
-        <div class="resume-viewer-wrap">
-          <div class="resume-viewer-inner">
-            <img id="resumePageImg" class="resume-page-img" src="resume_previews/ENHANCE CURRICULUM VITAE_01.jpg" alt="Resume Page 1" />
+        <!-- ── Add Comment Form ─────────────────────── -->
+        <div class="comment-form-wrap reveal">
+          <div class="comment-form-header">
+            <h3 class="comment-form-title">Leave a Review</h3>
+            <p class="comment-form-sub">
+              Your feedback means a lot. All fields marked
+              <span class="req-star">*</span> are required.
+            </p>
           </div>
 
-          <!-- Page controls -->
-          <div class="resume-controls">
-            <button class="resume-page-btn" id="prevPage" disabled>← Prev</button>
-            <span class="resume-page-info">
-              Page <span id="pageNum">1</span> of <span id="pageCount">06</span>
-            </span>
-            <button class="resume-page-btn" id="nextPage">Next →</button>
+          <form class="comment-form" id="commentForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label"
+                  >Full Name <span class="req-star">*</span></label
+                >
+                <input
+                  type="text"
+                  id="cf-name"
+                  class="form-input"
+                  placeholder="e.g. Juan dela Cruz"
+                  required
+                  maxlength="60"
+                />
+                <span class="form-error" id="err-name"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label"
+                  >Email Address <span class="req-star">*</span></label
+                >
+                <input
+                  type="email"
+                  id="cf-email"
+                  class="form-input"
+                  placeholder="e.g. juan@email.com"
+                  required
+                  maxlength="100"
+                />
+                <span class="form-error" id="err-email"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Project / Task Accomplished
+                <span class="req-star">*</span></label
+              >
+              <input
+                type="text"
+                id="cf-project"
+                class="form-input"
+                placeholder="e.g. PDF Automator, VA Support, Auto Mailer..."
+                required
+                maxlength="100"
+              />
+              <span class="form-error" id="err-project"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Rating <span class="req-star">*</span>
+                <span class="rating-value-display" id="ratingDisplay"
+                  >50%</span
+                ></label
+              >
+              <div class="rating-slider-wrap">
+                <span class="rating-min">1%</span>
+                <input
+                  type="range"
+                  id="cf-rating"
+                  class="rating-slider"
+                  min="1"
+                  max="100"
+                  value="50"
+                />
+                <span class="rating-max">100%</span>
+              </div>
+              <div class="rating-bar-track">
+                <div
+                  class="rating-bar-fill"
+                  id="ratingBarFill"
+                  style="width: 50%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Your Comment <span class="req-star">*</span></label
+              >
+              <textarea
+                id="cf-comment"
+                class="form-textarea"
+                placeholder="Share your experience working with Ceron..."
+                required
+                maxlength="500"
+                rows="4"
+              ></textarea>
+              <div class="form-char-count">
+                <span id="charCount">0</span>/500
+              </div>
+              <span class="form-error" id="err-comment"></span>
+            </div>
+
+            <div class="form-footer">
+              <p class="form-privacy">
+                🔒 Your email is used for verification only and will not be
+                publicly displayed.
+              </p>
+              <button
+                type="submit"
+                class="btn btn-primary comment-submit-btn"
+                id="commentSubmitBtn"
+              >
+                <span id="submitBtnText">Submit Review</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="form-success" id="formSuccess">
+              <span>✅</span>
+              <p>Thank you! Your review has been submitted successfully.</p>
+            </div>
+            <div class="form-error-global" id="formErrorGlobal"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+    <section class="resume-section" id="resume">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >RESUME · RESUME · RESUME · RESUME · RESUME · RESUME ·
+                RESUME</span
+              ></span
+            ></span
+          >
+          <h2 class="section-title">My Resume</h2>
+        </div>
+
+        <div class="resume-wrapper reveal">
+          <!-- Top action bar -->
+          <div class="resume-topbar">
+            <!-- <div class="resume-topbar-info">
+              <span class="resume-icon">📄</span>
+              <div>
+                <p class="resume-filename">ENHANCE_CURRICULUM_VITAE.pdf</p>
+                <p class="resume-meta">
+                  Ceron Matthew P. Calsena · Updated 2026
+                </p>
+              </div>
+            </div>
+            <div class="resume-actions">
+              <a
+                href="ENHANCE_CV_ceron.pdf"
+                target="_blank"
+                class="resume-btn resume-btn-view"
+              >
+                <span>🔍 Full View</span>
+              </a>
+              <a
+                href="ENHANCE_CV_ceron.pdf"
+                download="ENHANCE_CV_ceron.pdf"
+                class="resume-btn resume-btn-download"
+              >
+                <span>⬇ Download</span>
+              </a>
+            </div> -->
+            <!-- <div class="resume-topbar-info">
+              <span class="resume-icon">📄</span>
+              <div>
+                <p class="resume-filename">ENHANCE_ATS.pdf</p>
+                <p class="resume-meta">
+                  Ceron Matthew P. Calsena · Updated 2026
+                </p>
+              </div>
+            </div>
+            <div class="resume-actions">
+              <a
+                href="ENHANCE_ATS_ceron.pdf"
+                target="_blank"
+                class="resume-btn resume-btn-view"
+              >
+                <span>🔍 Full View</span>
+              </a>
+              <a
+                href="ENHANCE_ATS_ceron.pdf"
+                download="ENHANCE_ATS_ceron.pdf"
+                class="resume-btn resume-btn-download"
+              >
+                <span>⬇ Download</span>
+              </a>
+            </div> -->
+            <div class="resume-topbar-info">
+              <span class="resume-icon">📄</span>
+              <div>
+                <p class="resume-filename">ATS.pdf</p>
+                <p class="resume-meta">
+                  Ceron Matthew P. Calsena · Updated 2026
+                </p>
+              </div>
+            </div>
+            <div class="resume-actions">
+              <a
+                href="ATS.pdf"
+                target="_blank"
+                class="resume-btn resume-btn-view"
+              >
+                <span>🔍 Full View</span>
+              </a>
+              <a
+                href="ATS.pdf"
+                download="ATS.pdf"
+                class="resume-btn resume-btn-download"
+              >
+                <span>⬇ Download</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Image-based PDF Viewer -->
+          <div class="resume-viewer-wrap">
+            <div class="resume-viewer-inner">
+              <img
+                id="resumePageImg"
+                class="resume-page-img"
+                src="resume_previews/ENHANCE CURRICULUM VITAE_01.jpg"
+                alt="Resume Page 1"
+              />
+            </div>
+
+            <!-- Page controls -->
+            <div class="resume-controls">
+              <button class="resume-page-btn" id="prevPage" disabled>
+                ← Prev
+              </button>
+              <span class="resume-page-info">
+                Page <span id="pageNum">1</span> of
+                <span id="pageCount">06</span>
+              </span>
+              <button class="resume-page-btn" id="nextPage">Next →</button>
+            </div>
           </div>
         </div>
-
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== CONTACT SECTION ===== -->
-  <section class="contact" id="contact">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-tag"><span class="section-tag-ticker"><span class="section-tag-run"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8cefe9fee3e2efede0ffe9e2edccebe1ede5e0a2efe3e1">[email&#160;protected]</a> · +63 966 882 9302 · LINKEDIN · FACEBOOK · ONLINEJOBS.PH · LET'S WORK TOGETHER · </span></span></span>
-        <h2 class="section-title">Let's Work Together</h2>
-      </div>
-      <div class="contact-content reveal">
-        <p class="contact-lead">Have a project in mind, need a virtual assistant, or want to automate your workflow? Let's talk!</p>
-        <div class="contact-links">
-          <a href="https://mail.google.com/mail/?view=cm&to=ceroncalsena@gmail.com" target="_blank" class="contact-item">
-            <div class="contact-icon">✉</div>
-            <div class="contact-details">
-              <span class="contact-label">Email</span>
-              <span class="contact-value">ceroncalsena@gmail.com</span>
-            </div>
-          </a>
-          <a href="tel:+639668829302" class="contact-item">
-            <div class="contact-icon">📞</div>
-            <div class="contact-details">
-              <span class="contact-label">Phone | Viber | Whatsapp</span>
-              <span class="contact-value">(+63) 966-882-9302</span>
-            </div>
-          </a>
-          <a href="https://sg.linkedin.com/in/ceron-matthew-calse%C3%B1a-984134295" target="_blank" class="contact-item">
-            <div class="contact-icon">in</div>
-            <div class="contact-details">
-              <span class="contact-label">LinkedIn</span>
-              <span class="contact-value">Ceron Matthew Calseña</span>
-            </div>
-          </a>
-          <a href="https://www.facebook.com/share/16gxK3wJAz/" target="_blank" class="contact-item">
-            <div class="contact-icon">f</div>
-            <div class="contact-details">
-              <span class="contact-label">Facebook</span>
-              <span class="contact-value">Ceron Matthew Calsena</span>
-            </div>
-          </a>
-          <a href="https://www.onlinejobs.ph/jobseekers/info/4794065" target="_blank" class="contact-item">
-            <div class="contact-icon">OLJ</div>
-            <div class="contact-details">
-              <span class="contact-label">OnlineJobs.ph</span>
-              <span class="contact-value">View My Profile</span>
-            </div>
-          </a>
-          <a href="zoommtg://zoom.us/join?confno=5719132658" class="contact-item">
-            <div class="contact-icon">🎥</div>
-            <div class="contact-details">
-              <span class="contact-label">Zoom</span>
-              <span class="contact-value">571 913 2658</span>
-            </div>
+    <!-- ===== CONTACT SECTION ===== -->
+    <section class="contact" id="contact">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                ><a
+                  href="/cdn-cgi/l/email-protection"
+                  class="__cf_email__"
+                  data-cfemail="8cefe9fee3e2efede0ffe9e2edccebe1ede5e0a2efe3e1"
+                  >[email&#160;protected]</a
+                >
+                · +63 966 882 9302 · LINKEDIN · FACEBOOK · ONLINEJOBS.PH · LET'S
+                WORK TOGETHER ·
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">Let's Work Together</h2>
+        </div>
+        <div class="contact-content reveal">
+          <p class="contact-lead">
+            Have a project in mind, need a virtual assistant, or want to
+            automate your workflow? Let's talk!
+          </p>
+          <div class="contact-links">
+            <a
+              href="https://mail.google.com/mail/?view=cm&to=ceroncalsena@gmail.com"
+              target="_blank"
+              class="contact-item"
+            >
+              <div class="contact-icon">✉</div>
+              <div class="contact-details">
+                <span class="contact-label">Email</span>
+                <span class="contact-value">ceroncalsena@gmail.com</span>
+              </div>
+            </a>
+            <a href="tel:+639668829302" class="contact-item">
+              <div class="contact-icon">📞</div>
+              <div class="contact-details">
+                <span class="contact-label">Phone | Viber | Whatsapp</span>
+                <span class="contact-value">(+63) 966-882-9302</span>
+              </div>
+            </a>
+            <a
+              href="https://sg.linkedin.com/in/ceron-matthew-calse%C3%B1a-984134295"
+              target="_blank"
+              class="contact-item"
+            >
+              <div class="contact-icon">in</div>
+              <div class="contact-details">
+                <span class="contact-label">LinkedIn</span>
+                <span class="contact-value">Ceron Matthew Calseña</span>
+              </div>
+            </a>
+            <a
+              href="https://www.facebook.com/share/16gxK3wJAz/"
+              target="_blank"
+              class="contact-item"
+            >
+              <div class="contact-icon">f</div>
+              <div class="contact-details">
+                <span class="contact-label">Facebook</span>
+                <span class="contact-value">Ceron Matthew Calsena</span>
+              </div>
+            </a>
+            <a
+              href="https://www.onlinejobs.ph/jobseekers/info/4794065"
+              target="_blank"
+              class="contact-item"
+            >
+              <div class="contact-icon">OLJ</div>
+              <div class="contact-details">
+                <span class="contact-label">OnlineJobs.ph</span>
+                <span class="contact-value">View My Profile</span>
+              </div>
+            </a>
+            <a
+              href="zoommtg://zoom.us/join?confno=5719132658"
+              class="contact-item"
+            >
+              <div class="contact-icon">🎥</div>
+              <div class="contact-details">
+                <span class="contact-label">Zoom</span>
+                <span class="contact-value">571 913 2658</span>
+              </div>
+            </a>
+          </div>
+          <a
+            href="chat.html"
+            target="_blank"
+            class="btn btn-primary contact-cta"
+          >
+            <span>Send Me a Message</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
-        <a href="chat.html" target="_blank" class="btn btn-primary contact-cta">
-          <span>Send Me a Message</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===== FOOTER ===== -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-inner">
-        <div class="footer-logo">
-          <span class="logo-bracket">&lt;</span>CMC2026<span class="logo-bracket">/&gt;</span>
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-inner">
+          <div class="footer-logo">
+            <span class="logo-bracket">&lt;</span>CMC2026<span
+              class="logo-bracket"
+              >/&gt;</span
+            >
+          </div>
+          <p class="footer-copy">
+            © 2026 Ceron Matthew Calsena. Crafted with 🔥 &amp; code.
+          </p>
+          <p class="footer-quote">"Support That Moves You Forward."</p>
         </div>
-        <p class="footer-copy">© 2026 Ceron Matthew Calsena. Crafted with 🔥 &amp; code.</p>
-        <p class="footer-quote">"Support That Moves You Forward."</p>
       </div>
-    </div>
-  </footer>
+    </footer>
 
-  <!-- Firebase SDK -->
-  <script type="module" src="js/firebase-comments.js"></script>
-  <script type="module" src="js/firebase-visitors.js"></script>
-  <script src="js/script.js"></script>
-</body>
+    <!-- Firebase SDK -->
+    <script type="module" src="js/firebase-comments.js"></script>
+    <script type="module" src="js/firebase-visitors.js"></script>
+    <script src="js/script.js"></script>
+  </body>
 </html>
