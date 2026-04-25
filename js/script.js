@@ -285,35 +285,59 @@ if (toolsSection) {
 // Bug fix: removed PDF.js canvas code — certs now use static JPG previews
 // No JS needed for cert previews (pure HTML img tags)
 
-// ─── Resume Image Viewer ──────────────────
+// ─── Resume Tabs ──────────────────────────
 (function() {
-  const img     = document.getElementById('resumePageImg');
-  const prevBtn = document.getElementById('prevPage');
-  const nextBtn = document.getElementById('nextPage');
-  const pageNum = document.getElementById('pageNum');
-  const TOTAL   = 6;
-  let   curr    = 1;
+  const tabBtns     = document.querySelectorAll('.resume-tab-btn');
+  const tabContents = document.querySelectorAll('.resume-tab-content');
+  const img         = document.getElementById('resumePageImg');
+  const prevBtn     = document.getElementById('prevPage');
+  const nextBtn     = document.getElementById('nextPage');
+  const pageNum     = document.getElementById('pageNum');
 
-  if (!img) return;
+  const tabConfig = {
+    standard: { prefix: 'resume_previews/ats-page-',    ext: '.jpg', total: 4 },
+    visual:   { prefix: 'resume_previews/ENHANCE CURRICULUM VITAE_', ext: '.jpg', total: 7 }
+  };
+
+  let currentTab = 'standard';
+  let curr = 1;
+
+  const pageCount = document.getElementById('pageCount');
 
   function goToPage(n) {
-    curr = Math.max(1, Math.min(n, TOTAL));
+    const cfg = tabConfig[currentTab];
+    curr = Math.max(1, Math.min(n, cfg.total));
     const pad = String(curr).padStart(2, '0');
     img.style.opacity = '0';
-    img.src = `resume_previews/ENHANCE CURRICULUM VITAE_${pad}.jpg`;
+    img.src = `${cfg.prefix}${pad}${cfg.ext}`;
     img.alt = `Resume Page ${curr}`;
     img.onload = () => { img.style.opacity = '1'; };
-    if (pageNum) pageNum.textContent = curr;
+    if (pageNum)   pageNum.textContent  = curr;
+    if (pageCount) pageCount.textContent = String(cfg.total).padStart(2, '0');
     if (prevBtn) prevBtn.disabled = (curr <= 1);
-    if (nextBtn) nextBtn.disabled = (curr >= TOTAL);
+    if (nextBtn) nextBtn.disabled = (curr >= cfg.total);
   }
 
-  img.style.transition = 'opacity 0.3s ease';
+  if (img) img.style.transition = 'opacity 0.3s ease';
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTab = btn.getAttribute('data-tab');
+      curr = 1;
+
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      tabContents.forEach(c => c.classList.remove('active'));
+      document.getElementById(`tab-${currentTab}`).classList.add('active');
+
+      goToPage(1);
+    });
+  });
 
   if (prevBtn) prevBtn.addEventListener('click', () => goToPage(curr - 1));
   if (nextBtn) nextBtn.addEventListener('click', () => goToPage(curr + 1));
 
-  // Keyboard navigation when resume section is visible
   document.addEventListener('keydown', e => {
     const section = document.getElementById('resume');
     if (!section) return;
@@ -323,4 +347,7 @@ if (toolsSection) {
       if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToPage(curr - 1);
     }
   });
+
+  // Init default tab
+  goToPage(1);
 })();

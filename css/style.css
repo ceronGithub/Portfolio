@@ -2329,6 +2329,49 @@ section { padding: 7rem 0; }
   margin: 0 auto;
 }
 
+/* Resume Tabs */
+.resume-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid rgba(255,122,0,0.1);
+  padding-bottom: 0;
+}
+
+.resume-tab-btn {
+  padding: 0.85rem 1.5rem;
+  background: transparent;
+  border: 2px solid transparent;
+  color: rgba(255,255,255,0.6);
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border-radius: 6px 6px 0 0;
+  border-bottom: none;
+}
+
+.resume-tab-btn:hover {
+  color: var(--orange);
+  border-color: rgba(255,122,0,0.3);
+}
+
+.resume-tab-btn.active {
+  color: var(--orange);
+  border-color: var(--orange);
+  border-bottom: 3px solid var(--orange);
+  background: rgba(255,122,0,0.05);
+}
+
+.resume-tab-content {
+  display: none;
+}
+
+.resume-tab-content.active {
+  display: flex;
+}
+
 /* Top bar */
 .resume-topbar {
   display: flex;
