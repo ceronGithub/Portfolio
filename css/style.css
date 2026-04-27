@@ -587,22 +587,23 @@ section { padding: 7rem 0; }
 /* Reveal Animation — Fade In + Fade Out */
 .reveal {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translate3d(0, 40px, 0);
   transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: var(--stagger-delay, 0s);
   will-change: opacity, transform;
 }
 
 /* Fade IN — element enters viewport from below */
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
 }
 
 /* Fade OUT upward — scrolled past (exits top of viewport) */
 .reveal.fade-out-up {
   opacity: 0;
-  transform: translateY(-30px);
+  transform: translate3d(0, -30px, 0);
   transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -610,14 +611,14 @@ section { padding: 7rem 0; }
 /* Fade OUT downward — scrolled back up (exits bottom of viewport) */
 .reveal.fade-out-down {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translate3d(0, 40px, 0);
   transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .reveal.fade-out {
   opacity: 0;
-  transform: translateY(-30px);
+  transform: translate3d(0, -30px, 0);
   transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
@@ -627,7 +628,7 @@ section { padding: 7rem 0; }
 .about {
   background:
     linear-gradient(105deg, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.92) 55%, rgba(10,10,15,0.75) 100%),
-    url('../images/backgrounds/bg-about.png') left center / 80% auto no-repeat fixed;
+    url('../images/backgrounds/bg-about.png') left center / 80% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }
@@ -752,7 +753,7 @@ section { padding: 7rem 0; }
 .skills {
   background:
     linear-gradient(180deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.85) 35%, rgba(5,5,5,0.85) 65%, rgba(5,5,5,0.97) 100%),
-    url('../images/backgrounds/bg-skills.png') center 75% / 100% auto no-repeat fixed;
+    url('../images/backgrounds/bg-skills.png') center 75% / 100% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }
@@ -866,8 +867,18 @@ section { padding: 7rem 0; }
   background: var(--dark2);
   border: 1px solid rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.65);
-  transition: var(--transition);
+  transition: border-color 0.35s, color 0.35s, background 0.35s, box-shadow 0.35s,
+              opacity 0.4s ease, transform 0.4s ease;
+  transition-delay: var(--tag-delay, 0ms);
   cursor: default;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  will-change: opacity, transform;
+}
+
+.tools-visible .tool-tag {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .tool-tag:hover {
@@ -953,7 +964,7 @@ section { padding: 7rem 0; }
 .projects {
   background:
     linear-gradient(180deg, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.87) 40%, rgba(10,10,15,0.87) 60%, rgba(10,10,15,0.97) 100%),
-    url('../images/backgrounds/bg-projects.png') center -15% / 80% auto no-repeat fixed;
+    url('../images/backgrounds/bg-projects.png') center -15% / 80% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }
@@ -1348,7 +1359,7 @@ section { padding: 7rem 0; }
 .experience {
   background:
     linear-gradient(90deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.90) 50%, rgba(5,5,5,0.72) 100%),
-    url('../images/backgrounds/bg-experience.jpg') right center / 500px auto no-repeat fixed;
+    url('../images/backgrounds/bg-experience.jpg') right center / 500px auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }
@@ -1643,7 +1654,7 @@ section { padding: 7rem 0; }
 .certifications {
   background:
     linear-gradient(160deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.88) 50%, rgba(5,5,5,0.97) 100%),
-    url('../images/backgrounds/bg-certifications.png') center 70% / 100% auto no-repeat fixed;
+    url('../images/backgrounds/bg-certifications.png') center 70% / 100% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }
@@ -2423,6 +2434,10 @@ section { padding: 7rem 0; }
 
 .resume-tab-content.active {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
 }
 
 /* Top bar */
@@ -2430,7 +2445,7 @@ section { padding: 7rem 0; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 1rem;
   background: var(--dark2);
   border: 1px solid rgba(255,122,0,0.15);
@@ -2442,6 +2457,8 @@ section { padding: 7rem 0; }
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .resume-icon { font-size: 2rem; line-height: 1; }
@@ -2463,6 +2480,8 @@ section { padding: 7rem 0; }
 .resume-actions {
   display: flex;
   gap: 0.75rem;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .resume-btn {
@@ -2577,7 +2596,7 @@ section { padding: 7rem 0; }
 .contact {
   background:
     linear-gradient(170deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.90) 45%, rgba(5,5,5,0.75) 100%),
-    url('../images/backgrounds/bg-contact.jpg') right bottom / 480px auto no-repeat fixed;
+    url('../images/backgrounds/bg-contact.jpg') right bottom / 480px auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }

@@ -124,10 +124,10 @@ revealEls.forEach(el => revealObserver.observe(el));
 
 // ─── Staggered Children Animation ──────────
 document.querySelectorAll('.cert-flip-grid, .about-cards, .projects-grid, .contact-links, .about-stats').forEach(container => {
-  // Bug fix: updated selector from cert-grid → cert-flip-grid
   const children = container.querySelectorAll('.cert-flip-wrap, .info-card, .project-card, .contact-item, .stat-item');
+  // Use CSS custom property to avoid repeated style recalculations
   children.forEach((child, i) => {
-    child.style.transitionDelay = `${i * 0.08}s`;
+    child.style.setProperty('--stagger-delay', `${i * 0.08}s`);
   });
 });
 
@@ -153,15 +153,21 @@ const layerGrid = document.getElementById('layerGrid');
 const layerOrbs = document.getElementById('layerOrbs');
 const layerFg   = document.getElementById('layerFg');
 
+// Pre-promote layers to their own compositor layer
+[layerBg, layerGrid, layerOrbs, layerFg].forEach(el => {
+  if (el) el.style.willChange = 'transform';
+});
+
 let ticking = false;
 let lastScrollY = 0;
 
 function applyParallax() {
   if (!layerBg) return;
-  layerBg.style.transform   = `translateY(${lastScrollY * 0.15}px)`;
-  layerGrid.style.transform = `translateY(${lastScrollY * 0.08}px)`;
-  layerOrbs.style.transform = `translateY(${lastScrollY * 0.12}px)`;
-  if (layerFg) layerFg.style.transform = `translateY(${lastScrollY * 0.05}px)`;
+  const y = lastScrollY;
+  layerBg.style.transform   = `translate3d(0, ${y * 0.15}px, 0)`;
+  layerGrid.style.transform = `translate3d(0, ${y * 0.08}px, 0)`;
+  layerOrbs.style.transform = `translate3d(0, ${y * 0.12}px, 0)`;
+  if (layerFg) layerFg.style.transform = `translate3d(0, ${y * 0.05}px, 0)`;
   ticking = false;
 }
 
@@ -175,14 +181,25 @@ window.addEventListener('scroll', () => {
 
 // ─── Mouse Parallax (Hero only) ──────────
 const hero = document.getElementById('hero');
+let mouseTicking = false;
+let mouseX = 0, mouseY = 0;
+
+function applyMouseParallax() {
+  if (layerOrbs) layerOrbs.style.transform = `translate3d(${mouseX * 20}px, ${mouseY * 20}px, 0)`;
+  if (layerGrid) layerGrid.style.transform = `translate3d(${mouseX * 8}px, ${mouseY * 8}px, 0)`;
+  mouseTicking = false;
+}
+
 if (hero) {
   hero.addEventListener('mousemove', (e) => {
     const rect = hero.getBoundingClientRect();
-    const cx = (e.clientX - rect.left) / rect.width  - 0.5;
-    const cy = (e.clientY - rect.top)  / rect.height - 0.5;
-    if (layerOrbs) layerOrbs.style.transform = `translate(${cx * 20}px, ${cy * 20}px)`;
-    if (layerGrid) layerGrid.style.transform = `translate(${cx * 8}px, ${cy * 8}px)`;
-  });
+    mouseX = (e.clientX - rect.left) / rect.width  - 0.5;
+    mouseY = (e.clientY - rect.top)  / rect.height - 0.5;
+    if (!mouseTicking) {
+      requestAnimationFrame(applyMouseParallax);
+      mouseTicking = true;
+    }
+  }, { passive: true });
   hero.addEventListener('mouseleave', () => {
     if (layerOrbs) layerOrbs.style.transform = '';
     if (layerGrid) layerGrid.style.transform = '';
@@ -258,26 +275,19 @@ sortProjectCards();
 
 // ─── Tool Tags Stagger Animation ──────────
 const toolTags = document.querySelectorAll('.tool-tag');
+// Set stagger delays via CSS custom property once (no repeated style writes)
 toolTags.forEach((tag, i) => {
-  tag.style.transitionDelay = `${i * 0.03}s`;
-  tag.style.opacity = '0';
-  tag.style.transform = 'translateY(10px)';
+  tag.style.setProperty('--tag-delay', `${i * 30}ms`);
 });
 
 const toolsSection = document.querySelector('.tools-section');
 if (toolsSection) {
   const toolsObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
-      toolTags.forEach((tag, i) => {
-        setTimeout(() => {
-          tag.style.opacity = '1';
-          tag.style.transform = 'translateY(0)';
-          tag.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.35s, color 0.35s, background 0.35s, box-shadow 0.35s';
-        }, i * 40);
-      });
+      toolsSection.classList.add('tools-visible');
       toolsObserver.disconnect();
     }
-  }, { threshold: 0.2 });
+  }, { threshold: 0.1 });
   toolsObserver.observe(toolsSection);
 }
 
