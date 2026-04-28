@@ -72,14 +72,20 @@
   }
   .nav-links li:last-child .nav-link { border-bottom: none; }
 
-  /* Hero */
+  /* Hero — full width centering */
+  .hero         { padding: 5rem 1.5rem 4rem; width: 100%; box-sizing: border-box; }
   .hero-content {
     flex-direction: column;
+    align-items: center;
     text-align: center;
-    gap: 2.5rem;
+    width: 100%;
+    max-width: 100%;
+    gap: 2rem;
   }
-  .hero-cta     { justify-content: center; }
-  .profile-ring { width: 200px; height: 200px; }
+  .hero-text    { width: 100%; text-align: center; }
+  .hero-cta     { justify-content: center; flex-wrap: wrap; gap: 1rem; }
+  .profile-ring { width: 180px; height: 180px; }
+  .hero-name    { font-size: 2.2rem; }
 
   /* About */
   .about-grid  { grid-template-columns: 1fr; gap: 2.5rem; }
@@ -91,17 +97,17 @@
   .skills-grid-single { padding: 1.5rem; }
 
   /* Projects */
-  .projects-grid      { grid-template-columns: 1fr; }
-  .project-card-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-  .project-tags       { flex-wrap: wrap; }
-  .projects-trust-note { padding: 1rem; font-size: 0.8rem; }
-  .project-desc       { font-size: 0.88rem; }
-  .project-result     { font-size: 0.83rem; }
+  .projects-grid        { grid-template-columns: 1fr; }
+  .project-card-header  { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .project-tags         { flex-wrap: wrap; }
+  .projects-trust-note  { padding: 1rem; font-size: 0.8rem; }
+  .project-desc         { font-size: 0.88rem; }
+  .project-result       { font-size: 0.83rem; }
 
   /* AI Philosophy + LLM */
   .ai-philosophy,
-  .llm-section        { padding: 1.5rem; }
-  .llm-cards          { grid-template-columns: 1fr; }
+  .llm-section  { padding: 1.5rem; }
+  .llm-cards    { grid-template-columns: 1fr; }
 
   /* Certifications */
   .cert-grid      { grid-template-columns: 1fr 1fr; }
@@ -143,18 +149,22 @@
    480px — Small Phones
 =================================== */
 @media (max-width: 480px) {
-  .container  { padding: 0 1.25rem; }
-  .hero       { padding: 5rem 1.25rem 3rem; }
-  .hero-name  { font-size: 2rem; }
-  .about-stats { gap: 1.5rem; }
-  .about-cards { grid-template-columns: 1fr; }
-  .hero-cta   { flex-direction: column; align-items: center; }
-  .btn        { width: 100%; justify-content: center; }
-  .cert-grid  { grid-template-columns: 1fr; }
+  .container      { padding: 0 1.25rem; }
+  .hero           { padding: 5rem 1rem 3rem; }
+  .hero-content   { max-width: 100%; padding: 0; }
+  .hero-name      { font-size: 1.9rem; }
+  .hero-tagline   { font-size: 0.88rem; }
+  .about-stats    { gap: 1.5rem; }
+  .about-cards    { grid-template-columns: 1fr; }
+  .about-body     { font-size: 0.92rem; }
+  .hero-cta       { flex-direction: column; align-items: center; width: 100%; }
+  .btn            { width: 100%; justify-content: center; }
+  .cert-grid      { grid-template-columns: 1fr; }
   .cert-flip-grid { grid-template-columns: 1fr; }
   .ai-phil-title  { font-size: 0.97rem; }
   .llm-cards      { gap: 0.85rem; }
   .project-desc   { font-size: 0.85rem; }
+  section         { padding: 4rem 0; }
 }
 /* ===================================
    Form Row — Mobile Stack Fix
