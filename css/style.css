@@ -3169,3 +3169,192 @@ section { padding: 7rem 0; }
 /* ===== GAMES SECTION ===== */
 .games { padding: 6rem 0; background: var(--bg-section, #0a0a0a); }
 .games .projects-grid { margin-top: 2rem; }
+/* ===================================
+   AI PHILOSOPHY & LLM INTEGRATION
+=================================== */
+.ai-philosophy,
+.ai-llm-integration {
+  margin-top: 3.5rem;
+  padding: 2.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+}
+
+.ai-philosophy-text {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+.ai-philosophy-text:last-child { margin-bottom: 0; }
+
+/* LLM Cards */
+.llm-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.llm-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.llm-card:hover {
+  border-color: rgba(255,122,0,0.35);
+  transform: translateY(-3px);
+}
+.llm-card--highlight {
+  border-color: rgba(255,122,0,0.3);
+  background: rgba(255,122,0,0.05);
+}
+
+.llm-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+.llm-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+.llm-model {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+.llm-role-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.llm-role-badge--lead {
+  background: rgba(255,122,0,0.2);
+  color: var(--orange, #ff7a00);
+}
+.llm-card-desc {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+  .llm-cards { grid-template-columns: 1fr; }
+}
+
+/* =====================================================
+   AI PHILOSOPHY + LLM INTEGRATION BLOCKS
+===================================================== */
+.ai-philosophy,
+.llm-section {
+  margin-top: 3.5rem;
+  background: var(--dark2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  padding: 2rem 2.5rem;
+}
+
+.ai-phil-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.ai-phil-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ai-phil-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white);
+  margin: 0;
+}
+
+.ai-phil-body {
+  color: rgba(255,255,255,0.65);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  margin-bottom: 0.75rem;
+}
+.ai-phil-body:last-of-type { margin-bottom: 0; }
+
+/* LLM Cards */
+.llm-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.llm-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 1.25rem;
+  transition: var(--transition);
+}
+
+.llm-card:hover {
+  border-color: rgba(255,122,0,0.25);
+  background: rgba(255,122,0,0.04);
+}
+
+.llm-card--featured {
+  border-color: rgba(255,122,0,0.3);
+  background: rgba(255,122,0,0.05);
+}
+
+.llm-card--featured:hover {
+  border-color: rgba(255,122,0,0.5);
+  box-shadow: var(--glow-sm);
+}
+
+.llm-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.llm-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.llm-openai  { background: rgba(16,163,127,0.2); color: #10a37f; border: 1px solid rgba(16,163,127,0.3); }
+.llm-gemini  { background: rgba(66,133,244,0.2); color: #7baaf7; border: 1px solid rgba(66,133,244,0.3); }
+.llm-claude  { background: rgba(255,122,0,0.2);  color: var(--orange); border: 1px solid rgba(255,122,0,0.35); }
+
+.llm-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.llm-card p {
+  font-size: 0.87rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.75;
+  margin: 0;
+}
