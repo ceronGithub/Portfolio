@@ -26,13 +26,14 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; font-size: 16px; }
+html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; max-width: 100vw; }
 
 body {
   font-family: var(--font-main);
   background: var(--black);
   color: var(--white);
   overflow-x: hidden;
+  max-width: 100vw;
   line-height: 1.7;
 }
 
@@ -170,6 +171,8 @@ ul { list-style: none; }
   justify-content: center;
   overflow: hidden;
   padding: 6rem 2rem 4rem;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* Parallax Layers */
@@ -505,7 +508,7 @@ ul { list-style: none; }
 /* ===================================
    SECTION COMMON
 =================================== */
-section { padding: 7rem 0; }
+section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
 
 .section-header {
   margin-bottom: 4rem;

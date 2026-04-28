@@ -214,13 +214,37 @@ const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const id = entry.target.getAttribute('id');
-      allNavLinks.forEach(link => {
-        link.style.color = link.getAttribute('href') === `#${id}` ? 'var(--orange)' : '';
-      });
+      // Only update if this section's top is within the top half of the viewport
+      const rect = entry.target.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.5) {
+        allNavLinks.forEach(link => {
+          link.style.color = link.getAttribute('href') === `#${id}` ? 'var(--orange)' : '';
+        });
+      }
     }
   });
-}, { threshold: 0.4 });
+}, { threshold: 0.15, rootMargin: '0px 0px -50% 0px' });
 sections.forEach(s => sectionObserver.observe(s));
+
+// Fallback: on scroll, highlight the section whose top is closest to (but above) 30% viewport height
+window.addEventListener('scroll', () => {
+  const trigger = window.innerHeight * 0.3;
+  let closest = null;
+  let closestDist = Infinity;
+  sections.forEach(s => {
+    const top = s.getBoundingClientRect().top;
+    if (top <= trigger) {
+      const dist = trigger - top;
+      if (dist < closestDist) { closestDist = dist; closest = s; }
+    }
+  });
+  if (closest) {
+    const id = closest.getAttribute('id');
+    allNavLinks.forEach(link => {
+      link.style.color = link.getAttribute('href') === `#${id}` ? 'var(--orange)' : '';
+    });
+  }
+}, { passive: true });
 
 // ─── Profile Image Fallback ─────────────
 const profileImg         = document.querySelector('.profile-img');
@@ -305,7 +329,7 @@ if (toolsSection) {
   const pageNum     = document.getElementById('pageNum');
 
   const tabConfig = {
-    standard: { prefix: 'resume_previews/ats-page-',    ext: '.jpg', total: 3 },
+    standard: { prefix: 'resume_previews/ats-page-',    ext: '.jpg', total: 2 },
     visual:   { prefix: 'resume_previews/ENHANCE CURRICULUM VITAE_', ext: '.jpg', total: 7 }
   };
 

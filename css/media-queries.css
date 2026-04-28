@@ -124,6 +124,11 @@
   /* General */
   section { padding: 5rem 0; }
   .hero-scroll-hint { display: none; }
+
+  /* Shrink orbs to prevent horizontal overflow */
+  .orb-1 { width: 250px; height: 250px; right: -60px; top: -60px; }
+  .orb-2 { width: 180px; height: 180px; }
+  .orb-3 { width: 130px; height: 130px; }
 }
 
 
@@ -165,6 +170,11 @@
   .llm-cards      { gap: 0.85rem; }
   .project-desc   { font-size: 0.85rem; }
   section         { padding: 4rem 0; }
+
+  /* Shrink orbs so they don't push the page wider */
+  .orb-1 { width: 200px; height: 200px; right: -50px; top: -50px; }
+  .orb-2 { width: 150px; height: 150px; }
+  .orb-3 { width: 100px; height: 100px; }
 }
 /* ===================================
    Form Row — Mobile Stack Fix
