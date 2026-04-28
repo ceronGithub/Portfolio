@@ -1357,9 +1357,7 @@ section { padding: 7rem 0; }
    EXPERIENCE / TIMELINE SECTION
 =================================== */
 .experience {
-  background:
-    linear-gradient(90deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.90) 50%, rgba(5,5,5,0.72) 100%),
-    url('../images/backgrounds/bg-experience.jpg') right center / 500px auto no-repeat scroll;
+  background: var(--dark);
   position: relative;
   isolation: isolate;
 }
@@ -1367,8 +1365,7 @@ section { padding: 7rem 0; }
   content: '';
   position: absolute; inset: 0;
   background:
-    linear-gradient(to bottom, var(--dark) 0%, transparent 12%, transparent 88%, var(--dark) 100%),
-    radial-gradient(ellipse 50% 60% at 100% 50%, rgba(255,190,0,0.04), transparent 70%);
+    linear-gradient(to bottom, var(--dark) 0%, transparent 12%, transparent 88%, var(--dark) 100%);
   pointer-events: none; z-index: 0;
 }
 
@@ -3357,4 +3354,17 @@ section { padding: 7rem 0; }
   color: rgba(255,255,255,0.6);
   line-height: 1.75;
   margin: 0;
+}
+
+/* =====================================================
+   BAG EXPLOSION CANVAS
+===================================================== */
+#bagExplosionCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
 }
