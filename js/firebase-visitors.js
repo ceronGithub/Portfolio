@@ -417,18 +417,20 @@ function injectStyles() {
       #vc-widget {
         bottom: 16px;
         right: 12px;
-        left: 12px;
-        width: auto;
-        max-width: 260px;
-        margin-left: auto;
+        left: auto;
+        width: 230px;
+        max-width: calc(100vw - 24px);
+        margin-left: 0;
+        overflow: hidden;
       }
     }
     @media (max-width: 380px) {
       #vc-widget {
         right: 8px;
-        left: 8px;
-        max-width: none;
-        width: auto;
+        left: auto;
+        width: 210px;
+        max-width: calc(100vw - 16px);
+        overflow: hidden;
       }
     }
   `;
