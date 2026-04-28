@@ -1,0 +1,37 @@
+Below are some points you can add in your CV if experience in missing. Kindly only add experience you have had hands-on.
+
+what was automated?
+Which LLM (Claude, GPT-4, etc.)
+How it was used (not just “used AI”)
+End result / impact
+
+Explain how your AI solution works end-to-end
+You can add:
+Input source (user input, file, API)
+Processing (prompt, logic, rules)
+Output (automation, decision, response)
+Tools used (API, backend, database)
+
+LLM Integration Details
+API usage (OpenAI, Claude, etc.)
+Prompt engineering approach
+Handling responses (parsing, validation)
+
+Advanced AI Concepts (if you have it)
+RAG 
+Vector databases (Pinecone, FAISS, Supabase vector)
+AI agents / multi-step workflows
+Memory/context handling
+
+Please update your CV with:
+
+1–2 detailed AI/LLM projects (with tools used like GPT/Claude)
+Clear explanation of how AI was integrated (API, workflow, backend)
+Any automation use cases where AI reduced manual work
+Metrics (time saved, efficiency improvement)
+Any experience with RAG, vector DB, or advanced AI workflows (if applicable)
+API-level details (how you connected AI with systems)
+
+Please mention the AI tools repeatedly under projects wherever you have used them
+
+The goal is to include everything in detail so that we can balance less amount of experience with detailed explanation
