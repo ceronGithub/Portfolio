@@ -897,7 +897,7 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
 =================================== */
 .filter-tabs {
   display: flex;
-  gap: 0.75rem;
+  gap: 1.25rem;
   margin-bottom: 2.5rem;
   flex-wrap: wrap;
 }
@@ -960,6 +960,235 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   from { opacity: 0; transform: translateY(20px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* ===================================
+   AI FLOW SECTION
+=================================== */
+.ai-flow-section {
+  margin-top: 4rem;
+  padding: 3rem 2.5rem;
+  background: linear-gradient(135deg, rgba(255,122,0,0.04) 0%, rgba(10,10,15,0.6) 50%, rgba(255,122,0,0.03) 100%);
+  border: 1px solid rgba(255,122,0,0.15);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.ai-flow-section::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(255,122,0,0.08), transparent 70%);
+  pointer-events: none;
+}
+
+/* Label */
+.ai-flow-label { margin-bottom: 2.5rem; }
+.ai-flow-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--orange);
+  border: 1px solid rgba(255,122,0,0.4);
+  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  margin-bottom: 0.75rem;
+}
+.ai-flow-heading {
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+.ai-flow-sub {
+  text-align: justify;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.7;
+  width: 100%;
+}
+.ai-flow-sub strong { color: rgba(255,255,255,0.8); }
+.ai-flow-sub em { color: rgba(255,255,255,0.7); font-style: italic; }
+
+/* How I Integrate LLMs intro block */
+.ai-llm-intro {
+  margin-bottom: 1.75rem;
+  padding: 1.1rem 1.4rem;
+  background: rgba(255,122,0,0.04);
+  border-left: 3px solid rgba(255,122,0,0.4);
+  border-radius: 0 10px 10px 0;
+}
+.ai-llm-intro-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 0.4rem;
+}
+.ai-llm-intro-body {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Centered pipeline track */
+.pipeline-track--centered {
+  justify-content: center;
+}
+
+/* Principles */
+.ai-principles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+.ai-principle-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+  transition: border-color 0.3s, background 0.3s;
+}
+.ai-principle-item:hover {
+  border-color: rgba(255,122,0,0.3);
+  background: rgba(255,122,0,0.04);
+}
+.ai-principle-icon {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  background: rgba(255,122,0,0.1);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--orange);
+}
+.ai-principle-icon svg { width: 18px; height: 18px; }
+.ai-principle-item h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+.ai-principle-item p {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Pipeline */
+.pipeline-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.06em;
+  margin-bottom: 1.5rem;
+}
+.pipeline-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,122,0,0.3) transparent;
+}
+.pipeline-track::-webkit-scrollbar { height: 3px; }
+.pipeline-track::-webkit-scrollbar-thumb { background: rgba(255,122,0,0.3); border-radius: 3px; }
+
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 170px;
+  max-width: 190px;
+  flex-shrink: 0;
+}
+.pipeline-step--featured .pipeline-card {
+  border-color: rgba(255,122,0,0.45);
+  background: rgba(255,122,0,0.06);
+}
+.pipeline-node {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.node-gpt    { background: rgba(16,163,127,0.15); border-color: rgba(16,163,127,0.4); color: #10a37f; }
+.node-gemini { background: rgba(66,133,244,0.15); border-color: rgba(66,133,244,0.4); color: #4285f4; }
+.node-claude { background: rgba(255,122,0,0.15);  border-color: rgba(255,122,0,0.5);  color: var(--orange); box-shadow: 0 0 20px rgba(255,122,0,0.2); }
+.node-output { background: rgba(0,230,118,0.12);  border-color: rgba(0,230,118,0.4);  color: #00e676; }
+
+.pipeline-step-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+}
+.badge-featured { color: var(--orange); }
+.badge-output   { color: #00e676; }
+
+.pipeline-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  width: 100%;
+}
+.card-featured {
+  border-color: rgba(255,122,0,0.4);
+  background: rgba(255,122,0,0.05);
+}
+.pipeline-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+.pipeline-model {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.gpt-label    { color: #10a37f; }
+.gemini-label { color: #4285f4; }
+.claude-label { color: var(--orange); }
+.output-label { color: #00e676; }
+
+.pipeline-role {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.pipeline-card p {
+  font-size: 0.76rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+  margin: 0;
+}
+.pipeline-card p strong { color: rgba(255,255,255,0.8); }
+
+.pipeline-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  margin-top: 14px; /* align with node center */
+  color: rgba(255,122,0,0.35);
+  flex-shrink: 0;
+}
+.pipeline-arrow svg { width: 32px; height: 20px; }
 
 /* ===================================
    PROJECTS SECTION
@@ -3170,5 +3399,12 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
    css/media-queries.css
 =================================== */
 /* ===== GAMES SECTION ===== */
-.games { padding: 6rem 0; background: var(--bg-section, #0a0a0a); }
+.games {
+  padding: 6rem 0;
+  background:
+    linear-gradient(180deg, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.82) 40%, rgba(10,10,15,0.82) 60%, rgba(10,10,15,0.95) 100%),
+    url('../images/backgrounds/bg-games.jpg') center center / cover no-repeat scroll;
+  position: relative;
+  isolation: isolate;
+}
 .games .projects-grid { margin-top: 2rem; }
