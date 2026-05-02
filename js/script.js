@@ -260,22 +260,100 @@ if (profileImg) {
   }
 }
 
-// ─── Project Filter Tabs + Sort ───────────
-// Bug fix: added null guard on filterProjects for projectsGrid
-const projectsGrid = document.getElementById('projectsGrid');
-const filterBtns   = document.querySelectorAll('.filter-btn');
+// ─── Project Filter Tabs + Client Work Slider ───────────
+// Client filter activates a horizontal image slider (left-to-right).
+// All / Personal filters use the standard grid layout.
 
-function sortProjectCards() {
-  if (!projectsGrid) return;
-  const cards   = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]:not(.hidden)'));
-  const ongoing = cards.filter(c => c.querySelector('.ongoing-badge'));
-  const rest    = cards.filter(c => !c.querySelector('.ongoing-badge'));
-  [...ongoing, ...rest].forEach(card => projectsGrid.appendChild(card));
+const projectsGrid   = document.getElementById('projectsGrid');
+const clientSlider   = document.getElementById('clientSlider');
+const sliderTrack    = document.getElementById('sliderTrack');
+const sliderDots     = document.getElementById('sliderDots');
+const sliderPrev     = document.getElementById('sliderPrev');
+const sliderNext     = document.getElementById('sliderNext');
+const filterBtns     = document.querySelectorAll('.filter-btn');
+
+// Holds all project card DOM nodes (preserves original order)
+const allCards = Array.from(document.querySelectorAll('.project-card[data-category]'));
+
+// Current slider state
+let sliderIndex    = 0;
+let sliderCards    = []; // client cards currently mounted in sliderTrack
+
+// ── Builds dot indicators for the slider ──
+// Creates one dot button per slide; marks the active dot.
+function buildSliderDots(total, activeIndex) {
+  sliderDots.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'sliderDot' + (i === activeIndex ? ' sliderDot--active' : '');
+    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    dot.addEventListener('click', () => goToSlide(i));
+    sliderDots.appendChild(dot);
+  }
 }
 
-function filterProjects(filter) {
-  if (!projectsGrid) return;  // Bug fix: null guard
-  projectsGrid.querySelectorAll('.project-card[data-category]').forEach(card => {
+// ── Moves the slider track to the target slide index ──
+// Uses GPU-accelerated translateX on .sliderTrack.
+// Updates dots and arrow disabled states after each move.
+function goToSlide(index) {
+  sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
+  sliderTrack.style.transform = `translate3d(-${sliderIndex * 100}%, 0, 0)`;
+
+  // Update dots
+  sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
+    dot.classList.toggle('sliderDot--active', i === sliderIndex);
+  });
+
+  // Update arrow disabled states
+  sliderPrev.disabled = sliderIndex === 0;
+  sliderNext.disabled = sliderIndex === sliderCards.length - 1;
+}
+
+// ── Mounts client cards into sliderTrack and activates the slider ──
+// Removes client cards from the grid and places them in the slider viewport.
+function mountClientSlider() {
+  sliderIndex = 0;
+  sliderTrack.innerHTML = '';
+
+  // Collect client cards (ongoing first, then rest — preserves existing sort)
+  const clientAll = allCards.filter(c => c.getAttribute('data-category') === 'client');
+  const ongoing   = clientAll.filter(c => c.querySelector('.ongoing-badge'));
+  const rest      = clientAll.filter(c => !c.querySelector('.ongoing-badge'));
+  sliderCards = [...ongoing, ...rest];
+
+  sliderCards.forEach(card => {
+    card.classList.remove('hidden', 'fade-in');
+    sliderTrack.appendChild(card);
+  });
+
+  buildSliderDots(sliderCards.length, 0);
+  sliderTrack.style.transform = 'translate3d(0, 0, 0)';
+  sliderPrev.disabled = true;
+  sliderNext.disabled = sliderCards.length <= 1;
+
+  clientSlider.classList.add('clientSlider--active');
+  projectsGrid.style.display = 'none';
+}
+
+// ── Dismounts slider and returns cards to the grid ──
+// Called when switching away from the client filter.
+function dismountClientSlider() {
+  if (sliderCards.length) {
+    sliderCards.forEach(card => {
+      card.classList.add('hidden');
+      projectsGrid.appendChild(card);
+    });
+    sliderCards = [];
+  }
+  clientSlider.classList.remove('clientSlider--active');
+  projectsGrid.style.display = '';
+}
+
+// ── Filters the grid for all / personal views ──
+// Does NOT touch the slider; slider is always dismounted first.
+function filterProjectsGrid(filter) {
+  allCards.forEach(card => {
+    if (card.parentNode !== projectsGrid) return; // skip if in slider
     const show = filter === 'all' || card.getAttribute('data-category') === filter;
     if (show) {
       card.classList.remove('hidden');
@@ -285,19 +363,37 @@ function filterProjects(filter) {
       card.classList.add('hidden');
     }
   });
-  sortProjectCards();
+
+  // Sort: ongoing cards first
+  const visible = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]:not(.hidden)'));
+  const ongoing = visible.filter(c => c.querySelector('.ongoing-badge'));
+  const rest    = visible.filter(c => !c.querySelector('.ongoing-badge'));
+  [...ongoing, ...rest].forEach(card => projectsGrid.appendChild(card));
 }
 
+// ── Arrow button listeners ──
+sliderPrev.addEventListener('click', () => goToSlide(sliderIndex - 1));
+sliderNext.addEventListener('click', () => goToSlide(sliderIndex + 1));
+
+// ── Filter tab listeners ──
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     filterBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    filterProjects(btn.getAttribute('data-filter'));
+
+    const filter = btn.getAttribute('data-filter');
+    if (filter === 'client') {
+      dismountClientSlider(); // clean up any lingering state
+      mountClientSlider();
+    } else {
+      dismountClientSlider();
+      filterProjectsGrid(filter);
+    }
   });
 });
-// Default: show client work on load
-filterProjects('client');
-sortProjectCards();
+
+// Default: mount client slider on page load
+mountClientSlider();
 
 // ─── Tool Tags Stagger Animation ──────────
 const toolTags = document.querySelectorAll('.tool-tag');

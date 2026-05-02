@@ -696,6 +696,22 @@
           </button>
         </div>
 
+        <!-- Client Work Slider Shell — shown only when client filter is active -->
+        <div class="clientSlider" id="clientSlider" aria-label="Client work slider">
+          <button class="sliderArrow sliderArrowPrev" id="sliderPrev" aria-label="Previous project">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="sliderViewport" id="sliderViewport">
+            <div class="sliderTrack" id="sliderTrack">
+              <!-- Client cards are moved here by JS when client filter is active -->
+            </div>
+          </div>
+          <button class="sliderArrow sliderArrowNext" id="sliderNext" aria-label="Next project">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <div class="sliderDots" id="sliderDots"></div>
+        </div>
+
         <div class="projects-grid" id="projectsGrid">
           <!-- Project 1: Archivil-Plan — Mar 15, 2026 – Present (On Hold) -->
           <article class="project-card reveal" data-category="client">
