@@ -328,11 +328,24 @@ function buildSliderDots(total, activeIndex) {
   }
 }
 
+// ── Measures the active card's natural height and sets --stageH on the viewport ──
+// Called after positioning so the viewport expands/contracts smoothly with the card.
+function syncStageHeight() {
+  const activeCard = sliderCards[sliderIndex];
+  if (!activeCard) return;
+  // Temporarily remove height restriction so we can measure full content
+  activeCard.style.height = 'auto';
+  const h = activeCard.scrollHeight;
+  activeCard.style.height = '';
+  document.getElementById('sliderViewport').style.setProperty('--stageH', h + 'px');
+}
+
 // ── Navigates to a target slide index ──
 // Updates card positions, dots, and arrow states.
 function goToSlide(index) {
   sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
   positionCarouselCards();
+  syncStageHeight();
 
   // Update dots
   sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
@@ -368,6 +381,9 @@ function mountClientSlider() {
 
   clientSlider.classList.add('clientSlider--active');
   projectsGrid.style.display = 'none';
+
+  // Measure after paint so scrollHeight is accurate
+  requestAnimationFrame(syncStageHeight);
 }
 
 // ── Dismounts carousel and returns cards to the grid ──
