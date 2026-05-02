@@ -260,9 +260,10 @@ if (profileImg) {
   }
 }
 
-// ─── Project Filter Tabs + Client Work Slider ───────────
-// Client filter activates a horizontal image slider (left-to-right).
-// All / Personal filters use the standard grid layout.
+// ─── Project Filter Tabs + Client Work 3D Cinematic Carousel ───────────
+// Client filter: center card is large & active; adjacent cards are scaled
+// down and dimmed on both sides — matching a cinematic carousel style.
+// All / Personal filters use the standard flat grid layout.
 
 const projectsGrid   = document.getElementById('projectsGrid');
 const clientSlider   = document.getElementById('clientSlider');
@@ -272,15 +273,50 @@ const sliderPrev     = document.getElementById('sliderPrev');
 const sliderNext     = document.getElementById('sliderNext');
 const filterBtns     = document.querySelectorAll('.filter-btn');
 
-// Holds all project card DOM nodes (preserves original order)
-const allCards = Array.from(document.querySelectorAll('.project-card[data-category]'));
+// Preserve original DOM order of all project cards
+const allCards   = Array.from(document.querySelectorAll('.project-card[data-category]'));
 
-// Current slider state
-let sliderIndex    = 0;
-let sliderCards    = []; // client cards currently mounted in sliderTrack
+// Carousel state
+let sliderIndex  = 0;
+let sliderCards  = []; // client cards currently in sliderTrack
 
-// ── Builds dot indicators for the slider ──
-// Creates one dot button per slide; marks the active dot.
+// ── Card width + gap between cards (must match CSS card width) ──
+// Used to compute per-card horizontal offset from center.
+const CARD_WIDTH   = 680;  // px — matches CSS min(680px, 90vw)
+const SIDE_SCALE   = 0.78; // scale applied to non-center cards
+const SIDE_OFFSET  = 540;  // px — horizontal distance center → side card center
+const SIDE_OPACITY = 0.55;
+
+// ── Positions all cards according to their distance from sliderIndex ──
+// Each card gets CSS custom properties driving its absolute transform.
+// slot 0 = center, -1 = left neighbour, +1 = right neighbour, etc.
+function positionCarouselCards() {
+  const total = sliderCards.length;
+
+  sliderCards.forEach((card, i) => {
+    const slot = i - sliderIndex; // distance from active center
+
+    // Only show up to 1 card away on each side; hide farther cards
+    const visible = Math.abs(slot) <= 1;
+    card.style.display   = visible ? 'flex' : 'none';
+
+    if (!visible) return;
+
+    const cX      = slot * SIDE_OFFSET;
+    const cScale  = slot === 0 ? 1 : SIDE_SCALE;
+    const cOpacity = slot === 0 ? 1 : SIDE_OPACITY;
+    const cZ       = slot === 0 ? 5 : 1;
+
+    card.style.setProperty('--cX',       `${cX}px`);
+    card.style.setProperty('--cScale',   cScale);
+    card.style.setProperty('--cOpacity', cOpacity);
+    card.style.setProperty('--cZ',       cZ);
+
+    card.classList.toggle('sliderCard--active', slot === 0);
+  });
+}
+
+// ── Builds dot indicators ──
 function buildSliderDots(total, activeIndex) {
   sliderDots.innerHTML = '';
   for (let i = 0; i < total; i++) {
@@ -292,12 +328,11 @@ function buildSliderDots(total, activeIndex) {
   }
 }
 
-// ── Moves the slider track to the target slide index ──
-// Uses GPU-accelerated translateX on .sliderTrack.
-// Updates dots and arrow disabled states after each move.
+// ── Navigates to a target slide index ──
+// Updates card positions, dots, and arrow states.
 function goToSlide(index) {
   sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
-  sliderTrack.style.transform = `translate3d(-${sliderIndex * 100}%, 0, 0)`;
+  positionCarouselCards();
 
   // Update dots
   sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
@@ -309,13 +344,12 @@ function goToSlide(index) {
   sliderNext.disabled = sliderIndex === sliderCards.length - 1;
 }
 
-// ── Mounts client cards into sliderTrack and activates the slider ──
-// Removes client cards from the grid and places them in the slider viewport.
+// ── Mounts client cards into sliderTrack and activates carousel ──
 function mountClientSlider() {
   sliderIndex = 0;
   sliderTrack.innerHTML = '';
 
-  // Collect client cards (ongoing first, then rest — preserves existing sort)
+  // Sort: ongoing first, then rest
   const clientAll = allCards.filter(c => c.getAttribute('data-category') === 'client');
   const ongoing   = clientAll.filter(c => c.querySelector('.ongoing-badge'));
   const rest      = clientAll.filter(c => !c.querySelector('.ongoing-badge'));
@@ -327,7 +361,8 @@ function mountClientSlider() {
   });
 
   buildSliderDots(sliderCards.length, 0);
-  sliderTrack.style.transform = 'translate3d(0, 0, 0)';
+  positionCarouselCards();
+
   sliderPrev.disabled = true;
   sliderNext.disabled = sliderCards.length <= 1;
 
@@ -335,25 +370,27 @@ function mountClientSlider() {
   projectsGrid.style.display = 'none';
 }
 
-// ── Dismounts slider and returns cards to the grid ──
-// Called when switching away from the client filter.
+// ── Dismounts carousel and returns cards to the grid ──
 function dismountClientSlider() {
-  if (sliderCards.length) {
-    sliderCards.forEach(card => {
-      card.classList.add('hidden');
-      projectsGrid.appendChild(card);
-    });
-    sliderCards = [];
-  }
+  sliderCards.forEach(card => {
+    card.classList.remove('sliderCard--active');
+    card.style.removeProperty('--cX');
+    card.style.removeProperty('--cScale');
+    card.style.removeProperty('--cOpacity');
+    card.style.removeProperty('--cZ');
+    card.style.display = '';
+    card.classList.add('hidden');
+    projectsGrid.appendChild(card);
+  });
+  sliderCards = [];
   clientSlider.classList.remove('clientSlider--active');
   projectsGrid.style.display = '';
 }
 
-// ── Filters the grid for all / personal views ──
-// Does NOT touch the slider; slider is always dismounted first.
+// ── Grid filter for All / Personal views ──
 function filterProjectsGrid(filter) {
   allCards.forEach(card => {
-    if (card.parentNode !== projectsGrid) return; // skip if in slider
+    if (card.parentNode !== projectsGrid) return;
     const show = filter === 'all' || card.getAttribute('data-category') === filter;
     if (show) {
       card.classList.remove('hidden');
@@ -363,7 +400,6 @@ function filterProjectsGrid(filter) {
       card.classList.add('hidden');
     }
   });
-
   // Sort: ongoing cards first
   const visible = Array.from(projectsGrid.querySelectorAll('.project-card[data-category]:not(.hidden)'));
   const ongoing = visible.filter(c => c.querySelector('.ongoing-badge'));
@@ -371,7 +407,7 @@ function filterProjectsGrid(filter) {
   [...ongoing, ...rest].forEach(card => projectsGrid.appendChild(card));
 }
 
-// ── Arrow button listeners ──
+// ── Arrow listeners ──
 sliderPrev.addEventListener('click', () => goToSlide(sliderIndex - 1));
 sliderNext.addEventListener('click', () => goToSlide(sliderIndex + 1));
 
@@ -380,10 +416,9 @@ filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     filterBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
     const filter = btn.getAttribute('data-filter');
     if (filter === 'client') {
-      dismountClientSlider(); // clean up any lingering state
+      dismountClientSlider();
       mountClientSlider();
     } else {
       dismountClientSlider();
@@ -392,7 +427,7 @@ filterBtns.forEach(btn => {
   });
 });
 
-// Default: mount client slider on page load
+// Default: mount carousel on load
 mountClientSlider();
 
 // ─── Tool Tags Stagger Animation ──────────
