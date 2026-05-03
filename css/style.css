@@ -3410,95 +3410,94 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
 .games .projects-grid { margin-top: 2rem; }
 
 /* ─────────────────────────────────────────
-   CLIENT WORK — 3D CINEMATIC CAROUSEL
-   Center card is large & fully visible.
-   Adjacent cards are scaled down, dimmed,
-   and partially visible on both sides.
-   GPU-accelerated via transform3d + will-change.
+   CLIENT WORK — STACKED CARD DECK CAROUSEL
+   Center = active card, full size, full opacity.
+   Top-left peek = previous card (behind, dimmed).
+   Bottom-right peek = next card (in front, dimmed).
+   Left arrow disabled when no prev; right when no next.
+   GPU-accelerated via top/left/transform/opacity transitions.
 ───────────────────────────────────────── */
 
-/* Outer shell — hidden until JS adds --active */
 .clientSlider {
   display: none;
   position: relative;
   width: 100%;
-  padding: 3rem 0 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
 }
 
 .clientSlider.clientSlider--active {
   display: block;
 }
 
-/* Stage — horizontally clips peek cards; does NOT clip vertically so
-   the center card can expand to its full natural height.
-   JS sets --stageH on .sliderViewport to match the active card height. */
+/* Stage: overflow visible so peek cards can render outside center area.
+   Padding reserves room for top-left and bottom-right peeks.
+   Position relative so JS-positioned arrows anchor correctly. */
 .sliderViewport {
   position: relative;
   width: 100%;
-  overflow-x: hidden;
-  overflow-y: visible;
-  /* Height is driven by JS measuring the active card each slide change */
-  height: var(--stageH, 700px);
-  transition: height 0.55s cubic-bezier(0.77, 0, 0.18, 1);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-/* Absolute track — cards positioned individually by JS */
-.sliderTrack {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-/* ── Each Slide Item ── */
-.sliderTrack .project-card {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  /* Center card width */
-  width: min(700px, 88vw);
-  display: flex !important;
-  flex-direction: column;
-
-  transform-origin: top center;
-  transform: translateX(-50%) translate3d(var(--cX, 0px), 0, 0) scale(var(--cScale, 1));
-  opacity: var(--cOpacity, 1);
-  z-index: var(--cZ, 1);
-
-  transition:
-    transform 0.55s cubic-bezier(0.77, 0, 0.18, 1),
-    opacity   0.55s cubic-bezier(0.77, 0, 0.18, 1);
-
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-
-/* Center card — fully interactive, no height restriction */
-.sliderTrack .project-card.sliderCard--active {
-  pointer-events: auto;
+  /* top/left padding = room for prev peek; bottom/right = room for next peek */
+  padding: 54px 90px 90px 54px;
+  box-sizing: border-box;
   overflow: visible;
 }
 
-/* Side cards — clip to image area only so body text never shows */
-.sliderTrack .project-card:not(.sliderCard--active) {
-  height: 200px;
+/* Track: height driven by JS --stageH (active card scrollHeight) */
+.sliderTrack {
+  position: relative;
+  width: 100%;
+  height: var(--stageH, 700px);
+  transition: height 0.5s cubic-bezier(0.77, 0, 0.18, 1);
+}
+
+/* ── All cards ── */
+/* JS sets --cTop --cLeft --cScale --cOpacity --cZ per card each slide */
+.sliderTrack .project-card {
+  position: absolute;
+  top:     var(--cTop,  0px);
+  left:    var(--cLeft, 0px);
+  width:   min(700px, 88vw);
+  display: flex !important;
+  flex-direction: column;
+
+  transform-origin: top left;
+  transform:  scale(var(--cScale, 1));
+  opacity:    var(--cOpacity, 1);
+  z-index:    var(--cZ, 1);
+
+  transition:
+    top       0.5s cubic-bezier(0.77, 0, 0.18, 1),
+    left      0.5s cubic-bezier(0.77, 0, 0.18, 1),
+    transform 0.5s cubic-bezier(0.77, 0, 0.18, 1),
+    opacity   0.5s cubic-bezier(0.77, 0, 0.18, 1);
+
+  will-change: top, left, transform, opacity;
+  pointer-events: none;
+  border-radius: var(--radius);
+}
+
+/* Active center card: fully interactive, full content visible */
+.sliderTrack .project-card.sliderCard--active {
+  pointer-events: auto;
+}
+
+/* Peek cards: clipped to image area height only — no text bleed */
+.sliderTrack .project-card.sliderCard--prev,
+.sliderTrack .project-card.sliderCard--next {
+  height: 180px;
   overflow: hidden;
 }
 
-/* Dim overlay — covers entire side card cleanly */
+/* Dark overlay on all non-active cards */
 .sliderTrack .project-card::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.70);
   border-radius: var(--radius);
-  transition: opacity 0.55s cubic-bezier(0.77, 0, 0.18, 1);
-  opacity: 1;
   pointer-events: none;
-  z-index: 2;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.5s cubic-bezier(0.77, 0, 0.18, 1);
 }
 
 .sliderTrack .project-card.sliderCard--active::after {
@@ -3508,24 +3507,22 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
 /* ── Arrow Buttons ── */
 .sliderArrow {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 20;
-  width: 52px;
-  height: 52px;
+  z-index: 30;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(15,15,15,0.9);
-  border: 1.5px solid rgba(255,122,0,0.4);
+  background: rgba(15, 15, 15, 0.92);
+  border: 1.5px solid rgba(255, 122, 0, 0.45);
   color: var(--orange);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, opacity 0.25s;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  transition: background 0.22s, border-color 0.22s, box-shadow 0.22s, opacity 0.3s;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
 }
 
-.sliderArrow svg { width: 22px; height: 22px; }
+.sliderArrow svg { width: 18px; height: 18px; }
 
 .sliderArrow:hover {
   background: var(--orange);
@@ -3534,36 +3531,45 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   box-shadow: var(--glow-sm);
 }
 
+/* Disabled = ghosted, not clickable */
 .sliderArrow:disabled {
-  opacity: 0.2;
+  opacity: 0.18;
   pointer-events: none;
 }
 
-/* Push arrows outside the viewport edges */
-.sliderArrowPrev { left: 0; }
-.sliderArrowNext { right: 0; }
+/* Prev arrow: top-left, aligned with prev peek card corner */
+.sliderArrowPrev {
+  top:  8px;
+  left: 8px;
+}
+
+/* Next arrow: bottom-right corner of the sliderViewport, aligned with next peek */
+.sliderArrowNext {
+  bottom: 8px;
+  right:  8px;
+}
 
 /* ── Dot Indicators ── */
 .sliderDots {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 
 .sliderDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.18);
   border: none;
   cursor: pointer;
   padding: 0;
-  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  transition: background 0.28s, transform 0.28s, box-shadow 0.28s;
 }
 
 .sliderDot.sliderDot--active {
   background: var(--orange);
   transform: scale(1.4);
-  box-shadow: 0 0 8px rgba(255,122,0,0.6);
+  box-shadow: 0 0 8px rgba(255, 122, 0, 0.6);
 }
