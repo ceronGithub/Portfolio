@@ -46,22 +46,54 @@ let selDate  = null;
 let bookings = {}; // { 'YYYY-MM-DD': [ {...} ] }
 
 // ── Helpers ───────────────────────────────────────────
+/**
+ * phToday — Philippine Today Date Key
+ * WHAT: Returns today's date string in 'YYYY-MM-DD' format adjusted to Philippine Time (UTC+8).
+ * HOW: Offsets Date.now() by 8 hours before slicing the ISO string.
+ * CALLED BY: buildCals() for today highlighting, openBooking() implicitly via calendarDate checks.
+ */
 function phToday() {
   const now = new Date();
   const ph  = new Date(now.getTime() + 8 * 3600000);
   return ph.toISOString().slice(0, 10);
 }
+/**
+ * dKey — Date Key Builder
+ * WHAT: Formats year, month index (0-based), and day into 'YYYY-MM-DD' string.
+ * HOW: Zero-pads month (+1) and day using padStart.
+ * CALLED BY: buildCals(), openBooking(), bookSubmit handler, openOwnerView().
+ */
 function dKey(y, m, d) {
   return `${y}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 }
+/**
+ * closeOverlay — Overlay Close Helper
+ * WHAT: Removes the 'open' class from the overlay element matching the given ID.
+ * HOW: Direct classList.remove call; CSS handles hide transition.
+ * CALLED BY: bookClose, loginClose, ownerClose click listeners; bookSubmit success flow.
+ */
 function closeOverlay(id) {
   document.getElementById(id).classList.remove('open');
 }
+/**
+ * openOverlay — Overlay Open Helper
+ * WHAT: Adds the 'open' class to the overlay element matching the given ID.
+ * HOW: Direct classList.add call; CSS handles show transition.
+ * CALLED BY: openBooking(), openOwnerView(), ownerBtn click listener.
+ */
 function openOverlay(id) {
   document.getElementById(id).classList.add('open');
 }
 
 // ── Firebase realtime listener ────────────────────────
+/**
+ * listenBookings — Firestore Realtime Booking Listener
+ * WHAT: Subscribes to the 'appointments' Firestore collection and keeps the local
+ *       bookings{} map in sync in real time.
+ * HOW: onSnapshot rebuilds bookings{} from scratch on every change, then triggers
+ *      buildCals() and buildFooter() to reflect the latest data.
+ * CALLED BY: Boot sequence at the bottom of the file.
+ */
 function listenBookings() {
   onSnapshot(collection(db, COL), snap => {
     bookings = {};
@@ -80,11 +112,13 @@ function listenBookings() {
 // ══════════════════════════════════════════════
 //  COSMOS BACKGROUND
 // ══════════════════════════════════════════════
+/**
+ * buildCosmos — Cosmos Background Builder
+ * WHAT: Generates animated nebulas, stars, and shooting stars inside the #cosmos element.
+ * HOW: Creates DOM elements with randomized size, position, and CSS custom property delays/durations.
+ * CALLED BY: Boot sequence at the bottom of the file.
+ */
 function buildCosmos() {
-  const cosmos = document.getElementById('cosmos');
-  cosmos.innerHTML = '';
-
-  // Nebulas
   const nc = ['rgba(255,106,0,1)','rgba(255,208,0,1)','rgba(255,60,0,1)','rgba(200,150,0,1)'];
   for (let i = 0; i < 5; i++) {
     const n = document.createElement('div');
@@ -118,6 +152,14 @@ function buildCosmos() {
 // ══════════════════════════════════════════════
 //  MONTH FX GENERATORS
 // ══════════════════════════════════════════════
+/**
+ * fxJan–fxDec — Month-Specific Visual Effect Generators
+ * WHAT: Each function injects animated decorative elements (aurora, hearts, petals, rain,
+ *       fireflies, flares, lightning, meteors, orbit rings, embers, snowflakes, sparks)
+ *       into a calendar card's .cal-canvas element to match the theme of that month.
+ * HOW: Creates DOM elements with randomized CSS custom properties for size, timing, and position.
+ * CALLED BY: buildCals() — FX[mi](canvas) maps each month index to its generator.
+ */
 function fxJan(c) {
   const cols = ['rgba(100,180,255,1)','rgba(80,220,180,1)','rgba(180,100,255,1)','rgba(255,208,0,1)'];
   for (let i = 0; i < 4; i++) {
@@ -233,6 +275,15 @@ const FX = [fxJan,fxFeb,fxMar,fxApr,fxMay,fxJun,fxJul,fxAug,fxSep,fxOct,fxNov,fx
 // ══════════════════════════════════════════════
 //  BUILD CALENDARS
 // ══════════════════════════════════════════════
+/**
+ * buildCals — Full-Year Calendar Builder
+ * WHAT: Renders a 12-month calendar grid into #calGrid, displaying bookings, today highlight,
+ *       past-day styling, and per-month animated FX.
+ * HOW: Iterates MONTHS, builds a card per month with day cells. Each day cell checks bookings{},
+ *      applies past/today/booked/full classes, and attaches click listeners for booking or
+ *      owner view. Clears and rebuilds the entire grid on each call.
+ * CALLED BY: listenBookings() on every Firestore update; ownerBtn login/logout; year navigation.
+ */
 function buildCals(year) {
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
@@ -351,6 +402,13 @@ function buildCals(year) {
 // ══════════════════════════════════════════════
 //  STICKY FOOTER
 // ══════════════════════════════════════════════
+/**
+ * buildFooter — Sticky Footer Appointment Ticker Builder
+ * WHAT: Populates the sticky footer with a scrolling ticker of today's appointments.
+ * HOW: Reads bookings for today's phToday() key, sorts by time, renders duplicate content
+ *      for seamless CSS animation loop. Adjusts animationDuration to number of items.
+ * CALLED BY: listenBookings() on every Firestore update; boot sequence.
+ */
 function buildFooter() {
   const key   = phToday();
   const items = bookings[key] || [];
@@ -386,6 +444,14 @@ function buildFooter() {
 //  DAY VIEW — shows existing appointments first,
 //  then "Add Appointment" button at the bottom
 // ══════════════════════════════════════════════
+/**
+ * openBooking — Day Booking Modal Opener
+ * WHAT: Opens the booking overlay for a selected calendar day, pre-filling date labels
+ *       and available time slots. Skips directly to the booking form (no day-view step).
+ * HOW: Highlights the selected .cal-day cell, sets selDate state, builds available time
+ *      <option> elements, resets all form fields, and shows/hides form vs. full-booked message.
+ * CALLED BY: Day cell click listener in buildCals() when isOwner is false.
+ */
 function openBooking(y, m, d, el, booked, isFull) {
   // Highlight selected day
   document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
@@ -572,6 +638,13 @@ document.getElementById('bookSubmit').addEventListener('click', async () => {
 // ══════════════════════════════════════════════
 //  OWNER VIEW MODAL
 // ══════════════════════════════════════════════
+/**
+ * openOwnerView — Owner Day-View Modal Opener
+ * WHAT: Opens the owner overlay showing all appointments for a selected day, sorted by time.
+ * HOW: Reads bookings[key], builds appointment cards with Google Calendar search/event URLs,
+ *      attaches delete button listeners that call Firestore deleteDoc and show a removal hint.
+ * CALLED BY: Day cell click listener in buildCals() when isOwner is true.
+ */
 function openOwnerView(y, m, d) {
   const key    = dKey(y, m, d);
   const items  = bookings[key] || [];

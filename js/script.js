@@ -16,6 +16,13 @@ const logoEl = document.getElementById('logoTyped');
 const logoWords = ['VA + Dev', 'Web Dev', 'CMC', 'Desktop Dev'];
 let lIdx = 0, lChar = 0, lDeleting = false;
 
+/**
+ * typeLogo — Logo Typing Animation
+ * WHAT: Cycles through logoWords[], typing then deleting each word character by character.
+ * HOW: Uses lChar (cursor position), lDeleting (direction), and lIdx (word index).
+ *      Calls itself recursively via setTimeout with variable delay per phase.
+ * CALLED BY: setTimeout on page load (2500ms after load, deletes initial 'CMC' first).
+ */
 function typeLogo() {
   if (!logoEl) return;
   const word = logoWords[lIdx];
@@ -85,6 +92,13 @@ let charIndex  = 0;
 let isDeleting = false;
 const typedEl  = document.getElementById('typedText');
 
+/**
+ * type — Hero Typing Animation
+ * WHAT: Cycles through roles[], typing and deleting each role title in the hero section.
+ * HOW: Tracks charIndex and isDeleting state; adjusts delay per phase (type=110ms, delete=60ms).
+ *      Calls itself recursively via setTimeout.
+ * CALLED BY: setTimeout(type, 1200) on page load.
+ */
 function type() {
   if (!typedEl) return;
   const current = roles[roleIndex];
@@ -161,6 +175,13 @@ const layerFg   = document.getElementById('layerFg');
 let ticking = false;
 let lastScrollY = 0;
 
+/**
+ * applyParallax — Scroll Parallax Renderer
+ * WHAT: Applies GPU-accelerated translate3d transforms to layered background elements
+ *       at different speeds to create a parallax depth effect on scroll.
+ * HOW: Reads lastScrollY, applies different multipliers per layer, resets ticking flag.
+ * CALLED BY: requestAnimationFrame inside the passive scroll event listener.
+ */
 function applyParallax() {
   if (!layerBg) return;
   const y = lastScrollY;
@@ -184,6 +205,13 @@ const hero = document.getElementById('hero');
 let mouseTicking = false;
 let mouseX = 0, mouseY = 0;
 
+/**
+ * applyMouseParallax — Mouse-Move Parallax for Hero Section
+ * WHAT: Shifts layerOrbs and layerGrid based on mouse position within the hero section.
+ * HOW: Uses normalized mouseX/mouseY (−0.5 to 0.5) with different multipliers per layer.
+ *      Resets mouseTicking so the rAF gate allows the next frame.
+ * CALLED BY: requestAnimationFrame inside hero mousemove event listener.
+ */
 function applyMouseParallax() {
   if (layerOrbs) layerOrbs.style.transform = `translate3d(${mouseX * 20}px, ${mouseY * 20}px, 0)`;
   if (layerGrid) layerGrid.style.transform = `translate3d(${mouseX * 8}px, ${mouseY * 8}px, 0)`;
@@ -290,6 +318,14 @@ let   isAnimating    = false;
 // ── Layout all cards — only prev/active/next are shown, everything else display:none ──
 // Mobile/tablet (≤1024px): only active card visible, centered. Prev/next hidden.
 // Desktop: slot -1 → prev top-left, slot 0 → active center, slot +1 → next bottom-right.
+/**
+ * positionDeckCards — Stacked-Deck Card Layout Engine
+ * WHAT: Positions each project card as prev / active / next in a stacked-deck layout.
+ * HOW: On mobile/tablet (≤1024px): only the active card is shown (display:flex), all others hidden.
+ *      On desktop: computes absolute positions and CSS custom properties (--cTop, --cLeft, --cScale,
+ *      --cOpacity, --cZ) for the three visible slots; cards beyond ±1 are hidden.
+ * CALLED BY: schedulePosition(), goToSlide(), window resize listener.
+ */
 function positionDeckCards() {
 
   if (mobileTabletMQ.matches) {
@@ -386,6 +422,13 @@ function positionDeckCards() {
 }
 
 // ── Double-rAF ensures browser has painted before we read scrollHeight ──
+/**
+ * schedulePosition — Double-rAF Position Scheduler
+ * WHAT: Schedules positionDeckCards() after two animation frames to ensure the browser
+ *       has fully painted before we read scrollHeight values.
+ * HOW: Wraps positionDeckCards in a nested requestAnimationFrame pair.
+ * CALLED BY: mountClientSlider, mountPersonalSlider, mountAllSlider, window resize listener.
+ */
 function schedulePosition() {
   requestAnimationFrame(() => requestAnimationFrame(positionDeckCards));
 }
@@ -394,6 +437,14 @@ function schedulePosition() {
 // Pure horizontal slide: outgoing exits center→left/right, incoming enters right/left→center.
 // Both cards sit in a temp absolute layer inside sliderViewport (the clipping container).
 // No shrink, no vertical movement — pure translateX.
+/**
+ * animateSlide — Horizontal Slide Transition
+ * WHAT: Animates a horizontal slide between fromCard (exiting) and toCard (entering).
+ * HOW: Temporarily positions both cards absolute inside sliderViewport; outgoing exits
+ *      center → left/right, incoming enters right/left → center using CSS transform.
+ *      Cleans up all inline styles on transitionend and resets isAnimating flag.
+ * CALLED BY: goToSlide() on mobile/tablet when mobileTabletMQ.matches is true.
+ */
 function animateSlide(fromCard, toCard, dir) {
   isAnimating = true;
 
@@ -469,6 +520,13 @@ function animateSlide(fromCard, toCard, dir) {
 }
 
 // ── Navigate to a slide index ──
+/**
+ * goToSlide — Slide Navigator
+ * WHAT: Navigates the project card slider to a specific index, updating dots and arrow buttons.
+ * HOW: Clamps the index to valid range; on mobile triggers animateSlide(), on desktop calls
+ *      positionDeckCards() directly. Updates dot indicators and disables prev/next at boundaries.
+ * CALLED BY: sliderPrev/sliderNext click listeners, dot click listeners, filterBtns logic.
+ */
 function goToSlide(index) {
   const clamped = Math.max(0, Math.min(index, sliderCards.length - 1));
   if (clamped === sliderIndex) return;
@@ -495,6 +553,13 @@ function goToSlide(index) {
 }
 
 // ── Builds dot row ──
+/**
+ * buildSliderDots — Pagination Dot Builder
+ * WHAT: Clears and rebuilds the dot indicator row for the slider.
+ * HOW: Creates one <button class="sliderDot"> per slide; active dot gets sliderDot--active class.
+ *      Each dot has a click listener that calls goToSlide(i).
+ * CALLED BY: mountClientSlider, mountPersonalSlider, mountAllSlider.
+ */
 function buildSliderDots(total, activeIndex) {
   sliderDots.innerHTML = '';
   for (let i = 0; i < total; i++) {
@@ -507,6 +572,14 @@ function buildSliderDots(total, activeIndex) {
 }
 
 // ── Mount client slider ──
+/**
+ * mountClientSlider — Client Projects Slider Mount
+ * WHAT: Filters project cards to 'client' category, sorts ongoing cards first,
+ *       mounts them into the sliderTrack, and activates the slider UI.
+ * HOW: Clears sliderTrack, resets card styles, builds dots, disables/enables arrows,
+ *      shows clientSlider, hides projectsGrid, then calls schedulePosition().
+ * CALLED BY: filterBtns click listener when data-filter="client" is selected.
+ */
 function mountClientSlider() {
   sliderIndex = 0;
   isAnimating = false;
@@ -538,6 +611,12 @@ function mountClientSlider() {
 }
 
 // ── Mount personal slider ──
+/**
+ * mountPersonalSlider — Personal Projects Slider Mount
+ * WHAT: Filters project cards to 'personal' category and mounts them into the slider.
+ * HOW: Same mounting sequence as mountClientSlider but uses data-category="personal" filter.
+ * CALLED BY: filterBtns click listener when data-filter="personal" is selected.
+ */
 function mountPersonalSlider() {
   sliderIndex = 0;
   isAnimating = false;
@@ -567,6 +646,12 @@ function mountPersonalSlider() {
 }
 
 // ── Mount all-projects slider ──
+/**
+ * mountAllSlider — All Projects Slider Mount
+ * WHAT: Mounts all project cards into the slider (ongoing first, then the rest).
+ * HOW: Same mounting sequence as mountClientSlider but uses the full allCards array.
+ * CALLED BY: filterBtns click listener when data-filter="all" is selected.
+ */
 function mountAllSlider() {
   sliderIndex = 0;
   isAnimating = false;
@@ -597,6 +682,13 @@ function mountAllSlider() {
 }
 
 // ── Dismount slider, return cards to grid ──
+/**
+ * dismountClientSlider — Slider Dismount / Grid Restore
+ * WHAT: Removes all slider cards from the sliderTrack and returns them to the projectsGrid.
+ * HOW: Strips slider CSS classes and custom properties from each card, re-adds hidden class,
+ *      moves them back to projectsGrid, clears sliderCards[], deactivates clientSlider.
+ * CALLED BY: filterBtns click listener before mounting a new slider or grid filter.
+ */
 function dismountClientSlider() {
   sliderCards.forEach(card => {
     card.classList.remove('sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
@@ -611,6 +703,12 @@ function dismountClientSlider() {
 }
 
 // ── Grid filter for All / Personal ──
+/**
+ * filterProjectsGrid — Grid Filter by Category
+ * WHAT: Shows/hides project cards in the grid based on a category filter string.
+ * HOW: Toggles hidden/fade-in classes per card; re-sorts visible cards with ongoing first.
+ * CALLED BY: filterBtns click listener for non-slider filter values.
+ */
 function filterProjectsGrid(filter) {
   allCards.forEach(card => {
     if (card.parentNode !== projectsGrid) return;
@@ -683,7 +781,15 @@ if (toolsSection) {
 // Bug fix: removed PDF.js canvas code — certs now use static JPG previews
 // No JS needed for cert previews (pure HTML img tags)
 
-// ─── Resume Tabs ──────────────────────────
+/**
+ * Resume Tabs — IIFE
+ * WHAT: Manages two resume tab views (Standard ATS / Visual CV) with paginated image previews.
+ * HOW: tabConfig maps tab keys to image prefix, extension, and page totals.
+ *      goToPage() updates the <img> src with fade-in transition and updates nav controls.
+ *      Tab buttons switch currentTab, reset to page 1, and activate/deactivate tab content.
+ *      Arrow keys work when the resume section is visible in the viewport.
+ * CALLED BY: Self-invoking on page load; also responds to tab/prev/next button clicks and keydown.
+ */
 (function() {
   const tabBtns     = document.querySelectorAll('.resume-tab-btn');
   const tabContents = document.querySelectorAll('.resume-tab-content');
@@ -702,6 +808,13 @@ if (toolsSection) {
 
   const pageCount = document.getElementById('pageCount');
 
+  /**
+   * goToPage — Resume Page Navigator
+   * WHAT: Loads the correct resume image for the current tab and page number.
+   * HOW: Clamps n to [1, cfg.total], builds the padded filename, fades image out then in on load,
+   *      updates pageNum/pageCount labels, and disables prev/next at boundaries.
+   * CALLED BY: Tab button click listener, prevBtn/nextBtn click listeners, keydown handler.
+   */
   function goToPage(n) {
     const cfg = tabConfig[currentTab];
     curr = Math.max(1, Math.min(n, cfg.total));

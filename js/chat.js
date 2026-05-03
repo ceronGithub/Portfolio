@@ -39,10 +39,28 @@ let convoUnsub     = null;
 let allConvos      = [];
 
 // ── Visitor identity (persisted in localStorage) ──────
+/**
+ * getVisitorId — Visitor Identity Reader
+ * WHAT: Reads the visitor's conversation ID from localStorage.
+ * HOW: Catches exceptions (private/incognito mode) and returns null on failure.
+ * CALLED BY: selectConvo(), checkReturnVisitor(), newConvoBtn click listener.
+ */
 function getVisitorId()   { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } }
+
+/**
+ * setVisitorId — Visitor Identity Writer
+ * WHAT: Persists the visitor's conversation ID to localStorage.
+ * HOW: Silent fail on write errors (private/incognito mode).
+ * CALLED BY: ncSubmit click listener after a new conversation is created.
+ */
 function setVisitorId(id) { try { localStorage.setItem(STORAGE_KEY, id); } catch {} }
 
-// ── Cosmos ────────────────────────────────────────────
+/**
+ * buildCosmos — Cosmos Background Builder (Chat Page)
+ * WHAT: Generates animated nebulas and stars inside the #cosmos element for the chat page.
+ * HOW: Creates DOM elements with randomized CSS custom properties for size, position, and timing.
+ * CALLED BY: Boot sequence at the bottom of the file.
+ */
 function buildCosmos() {
   const cosmos = document.getElementById('cosmos');
   if (!cosmos) return;
@@ -62,9 +80,22 @@ function buildCosmos() {
 }
 
 // ── Helpers ───────────────────────────────────────────
+/**
+ * initials — Name Initials Extractor
+ * WHAT: Extracts up to 2 uppercase initials from a full name string.
+ * HOW: Splits by space, takes first character of each word, joins and slices to 2 chars.
+ * CALLED BY: renderSidebar(), selectConvo() header, renderMessage().
+ */
 function initials(name = '') {
   return name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 }
+
+/**
+ * timeAgo — Relative Timestamp Formatter
+ * WHAT: Converts a Firestore Timestamp or Date into a human-readable relative time string.
+ * HOW: Computes ms difference from now; returns 'just now', 'Xm ago', 'Xh ago', or locale date.
+ * CALLED BY: renderSidebar() for conversation last-message time display.
+ */
 function timeAgo(ts) {
   if (!ts) return '';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -74,20 +105,53 @@ function timeAgo(ts) {
   if (diff < 86400000)return Math.floor(diff/3600000) + 'h ago';
   return d.toLocaleDateString('en-PH', {month:'short', day:'numeric'});
 }
+/**
+ * formatTime — Message Timestamp Formatter
+ * WHAT: Formats a Firestore Timestamp or Date into 'HH:MM AM/PM' using en-PH locale.
+ * HOW: Converts Firestore Timestamp via .toDate() then uses toLocaleTimeString.
+ * CALLED BY: renderMessage() for each chat bubble time label.
+ */
 function formatTime(ts) {
   if (!ts) return '';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleTimeString('en-PH', {hour:'2-digit', minute:'2-digit'});
 }
+
+/**
+ * closeModal — Modal Close Helper
+ * WHAT: Removes the 'open' class from the modal element matching the given ID.
+ * HOW: Direct classList.remove; CSS handles hide transition.
+ * CALLED BY: Close button listeners and backdrop click listeners.
+ */
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/**
+ * openModal — Modal Open Helper
+ * WHAT: Adds the 'open' class to the modal element matching the given ID.
+ * HOW: Direct classList.add; CSS handles show transition.
+ * CALLED BY: ownerBtn click listener, newConvoBtn click listener.
+ */
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
+
+/**
+ * esc — HTML Escape Utility
+ * WHAT: Escapes HTML special characters to prevent XSS in dynamically injected innerHTML.
+ * HOW: Replaces &, <, >, with their HTML entity equivalents.
+ * CALLED BY: renderSidebar(), renderMessage() wherever user data is injected into HTML.
+ */
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── TAG classes ───────────────────────────────────────
 const TAG_CLASS = { new:'tag-new', read:'tag-read', replied:'tag-replied', starred:'tag-starred', closed:'tag-closed' };
 const TAG_LABEL = { new:'🟡 New', read:'⚪ Read', replied:'🟢 Replied', starred:'🟠 Starred', closed:'🔴 Closed' };
 
-// ── Sidebar: render conversation list ─────────────────
+/**
+ * renderSidebar — Conversation List Renderer
+ * WHAT: Clears and re-renders the sidebar conversation list, filtered by the search input.
+ * HOW: Filters allConvos by name/email match; renders owner view (full details + tag) vs.
+ *      visitor view (name + avatar only). Attaches selectConvo() click listener per item.
+ * CALLED BY: listen() onSnapshot callback, ownerBtn login/logout, sidebarSearch input.
+ */
 function renderSidebar(convos) {
   const list  = document.getElementById('convoList');
   const query = document.getElementById('sidebarSearch').value.toLowerCase();
@@ -134,7 +198,14 @@ function renderSidebar(convos) {
   });
 }
 
-// ── Select a conversation ─────────────────────────────
+/**
+ * selectConvo — Conversation Selector
+ * WHAT: Activates a conversation in the chat panel, showing its messages and updating the header.
+ * HOW: Sets activeConvoId, refreshes sidebar active state, updates header info, shows/hides
+ *      owner action controls, blurs messages for non-owners viewing others' convos,
+ *      and marks 'new' conversations as 'read' if the owner is viewing.
+ * CALLED BY: renderSidebar() item click listeners, checkReturnVisitor() returnBtn handler.
+ */
 function selectConvo(c) {
   activeConvoId = c.id;
   renderSidebar(allConvos);
@@ -189,7 +260,13 @@ function selectConvo(c) {
   }
 }
 
-// ── Load messages realtime ────────────────────────────
+/**
+ * loadMessages — Realtime Message Stream Loader
+ * WHAT: Subscribes to the messages subcollection of a conversation and renders them in real time.
+ * HOW: Unsubscribes any previous msgUnsub listener, queries messages ordered by createdAt asc,
+ *      clears and re-renders all messages on each snapshot, then scrolls to the bottom.
+ * CALLED BY: selectConvo() whenever a conversation is activated.
+ */
 function loadMessages(convoId) {
   if (msgUnsub) msgUnsub();
 
@@ -204,7 +281,13 @@ function loadMessages(convoId) {
   });
 }
 
-// ── Render a single message ───────────────────────────
+/**
+ * renderMessage — Single Message Bubble Renderer
+ * WHAT: Creates and appends a chat message bubble (with avatar, text, and timestamp) to #chatMessages.
+ * HOW: Determines owner vs. visitor layout; owner messages align right (inner then avatar),
+ *      visitor messages align left (avatar then inner). Auto-reply bubbles get 'auto-reply' class.
+ * CALLED BY: loadMessages() onSnapshot for each message document.
+ */
 function renderMessage(msg, convoId) {
   const msgDiv = document.getElementById('chatMessages');
   const isOwnerMsg = msg.sender === 'owner';
@@ -244,7 +327,14 @@ function renderMessage(msg, convoId) {
   msgDiv.appendChild(wrap);
 }
 
-// ── Send message ──────────────────────────────────────
+/**
+ * sendMessage — Chat Message Sender
+ * WHAT: Sends the typed message to Firestore and updates the conversation's lastMessage/tag.
+ * HOW: Reads chatInput value, disables button during send, writes to messages subcollection
+ *      via addDoc, then updates the parent conversation doc with lastMessage and tag.
+ *      Owner sends tag as 'replied'; visitor sends tag as 'new'.
+ * CALLED BY: chatSendBtn click listener, chatInput Enter keydown listener.
+ */
 async function sendMessage() {
   const input = document.getElementById('chatInput');
   const text  = input.value.trim();
@@ -425,7 +515,14 @@ document.getElementById('newConvoBtn').addEventListener('click', () => {
 // ── Sidebar search ────────────────────────────────────
 document.getElementById('sidebarSearch').addEventListener('input', () => renderSidebar(allConvos));
 
-// ── Visitor return banner ─────────────────────────────
+/**
+ * checkReturnVisitor — Return Visitor Banner Handler
+ * WHAT: Checks if the current browser session has a stored conversation ID and shows
+ *       a welcome-back banner if that conversation still exists.
+ * HOW: Reads getVisitorId() from localStorage, finds the matching conversation in allConvos,
+ *      populates #returnName, shows the banner, and attaches a selectConvo handler to the button.
+ * CALLED BY: listen() onSnapshot callback after allConvos is refreshed.
+ */
 function checkReturnVisitor() {
   const id = getVisitorId();
   if (!id || isOwner) return;
@@ -440,7 +537,13 @@ function checkReturnVisitor() {
   };
 }
 
-// ── Realtime listener ─────────────────────────────────
+/**
+ * listen — Firestore Conversation Realtime Listener
+ * WHAT: Subscribes to all conversations ordered by lastAt desc and keeps allConvos in sync.
+ * HOW: onSnapshot updates allConvos[], re-renders sidebar, checks return visitor, and
+ *      refreshes the active convo's tag select if owner has one open.
+ * CALLED BY: Boot sequence at the bottom of the file.
+ */
 function listen() {
   const q = query(collection(db, COL), orderBy('lastAt', 'desc'));
   convoUnsub = onSnapshot(q, snap => {

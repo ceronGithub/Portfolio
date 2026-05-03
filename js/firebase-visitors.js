@@ -31,6 +31,13 @@ const COL = 'visitors';
 // ─── Helpers ─────────────────────────────────────
 // Use Philippine Time (UTC+8) so the day resets at midnight PH time,
 // not midnight UTC (which would be 8:00 AM PH — causing wrong date keys).
+/**
+ * todayKey — Philippine Time Date Key Generator
+ * WHAT: Returns today's date in 'YYYY-MM-DD' format using Philippine Time (UTC+8).
+ * HOW: Offsets Date.now() by 8 hours so the key resets at midnight PH time, not midnight UTC.
+ * CALLED BY: hasVisitedToday(), markVisited(), recordVisit(), buildChart() (isToday check),
+ *            init() (todayData lookup).
+ */
 function todayKey() {
   const now = new Date();
   const phTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
@@ -39,6 +46,13 @@ function todayKey() {
 
 // Use localStorage (persists across sessions) + date key so each
 // calendar day gets counted once per browser, even across page reloads.
+/**
+ * hasVisitedToday — Visit Deduplication Check
+ * WHAT: Returns true if the current browser has already been counted as a visit today.
+ * HOW: Compares localStorage key 'cmc_visited' with todayKey(). Catches storage errors
+ *      (private/incognito) and returns false to allow the count attempt.
+ * CALLED BY: recordVisit() as a gate before writing to Firestore.
+ */
 function hasVisitedToday() {
   try {
     return localStorage.getItem('cmc_visited') === todayKey();
@@ -47,13 +61,27 @@ function hasVisitedToday() {
   }
 }
 
+/**
+ * markVisited — Visit Flag Writer
+ * WHAT: Stores today's date key in localStorage to prevent duplicate visit counting.
+ * HOW: Silent fail on write errors (private/incognito). Only called AFTER a successful
+ *      Firestore write to ensure failed writes can retry on next page load.
+ * CALLED BY: recordVisit() after Firestore write succeeds.
+ */
 function markVisited() {
   try {
     localStorage.setItem('cmc_visited', todayKey());
   } catch { /* ignore */ }
 }
 
-// ─── Record visit ────────────────────────────────
+/**
+ * recordVisit — Visit Counter Writer
+ * WHAT: Increments today's visitor count in Firestore (or creates the day doc if absent).
+ * HOW: Gates on hasVisitedToday() to avoid duplicate writes per browser per day.
+ *      Uses getDoc to check existence; updateDoc with increment(1) if exists, setDoc if new.
+ *      Only calls markVisited() after a confirmed successful write.
+ * CALLED BY: init() during widget initialization.
+ */
 async function recordVisit() {
   if (hasVisitedToday()) {
     console.log('[CMC Visitors] Already counted today — skipping.');
@@ -83,7 +111,12 @@ async function recordVisit() {
   }
 }
 
-// ─── Fetch last N days ───────────────────────────
+/**
+ * fetchDailyStats — Last N Days Visitor Data Fetcher
+ * WHAT: Fetches the most recent N days of visitor data from Firestore, ordered oldest→newest.
+ * HOW: Queries 'visitors' collection ordered by date desc with a limit, then reverses for chart order.
+ * CALLED BY: init() in parallel with fetchTotalCount() via Promise.all.
+ */
 async function fetchDailyStats(days = 7) {
   const q    = query(collection(db, COL), orderBy('date', 'desc'), limit(days));
   const snap = await getDocs(q);
@@ -92,12 +125,23 @@ async function fetchDailyStats(days = 7) {
     .reverse(); // oldest → newest for the chart
 }
 
+/**
+ * fetchTotalCount — Total Visit Count Aggregator
+ * WHAT: Sums all visitor counts across all days in the 'visitors' Firestore collection.
+ * HOW: Reads all docs with getDocs, reduces their count fields.
+ * CALLED BY: init() in parallel with fetchDailyStats() via Promise.all.
+ */
 async function fetchTotalCount() {
   const snap = await getDocs(collection(db, COL));
   return snap.docs.reduce((sum, d) => sum + (d.data().count || 0), 0);
 }
 
-// ─── Animated number ─────────────────────────────
+/**
+ * animateCount — Animated Number Counter
+ * WHAT: Smoothly animates a number element from its current displayed value to a target number.
+ * HOW: Uses requestAnimationFrame with a cubic ease-out curve over the given duration (default 1400ms).
+ * CALLED BY: init() to animate #vcCount and #vcCountSmall after data loads.
+ */
 function animateCount(el, target, duration = 1400) {
   const start = performance.now();
   const from  = parseInt(el.textContent.replace(/,/g,'')) || 0;
@@ -110,9 +154,13 @@ function animateCount(el, target, duration = 1400) {
   requestAnimationFrame(step);
 }
 
-// ─── Build SVG Histogram ─────────────────────────
-// True histogram: adjacent bins (no gaps), baseline axis,
-// count labels above each bin, day labels at base.
+/**
+ * buildChart — SVG Visitor Histogram Builder
+ * WHAT: Generates an inline SVG histogram of daily visitor counts for the last 7 days.
+ * HOW: Computes bar heights relative to max count; highlights today's bar with a different
+ *      gradient. Adds count labels above bars and day-of-week labels below. Returns SVG string.
+ * CALLED BY: init() to populate #vcChart after fetchDailyStats() resolves.
+ */
 function buildChart(data) {
   const W      = 220;
   const H      = 74;
@@ -170,7 +218,13 @@ function buildChart(data) {
   </svg>`;
 }
 
-// ─── Inject widget CSS ────────────────────────────
+/**
+ * injectStyles — Visitor Widget CSS Injector
+ * WHAT: Dynamically injects the visitor counter widget's CSS into <head> once.
+ * HOW: Guards against duplicate injection with a #vc-styles ID check. Creates a <style>
+ *      element with all widget layout, animation, and responsive styles.
+ * CALLED BY: init() before buildWidget().
+ */
 function injectStyles() {
   if (document.getElementById('vc-styles')) return;
   const style = document.createElement('style');
@@ -437,7 +491,14 @@ function injectStyles() {
   document.head.appendChild(style);
 }
 
-// ─── Build widget HTML ────────────────────────────
+/**
+ * buildWidget — Visitor Counter Widget DOM Builder
+ * WHAT: Creates and appends the fixed-position visitor counter widget to document.body.
+ * HOW: Builds innerHTML with header, count display, 7-day chart placeholder, appointment button,
+ *      and chat button. Attaches collapse toggle, appointment link, and chat link click handlers.
+ *      Returns the widget element so init() can animate it in.
+ * CALLED BY: init().
+ */
 function buildWidget() {
   const wrap = document.createElement('div');
   wrap.id = 'vc-widget';
@@ -523,7 +584,15 @@ function buildWidget() {
   return wrap;
 }
 
-// ─── Main ─────────────────────────────────────────
+/**
+ * init — Visitor Widget Initializer (Main Entry Point)
+ * WHAT: Orchestrates the full visitor widget lifecycle: injects styles, builds the widget DOM,
+ *       records the visit, fetches stats, and populates count/chart/pill displays.
+ * HOW: Calls injectStyles() → buildWidget() → shows widget after 800ms delay →
+ *      recordVisit() → Promise.all([fetchTotalCount, fetchDailyStats]) →
+ *      animates counts and renders the SVG chart. Shows '--' error state on failure.
+ * CALLED BY: Module boot — invoked immediately at the bottom of the file.
+ */
 async function init() {
   injectStyles();
   const widget = buildWidget();

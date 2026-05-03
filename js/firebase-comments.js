@@ -65,14 +65,25 @@ if (textarea && charCountEl) {
   });
 }
 
-// ─── HTML Escape ─────────────────────────
+/**
+ * esc — HTML Escape Utility
+ * WHAT: Escapes HTML special characters to prevent XSS in dynamically injected innerHTML.
+ * HOW: Replaces &, <, >, ", ' with their HTML entity equivalents.
+ * CALLED BY: renderCarousel() wherever user-submitted data is injected into card innerHTML.
+ */
 function esc(str) {
   return String(str ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// ─── Render Carousel ─────────────────────
+/**
+ * renderCarousel — Comment Cards Carousel Builder
+ * WHAT: Clears and rebuilds the comments carousel with a card per comment, plus dot indicators.
+ * HOW: Creates .comment-card elements with avatar initials, rating bar, comment text, and date.
+ *      Builds dot buttons with goToSlide() click listeners. Starts autoplay after build.
+ * CALLED BY: loadComments() on initial load and after a new comment is submitted.
+ */
 function renderCarousel(comments) {
   if (!carousel) return;
   carousel.querySelectorAll('.comment-card').forEach(c => c.remove());
@@ -136,6 +147,12 @@ function renderCarousel(comments) {
   startAutoplay();
 }
 
+/**
+ * goToSlide — Carousel Slide Navigator
+ * WHAT: Transitions the active comment card and dot indicator to the given index.
+ * HOW: Removes 'active' from the current card/dot, wraps index via modulo, adds 'active' to new ones.
+ * CALLED BY: prevBtn/nextBtn click listeners, dot click listeners, startAutoplay() interval, touch swipe.
+ */
 function goToSlide(idx) {
   const cards = carousel?.querySelectorAll('.comment-card');
   const dots  = dotsWrap?.querySelectorAll('.carousel-dot');
@@ -151,12 +168,25 @@ function goToSlide(idx) {
   updateControls();
 }
 
+/**
+ * updateControls — Carousel Arrow State Updater
+ * WHAT: Enables or disables the prev/next carousel buttons based on whether there are multiple comments.
+ * HOW: Sets disabled property based on allComments.length > 1.
+ * CALLED BY: renderCarousel(), goToSlide().
+ */
 function updateControls() {
   const ok = allComments.length > 1;
   if (prevBtn) prevBtn.disabled = !ok;
   if (nextBtn) nextBtn.disabled = !ok;
 }
 
+/**
+ * startAutoplay — Carousel Auto-Advance Timer
+ * WHAT: Clears any existing autoplay timer and starts a new 5-second interval to advance slides.
+ * HOW: Uses setInterval to call goToSlide(currentSlide + 1) every 5000ms.
+ *      Only starts if there are more than 1 comments. Pauses on mouseenter (see listeners below).
+ * CALLED BY: renderCarousel() after building cards, carousel mouseleave listener.
+ */
 function startAutoplay() {
   clearInterval(autoplayTimer);
   if (allComments.length > 1) {
@@ -177,7 +207,13 @@ carousel?.addEventListener('touchend',   e => {
   if (Math.abs(d) > 50) goToSlide(d > 0 ? currentSlide+1 : currentSlide-1);
 });
 
-// ─── Load Comments ────────────────────────
+/**
+ * loadComments — Firestore Comments Fetcher
+ * WHAT: Fetches all comments from the 'comments' Firestore collection ordered by createdAt desc.
+ * HOW: Uses getDocs (one-time read) with an orderBy query; maps docs to plain objects
+ *      and passes the result to renderCarousel(). Shows error state in emptyState on failure.
+ * CALLED BY: Boot sequence at bottom of file; also called after a new comment is submitted.
+ */
 async function loadComments() {
   try {
     const q    = query(collection(db, COL), orderBy('createdAt','desc'));
@@ -193,7 +229,14 @@ async function loadComments() {
   }
 }
 
-// ─── Validation ───────────────────────────
+/**
+ * validate — Comment Form Validator
+ * WHAT: Validates all required comment form fields and the email format.
+ * HOW: Iterates field config array; shows inline error messages and adds 'input-error' class
+ *      to invalid fields. Also enforces a 10-character minimum on the comment body.
+ *      Returns true only if all checks pass.
+ * CALLED BY: form submit event listener before Firestore write.
+ */
 function validate() {
   let ok = true;
   const fields = [
