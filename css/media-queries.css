@@ -99,6 +99,10 @@
 =================================== */
 @media (max-width: 768px) {
 
+  /* Hide page scrollbar on tablet/mobile */
+  ::-webkit-scrollbar { display: none; }
+  html, body { scrollbar-width: none; }
+
   /* Navbar */
   .navbar { padding: 1rem 1.5rem; }
   .hamburger { display: flex; }
