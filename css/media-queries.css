@@ -30,6 +30,11 @@
     overflow: hidden;
     display: flex;
     justify-content: center;
+    scrollbar-width: none;
+  }
+
+  .sliderViewport::-webkit-scrollbar {
+    display: none;
   }
 
   .sliderTrack {
@@ -51,6 +56,13 @@
     opacity:   1 !important;
     z-index:   2;
     margin:    0 auto;
+    overflow:  hidden;
+    scrollbar-width: none;
+  }
+
+  /* Hide webkit scrollbar on active card */
+  .sliderTrack .project-card.sliderCard--active::-webkit-scrollbar {
+    display: none;
   }
 
   /* Prev & next: fully hidden — no peek, no bleed */
