@@ -20,6 +20,31 @@
   .hero-content { gap: 3rem; }
   .about-grid   { gap: 3rem; }
   .profile-ring { width: 220px; height: 220px; }
+
+  /* ── Client Slider: simple one-card-at-a-time on tablet/mobile ──
+     Remove the deck padding used for desktop peek corners.
+     Track clips to active card height only — no overflow bleed.
+     Card fills full viewport width minus container padding.
+     Arrows sit at left/right edges of the viewport strip. */
+  .sliderViewport {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .sliderTrack {
+    overflow: hidden;
+  }
+
+  .sliderTrack .project-card {
+    width: 100%;
+    left: 0 !important;
+    top:  0 !important;
+    transform: none !important;
+    position: relative;
+  }
+
+  .sliderArrowPrev { left: 4px; }
+  .sliderArrowNext { right: 4px; }
 }
 
 
