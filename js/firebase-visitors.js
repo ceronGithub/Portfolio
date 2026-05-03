@@ -270,6 +270,7 @@ function injectStyles() {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
       margin-bottom: 10px;
     }
     .vc-title-wrap {
@@ -565,12 +566,14 @@ function buildWidget() {
   `;
   document.body.appendChild(wrap);
 
-  // Toggle collapse
-  let collapsed = false;
+  // Toggle collapse — starts minimized by default
+  let collapsed = true;
+  wrap.classList.add('vc-collapsed');
+  document.getElementById('vcToggle').textContent = '+';
   document.getElementById('vcToggle').addEventListener('click', () => {
     collapsed = !collapsed;
     wrap.classList.toggle('vc-collapsed', collapsed);
-    document.getElementById('vcToggle').textContent = collapsed ? ' + ' : '−';
+    document.getElementById('vcToggle').textContent = collapsed ? '+' : '−';
   });
 
   // Appointment button
