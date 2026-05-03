@@ -570,7 +570,7 @@ function buildWidget() {
   document.getElementById('vcToggle').addEventListener('click', () => {
     collapsed = !collapsed;
     wrap.classList.toggle('vc-collapsed', collapsed);
-    document.getElementById('vcToggle').textContent = collapsed ? '+' : '−';
+    document.getElementById('vcToggle').textContent = collapsed ? ' + ' : '−';
   });
 
   // Appointment button
