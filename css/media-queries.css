@@ -41,23 +41,24 @@
     overflow: hidden;
     width: 100%;
     height: auto !important;
+    position: relative;
     display: flex;
     justify-content: center;
   }
 
-  /* Active card: centered, full width, no absolute offset */
+  /* Active card: centered, positioned in flow, animation-ready */
   .sliderTrack .project-card.sliderCard--active {
     position: relative;
-    top:       0 !important;
-    left:      0 !important;
-    width:     min(620px, 92vw);
-    height:    auto !important;
-    transform: none !important;
-    opacity:   1 !important;
-    z-index:   2;
-    margin:    0 auto;
-    overflow:  hidden;
+    top:      0 !important;
+    left:     0 !important;
+    width:    min(620px, 92vw);
+    height:   auto !important;
+    opacity:  1;
+    z-index:  2;
+    margin:   0 auto;
+    overflow: hidden;
     scrollbar-width: none;
+    will-change: transform, opacity;
   }
 
   /* Hide webkit scrollbar on active card */

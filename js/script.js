@@ -361,11 +361,70 @@ function schedulePosition() {
   requestAnimationFrame(() => requestAnimationFrame(positionDeckCards));
 }
 
+// ── matchMedia gate — smooth slide animation on mobile/tablet only ──
+const mobileTabletMQ = window.matchMedia('(max-width: 1024px)');
+let   isAnimating    = false;
+
+// ── animateSlide ──
+// Slides outgoing card out and incoming card in via translateX + opacity.
+// Direction-aware: next slides left, prev slides right.
+function animateSlide(fromCard, toCard, dir) {
+  isAnimating = true;
+
+  // Place incoming off-screen in slide direction, make visible
+  toCard.style.transition = 'none';
+  toCard.style.transform  = `translateX(${dir * 100}%)`;
+  toCard.style.opacity    = '0';
+  toCard.style.display    = 'flex';
+
+  // Force reflow so transition fires correctly
+  toCard.getBoundingClientRect();
+
+  const ease = 'transform 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease';
+
+  // Animate outgoing out
+  fromCard.style.transition = ease;
+  fromCard.style.transform  = `translateX(${dir * -100}%)`;
+  fromCard.style.opacity    = '0';
+
+  // Animate incoming in
+  toCard.style.transition = ease;
+  toCard.style.transform  = 'translateX(0%)';
+  toCard.style.opacity    = '1';
+
+  toCard.addEventListener('transitionend', function cleanup() {
+    toCard.removeEventListener('transitionend', cleanup);
+    // Reset outgoing card
+    fromCard.style.display    = 'none';
+    fromCard.style.transition = '';
+    fromCard.style.transform  = '';
+    fromCard.style.opacity    = '';
+    fromCard.classList.remove('sliderCard--active');
+    // Clean incoming inline overrides
+    toCard.style.transition = '';
+    toCard.style.transform  = '';
+    toCard.style.opacity    = '';
+    isAnimating = false;
+  }, { once: true });
+}
+
 // ── Navigate to a slide index ──
 function goToSlide(index) {
-  sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
-  positionDeckCards();
-  schedulePosition(); // re-measure after transition settles
+  const clamped = Math.max(0, Math.min(index, sliderCards.length - 1));
+  if (clamped === sliderIndex) return;
+
+  if (mobileTabletMQ.matches && !isAnimating) {
+    const dir      = clamped > sliderIndex ? 1 : -1;
+    const fromCard = sliderCards[sliderIndex];
+    sliderIndex    = clamped;
+    const toCard   = sliderCards[sliderIndex];
+    toCard.classList.add('sliderCard--active');
+    animateSlide(fromCard, toCard, dir);
+  } else if (!mobileTabletMQ.matches) {
+    sliderIndex = clamped;
+    positionDeckCards();
+    schedulePosition();
+  }
 
   sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
     dot.classList.toggle('sliderDot--active', i === sliderIndex);
