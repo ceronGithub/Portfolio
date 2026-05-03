@@ -26,10 +26,10 @@
      Active card is centered via flexbox; prev & next are invisible.
      Track height still driven by JS --stageH on the active card. */
   .sliderViewport {
-    padding: 0;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
+    padding:   0;
+    overflow:  hidden;
+    position:  relative;
+    width:     100%;
     scrollbar-width: none;
   }
 
@@ -37,13 +37,15 @@
     display: none;
   }
 
+  .clientSlider--active .sliderTrack,
   .sliderTrack {
-    overflow: hidden;
-    width: 100%;
-    height: auto !important;
-    position: relative;
-    display: flex;
+    width:    100%;
+    height:   auto;
+    display:  flex;
     justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow: visible;
   }
 
   /* Active card: centered, positioned in flow, animation-ready */

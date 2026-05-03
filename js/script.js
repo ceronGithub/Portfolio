@@ -281,14 +281,43 @@ let sliderIndex = 0;
 let sliderCards = [];
 
 const PEEK_SCALE  = 0.62;
-const PEEK_OFFSET = 30; // px: how far the peek card's corner sticks out from the active card's corner
+const PEEK_OFFSET = 30;
+
+// ── matchMedia gate — slider mounts on mobile/tablet only ──
+const mobileTabletMQ = window.matchMedia('(max-width: 1024px)');
+let   isAnimating    = false;
 
 // ── Layout all cards — only prev/active/next are shown, everything else display:none ──
-// slot -1 → prev:  top-left corner, scaled, behind  (z:2)
-// slot  0 → active: horizontally centered, full size (z:5)
-// slot +1 → next:  bottom-right corner, scaled, in front (z:3)
-// |slot| > 1 → strictly hidden
+// Mobile/tablet (≤1024px): only active card visible, centered. Prev/next hidden.
+// Desktop: slot -1 → prev top-left, slot 0 → active center, slot +1 → next bottom-right.
 function positionDeckCards() {
+
+  if (mobileTabletMQ.matches) {
+    // Mobile/tablet: only active card shown, all others hidden
+    sliderCards.forEach((card, i) => {
+      if (i === sliderIndex) {
+        card.style.display = 'flex';
+        card.style.removeProperty('--cTop');
+        card.style.removeProperty('--cLeft');
+        card.style.removeProperty('--cScale');
+        card.style.removeProperty('--cOpacity');
+        card.style.removeProperty('--cZ');
+        card.classList.add('sliderCard--active');
+        card.classList.remove('sliderCard--prev', 'sliderCard--next');
+      } else {
+        card.style.display = 'none';
+        card.style.removeProperty('--cTop');
+        card.style.removeProperty('--cLeft');
+        card.style.removeProperty('--cScale');
+        card.style.removeProperty('--cOpacity');
+        card.style.removeProperty('--cZ');
+        card.classList.remove('sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
+      }
+    });
+    return;
+  }
+
+  // ── Desktop: stacked-deck layout (unchanged) ──
   const trackW     = sliderTrack.offsetWidth;
   const cardW      = Math.min(700, Math.max(200, trackW * 0.88));
   const activeLeft = Math.max(0, (trackW - cardW) / 2);
@@ -361,49 +390,80 @@ function schedulePosition() {
   requestAnimationFrame(() => requestAnimationFrame(positionDeckCards));
 }
 
-// ── matchMedia gate — smooth slide animation on mobile/tablet only ──
-const mobileTabletMQ = window.matchMedia('(max-width: 1024px)');
-let   isAnimating    = false;
-
 // ── animateSlide ──
-// Slides outgoing card out and incoming card in via translateX + opacity.
-// Direction-aware: next slides left, prev slides right.
+// Pure horizontal slide: outgoing exits center→left/right, incoming enters right/left→center.
+// Both cards sit in a temp absolute layer inside sliderViewport (the clipping container).
+// No shrink, no vertical movement — pure translateX.
 function animateSlide(fromCard, toCard, dir) {
   isAnimating = true;
 
-  // Place incoming off-screen in slide direction, make visible
-  toCard.style.transition = 'none';
-  toCard.style.transform  = `translateX(${dir * 100}%)`;
-  toCard.style.opacity    = '0';
-  toCard.style.display    = 'flex';
+  const vp    = sliderViewport;
+  const vpW   = vp.offsetWidth;
+  const cardW = fromCard.offsetWidth;
+  const cardH = fromCard.offsetHeight;
 
-  // Force reflow so transition fires correctly
+  // Freeze viewport height so page doesn't jump
+  vp.style.height   = `${cardH}px`;
+  vp.style.position = 'relative';
+  vp.style.overflow = 'hidden';
+
+  // Pull both cards out of flow into the viewport stage
+  const centerX = (vpW - cardW) / 2;
+
+  [fromCard, toCard].forEach(c => {
+    c.style.position = 'absolute';
+    c.style.top      = '0';
+    c.style.width    = `${cardW}px`;
+    c.style.margin   = '0';
+    c.style.transition = 'none';
+  });
+
+  // Outgoing starts centered
+  fromCard.style.left      = `${centerX}px`;
+  fromCard.style.transform = 'translateX(0)';
+  fromCard.style.display   = 'flex';
+
+  // Incoming starts off-screen in direction of travel
+  toCard.style.left      = `${centerX}px`;
+  toCard.style.transform = `translateX(${dir * vpW}px)`;
+  toCard.style.display   = 'flex';
+
+  // Force reflow
   toCard.getBoundingClientRect();
 
-  const ease = 'transform 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease';
+  const ease = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
 
-  // Animate outgoing out
+  // Slide both cards simultaneously
   fromCard.style.transition = ease;
-  fromCard.style.transform  = `translateX(${dir * -100}%)`;
-  fromCard.style.opacity    = '0';
+  fromCard.style.transform  = `translateX(${dir * -vpW}px)`;
 
-  // Animate incoming in
   toCard.style.transition = ease;
-  toCard.style.transform  = 'translateX(0%)';
-  toCard.style.opacity    = '1';
+  toCard.style.transform  = 'translateX(0)';
 
   toCard.addEventListener('transitionend', function cleanup() {
     toCard.removeEventListener('transitionend', cleanup);
-    // Reset outgoing card
-    fromCard.style.display    = 'none';
-    fromCard.style.transition = '';
-    fromCard.style.transform  = '';
-    fromCard.style.opacity    = '';
+
+    // Restore all inline styles
+    [fromCard, toCard].forEach(c => {
+      c.style.position   = '';
+      c.style.top        = '';
+      c.style.left       = '';
+      c.style.width      = '';
+      c.style.margin     = '';
+      c.style.transition = '';
+      c.style.transform  = '';
+      c.style.display    = '';
+    });
+
+    // Hide outgoing, remove active class
+    fromCard.style.display = 'none';
     fromCard.classList.remove('sliderCard--active');
-    // Clean incoming inline overrides
-    toCard.style.transition = '';
-    toCard.style.transform  = '';
-    toCard.style.opacity    = '';
+
+    // Restore viewport
+    vp.style.height   = '';
+    vp.style.position = '';
+    vp.style.overflow = '';
+
     isAnimating = false;
   }, { once: true });
 }
@@ -449,6 +509,7 @@ function buildSliderDots(total, activeIndex) {
 // ── Mount client slider ──
 function mountClientSlider() {
   sliderIndex = 0;
+  isAnimating = false;
   sliderTrack.innerHTML = '';
 
   const clientAll = allCards.filter(c => c.getAttribute('data-category') === 'client');
@@ -456,8 +517,12 @@ function mountClientSlider() {
   const rest      = clientAll.filter(c => !c.querySelector('.ongoing-badge'));
   sliderCards = [...ongoing, ...rest];
 
-  sliderCards.forEach(card => {
-    card.classList.remove('hidden', 'fade-in');
+  sliderCards.forEach((card, i) => {
+    card.classList.remove('hidden', 'fade-in', 'sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
+    card.style.display   = i === 0 ? 'flex' : 'none';
+    card.style.transform = '';
+    card.style.opacity   = '';
+    if (i === 0) card.classList.add('sliderCard--active');
     sliderTrack.appendChild(card);
   });
 
@@ -469,7 +534,6 @@ function mountClientSlider() {
   clientSlider.classList.add('clientSlider--active');
   projectsGrid.style.display = 'none';
 
-  // Double-rAF: wait for cards to paint so scrollHeight and offsetWidth are real
   schedulePosition();
 }
 
@@ -482,11 +546,12 @@ function mountPersonalSlider() {
   const personalAll = allCards.filter(c => c.getAttribute('data-category') === 'personal');
   sliderCards = personalAll;
 
-  sliderCards.forEach(card => {
-    card.classList.remove('hidden', 'fade-in');
-    card.style.display   = '';
+  sliderCards.forEach((card, i) => {
+    card.classList.remove('hidden', 'fade-in', 'sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
+    card.style.display   = i === 0 ? 'flex' : 'none';
     card.style.transform = '';
     card.style.opacity   = '';
+    if (i === 0) card.classList.add('sliderCard--active');
     sliderTrack.appendChild(card);
   });
 
@@ -511,11 +576,12 @@ function mountAllSlider() {
   const rest    = allCards.filter(c => !c.querySelector('.ongoing-badge'));
   sliderCards   = [...ongoing, ...rest];
 
-  sliderCards.forEach(card => {
-    card.classList.remove('hidden', 'fade-in');
-    card.style.display   = '';
+  sliderCards.forEach((card, i) => {
+    card.classList.remove('hidden', 'fade-in', 'sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
+    card.style.display   = i === 0 ? 'flex' : 'none';
     card.style.transform = '';
     card.style.opacity   = '';
+    if (i === 0) card.classList.add('sliderCard--active');
     sliderTrack.appendChild(card);
   });
 
