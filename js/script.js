@@ -262,12 +262,9 @@ if (profileImg) {
 
 // ─── Project Filter Tabs + Client Work Stacked Card Deck Carousel ───────────
 // Client filter: center = active card (full).
-// ── CLIENT WORK SLIDER ──────────────────────────────────────────────────────
-// Desktop  (>1024px) : stacked-deck layout unchanged — prev top-left, next bottom-right.
-// Mobile/Tablet (≤1024px) : simple one-card-at-a-time slider.
-//   Only the active card is visible. All other cards are hidden (display:none).
-//   Left arrow  → previous card.  Right arrow → next card.
-// ────────────────────────────────────────────────────────────────────────────
+// Previous card peeks from TOP-LEFT corner (behind, dimmed, clipped).
+// Next card peeks from BOTTOM-RIGHT corner (in front, dimmed, clipped).
+// Left arrow disabled when no prev; right arrow disabled when no next.
 
 const projectsGrid   = document.getElementById('projectsGrid');
 const clientSlider   = document.getElementById('clientSlider');
@@ -283,58 +280,33 @@ const allCards  = Array.from(document.querySelectorAll('.project-card[data-categ
 let sliderIndex = 0;
 let sliderCards = [];
 
-// ── matchMedia gate — slider mounts on mobile/tablet only ──
-const mobileTabletMQ = window.matchMedia('(max-width: 1024px)');
-
-// Desktop peek-deck constants (unchanged)
 const PEEK_SCALE  = 0.62;
-const PEEK_OFFSET = 30;
+const PEEK_OFFSET = 30; // px: how far the peek card's corner sticks out from the active card's corner
 
-// ── positionDeckCards ──
-// Mobile/tablet: shows only the active card; all others display:none.
-// Desktop: stacked-deck layout — prev top-left, next bottom-right (unchanged).
+// ── Layout all cards — only prev/active/next are shown, everything else display:none ──
+// slot -1 → prev:  top-left corner, scaled, behind  (z:2)
+// slot  0 → active: horizontally centered, full size (z:5)
+// slot +1 → next:  bottom-right corner, scaled, in front (z:3)
+// |slot| > 1 → strictly hidden
 function positionDeckCards() {
-  if (mobileTabletMQ.matches) {
-    // Simple slider: only the active card is shown
-    const activeCard = sliderCards[sliderIndex];
-    const activeH    = activeCard ? activeCard.scrollHeight : 500;
-    sliderTrack.style.setProperty('--stageH', `${activeH}px`);
-
-    sliderCards.forEach((card, i) => {
-      if (i === sliderIndex) {
-        card.style.display = 'flex';
-        card.style.setProperty('--cTop',     '0px');
-        card.style.setProperty('--cLeft',    '0px');
-        card.style.setProperty('--cScale',   '1');
-        card.style.setProperty('--cOpacity', '1');
-        card.style.setProperty('--cZ',       '5');
-        card.classList.add('sliderCard--active');
-        card.classList.remove('sliderCard--prev', 'sliderCard--next');
-      } else {
-        card.style.display = 'none';
-        card.classList.remove('sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
-      }
-    });
-    return;
-  }
-
-  // ── Desktop: original stacked-deck layout (unchanged) ──
   const trackW     = sliderTrack.offsetWidth;
   const cardW      = Math.min(700, Math.max(200, trackW * 0.88));
   const activeLeft = Math.max(0, (trackW - cardW) / 2);
 
   const activeCard = sliderCards[sliderIndex];
   const activeH    = activeCard ? activeCard.scrollHeight : 500;
-  const peekH      = 180 * PEEK_SCALE;
+  const peekH      = 180 * PEEK_SCALE; // peek cards are clipped to 180px in CSS
 
-  const topRoom = 20;
-  const botRoom = 40;
-  const totalH  = topRoom + activeH + botRoom;
+  // Track height: small top overlap for prev + active card + small bottom overlap for next
+  const topRoom  = 20; // prev card overlaps active from the top by this much
+  const botRoom  = 40; // next card peeks out below active card by this much
+  const totalH   = topRoom + activeH + botRoom;
   sliderTrack.style.setProperty('--stageH', `${totalH}px`);
 
   sliderCards.forEach((card, i) => {
     const slot = i - sliderIndex;
 
+    // Strictly hide everything beyond prev/active/next
     if (Math.abs(slot) > 1) {
       card.style.setProperty('--cOpacity', '0');
       card.style.setProperty('--cScale',   '0.5');
@@ -347,6 +319,7 @@ function positionDeckCards() {
     card.style.display = 'flex';
 
     if (slot === 0) {
+      // Active — centered, sits below topRoom
       card.style.setProperty('--cTop',     `${topRoom}px`);
       card.style.setProperty('--cLeft',    `${activeLeft}px`);
       card.style.setProperty('--cScale',   '1');
@@ -356,8 +329,9 @@ function positionDeckCards() {
       card.classList.remove('sliderCard--prev', 'sliderCard--next');
 
     } else if (slot === -1) {
+      // Prev — top-left: mirrors next card's corner overlap, shifted left of active card
       const prevTop  = 0;
-      const prevLeft = activeLeft - (cardW * PEEK_SCALE * 0.8);
+      const prevLeft = activeLeft - (cardW * PEEK_SCALE * .8);
       card.style.setProperty('--cTop',     `${prevTop}px`);
       card.style.setProperty('--cLeft',    `${prevLeft}px`);
       card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
@@ -367,6 +341,8 @@ function positionDeckCards() {
       card.classList.remove('sliderCard--active', 'sliderCard--next');
 
     } else {
+      // Next — bottom-right: overlaps active card's bottom-right corner, shifted right
+      // Sits so its top is near active card's bottom, shifted right past active's right edge
       const nextTop  = topRoom + activeH - (peekH * 0.35);
       const nextLeft = activeLeft + cardW - (cardW * PEEK_SCALE * 0.8);
       card.style.setProperty('--cTop',     `${nextTop}px`);
@@ -389,7 +365,7 @@ function schedulePosition() {
 function goToSlide(index) {
   sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
   positionDeckCards();
-  schedulePosition();
+  schedulePosition(); // re-measure after transition settles
 
   sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
     dot.classList.toggle('sliderDot--active', i === sliderIndex);
@@ -411,7 +387,7 @@ function buildSliderDots(total, activeIndex) {
   }
 }
 
-// ── Mount client slider (mobile/tablet only) ──
+// ── Mount client slider ──
 function mountClientSlider() {
   sliderIndex = 0;
   sliderTrack.innerHTML = '';
@@ -434,15 +410,16 @@ function mountClientSlider() {
   clientSlider.classList.add('clientSlider--active');
   projectsGrid.style.display = 'none';
 
+  // Double-rAF: wait for cards to paint so scrollHeight and offsetWidth are real
   schedulePosition();
 }
 
 // ── Dismount slider, return cards to grid ──
 function dismountClientSlider() {
   sliderCards.forEach(card => {
-    card.style.display = '';
     card.classList.remove('sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
     ['--cTop','--cLeft','--cScale','--cOpacity','--cZ'].forEach(p => card.style.removeProperty(p));
+    card.style.display = '';
     card.classList.add('hidden');
     projectsGrid.appendChild(card);
   });
@@ -473,23 +450,10 @@ function filterProjectsGrid(filter) {
 sliderPrev.addEventListener('click', () => goToSlide(sliderIndex - 1));
 sliderNext.addEventListener('click', () => goToSlide(sliderIndex + 1));
 
-// Re-position on window resize; re-check mobile/tablet gate on breakpoint cross
+// Re-center on window resize
 window.addEventListener('resize', () => {
   if (sliderCards.length > 0) schedulePosition();
 }, { passive: true });
-
-// ── Breakpoint change: switch between slider and grid automatically ──
-mobileTabletMQ.addEventListener('change', () => {
-  const activeFilter = document.querySelector('.filter-btn.active')?.getAttribute('data-filter') || 'all';
-  if (activeFilter === 'client') {
-    dismountClientSlider();
-    if (mobileTabletMQ.matches) {
-      mountClientSlider();
-    } else {
-      filterProjectsGrid('client');
-    }
-  }
-});
 
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -498,12 +462,7 @@ filterBtns.forEach(btn => {
     const filter = btn.getAttribute('data-filter');
     if (filter === 'client') {
       dismountClientSlider();
-      // Slider only on mobile/tablet; desktop uses the grid
-      if (mobileTabletMQ.matches) {
-        mountClientSlider();
-      } else {
-        filterProjectsGrid('client');
-      }
+      mountClientSlider();
     } else {
       dismountClientSlider();
       filterProjectsGrid(filter);
@@ -511,12 +470,7 @@ filterBtns.forEach(btn => {
   });
 });
 
-// ── Initial mount: slider on mobile/tablet, grid on desktop ──
-if (mobileTabletMQ.matches) {
-  mountClientSlider();
-} else {
-  filterProjectsGrid('client');
-}
+mountClientSlider();
 
 
 // ─── Tool Tags Stagger Animation ──────────
