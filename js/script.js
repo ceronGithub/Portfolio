@@ -298,7 +298,7 @@ function positionDeckCards() {
   const peekH      = 180 * PEEK_SCALE; // peek cards are clipped to 180px in CSS
 
   // Track height: small top overlap for prev + active card + small bottom overlap for next
-  const topRoom  = 20; // prev card overlaps active from the top by this much
+  const topRoom  = 60; // prev card overlaps active from the top by this much
   const botRoom  = 40; // next card peeks out below active card by this much
   const totalH   = topRoom + activeH + botRoom;
   sliderTrack.style.setProperty('--stageH', `${totalH}px`);
