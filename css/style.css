@@ -53,7 +53,7 @@ ul { list-style: none; }
    SCROLLBAR
 =================================== */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--gradient);
   border-radius: 3px;
@@ -3429,14 +3429,12 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   display: block;
 }
 
-/* Stage: overflow visible so peek cards can render outside center area.
-   Padding reserves room for top-left and bottom-right peeks.
-   Position relative so JS-positioned arrows anchor correctly. */
+/* Stage: overflow visible so peek cards render at corners outside the active card area.
+   Top/left padding gives room for prev peek at top-left corner. */
 .sliderViewport {
   position: relative;
   width: 100%;
-  /* top/left padding = room for prev peek; bottom/right = room for next peek */
-  padding: 54px 90px 90px 54px;
+  padding: 50px 60px 60px 50px;
   box-sizing: border-box;
   overflow: visible;
 }
@@ -3446,7 +3444,7 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   position: relative;
   width: 100%;
   height: var(--stageH, 700px);
-  transition: height 0.5s cubic-bezier(0.77, 0, 0.18, 1);
+  transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── All cards ── */
@@ -3459,16 +3457,16 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   display: flex !important;
   flex-direction: column;
 
-  transform-origin: top left;
+  transform-origin: top center;
   transform:  scale(var(--cScale, 1));
   opacity:    var(--cOpacity, 1);
   z-index:    var(--cZ, 1);
 
   transition:
-    top       0.5s cubic-bezier(0.77, 0, 0.18, 1),
-    left      0.5s cubic-bezier(0.77, 0, 0.18, 1),
-    transform 0.5s cubic-bezier(0.77, 0, 0.18, 1),
-    opacity   0.5s cubic-bezier(0.77, 0, 0.18, 1);
+    top       0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    left      0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.35s ease;
 
   will-change: top, left, transform, opacity;
   pointer-events: none;
@@ -3537,16 +3535,18 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   pointer-events: none;
 }
 
-/* Prev arrow: top-left, aligned with prev peek card corner */
+/* Prev arrow: left side, vertically centered in the sliderViewport */
 .sliderArrowPrev {
-  top:  8px;
-  left: 8px;
+  top:  50%;
+  left: 0px;
+  transform: translateY(-50%);
 }
 
-/* Next arrow: bottom-right corner of the sliderViewport, aligned with next peek */
+/* Next arrow: right side, vertically centered in the sliderViewport */
 .sliderArrowNext {
-  bottom: 8px;
-  right:  8px;
+  top:   50%;
+  right: 0px;
+  transform: translateY(-50%);
 }
 
 /* ── Dot Indicators ── */

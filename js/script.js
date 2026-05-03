@@ -280,19 +280,37 @@ const allCards  = Array.from(document.querySelectorAll('.project-card[data-categ
 let sliderIndex = 0;
 let sliderCards = [];
 
-const PEEK_SCALE  = 0.72;
-const PEEK_OFFSET = -46; // px shift toward top-left for prev peek
+const PEEK_SCALE  = 0.62;
+const PEEK_OFFSET = 30; // px: how far the peek card's corner sticks out from the active card's corner
 
-// ── Positions all cards in stacked deck layout ──
-// slot -1 = prev → top-left peek
-// slot  0 = center → full card
-// slot +1 = next → bottom-right peek
-// |slot| > 1 → hidden
+// ── Layout all cards — only prev/active/next are shown, everything else display:none ──
+// slot -1 → prev:  top-left corner, scaled, behind  (z:2)
+// slot  0 → active: horizontally centered, full size (z:5)
+// slot +1 → next:  bottom-right corner, scaled, in front (z:3)
+// |slot| > 1 → strictly hidden
 function positionDeckCards() {
+  const trackW     = sliderTrack.offsetWidth;
+  const cardW      = Math.min(700, Math.max(200, trackW * 0.88));
+  const activeLeft = Math.max(0, (trackW - cardW) / 2);
+
+  const activeCard = sliderCards[sliderIndex];
+  const activeH    = activeCard ? activeCard.scrollHeight : 500;
+  const peekH      = 180 * PEEK_SCALE; // peek cards are clipped to 180px in CSS
+
+  // Track height: small top overlap for prev + active card + small bottom overlap for next
+  const topRoom  = 20; // prev card overlaps active from the top by this much
+  const botRoom  = 40; // next card peeks out below active card by this much
+  const totalH   = topRoom + activeH + botRoom;
+  sliderTrack.style.setProperty('--stageH', `${totalH}px`);
+
   sliderCards.forEach((card, i) => {
     const slot = i - sliderIndex;
 
+    // Strictly hide everything beyond prev/active/next
     if (Math.abs(slot) > 1) {
+      card.style.setProperty('--cOpacity', '0');
+      card.style.setProperty('--cScale',   '0.5');
+      card.style.setProperty('--cZ',       '0');
       card.style.display = 'none';
       card.classList.remove('sliderCard--active', 'sliderCard--prev', 'sliderCard--next');
       return;
@@ -301,8 +319,9 @@ function positionDeckCards() {
     card.style.display = 'flex';
 
     if (slot === 0) {
-      card.style.setProperty('--cTop',     '0px');
-      card.style.setProperty('--cLeft',    '0px');
+      // Active — centered, sits below topRoom
+      card.style.setProperty('--cTop',     `${topRoom}px`);
+      card.style.setProperty('--cLeft',    `${activeLeft}px`);
       card.style.setProperty('--cScale',   '1');
       card.style.setProperty('--cOpacity', '1');
       card.style.setProperty('--cZ',       '5');
@@ -310,29 +329,25 @@ function positionDeckCards() {
       card.classList.remove('sliderCard--prev', 'sliderCard--next');
 
     } else if (slot === -1) {
-      // Prev: top-left corner peek
-      card.style.setProperty('--cTop',     `${PEEK_OFFSET}px`);
-      card.style.setProperty('--cLeft',    `${PEEK_OFFSET}px`);
-      card.style.setProperty('--cScale',   PEEK_SCALE);
+      // Prev — top-left: mirrors next card's corner overlap, shifted left of active card
+      const prevTop  = 0;
+      const prevLeft = activeLeft - (cardW * PEEK_SCALE * 1);
+      card.style.setProperty('--cTop',     `${prevTop}px`);
+      card.style.setProperty('--cLeft',    `${prevLeft}px`);
+      card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
       card.style.setProperty('--cOpacity', '0.6');
       card.style.setProperty('--cZ',       '2');
       card.classList.add('sliderCard--prev');
       card.classList.remove('sliderCard--active', 'sliderCard--next');
 
     } else {
-      // Next: bottom-right corner peek
-      // Align so the peek card's scaled top-left sits at the center card's bottom-right
-      const activeCard = sliderCards[sliderIndex];
-      const activeH    = activeCard ? activeCard.scrollHeight : 700;
-      const trackW     = sliderTrack.offsetWidth;
-      const cardW      = Math.min(700, trackW * 0.88);
-
-      const nextTop  = activeH - (180 * PEEK_SCALE) + 46;
-      const nextLeft = cardW   - (cardW * PEEK_SCALE) + 46;
-
+      // Next — bottom-right: overlaps active card's bottom-right corner, shifted right
+      // Sits so its top is near active card's bottom, shifted right past active's right edge
+      const nextTop  = topRoom + activeH - (peekH * 0.35);
+      const nextLeft = activeLeft + cardW - (cardW * PEEK_SCALE * 0.58);
       card.style.setProperty('--cTop',     `${nextTop}px`);
       card.style.setProperty('--cLeft',    `${nextLeft}px`);
-      card.style.setProperty('--cScale',   PEEK_SCALE);
+      card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
       card.style.setProperty('--cOpacity', '0.6');
       card.style.setProperty('--cZ',       '3');
       card.classList.add('sliderCard--next');
@@ -341,11 +356,23 @@ function positionDeckCards() {
   });
 }
 
-// ── Syncs track --stageH to active card's full scrollHeight ──
-function syncStageHeight() {
-  const active = sliderCards[sliderIndex];
-  if (!active) return;
-  sliderTrack.style.setProperty('--stageH', active.scrollHeight + 'px');
+// ── Double-rAF ensures browser has painted before we read scrollHeight ──
+function schedulePosition() {
+  requestAnimationFrame(() => requestAnimationFrame(positionDeckCards));
+}
+
+// ── Navigate to a slide index ──
+function goToSlide(index) {
+  sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
+  positionDeckCards();
+  schedulePosition(); // re-measure after transition settles
+
+  sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
+    dot.classList.toggle('sliderDot--active', i === sliderIndex);
+  });
+
+  sliderPrev.disabled = sliderIndex === 0;
+  sliderNext.disabled = sliderIndex === sliderCards.length - 1;
 }
 
 // ── Builds dot row ──
@@ -358,20 +385,6 @@ function buildSliderDots(total, activeIndex) {
     dot.addEventListener('click', () => goToSlide(i));
     sliderDots.appendChild(dot);
   }
-}
-
-// ── Navigate to slide ──
-function goToSlide(index) {
-  sliderIndex = Math.max(0, Math.min(index, sliderCards.length - 1));
-  positionDeckCards();
-  requestAnimationFrame(syncStageHeight);
-
-  sliderDots.querySelectorAll('.sliderDot').forEach((dot, i) => {
-    dot.classList.toggle('sliderDot--active', i === sliderIndex);
-  });
-
-  sliderPrev.disabled = sliderIndex === 0;
-  sliderNext.disabled = sliderIndex === sliderCards.length - 1;
 }
 
 // ── Mount client slider ──
@@ -390,14 +403,15 @@ function mountClientSlider() {
   });
 
   buildSliderDots(sliderCards.length, 0);
-  positionDeckCards();
 
   sliderPrev.disabled = true;
   sliderNext.disabled = sliderCards.length <= 1;
 
   clientSlider.classList.add('clientSlider--active');
   projectsGrid.style.display = 'none';
-  requestAnimationFrame(syncStageHeight);
+
+  // Double-rAF: wait for cards to paint so scrollHeight and offsetWidth are real
+  schedulePosition();
 }
 
 // ── Dismount slider, return cards to grid ──
@@ -435,6 +449,11 @@ function filterProjectsGrid(filter) {
 
 sliderPrev.addEventListener('click', () => goToSlide(sliderIndex - 1));
 sliderNext.addEventListener('click', () => goToSlide(sliderIndex + 1));
+
+// Re-center on window resize
+window.addEventListener('resize', () => {
+  if (sliderCards.length > 0) schedulePosition();
+}, { passive: true });
 
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
