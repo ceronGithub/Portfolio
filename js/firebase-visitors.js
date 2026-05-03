@@ -254,7 +254,9 @@ function injectStyles() {
       transform: translateY(0);
       opacity: 1;
     }
-    #vc-widget.vc-collapsed #vc-body {
+    #vc-widget.vc-collapsed #vc-body,
+    #vc-widget.vc-collapsed .vc-appt-wrap,
+    #vc-widget.vc-collapsed .vc-chat-wrap {
       display: none;
     }
     #vc-widget.vc-collapsed {

@@ -523,36 +523,21 @@ section { padding: 7rem 0; overflow-x: hidden; max-width: 100vw; }
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.75rem;
-  overflow: hidden;
 }
 
-/* Running ticker strip next to // label */
+/* Running ticker strip — full viewport width, no fade shadows */
 .section-tag-ticker {
-  flex: 1;
-  overflow: hidden;
   position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  overflow: hidden;
   height: 3rem;
-  max-width: 100vw;
   border-top: 1px solid var(--orange);
   border-bottom: 1px solid var(--orange);
   contain: layout style;
-}
-
-.section-tag-ticker::before,
-.section-tag-ticker::after {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 24px;
-  z-index: 2;
-}
-.section-tag-ticker::before {
-  left: 0;
-  background: linear-gradient(to right, var(--black), transparent);
-}
-.section-tag-ticker::after {
-  right: 0;
-  background: linear-gradient(to left, var(--black), transparent);
 }
 
 .section-tag-run {
