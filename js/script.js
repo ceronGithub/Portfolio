@@ -331,7 +331,7 @@ function positionDeckCards() {
     } else if (slot === -1) {
       // Prev — top-left: mirrors next card's corner overlap, shifted left of active card
       const prevTop  = 0;
-      const prevLeft = activeLeft - (cardW * PEEK_SCALE * 1);
+      const prevLeft = activeLeft - (cardW * PEEK_SCALE * .8);
       card.style.setProperty('--cTop',     `${prevTop}px`);
       card.style.setProperty('--cLeft',    `${prevLeft}px`);
       card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
@@ -344,7 +344,7 @@ function positionDeckCards() {
       // Next — bottom-right: overlaps active card's bottom-right corner, shifted right
       // Sits so its top is near active card's bottom, shifted right past active's right edge
       const nextTop  = topRoom + activeH - (peekH * 0.35);
-      const nextLeft = activeLeft + cardW - (cardW * PEEK_SCALE * 0.58);
+      const nextLeft = activeLeft + cardW - (cardW * PEEK_SCALE * 0.8);
       card.style.setProperty('--cTop',     `${nextTop}px`);
       card.style.setProperty('--cLeft',    `${nextLeft}px`);
       card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
