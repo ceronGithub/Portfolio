@@ -473,6 +473,63 @@ function mountClientSlider() {
   schedulePosition();
 }
 
+// ── Mount personal slider ──
+function mountPersonalSlider() {
+  sliderIndex = 0;
+  isAnimating = false;
+  sliderTrack.innerHTML = '';
+
+  const personalAll = allCards.filter(c => c.getAttribute('data-category') === 'personal');
+  sliderCards = personalAll;
+
+  sliderCards.forEach(card => {
+    card.classList.remove('hidden', 'fade-in');
+    card.style.display   = '';
+    card.style.transform = '';
+    card.style.opacity   = '';
+    sliderTrack.appendChild(card);
+  });
+
+  buildSliderDots(sliderCards.length, 0);
+
+  sliderPrev.disabled = true;
+  sliderNext.disabled = sliderCards.length <= 1;
+
+  clientSlider.classList.add('clientSlider--active');
+  projectsGrid.style.display = 'none';
+
+  schedulePosition();
+}
+
+// ── Mount all-projects slider ──
+function mountAllSlider() {
+  sliderIndex = 0;
+  isAnimating = false;
+  sliderTrack.innerHTML = '';
+
+  const ongoing = allCards.filter(c => c.querySelector('.ongoing-badge'));
+  const rest    = allCards.filter(c => !c.querySelector('.ongoing-badge'));
+  sliderCards   = [...ongoing, ...rest];
+
+  sliderCards.forEach(card => {
+    card.classList.remove('hidden', 'fade-in');
+    card.style.display   = '';
+    card.style.transform = '';
+    card.style.opacity   = '';
+    sliderTrack.appendChild(card);
+  });
+
+  buildSliderDots(sliderCards.length, 0);
+
+  sliderPrev.disabled = true;
+  sliderNext.disabled = sliderCards.length <= 1;
+
+  clientSlider.classList.add('clientSlider--active');
+  projectsGrid.style.display = 'none';
+
+  schedulePosition();
+}
+
 // ── Dismount slider, return cards to grid ──
 function dismountClientSlider() {
   sliderCards.forEach(card => {
@@ -522,6 +579,12 @@ filterBtns.forEach(btn => {
     if (filter === 'client') {
       dismountClientSlider();
       mountClientSlider();
+    } else if (filter === 'personal') {
+      dismountClientSlider();
+      mountPersonalSlider();
+    } else if (filter === 'all') {
+      dismountClientSlider();
+      mountAllSlider();
     } else {
       dismountClientSlider();
       filterProjectsGrid(filter);
