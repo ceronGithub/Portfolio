@@ -862,3 +862,157 @@ if (toolsSection) {
   // Init default tab
   goToPage(1);
 })();
+
+// ─── Games Stacked Card Deck Carousel ───────────────────────────────────
+// Identical layout engine to the client work slider.
+// Center card is horizontally centered in the track.
+// Prev peeks top-left, next peeks bottom-right.
+// Left/right arrows sit on the sides, vertically centered.
+// Mobile/tablet (≤1024px): only active card shown, no peeks.
+(function () {
+  const gSlider  = document.getElementById('gamesSlider');
+  const gTrack   = document.getElementById('gSliderTrack');
+  const gDots    = document.getElementById('gSliderDots');
+  const gPrev    = document.getElementById('gSliderPrev');
+  const gNext    = document.getElementById('gSliderNext');
+  const gGrid    = document.getElementById('gamesGrid');
+
+  if (!gSlider || !gTrack || !gGrid) return;
+
+  const gameCards = Array.from(gGrid.querySelectorAll('.project-card[data-game]'));
+  if (!gameCards.length) return;
+
+  let gIndex = 0;
+  const PEEK_SCALE = 0.72;
+  const gameMQ     = window.matchMedia('(max-width: 1024px)');
+
+  // ── Position all cards using exact same math as positionDeckCards ──
+  function positionGameCards() {
+    if (gameMQ.matches) {
+      // Mobile/tablet: only active card visible, all others hidden
+      gameCards.forEach((card, i) => {
+        if (i === gIndex) {
+          card.style.display = 'flex';
+          ['--cTop','--cLeft','--cScale','--cOpacity','--cZ'].forEach(p => card.style.removeProperty(p));
+          card.classList.add('gCard--active');
+          card.classList.remove('gCard--prev', 'gCard--next');
+        } else {
+          card.style.display = 'none';
+          card.classList.remove('gCard--active', 'gCard--prev', 'gCard--next');
+        }
+      });
+      return;
+    }
+
+    // Desktop: stacked-deck layout matching client work slider
+    const trackW     = gTrack.offsetWidth;
+    const cardW      = Math.min(700, Math.max(200, trackW * 0.88));
+    const activeLeft = Math.max(0, (trackW - cardW) / 2);
+
+    const activeCard = gameCards[gIndex];
+    const activeH    = activeCard ? activeCard.scrollHeight : 500;
+    const peekH      = 180 * PEEK_SCALE;
+
+    const topRoom = 60;
+    const botRoom = 40;
+    const totalH  = topRoom + activeH + botRoom;
+    gTrack.style.setProperty('--gStageH', `${totalH}px`);
+
+    gameCards.forEach((card, i) => {
+      const slot = i - gIndex;
+
+      if (Math.abs(slot) > 1) {
+        card.style.setProperty('--cOpacity', '0');
+        card.style.setProperty('--cScale',   '0.5');
+        card.style.setProperty('--cZ',       '0');
+        card.style.display = 'none';
+        card.classList.remove('gCard--active', 'gCard--prev', 'gCard--next');
+        return;
+      }
+
+      card.style.display = 'flex';
+
+      if (slot === 0) {
+        // Active — centered
+        card.style.setProperty('--cTop',     `${topRoom}px`);
+        card.style.setProperty('--cLeft',    `${activeLeft}px`);
+        card.style.setProperty('--cScale',   '1');
+        card.style.setProperty('--cOpacity', '1');
+        card.style.setProperty('--cZ',       '5');
+        card.classList.add('gCard--active');
+        card.classList.remove('gCard--prev', 'gCard--next');
+
+      } else if (slot === -1) {
+        // Prev — top-left peek
+        const prevLeft = activeLeft - (cardW * PEEK_SCALE * 0.8);
+        card.style.setProperty('--cTop',     '0px');
+        card.style.setProperty('--cLeft',    `${prevLeft}px`);
+        card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
+        card.style.setProperty('--cOpacity', '0.6');
+        card.style.setProperty('--cZ',       '2');
+        card.classList.add('gCard--prev');
+        card.classList.remove('gCard--active', 'gCard--next');
+
+      } else {
+        // Next — bottom-right peek
+        const nextTop  = topRoom + activeH - (peekH * 0.35);
+        const nextLeft = activeLeft + cardW - (cardW * PEEK_SCALE * 0.8);
+        card.style.setProperty('--cTop',     `${nextTop}px`);
+        card.style.setProperty('--cLeft',    `${nextLeft}px`);
+        card.style.setProperty('--cScale',   `${PEEK_SCALE}`);
+        card.style.setProperty('--cOpacity', '0.6');
+        card.style.setProperty('--cZ',       '3');
+        card.classList.add('gCard--next');
+        card.classList.remove('gCard--active', 'gCard--prev');
+      }
+    });
+  }
+
+  // ── Double-rAF: ensures browser has painted before reading scrollHeight ──
+  function schedulePosition() {
+    requestAnimationFrame(() => requestAnimationFrame(positionGameCards));
+  }
+
+  // ── Build dot indicators ──
+  function buildGDots() {
+    gDots.innerHTML = '';
+    gameCards.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'gSliderDot' + (i === gIndex ? ' gSliderDot--active' : '');
+      dot.setAttribute('aria-label', `Go to game ${i + 1}`);
+      dot.addEventListener('click', () => goToGame(i));
+      gDots.appendChild(dot);
+    });
+  }
+
+  // ── Navigate to game index ──
+  function goToGame(index) {
+    gIndex = Math.max(0, Math.min(index, gameCards.length - 1));
+    schedulePosition();
+    gDots.querySelectorAll('.gSliderDot').forEach((dot, i) => {
+      dot.classList.toggle('gSliderDot--active', i === gIndex);
+    });
+    gPrev.disabled = gIndex === 0;
+    gNext.disabled = gIndex === gameCards.length - 1;
+  }
+
+  // ── Mount: move cards from hidden gamesGrid into gSliderTrack ──
+  gameCards.forEach(card => {
+    card.classList.remove('hidden');
+    gTrack.appendChild(card);
+  });
+
+  buildGDots();
+
+  gPrev.disabled = true;
+  gNext.disabled = gameCards.length <= 1;
+
+  gPrev.addEventListener('click', () => goToGame(gIndex - 1));
+  gNext.addEventListener('click', () => goToGame(gIndex + 1));
+
+  // Reposition on resize
+  window.addEventListener('resize', schedulePosition);
+
+  // Initial position
+  schedulePosition();
+}());

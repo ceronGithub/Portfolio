@@ -1187,6 +1187,7 @@ section.hero { padding: 8rem 2rem 5rem; }
     url('../images/backgrounds/bg-projects.png') center center / 80% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
+  overflow: hidden !important;
 }
 .projects::after {
   content: '';
@@ -3559,6 +3560,164 @@ section.hero { padding: 8rem 2rem 5rem; }
 }
 
 .sliderDot.sliderDot--active {
+  background: var(--orange);
+  transform: scale(1.4);
+  box-shadow: 0 0 8px rgba(255, 122, 0, 0.6);
+}
+
+
+/* ─────────────────────────────────────────
+   GAMES — STACKED CARD DECK CAROUSEL
+   Identical layout to client work slider.
+   Center card is horizontally centered.
+   Left/right arrows sit on the sides, vertically centered.
+   Prev peeks top-left, next peeks bottom-right.
+───────────────────────────────────────── */
+
+.gamesSlider {
+  position: relative;
+  width: 100%;
+  margin-bottom: 4rem;
+}
+
+/* Stage: matches .sliderViewport exactly */
+.gSliderViewport {
+  position: relative;
+  width: 100%;
+  padding: 50px 60px 60px 50px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Track: height driven by JS --gStageH */
+.gSliderTrack {
+  position: relative;
+  width: 100%;
+  height: var(--gStageH, 700px);
+  transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* All game cards inside slider */
+.gSliderTrack .project-card {
+  position: absolute;
+  top:     var(--cTop,  0px);
+  left:    var(--cLeft, 0px);
+  width:   min(700px, 92vw);
+  display: flex !important;
+  flex-direction: column;
+
+  transform-origin: top center;
+  transform:  scale(var(--cScale, 1));
+  opacity:    var(--cOpacity, 1);
+  z-index:    var(--cZ, 1);
+
+  transition:
+    top       0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    left      0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.35s ease;
+
+  will-change: top, left, transform, opacity;
+  pointer-events: none;
+  border-radius: var(--radius);
+}
+
+/* Active center game card */
+.gSliderTrack .project-card.gCard--active {
+  pointer-events: auto;
+  overflow: visible;
+}
+
+/* Peek cards: clipped to image area */
+.gSliderTrack .project-card.gCard--prev,
+.gSliderTrack .project-card.gCard--next {
+  overflow: hidden;
+  max-height: var(--peekH, 120px);
+}
+
+/* Dark overlay on non-active cards */
+.gSliderTrack .project-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.70);
+  border-radius: var(--radius);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.5s cubic-bezier(0.77, 0, 0.18, 1);
+}
+
+.gSliderTrack .project-card.gCard--active::after {
+  opacity: 0;
+}
+
+/* ── Arrow Buttons — matches .sliderArrow exactly ── */
+.gSliderArrow {
+  position: absolute;
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 15, 15, 0.92);
+  border: 1.5px solid rgba(255, 122, 0, 0.45);
+  color: var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.22s, border-color 0.22s, box-shadow 0.22s, opacity 0.3s;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+}
+
+.gSliderArrow svg { width: 18px; height: 18px; }
+
+.gSliderArrow:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--black);
+  box-shadow: var(--glow-sm);
+}
+
+.gSliderArrow:disabled {
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+/* Left side, vertically centered — mirrors .sliderArrowPrev */
+.gSliderArrowPrev {
+  top:  50%;
+  left: 0px;
+  transform: translateY(-50%);
+}
+
+/* Right side, vertically centered — mirrors .sliderArrowNext */
+.gSliderArrowNext {
+  top:   50%;
+  right: 0px;
+  transform: translateY(-50%);
+}
+
+/* ── Dot Indicators ── */
+.gSliderDots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.gSliderDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.28s, transform 0.28s, box-shadow 0.28s;
+}
+
+.gSliderDot.gSliderDot--active {
   background: var(--orange);
   transform: scale(1.4);
   box-shadow: 0 0 8px rgba(255, 122, 0, 0.6);

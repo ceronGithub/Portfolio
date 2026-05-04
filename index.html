@@ -1604,9 +1604,23 @@
           </p>
         </div>
 
-        <div class="projects-grid">
+        <!-- Games Stacked Card Deck Carousel -->
+        <div class="gamesSlider" id="gamesSlider" aria-label="Games slider">
+          <button class="gSliderArrow gSliderArrowPrev" id="gSliderPrev" aria-label="Previous game" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="gSliderViewport" id="gSliderViewport">
+            <div class="gSliderTrack" id="gSliderTrack"></div>
+          </div>
+          <button class="gSliderArrow gSliderArrowNext" id="gSliderNext" aria-label="Next game">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <div class="gSliderDots" id="gSliderDots"></div>
+        </div>
+
+        <div class="projects-grid" id="gamesGrid" style="display:none">
           <!-- Game 1: The Void Ascension -->
-          <article class="project-card project-card--personal reveal">
+          <article class="project-card project-card--personal reveal" data-game="true">
             <div class="project-img-wrap">
               <div
                 class="project-img-placeholder"
@@ -2430,7 +2444,7 @@
                 </a>
                 <a
                   href="ATS.pdf"
-                  download="Ceron_Calsena_Resume_ATS.pdf"
+                  download="Ceron_Calsena_Resume_new_11.pdf"
                   class="resume-btn resume-btn-download"
                 >
                   <span>⬇ Download</span>
