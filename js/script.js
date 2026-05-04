@@ -78,13 +78,14 @@ if (hamburger && navLinks) {
 
 // ─── Hero Typing Animation ─────────────────
 const roles = [
-  'VA Support',
-  'AI Workflow Dev',
-  'AI Automation',
+  'Full Stack Developer',
   'Laravel Developer',
-  'PHP Developer',  
-  'Web Developer',
-  'Desktop Developer'
+  'Inventory System Builder',
+  'Booking System Developer',
+  'AI Automation Dev',
+  'PHP Developer',
+  'Web App Developer',
+  'Freelance Developer PH'
 ];
 
 let roleIndex  = 0;
