@@ -804,21 +804,10 @@
                 <span class="meta-item">🏢 Civil And Archi A.</span>
               </div>
               <p class="project-desc">
-                Construction estimation still done manually with a ruler and a
-                spreadsheet? I built a web tool that lets you
-                <strong
-                  >upload a floor plan image and instantly get measurable
-                  data</strong
-                >
-                — no manual measuring needed. It maps the layout into
-                scatter-based coordinates, calculates Bill of Quantities (BOQ)
-                for materials like cement, and exports everything into a clean
-                Excel report ready for your contractor or client.
+                Built a browser-based construction estimation tool that lets users <strong>upload a floor plan image and extract measurable data automatically</strong> — no manual measuring required. The tool maps the uploaded image into scatter-based coordinate points, uses those coordinates to calculate a Bill of Quantities (BOQ) covering materials such as cement, and compiles everything into a structured Excel report ready for contractor or client handoff. Built entirely with vanilla HTML, CSS, and JavaScript with no backend server — all image processing and coordinate mapping runs client-side. Claude AI was used to accelerate development and assist in implementing the coordinate-to-measurement conversion logic.
               </p>
               <div class="project-result">
-                <span class="result-label">💡 Perfect for:</span> Architects,
-                engineers, contractors, and property developers who want faster,
-                more accurate construction estimates — without the manual grind.
+                <span class="result-label">💡 Perfect for:</span> Architects, engineers, contractors, and property developers who need faster and more accurate construction estimates without the manual measuring grind.
               </div>
               <div
                 class="btn-request-access"
@@ -887,14 +876,10 @@
               </div>
 
               <p class="project-desc">
-                Replaced handwritten stock records with a <strong>digital inventory &amp; mini e-commerce system</strong> tracking live stock levels and sales in real time via Firebase Realtime Database API — eliminating 100% of manual stock tallying and reducing stock discrepancy errors to zero.
-                Integrated Firebase REST API for read/write operations on stock and sales data, enabling live sync across sessions without page refresh — cutting data retrieval time from manual lookup (~2–3 min) to instant.
-                Built sales analysis features surfacing performance trends the owner previously couldn't see — reducing manual Excel analysis from ~1 hour/week to near-zero (<strong>est. 95% time reduction</strong>).
-                Developed an <strong>automatic invoice generator</strong> producing buyer receipts and Excel sales reports without manual input — cutting invoice generation time from ~5 minutes per transaction to <strong>under 10 seconds (97% faster)</strong>.
-                Integrated ImgBB API for product image hosting, connecting uploads directly to inventory records via REST API — eliminating manual file management for 100% of product images.
+                Replaced handwritten stock records with a <strong>digital inventory and mini e-commerce system</strong> backed by Firebase Realtime Database. Integrated the Firebase REST API for all read and write operations on stock and sales data, enabling live sync across sessions without page refresh. Built sales analysis features that surface performance trends from accumulated transaction data. Developed an <strong>automatic invoice generator</strong> that produces buyer receipts and downloadable Excel sales reports using SheetJS — triggered directly from the sales interface without manual input. Integrated the ImgBB API for product image hosting, connecting image uploads directly to inventory records via REST so product photos are stored and linked automatically. The entire system runs client-side using HTML, CSS, and JavaScript — no backend server required. Claude AI was used to accelerate development across the full build.
               </p>
               <div class="project-result">
-                <span class="result-label">📊 Results:</span> 100% manual stock tallying eliminated · stock discrepancy errors → zero · data retrieval cut from 2–3 min to instant · invoice generation 97% faster · AI-assisted workflow compressed a 2–3 week build into a single-week delivery (60%+ time reduction).
+                <span class="result-label">💡 Perfect for:</span> Small business owners and street vendors who need a simple, real-time way to manage stock, track sales, and generate invoices without spreadsheets or manual logs.
               </div>
               <div style="display: flex; flex-direction: column; gap: 0.75rem">
                 <a
@@ -966,13 +951,10 @@
 
               </div>
               <p class="project-desc">
-                Replaced paper booking logs with a <strong>calendar-driven reservation system</strong> connected to Firebase Realtime Database via REST API — reducing double bookings from a recurring issue to zero, protecting an estimated 5–10% of monthly revenue previously lost to scheduling conflicts.
-                Built real-time availability tracking with <strong>automated conflict detection alerts</strong> — the system queries Firebase on every booking attempt and blocks overlapping reservations in under 1 second, preventing revenue loss from scheduling gaps.
-                Integrated Firebase REST API for all reservation CRUD operations, enabling instant data consistency across multiple devices — eliminating ~30 minutes/day of manual log reconciliation.
-                Added an <strong>analytics module</strong> surfacing booking patterns for data-driven pricing and availability decisions — replacing 1–2 hours/week of manual log review.
+                Replaced paper booking logs with a <strong>calendar-driven reservation system</strong> connected to Firebase Realtime Database via REST API. The system handles all reservation CRUD operations through the Firebase REST API, keeping data consistent across multiple devices in real time. Built automated conflict detection that queries Firebase on every booking attempt and blocks overlapping reservations before they are saved. Added an <strong>analytics module</strong> that reads accumulated booking data from Firebase and surfaces patterns such as peak dates and occupancy trends — giving the resort owner data-driven visibility into availability and pricing decisions. The full system runs client-side using HTML, CSS, and JavaScript with no backend server. Claude AI was used throughout development to accelerate delivery.
               </p>
               <div class="project-result">
-                <span class="result-label">📊 Results:</span> Double bookings → zero · ~30 min/day manual reconciliation eliminated · 5–10% monthly revenue protected · full reservation platform delivered solo in one week (est. 3–4x faster than traditional solo dev).
+                <span class="result-label">💡 Perfect for:</span> Private resorts, event venues, and rental properties that need a reliable digital booking system to replace manual logs and eliminate scheduling conflicts.
               </div>
               <div
                 class="btn-request-access"
@@ -1030,14 +1012,10 @@
                 <span class="meta-item">🏢 Victorias Haven Private Resort</span>
               </div>
               <p class="project-desc">
-                Automated repetitive daily email tasks end-to-end via EmailJS API integration — cutting task completion time from ~10 minutes to ~10 seconds per send (<strong>98% time reduction</strong>), saving the client ~45–50 minutes of manual work per day.
-                Connected Firebase REST API for dynamic template data retrieval and EmailJS REST API for programmatic mail dispatch — the two APIs work in tandem: Firebase supplies the payload, EmailJS sends the email, reducing the full send workflow to a <strong>single button click</strong>.
-                Built a single mail-sending interface removing the need to switch browser tabs or log into Gmail directly — eliminating ~3–5 context switches per daily email session and reducing human error risk by an estimated 80%.
-                Programmed <strong>automatic file and image attachment logic</strong> based on user selections, driven by conditional JavaScript logic — reducing wrong-attachment errors from a recurring daily issue to zero (100% error elimination).
-                Designed to handle bulk sends with templated content — enabling multi-recipient email campaigns in a single click vs. individual manual sends per recipient.
+                Automated repetitive daily email tasks end-to-end by integrating the <strong>EmailJS API and Firebase REST API</strong> in a single browser-based interface. Firebase supplies dynamic template data — recipient details, subject content, and attachment references — and passes the payload directly to EmailJS, which handles programmatic mail dispatch. The two APIs work in tandem so the entire send workflow executes from a <strong>single button click</strong> without opening Gmail or switching browser tabs. Built conditional JavaScript logic for <strong>automatic file and image attachment</strong> based on user selections, ensuring the correct files are always attached without manual intervention. The system also supports bulk sends with templated content, allowing multi-recipient email campaigns to be triggered in a single action. Built entirely with HTML, CSS, and JavaScript — no backend required. Claude AI was used to accelerate development and integration work.
               </p>
               <div class="project-result">
-                <span class="result-label">📊 Results:</span> 98% time reduction per send · ~45–50 min/day saved · wrong-attachment errors → zero · bulk campaigns in one click · full system delivered in under 2 weeks (60% faster with AI-assisted dev).
+                <span class="result-label">💡 Perfect for:</span> Business owners and admin staff who send repetitive daily emails with attachments and want a dedicated, error-free interface instead of doing it manually through Gmail.
               </div>
               <div
                 class="btn-request-access"
@@ -1094,13 +1072,10 @@
                 <span class="meta-item">🏢 Liza De Veyra</span>
               </div>
               <p class="project-desc">
-                Engineered a browser-based automation app handling simultaneous import and processing of <strong>up to 2,000 PDF files</strong> with zero server-side processing — replacing a fully manual document review workflow that previously required hours per batch.
-                Automated keyword extraction using the PDF.js library, parsing raw PDF binary streams client-side — processing a 2,000-file batch in seconds vs. hours of manual reading (<strong>est. 99%+ time reduction per run</strong>).
-                Developed <strong>3 extraction modes</strong> — Multiple Keywords, Single Keyword, Extract All — each triggering a distinct automated pipeline with direct Excel export via SheetJS, eliminating all manual copy-paste work.
-                All processing stays local to the browser; <strong>zero data ever leaves the user's machine</strong> — ensuring 100% data privacy compliance with no server infrastructure cost.
+                Engineered a browser-based automation app that handles simultaneous import and processing of <strong>up to 2,000 PDF files</strong> entirely client-side with zero server-side processing. Uses the <strong>PDF.js library</strong> to parse raw PDF binary streams directly in the browser, extracting text content from each file without uploading anything to a server — keeping all data local to the user's machine and ensuring full privacy compliance. Built <strong>3 extraction modes</strong> — Multiple Keywords, Single Keyword, and Extract All — each triggering a distinct automated pipeline tailored to different review workflows. All extracted data is exported directly to Excel via the <strong>SheetJS library</strong>, producing a structured report without any manual copy-paste. The application runs entirely in HTML, CSS, and JavaScript. Claude AI was used to accelerate development and assist in implementing the PDF parsing and extraction pipeline.
               </p>
               <div class="project-result">
-                <span class="result-label">📊 Results:</span> Client's document review time cut from hours to seconds · 95%+ time savings per batch across all 3 modes · 100% data privacy · AI-assisted build cut dev time from 2 weeks to under 5 days (65% faster delivery).
+                <span class="result-label">💡 Perfect for:</span> Legal teams, document reviewers, compliance officers, and any professional who manually reads through large batches of PDFs to find specific information.
               </div>
               <div
                 class="btn-request-access"
@@ -1152,21 +1127,10 @@
                 <span class="meta-item">🏢 Western Digital</span>
               </div>
               <p class="project-desc">
-                Raw machine data trapped in endless spreadsheet rows tells
-                engineers nothing at a glance. I built a desktop tool that
-                <strong
-                  >transforms those datasets into clear, interactive visual
-                  charts</strong
-                >
-                — so patterns, anomalies, and root causes jump out immediately.
-                The team went from hours of manual analysis to actionable
-                insights in minutes, and used it to resolve a critical
-                production issue in under 2 weeks.
+                Built a <strong>C# WinForms desktop application</strong> that reads raw Excel files and flat data exports from manufacturing equipment and converts them into clear, interactive visual charts. The tool parses Excel files directly using file I/O and data mapping logic built in C#, transforms the raw row data into structured chart datasets, and renders them as interactive graphs inside the WinForms interface. Supports <strong>export to both Excel and PDF</strong> so engineers can share findings without additional tools. Developed as a special internal project at Western Digital to give the engineering team a faster way to interpret machine-generated datasets and identify patterns, anomalies, and root causes that are difficult to spot in raw spreadsheet form.
               </p>
               <div class="project-result">
-                <span class="result-label">💡 Perfect for:</span> Engineering
-                teams, manufacturers, or any business sitting on data they can't
-                easily interpret or act on.
+                <span class="result-label">💡 Perfect for:</span> Engineering teams, manufacturers, and data-heavy operations that need a simple desktop tool to turn raw machine or Excel data into readable, actionable charts.
               </div>
               <div
                 style="
@@ -1824,7 +1788,7 @@
           <!-- Resume Tabs -->
           <div class="resume-tabs">
             <button class="resume-tab-btn active" data-tab="standard">Standard Resume (ATS-Optimized)</button>
-            <!-- <button class="resume-tab-btn" data-tab="visual">Visual CV</button> -->
+            <button class="resume-tab-btn" data-tab="visual">Enhanced CV</button>
           </div>
 
           <!-- Top action bar -->
@@ -1859,13 +1823,13 @@
             </div>
 
             <!-- Visual CV Tab -->
-            <!-- <div class="resume-tab-content" id="tab-visual">
+            <div class="resume-tab-content" id="tab-visual">
               <div class="resume-topbar-info">
                 <span class="resume-icon">🎨</span>
                 <div>
-                  <p class="resume-filename">Enhanced Curriculum Vitae</p>
+                  <p class="resume-filename">Enhance Curriculum Vitae</p>
                   <p class="resume-meta">
-                    Professional Design · Updated April 2026
+                    Professional Design · Updated May 2026
                   </p>
                 </div>
               </div>
@@ -1879,13 +1843,13 @@
                 </a>
                 <a
                   href="ENHANCE_CV_ceron.pdf"
-                  download="Enhanced_Curriculum_Vitae.pdf"
+                  download="Ceron_Calsena_Enhance_CV.pdf"
                   class="resume-btn resume-btn-download"
                 >
                   <span>⬇ Download</span>
                 </a>
               </div>
-            </div> -->
+            </div>
           </div>
 
           <!-- Image-based PDF Viewer -->
@@ -1906,7 +1870,7 @@
               </button>
               <span class="resume-page-info">
                 Page <span id="pageNum">1</span> of
-                <span id="pageCount">04</span>
+                <span id="pageCount">06</span>
               </span>
               <button class="resume-page-btn" id="nextPage">Next →</button>
             </div>

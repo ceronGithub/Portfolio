@@ -801,7 +801,7 @@ if (toolsSection) {
 
   const tabConfig = {
     standard: { prefix: 'resume_previews/ats-page-',    ext: '.jpg', total: 3 },
-    visual:   { prefix: 'resume_previews/ENHANCE CURRICULUM VITAE_', ext: '.jpg', total: 7 }
+    visual:   { prefix: 'resume_previews/ENHANCE CURRICULUM VITAE_', ext: '.jpg', total: 6 }
   };
 
   let currentTab = 'standard';
