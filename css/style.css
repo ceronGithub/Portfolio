@@ -1187,6 +1187,7 @@ section.hero { padding: 8rem 2rem 5rem; }
     url('../images/backgrounds/bg-projects.png') center center / 80% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
+  overflow: hidden !important;
 }
 .projects::after {
   content: '';
