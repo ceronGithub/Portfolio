@@ -1184,7 +1184,7 @@ section.hero { padding: 8rem 2rem 5rem; }
 .projects {
   background:
     linear-gradient(180deg, rgba(10,10,15,0.97) 0%, rgba(10,10,15,0.87) 40%, rgba(10,10,15,0.87) 60%, rgba(10,10,15,0.97) 100%),
-    url('../images/backgrounds/bg-projects.png') center -15% / 80% auto no-repeat scroll;
+    url('../images/backgrounds/bg-projects.png') center center / 80% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
 }
@@ -3436,12 +3436,11 @@ section.hero { padding: 8rem 2rem 5rem; }
 }
 
 /* ── All cards ── */
-/* JS sets --cTop --cLeft --cScale --cOpacity --cZ per card each slide */
 .sliderTrack .project-card {
   position: absolute;
   top:     var(--cTop,  0px);
   left:    var(--cLeft, 0px);
-  width:   min(700px, 88vw);
+  width:   min(700px, 92vw);
   display: flex !important;
   flex-direction: column;
 
@@ -3461,16 +3460,17 @@ section.hero { padding: 8rem 2rem 5rem; }
   border-radius: var(--radius);
 }
 
-/* Active center card: fully interactive, full content visible */
+/* Active card: fully interactive, full height */
 .sliderTrack .project-card.sliderCard--active {
   pointer-events: auto;
+  overflow: visible;
 }
 
-/* Peek cards: clipped to image area height only — no text bleed */
+/* Peek cards: clipped — only the 20% nearest to the active card shows */
 .sliderTrack .project-card.sliderCard--prev,
 .sliderTrack .project-card.sliderCard--next {
-  height: 180px;
   overflow: hidden;
+  max-height: var(--peekH, 120px);
 }
 
 /* Dark overlay on all non-active cards */
