@@ -1187,7 +1187,6 @@ section.hero { padding: 8rem 2rem 5rem; }
     url('../images/backgrounds/bg-projects.png') center center / 80% auto no-repeat scroll;
   position: relative;
   isolation: isolate;
-  overflow: hidden !important;
 }
 .projects::after {
   content: '';
@@ -1233,6 +1232,8 @@ section.hero { padding: 8rem 2rem 5rem; }
   position: relative;
   height: 180px;
   overflow: hidden;
+  /* Match card's top corners so the image doesn't create a double-radius */
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .project-img-placeholder {
