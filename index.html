@@ -30,11 +30,11 @@
         <li><a href="#about" class="nav-link">About</a></li>
         <li><a href="#skills" class="nav-link">Skills</a></li>
         <li><a href="#projects" class="nav-link">Projects</a></li>
-        <li><a href="#games" class="nav-link">Games</a></li>
         <li><a href="#experience" class="nav-link">Experience</a></li>
-        <li><a href="#certifications" class="nav-link">Certifications</a></li>
-        <li><a href="#comments" class="nav-link">Reviews</a></li>
         <li><a href="#resume" class="nav-link">Resume</a></li>
+        <li><a href="#certifications" class="nav-link">Certifications</a></li>
+        <li><a href="#games" class="nav-link">Games</a></li>
+        <li><a href="#comments" class="nav-link">Reviews</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
       </ul>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
@@ -42,7 +42,6 @@
       </button>
     </nav>
 
-    <!-- ===== HERO SECTION ===== -->
     <section class="hero" id="hero">
       <div class="parallax-layer layer-bg" id="layerBg"></div>
       <div class="parallax-layer layer-grid" id="layerGrid"></div>
@@ -1585,126 +1584,6 @@
       </div>
     </section>
 
-    <!-- ===== GAMES SECTION ===== -->
-    <section class="games" id="games">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-tag"
-            ><span class="section-tag-ticker"
-              ><span class="section-tag-run"
-                >GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES ·
-                GAMES · GAMES ·
-              </span></span
-            ></span
-          >
-          <h2 class="section-title">Games I Built</h2>
-          <p class="projects-subtitle">
-            Full-stack games engineered from scratch — real architecture, real
-            performance, real stakes.
-          </p>
-        </div>
-
-        <!-- Games Stacked Card Deck Carousel -->
-        <div class="gamesSlider" id="gamesSlider" aria-label="Games slider">
-          <button class="gSliderArrow gSliderArrowPrev" id="gSliderPrev" aria-label="Previous game" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div class="gSliderViewport" id="gSliderViewport">
-            <div class="gSliderTrack" id="gSliderTrack"></div>
-          </div>
-          <button class="gSliderArrow gSliderArrowNext" id="gSliderNext" aria-label="Next game">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-          <div class="gSliderDots" id="gSliderDots"></div>
-        </div>
-
-        <div class="projects-grid" id="gamesGrid" style="display:none">
-          <!-- Game 1: The Void Ascension -->
-          <article class="project-card project-card--personal reveal" data-game="true">
-            <div class="project-img-wrap">
-              <div
-                class="project-img-placeholder"
-                style="--card-color: #ff7a00"
-              >
-                <span class="project-icon">⚔️</span>
-              </div>
-              <div class="project-personal-overlay">
-                <a
-                  href="https://clustered-mmorpg.onrender.com"
-                  target="_blank"
-                  class="project-link-btn"
-                  >Play Now →</a
-                >
-              </div>
-            </div>
-            <div class="project-body">
-              <div class="project-card-header">
-                <div class="project-tags">
-                  <span class="ptag">MongoDB atlas</span
-                  ><span class="ptag">Node.js</span
-                  ><span class="ptag">React</span
-                  ><span class="ptag">TypeScript</span
-                  ><span class="ptag">WebSocket</span
-                  ><span class="ptag">RESTful APIs</span
-                  ><span class="ptag">Claude AI</span
-                  ><span class="ptag">Xendot</span
-                  ><span class="ptag">Render</span>
-                </div>
-                <div style="display: flex; gap: 0.5rem; align-items: center">
-                  <span class="ongoing-badge">🔧 Ongoing Development</span>
-                  <span class="personal-badge">🎮 MMORPG</span>
-                </div>
-              </div>
-              <h3 class="project-title">The Void Ascension</h3>
-              <div class="project-meta">
-                <span class="meta-item">📅 Mar 28, 2026 – Present</span>
-                <span class="meta-item">🛠️ Self-Built</span>
-              </div>
-              <p class="project-desc">
-                A <strong>high-performance, 900-level RPG engine</strong> built
-                to handle massive entity management and a high-stakes player
-                economy. Supports a 60-unit real-time army across 50 world maps,
-                with complex mathematical scaling and low-latency data
-                persistence. Features a horde system where 50 "Scrapper" minions
-                inherit 50% of player attributes in real-time, a unified
-                algorithmic scaling engine, and a server-side
-                <strong>15% Shatter Risk mechanic</strong> — permanent item
-                destruction on death — driving strategic gameplay stakes.
-              </p>
-              <div class="project-result">
-                <span class="result-label">💡 Tech highlights:</span> Scalable
-                MongoDB schema for 900-level progression, WebSocket-driven
-                real-time combat, cloud background workers for async game logic,
-                and a risk-based economy system built for long-term player
-                engagement.
-              </div>
-              <div
-                class="project-result"
-                style="
-                  border-color: rgba(255, 68, 68, 0.2);
-                  background: rgba(255, 68, 68, 0.05);
-                "
-              >
-                <span class="result-label" style="color: #ff6b6b"
-                  >⚠️ Note:</span
-                >
-                If you encounter an error on the live site, the Supabase database may have paused due to inactivity. It resumes automatically after a short wait, or contact me to manually wake it up.
-              </div>
-              <div class="personal-project-links">
-                <a
-                  href="https://clustered-mmorpg.onrender.com"
-                  target="_blank"
-                  class="plink-live"
-                >
-                  🎮 Play Now →
-                </a>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
     <!-- ===== EXPERIENCE SECTION ===== -->
     <section class="experience" id="experience">
       <div class="container">
@@ -1872,6 +1751,115 @@
     </section>
 
     <!-- ===== EXPERIENCE SECTION ===== -->
+
+    <section class="resume-section" id="resume">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >RESUME · RESUME · RESUME · RESUME · RESUME · RESUME ·
+                RESUME</span
+              ></span
+            ></span
+          >
+          <h2 class="section-title">My Resume</h2>
+        </div>
+
+        <div class="resume-wrapper reveal">
+          <!-- Resume Tabs -->
+          <div class="resume-tabs">
+            <button class="resume-tab-btn active" data-tab="standard">Standard Resume (ATS-Optimized)</button>
+            <!-- <button class="resume-tab-btn" data-tab="visual">Visual CV</button> -->
+          </div>
+
+          <!-- Top action bar -->
+          <div class="resume-topbar">
+            <!-- Standard Resume Tab -->
+            <div class="resume-tab-content active" id="tab-standard">
+              <div class="resume-topbar-info">
+                <span class="resume-icon">📄</span>
+                <div>
+                  <p class="resume-filename">Ceron Calsena Resume</p>
+                  <p class="resume-meta">
+                    Full Stack Developer & AI-Webflow Dev · Updated May 2026
+                  </p>
+                </div>
+              </div>
+              <div class="resume-actions">
+                <a
+                  href="ATS.pdf"
+                  target="_blank"
+                  class="resume-btn resume-btn-view"
+                >
+                  <span>🔍 Full View</span>
+                </a>
+                <a
+                  href="ATS.pdf"
+                  download="Ceron_Calsena_Resume_new_11.pdf"
+                  class="resume-btn resume-btn-download"
+                >
+                  <span>⬇ Download</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Visual CV Tab -->
+            <!-- <div class="resume-tab-content" id="tab-visual">
+              <div class="resume-topbar-info">
+                <span class="resume-icon">🎨</span>
+                <div>
+                  <p class="resume-filename">Enhanced Curriculum Vitae</p>
+                  <p class="resume-meta">
+                    Professional Design · Updated April 2026
+                  </p>
+                </div>
+              </div>
+              <div class="resume-actions">
+                <a
+                  href="ENHANCE_CV_ceron.pdf"
+                  target="_blank"
+                  class="resume-btn resume-btn-view"
+                >
+                  <span>🔍 Full View</span>
+                </a>
+                <a
+                  href="ENHANCE_CV_ceron.pdf"
+                  download="Enhanced_Curriculum_Vitae.pdf"
+                  class="resume-btn resume-btn-download"
+                >
+                  <span>⬇ Download</span>
+                </a>
+              </div>
+            </div> -->
+          </div>
+
+          <!-- Image-based PDF Viewer -->
+          <div class="resume-viewer-wrap">
+            <div class="resume-viewer-inner">
+              <img
+                id="resumePageImg"
+                class="resume-page-img"
+                src="resume_previews/ENHANCE CURRICULUM VITAE_01.jpg"
+                alt="Resume Page 1"
+              />
+            </div>
+
+            <!-- Page controls -->
+            <div class="resume-controls">
+              <button class="resume-page-btn" id="prevPage" disabled>
+                ← Prev
+              </button>
+              <span class="resume-page-info">
+                Page <span id="pageNum">1</span> of
+                <span id="pageCount">04</span>
+              </span>
+              <button class="resume-page-btn" id="nextPage">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ===== CERTIFICATIONS SECTION ===== -->
     <section class="certifications" id="certifications">
@@ -2226,6 +2214,126 @@
       </div>
     </section>
 
+    <!-- ===== GAMES SECTION ===== -->
+    <section class="games" id="games">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag"
+            ><span class="section-tag-ticker"
+              ><span class="section-tag-run"
+                >GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES · GAMES ·
+                GAMES · GAMES ·
+              </span></span
+            ></span
+          >
+          <h2 class="section-title">Games I Built</h2>
+          <p class="projects-subtitle">
+            Full-stack games engineered from scratch — real architecture, real
+            performance, real stakes.
+          </p>
+        </div>
+
+        <!-- Games Stacked Card Deck Carousel -->
+        <div class="gamesSlider" id="gamesSlider" aria-label="Games slider">
+          <button class="gSliderArrow gSliderArrowPrev" id="gSliderPrev" aria-label="Previous game" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="gSliderViewport" id="gSliderViewport">
+            <div class="gSliderTrack" id="gSliderTrack"></div>
+          </div>
+          <button class="gSliderArrow gSliderArrowNext" id="gSliderNext" aria-label="Next game">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <div class="gSliderDots" id="gSliderDots"></div>
+        </div>
+
+        <div class="projects-grid" id="gamesGrid" style="display:none">
+          <!-- Game 1: The Void Ascension -->
+          <article class="project-card project-card--personal reveal" data-game="true">
+            <div class="project-img-wrap">
+              <div
+                class="project-img-placeholder"
+                style="--card-color: #ff7a00"
+              >
+                <span class="project-icon">⚔️</span>
+              </div>
+              <div class="project-personal-overlay">
+                <a
+                  href="https://clustered-mmorpg.onrender.com"
+                  target="_blank"
+                  class="project-link-btn"
+                  >Play Now →</a
+                >
+              </div>
+            </div>
+            <div class="project-body">
+              <div class="project-card-header">
+                <div class="project-tags">
+                  <span class="ptag">MongoDB atlas</span
+                  ><span class="ptag">Node.js</span
+                  ><span class="ptag">React</span
+                  ><span class="ptag">TypeScript</span
+                  ><span class="ptag">WebSocket</span
+                  ><span class="ptag">RESTful APIs</span
+                  ><span class="ptag">Claude AI</span
+                  ><span class="ptag">Xendot</span
+                  ><span class="ptag">Render</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <span class="ongoing-badge">🔧 Ongoing Development</span>
+                  <span class="personal-badge">🎮 MMORPG</span>
+                </div>
+              </div>
+              <h3 class="project-title">The Void Ascension</h3>
+              <div class="project-meta">
+                <span class="meta-item">📅 Mar 28, 2026 – Present</span>
+                <span class="meta-item">🛠️ Self-Built</span>
+              </div>
+              <p class="project-desc">
+                A <strong>high-performance, 900-level RPG engine</strong> built
+                to handle massive entity management and a high-stakes player
+                economy. Supports a 60-unit real-time army across 50 world maps,
+                with complex mathematical scaling and low-latency data
+                persistence. Features a horde system where 50 "Scrapper" minions
+                inherit 50% of player attributes in real-time, a unified
+                algorithmic scaling engine, and a server-side
+                <strong>15% Shatter Risk mechanic</strong> — permanent item
+                destruction on death — driving strategic gameplay stakes.
+              </p>
+              <div class="project-result">
+                <span class="result-label">💡 Tech highlights:</span> Scalable
+                MongoDB schema for 900-level progression, WebSocket-driven
+                real-time combat, cloud background workers for async game logic,
+                and a risk-based economy system built for long-term player
+                engagement.
+              </div>
+              <div
+                class="project-result"
+                style="
+                  border-color: rgba(255, 68, 68, 0.2);
+                  background: rgba(255, 68, 68, 0.05);
+                "
+              >
+                <span class="result-label" style="color: #ff6b6b"
+                  >⚠️ Note:</span
+                >
+                If you encounter an error on the live site, the Supabase database may have paused due to inactivity. It resumes automatically after a short wait, or contact me to manually wake it up.
+              </div>
+              <div class="personal-project-links">
+                <a
+                  href="https://clustered-mmorpg.onrender.com"
+                  target="_blank"
+                  class="plink-live"
+                >
+                  🎮 Play Now →
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== COMMENTS SECTION ===== -->
     <section class="comments-section" id="comments">
       <div class="container">
@@ -2400,115 +2508,6 @@
         </div>
       </div>
     </section>
-    <section class="resume-section" id="resume">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-tag"
-            ><span class="section-tag-ticker"
-              ><span class="section-tag-run"
-                >RESUME · RESUME · RESUME · RESUME · RESUME · RESUME ·
-                RESUME</span
-              ></span
-            ></span
-          >
-          <h2 class="section-title">My Resume</h2>
-        </div>
-
-        <div class="resume-wrapper reveal">
-          <!-- Resume Tabs -->
-          <div class="resume-tabs">
-            <button class="resume-tab-btn active" data-tab="standard">Standard Resume (ATS-Optimized)</button>
-            <!-- <button class="resume-tab-btn" data-tab="visual">Visual CV</button> -->
-          </div>
-
-          <!-- Top action bar -->
-          <div class="resume-topbar">
-            <!-- Standard Resume Tab -->
-            <div class="resume-tab-content active" id="tab-standard">
-              <div class="resume-topbar-info">
-                <span class="resume-icon">📄</span>
-                <div>
-                  <p class="resume-filename">Ceron Calsena Resume</p>
-                  <p class="resume-meta">
-                    Full Stack Developer & AI-Webflow Dev · Updated May 2026
-                  </p>
-                </div>
-              </div>
-              <div class="resume-actions">
-                <a
-                  href="ATS.pdf"
-                  target="_blank"
-                  class="resume-btn resume-btn-view"
-                >
-                  <span>🔍 Full View</span>
-                </a>
-                <a
-                  href="ATS.pdf"
-                  download="Ceron_Calsena_Resume_new_11.pdf"
-                  class="resume-btn resume-btn-download"
-                >
-                  <span>⬇ Download</span>
-                </a>
-              </div>
-            </div>
-
-            <!-- Visual CV Tab -->
-            <!-- <div class="resume-tab-content" id="tab-visual">
-              <div class="resume-topbar-info">
-                <span class="resume-icon">🎨</span>
-                <div>
-                  <p class="resume-filename">Enhanced Curriculum Vitae</p>
-                  <p class="resume-meta">
-                    Professional Design · Updated April 2026
-                  </p>
-                </div>
-              </div>
-              <div class="resume-actions">
-                <a
-                  href="ENHANCE_CV_ceron.pdf"
-                  target="_blank"
-                  class="resume-btn resume-btn-view"
-                >
-                  <span>🔍 Full View</span>
-                </a>
-                <a
-                  href="ENHANCE_CV_ceron.pdf"
-                  download="Enhanced_Curriculum_Vitae.pdf"
-                  class="resume-btn resume-btn-download"
-                >
-                  <span>⬇ Download</span>
-                </a>
-              </div>
-            </div> -->
-          </div>
-
-          <!-- Image-based PDF Viewer -->
-          <div class="resume-viewer-wrap">
-            <div class="resume-viewer-inner">
-              <img
-                id="resumePageImg"
-                class="resume-page-img"
-                src="resume_previews/ENHANCE CURRICULUM VITAE_01.jpg"
-                alt="Resume Page 1"
-              />
-            </div>
-
-            <!-- Page controls -->
-            <div class="resume-controls">
-              <button class="resume-page-btn" id="prevPage" disabled>
-                ← Prev
-              </button>
-              <span class="resume-page-info">
-                Page <span id="pageNum">1</span> of
-                <span id="pageCount">04</span>
-              </span>
-              <button class="resume-page-btn" id="nextPage">Next →</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- ===== CONTACT SECTION ===== -->
     <section class="contact" id="contact">
       <div class="container">
