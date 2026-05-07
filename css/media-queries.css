@@ -284,15 +284,41 @@
     text-align: center;
   }
 
+  /* Actions row: full width, buttons share the row equally */
   .resume-actions {
+    width: 100%;
     gap: 0.5rem;
+    margin-left: 0;
+    justify-content: stretch;
   }
 
   .resume-btn {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     justify-content: center;
     font-size: 0.75rem;
     padding: 0.5rem 0.85rem;
+    min-width: 0;
+  }
+
+  /* Topbar info: allow shrink so it never pushes buttons off screen */
+  .resume-topbar-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .resume-filename {
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .resume-meta {
+    font-size: 0.65rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Shrink orbs so they don't push the page wider */

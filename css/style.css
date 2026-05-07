@@ -2668,7 +2668,7 @@ section.hero { padding: 8rem 2rem 5rem; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 1rem;
   background: var(--dark2);
   border: 1px solid rgba(255,122,0,0.15);
