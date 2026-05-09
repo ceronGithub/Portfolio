@@ -102,27 +102,6 @@
 =================================== */
 @media (max-width: 768px) {
 
-  /* Resume topbar: stack info + actions vertically so buttons stay visible */
-  .resume-topbar {
-    flex-wrap: wrap;
-    gap: 0.85rem;
-    padding: 1rem 1.25rem;
-  }
-
-  /* Allow info block to shrink so actions have room */
-  .resume-topbar-info {
-    flex-shrink: 1;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  /* Push actions to their own row on wrap */
-  .resume-actions {
-    width: 100%;
-    justify-content: flex-end;
-    margin-left: 0;
-  }
-
   /* Hide page scrollbar on tablet/mobile */
   ::-webkit-scrollbar { display: none; }
   html, body { scrollbar-width: none; }
@@ -271,56 +250,6 @@
   .project-desc   { font-size: 0.85rem; }
   section         { padding: 4rem 0; }
 
-  /* Resume: full-width actions row on small phones, tabs wrap */
-  .resume-tabs {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .resume-tab-btn {
-    flex: 1 1 auto;
-    font-size: 0.72rem;
-    padding: 0.55rem 0.75rem;
-    text-align: center;
-  }
-
-  /* Actions row: full width, buttons share the row equally */
-  .resume-actions {
-    width: 100%;
-    gap: 0.5rem;
-    margin-left: 0;
-    justify-content: stretch;
-  }
-
-  .resume-btn {
-    flex: 1 1 0;
-    justify-content: center;
-    font-size: 0.75rem;
-    padding: 0.5rem 0.85rem;
-    min-width: 0;
-  }
-
-  /* Topbar info: allow shrink so it never pushes buttons off screen */
-  .resume-topbar-info {
-    flex: 1 1 auto;
-    min-width: 0;
-    flex-shrink: 1;
-  }
-
-  .resume-filename {
-    font-size: 0.82rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .resume-meta {
-    font-size: 0.65rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   /* Shrink orbs so they don't push the page wider */
   .orb-1 { width: 200px; height: 200px; right: -50px; top: -50px; }
   .orb-2 { width: 150px; height: 150px; }
@@ -382,5 +311,142 @@
   }
   .ai-config-section {
     padding: 2rem 1.25rem;
+  }
+}
+
+/* ===================================
+   Resume Section — Responsive
+   Breakpoints: 768px → 600px → 480px
+   Goal: View + Download buttons always
+   fully visible and never cut off.
+=================================== */
+
+/* 768px — Tablet: topbar wraps, actions push to second row */
+@media (max-width: 768px) {
+  .resume-topbar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+
+  /* Tab content row: info left, actions right; wraps if too tight */
+  .resume-tab-content.active {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* Info block: shrinks to give actions room, text clips with ellipsis */
+  .resume-topbar-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .resume-filename {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .resume-meta {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Actions: never shrink, always stay on same row unless forced to wrap */
+  .resume-actions {
+    flex-shrink: 0;
+    margin-left: 0;
+    gap: 0.5rem;
+  }
+
+  /* Tabs: allow wrap so long tab labels don't overflow */
+  .resume-tabs {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .resume-tab-btn {
+    font-size: 0.82rem;
+    padding: 0.7rem 1rem;
+  }
+}
+
+/* 600px — Small Tablet: actions move to own full-width row */
+@media (max-width: 600px) {
+  .resume-topbar {
+    padding: 0.9rem 1rem;
+    gap: 0.6rem;
+  }
+
+  /* Force actions onto their own row, aligned right */
+  .resume-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+    gap: 0.5rem;
+  }
+
+  .resume-btn {
+    font-size: 0.78rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .resume-filename {
+    font-size: 0.85rem;
+  }
+
+  .resume-meta {
+    font-size: 0.65rem;
+  }
+}
+
+/* 480px — Small Phone: buttons share row equally, full width each */
+@media (max-width: 480px) {
+  .resume-topbar {
+    padding: 0.85rem 0.9rem;
+  }
+
+  /* Tabs: each button stretches to fill row */
+  .resume-tabs {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .resume-tab-btn {
+    flex: 1 1 auto;
+    font-size: 0.72rem;
+    padding: 0.55rem 0.6rem;
+    text-align: center;
+  }
+
+  /* Actions: both buttons share the row equally */
+  .resume-actions {
+    width: 100%;
+    gap: 0.4rem;
+    justify-content: stretch;
+  }
+
+  .resume-btn {
+    flex: 1 1 0;
+    justify-content: center;
+    font-size: 0.74rem;
+    padding: 0.5rem 0.5rem;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .resume-filename {
+    font-size: 0.8rem;
+  }
+
+  .resume-meta {
+    font-size: 0.62rem;
+  }
+
+  /* Icon: shrink slightly so info block has more text room */
+  .resume-icon {
+    font-size: 1.5rem;
   }
 }
