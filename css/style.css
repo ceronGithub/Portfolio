@@ -595,6 +595,7 @@ section.hero { padding: 8rem 2rem 5rem; }
   transform: translate3d(0, -30px, 0);
   transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0s;
 }
 
 /* Fade OUT downward — scrolled back up (exits bottom of viewport) */
@@ -603,6 +604,7 @@ section.hero { padding: 8rem 2rem 5rem; }
   transform: translate3d(0, 40px, 0);
   transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0s;
 }
 
 .reveal.fade-out {

@@ -121,12 +121,14 @@ function type() {
 setTimeout(type, 1200);
 
 // ─── Scroll Reveal: Fade-In + Fade-Out (bidirectional) ────────
-// WHAT: Reveals elements when they enter the viewport scrolling down,
-//       and un-reveals them when scrolling back up past their position.
-// HOW:  Tracks scroll direction via lastRevealScrollY. On intersection exit,
-//       applies fade-out-down (element drops back) when scrolling up.
-//       Mobile guard: skips un-reveal if viewport is too narrow to avoid
-//       mid-scroll flicker on small screens (≤480px).
+// WHAT: Reveals elements on scroll-down entry, un-reveals on scroll-up exit.
+// HOW:  Uses two IntersectionObservers — one per scroll direction — to eliminate
+//       the async race condition between the scroll listener and observer callback.
+//       scrollDownObserver fires when element enters from below (reveal).
+//       scrollUpObserver fires when element exits below the viewport (un-reveal).
+//       Each observer uses the correct rootMargin for its direction so callbacks
+//       fire reliably regardless of scroll speed.
+//       Mobile guard: un-reveal skipped on ≤600px to prevent mid-scroll flicker.
 const revealEls = document.querySelectorAll('.reveal');
 let lastRevealScrollY = window.scrollY;
 let revealScrollDir = 'down';
@@ -136,25 +138,38 @@ window.addEventListener('scroll', () => {
   lastRevealScrollY = window.scrollY;
 }, { passive: true });
 
-const revealObserver = new IntersectionObserver((entries) => {
+// Observer 1 — fires when element enters the viewport from below (scroll-down)
+const scrollDownObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    const isMobile = window.innerWidth <= 480;
-
     if (entry.isIntersecting) {
-      // Entering viewport — always reveal
       entry.target.classList.remove('fade-out-up', 'fade-out-down');
       entry.target.classList.add('visible');
-    } else if (!isMobile && entry.target.classList.contains('visible')) {
-      // Exiting viewport while scrolling up — un-reveal downward
-      if (revealScrollDir === 'up') {
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+// Observer 2 — fires when element exits the bottom of the viewport (scroll-up)
+// rootMargin bottom is positive so the trigger zone extends below the viewport,
+// catching the element the moment it re-enters from the bottom edge on scroll-up.
+const scrollUpObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const isMobile = window.innerWidth <= 600;
+    if (isMobile) return;
+
+    if (!entry.isIntersecting && entry.target.classList.contains('visible')) {
+      // boundingClientRect.top > 0 means element is below the viewport — scroll-up exit
+      if (entry.boundingClientRect.top > 0) {
         entry.target.classList.remove('visible', 'fade-out-up');
         entry.target.classList.add('fade-out-down');
       }
     }
   });
-}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+}, { threshold: 0, rootMargin: '0px 0px 80px 0px' });
 
-revealEls.forEach(el => revealObserver.observe(el));
+revealEls.forEach(el => {
+  scrollDownObserver.observe(el);
+  scrollUpObserver.observe(el);
+});
 
 // ─── Staggered Children Animation ──────────
 document.querySelectorAll('.cert-flip-grid, .about-cards, .projects-grid, .contact-links, .about-stats').forEach(container => {
@@ -165,16 +180,30 @@ document.querySelectorAll('.cert-flip-grid, .about-cards, .projects-grid, .conta
   });
 });
 
-// ─── Skill Bar Animation ──────────────────
+// ─── Skill Bar Animation (bidirectional) ──────────────────
+// WHAT: Animates skill bars 0% to target width on scroll-down entry.
+//       Resets to 0% on scroll-up exit so the animation replays cleanly on re-entry.
+// HOW:  Shares revealScrollDir from the reveal observer above.
+//       transition:none is applied before the reset so the snap is instant,
+//       then restored via double-rAF so the next fill animates smoothly.
 const skillFills = document.querySelectorAll('.skill-fill');
 
 const skillObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
+    const fill = entry.target;
+    const targetWidth = fill.getAttribute('data-width');
+
     if (entry.isIntersecting) {
-      const fill = entry.target;
-      const targetWidth = fill.getAttribute('data-width');
+      // Animate fill to target width on entry
       setTimeout(() => { fill.style.width = targetWidth + '%'; }, 300);
-      skillObserver.unobserve(fill);
+    } else if (revealScrollDir === 'up') {
+      // Reset to 0% instantly on scroll-up exit
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+      // Re-enable transition after reset so next fill animates smoothly
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { fill.style.transition = ''; });
+      });
     }
   });
 }, { threshold: 0.3 });
