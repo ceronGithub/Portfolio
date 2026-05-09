@@ -349,3 +349,38 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===================================
+   AI Config & CI/CD — Mobile
+=================================== */
+@media (max-width: 900px) {
+  .aiCfg-compare {
+    grid-template-columns: 1fr 1fr;
+  }
+  .aiCfg-compare-card--preferred {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .aiCfg-compare {
+    grid-template-columns: 1fr;
+  }
+  .cicd-pipeline {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .cicd-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+  .cicd-stack-row {
+    flex-direction: column;
+  }
+  .cicd-stack-divider {
+    width: 100%; height: 1px;
+  }
+  .ai-config-section {
+    padding: 2rem 1.25rem;
+  }
+}
