@@ -120,17 +120,36 @@ function type() {
 }
 setTimeout(type, 1200);
 
-// ─── Scroll Reveal: Fade-In Only ────────
-// Fix: removed fade-out logic — it caused sections to disappear on mobile
-// when IntersectionObserver triggered on small screens mid-scroll.
+// ─── Scroll Reveal: Fade-In + Fade-Out (bidirectional) ────────
+// WHAT: Reveals elements when they enter the viewport scrolling down,
+//       and un-reveals them when scrolling back up past their position.
+// HOW:  Tracks scroll direction via lastRevealScrollY. On intersection exit,
+//       applies fade-out-down (element drops back) when scrolling up.
+//       Mobile guard: skips un-reveal if viewport is too narrow to avoid
+//       mid-scroll flicker on small screens (≤480px).
 const revealEls = document.querySelectorAll('.reveal');
+let lastRevealScrollY = window.scrollY;
+let revealScrollDir = 'down';
+
+window.addEventListener('scroll', () => {
+  revealScrollDir = window.scrollY > lastRevealScrollY ? 'down' : 'up';
+  lastRevealScrollY = window.scrollY;
+}, { passive: true });
 
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
+    const isMobile = window.innerWidth <= 480;
+
     if (entry.isIntersecting) {
+      // Entering viewport — always reveal
       entry.target.classList.remove('fade-out-up', 'fade-out-down');
       entry.target.classList.add('visible');
-      revealObserver.unobserve(entry.target); // once visible, stays visible
+    } else if (!isMobile && entry.target.classList.contains('visible')) {
+      // Exiting viewport while scrolling up — un-reveal downward
+      if (revealScrollDir === 'up') {
+        entry.target.classList.remove('visible', 'fade-out-up');
+        entry.target.classList.add('fade-out-down');
+      }
     }
   });
 }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
