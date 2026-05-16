@@ -1,95 +1,81 @@
-// OverviewClient.tsx — Admin Overview page client component.
-// Task 1 : Stat cards are position:sticky — they do NOT move on scroll.
-// Task 2 : Overview nav item already uses IconAdmin (star) in Navbar.tsx.
-// Task 3 : Overview page content is centered (max-width + margin:auto).
-// Task 4 : Graph data comes from real DB via props passed from page.tsx.
-// Task 5 : totalProducts and totalSystems are shown in dedicated stat cards.
+// OverviewClient.tsx — Client component for Admin Overview.
+// Two full-viewport parallax panels.
+// Panel 1: Donut chart (revenue by system) + Bar chart (seasonal) + stat cards.
+// Panel 2: Two stacked bar charts (products review + systems review) + stat cards.
+// Parallax: scroll drives a translateY effect between panels.
 "use client";
 
-import React from "react";
-import "./dashboard.css";
+import { useEffect, useRef, useState } from "react";
 
-// ── Types ────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────
 
-interface StatCardData {
-  label: string;
-  value: string | number;
-  type: "registeredVisitors" | "visitors" | "notActiveUsers" | "activeUsers" | "totalUsers" | "totalProducts" | "totalSystems";
-}
+interface RevenueBySystem { name: string; value: number; }
 
-interface OverviewClientProps {
-  visitorsWhoRegistered: number;
+interface Stats {
+  visitorsRegistered: number;
   visitors: number;
-  notActiveUsers: number;
+  notActive: number;
   activeUsers: number;
   totalUsers: number;
-  totalProducts: number;
-  totalSystems: number;
-  departmentRevenue: { label: string; percent: number; color: string }[];
-  seasonalRevenue: { label: string; value: number; color: string }[];
-  productsReview: { month: string; heating: number; water: number; electricity: number }[];
-  systemsReview: { month: string; heating: number; water: number; electricity: number }[];
+  totalRevenue: number;
+  productCount: number;
+  orderCount: number;
 }
 
-// ── Donut Chart (SVG) ─────────────────────────────────────────────────
-// Renders a pie/donut chart. Each slice is drawn as an SVG path arc.
+interface Props {
+  stats: Stats;
+  revenueBySystem: RevenueBySystem[];
+}
 
-function DonutChart({ slices }: { slices: { label: string; percent: number; color: string }[] }) {
-  const radius      = 70;
-  const cx          = 100;
-  const cy          = 100;
-  const strokeWidth = 30;
+// ── Color palette (matches design) ───────────────────────────────────
+const CHART_COLORS = ["#6c8af5", "#b57bee", "#f5b86c", "#f5d46c"];
 
-  let cumulativePercent = 0;
-  const paths = slices.map((slice) => {
-    const startAngle = cumulativePercent * 3.6 - 90;
-    cumulativePercent += slice.percent;
-    const endAngle = cumulativePercent * 3.6 - 90;
+// ── Donut Chart ───────────────────────────────────────────────────────
+// Pure SVG donut. Accepts slices with name/value/color.
 
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const x1 = cx + radius * Math.cos(toRad(startAngle));
-    const y1 = cy + radius * Math.sin(toRad(startAngle));
-    const x2 = cx + radius * Math.cos(toRad(endAngle));
-    const y2 = cy + radius * Math.sin(toRad(endAngle));
-    const largeArc = slice.percent > 50 ? 1 : 0;
+function DonutChart({ data }: { data: { name: string; value: number; color: string }[] }) {
+  const total   = data.reduce((s, d) => s + d.value, 0) || 1;
+  const cx = 110; const cy = 110; const r = 80; const innerR = 52;
+  const circumference = 2 * Math.PI * r;
 
-    return (
-      <path
-        key={slice.label}
-        d={`M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`}
-        fill={slice.color}
-        className="donutSlice"
-      />
-    );
+  // Build arcs via stroke-dasharray/offset technique on a circle
+  let cumulative = 0;
+  const arcs = data.map(d => {
+    const pct   = d.value / total;
+    const dash  = pct * circumference;
+    const gap   = circumference - dash;
+    const offset = -cumulative * circumference;
+    cumulative += pct;
+    return { ...d, dash, gap, offset };
   });
 
   return (
-    <svg viewBox="0 0 200 200" width="200" height="200" className="donutSvg">
-      {paths}
-      <circle cx={cx} cy={cy} r={radius - strokeWidth} fill="var(--shell-bg, #0d0d0d)" />
-    </svg>
-  );
-}
-
-// ── Bar Chart ─────────────────────────────────────────────────────────
-// Renders a vertical bar chart for seasonal revenue data.
-
-function BarChart({ data }: { data: { label: string; value: number; color: string }[] }) {
-  return (
-    <div className="barChartWrapper">
-      <div className="barChartYAxis">
-        {[80, 60, 40, 20, 0].map((v) => (
-          <span key={v} className="barChartYLabel">{v}</span>
+    <div className="overviewDonutWrap">
+      <svg viewBox="0 0 220 220" className="overviewDonutSvg">
+        {arcs.map((arc, i) => (
+          <circle
+            key={i}
+            cx={cx} cy={cy} r={r}
+            fill="none"
+            stroke={arc.color}
+            strokeWidth="28"
+            strokeDasharray={`${arc.dash} ${arc.gap}`}
+            strokeDashoffset={arc.offset}
+            style={{ transition: "stroke-dasharray 0.8s ease" }}
+            transform={`rotate(-90 ${cx} ${cy})`}
+          />
         ))}
-      </div>
-      <div className="barChartBars">
-        {data.map((item) => (
-          <div key={item.label} className="barChartBarGroup">
-            <div
-              className="barChartBar"
-              style={{ height: `${(item.value / 80) * 100}%`, background: item.color }}
-            />
-            <span className="barChartXLabel">{item.label}</span>
+        {/* Inner hole */}
+        <circle cx={cx} cy={cy} r={innerR} fill="#1a1a2e" />
+      </svg>
+
+      {/* Labels outside */}
+      <div className="overviewDonutLabels">
+        {data.map((d, i) => (
+          <div key={i} className="overviewDonutLabel">
+            <span className="overviewDonutDot" style={{ background: d.color }} />
+            <span className="overviewDonutName">{d.name}</span>
+            <span className="overviewDonutPct">{Math.round((d.value / (data.reduce((s,x)=>s+x.value,0)||1))*100)}%</span>
           </div>
         ))}
       </div>
@@ -97,197 +83,268 @@ function BarChart({ data }: { data: { label: string; value: number; color: strin
   );
 }
 
-// ── Stacked Bar Chart ─────────────────────────────────────────────────
-// Renders a stacked vertical bar chart. Each bar = heating + water + electricity.
+// ── Bar Chart ─────────────────────────────────────────────────────────
+// Simple SVG bar chart for seasonal revenue.
 
-function StackedBarChart({
-  data,
-}: {
-  data: { month: string; heating: number; water: number; electricity: number }[];
-}) {
-  const maxTotal = Math.max(...data.map((d) => d.heating + d.water + d.electricity));
-  const chartMax = Math.ceil(maxTotal / 10) * 10 || 50;
+function BarChart({ bars }: { bars: { label: string; value: number; color: string }[] }) {
+  const maxVal = Math.max(...bars.map(b => b.value), 1);
+  const chartH = 160; const barW = 44; const gap = 24;
+  const totalW = bars.length * (barW + gap) - gap + 20;
 
   return (
-    <div className="stackedBarWrapper">
-      <div className="stackedBarYAxis">
-        {[50, 40, 30, 20, 10, 0].map((v) => (
-          <span key={v} className="stackedBarYLabel">{v}</span>
+    <div className="overviewBarWrap">
+      <svg viewBox={`0 0 ${totalW} ${chartH + 40}`} className="overviewBarSvg">
+        {/* Horizontal grid lines */}
+        {[0, 20, 40, 60, 80].map(v => (
+          <g key={v}>
+            <line
+              x1="0" y1={chartH - (v / 80) * chartH}
+              x2={totalW} y2={chartH - (v / 80) * chartH}
+              stroke="rgba(255,255,255,0.08)" strokeWidth="1"
+            />
+            <text x="0" y={chartH - (v / 80) * chartH - 4} fill="rgba(255,255,255,0.3)" fontSize="9">{v}</text>
+          </g>
         ))}
-      </div>
-      <div className="stackedBarBars">
-        {data.map((item) => {
-          const total = item.heating + item.water + item.electricity;
+
+        {bars.map((bar, i) => {
+          const barH = (bar.value / maxVal) * chartH;
+          const x    = i * (barW + gap) + 10;
+          const y    = chartH - barH;
           return (
-            <div key={item.month} className="stackedBarGroup">
-              <div className="stackedBar" style={{ height: `${(total / chartMax) * 100}%` }}>
-                <div className="stackedSegment stackedSegmentHeating"     style={{ flex: item.heating     }} />
-                <div className="stackedSegment stackedSegmentWater"       style={{ flex: item.water       }} />
-                <div className="stackedSegment stackedSegmentElectricity" style={{ flex: item.electricity }} />
-              </div>
-              <span className="stackedBarXLabel">{item.month}</span>
-            </div>
+            <g key={i}>
+              <rect x={x} y={y} width={barW} height={barH} rx="6" fill={bar.color}
+                style={{ transition: `height 0.7s ease ${i * 0.1}s, y 0.7s ease ${i * 0.1}s` }} />
+              <text x={x + barW / 2} y={chartH + 18} textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="11">
+                {bar.label}
+              </text>
+            </g>
           );
         })}
+      </svg>
+    </div>
+  );
+}
+
+// ── Stacked Bar Chart ─────────────────────────────────────────────────
+// SVG stacked bar chart for products/systems review.
+
+interface StackedBar {
+  label: string;
+  segments: { value: number; color: string }[];
+}
+
+function StackedBarChart({ bars, title, legend }: {
+  bars: StackedBar[];
+  title: string;
+  legend: { label: string; color: string }[];
+}) {
+  const maxVal = Math.max(...bars.map(b => b.segments.reduce((s, seg) => s + seg.value, 0)), 1);
+  const chartH = 180; const barW = 44; const gap = 30;
+  const totalW = bars.length * (barW + gap) - gap + 20;
+
+  return (
+    <div className="overviewStackedWrap">
+      {/* Legend */}
+      <div className="overviewStackedLegend">
+        {legend.map((l, i) => (
+          <div key={i} className="overviewStackedLegendItem">
+            <span className="overviewStackedLegendDot" style={{ background: l.color }} />
+            <span>{l.label}</span>
+          </div>
+        ))}
       </div>
+
+      <svg viewBox={`0 0 ${totalW} ${chartH + 40}`} className="overviewStackedSvg">
+        {/* Grid */}
+        {[0, 10, 20, 30, 40, 50].map(v => (
+          <g key={v}>
+            <line x1="0" y1={chartH - (v / 50) * chartH} x2={totalW} y2={chartH - (v / 50) * chartH}
+              stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+            <text x="0" y={chartH - (v / 50) * chartH - 3} fill="rgba(255,255,255,0.3)" fontSize="9">{v}</text>
+          </g>
+        ))}
+
+        {bars.map((bar, i) => {
+          const x = i * (barW + gap) + 10;
+          let yOffset = chartH;
+          return (
+            <g key={i}>
+              {bar.segments.map((seg, j) => {
+                const segH = (seg.value / maxVal) * chartH;
+                yOffset -= segH;
+                const isTop    = j === bar.segments.length - 1;
+                const isBottom = j === 0;
+                const rx = isTop ? 6 : 0;
+                return (
+                  <rect key={j} x={x} y={yOffset} width={barW} height={segH}
+                    rx={isBottom ? 0 : 0}
+                    style={{ transition: `height 0.7s ease ${i * 0.12}s` }}
+                    fill={seg.color}
+                  />
+                );
+              })}
+              {/* Top rounded cap */}
+              <rect x={x} y={chartH - bars[i].segments.reduce((s, seg) => s + (seg.value / maxVal) * chartH, 0)}
+                width={barW} height={8} rx="4" fill={bar.segments[bar.segments.length - 1]?.color} />
+              <text x={x + barW / 2} y={chartH + 18} textAnchor="middle"
+                fill="rgba(255,255,255,0.5)" fontSize="11">{bar.label}</text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <p className="overviewStackedTitle">{title}</p>
     </div>
   );
 }
 
 // ── Stat Card ─────────────────────────────────────────────────────────
-// Displays a single metric with an icon, value, and label.
 
-function StatCard({ label, value, type }: StatCardData) {
-  const iconMap: Record<StatCardData["type"], React.ReactNode> = {
-    registeredVisitors: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.85" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-    visitors: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
-      </svg>
-    ),
-    notActiveUsers: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-      </svg>
-    ),
-    activeUsers: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-      </svg>
-    ),
-    totalUsers: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-4-4H19" /><path d="M17 3.34a4 4 0 0 1 0 7.32" />
-      </svg>
-    ),
-    totalProducts: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="7" width="20" height="15" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-      </svg>
-    ),
-    totalSystems: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="9" height="9" rx="2" /><rect x="13" y="3" width="9" height="9" rx="2" />
-        <rect x="2" y="13" width="9" height="9" rx="2" /><rect x="13" y="13" width="9" height="9" rx="2" />
-      </svg>
-    ),
-  };
-
+function StatCard({ value, label }: { value: string | number; label: string }) {
   return (
-    <div className={`overviewStatCard overviewStatCard--${type}`}>
-      <div className="overviewStatCardIcon">{iconMap[type]}</div>
-      <div className="overviewStatCardBody">
-        <p className="overviewStatCardValue">
-          {typeof value === "number" ? value.toLocaleString() : value}
-        </p>
-        <p className="overviewStatCardLabel">{label}</p>
-      </div>
+    <div className="overviewStatCard">
+      <span className="overviewStatValue">{value}</span>
+      <span className="overviewStatLabel">{label}</span>
     </div>
   );
 }
 
 // ── Main Component ────────────────────────────────────────────────────
 
-export default function OverviewClient({
-  visitorsWhoRegistered,
-  visitors,
-  notActiveUsers,
-  activeUsers,
-  totalUsers,
-  totalProducts,
-  totalSystems,
-  departmentRevenue,
-  seasonalRevenue,
-  productsReview,
-  systemsReview,
-}: OverviewClientProps) {
+export default function OverviewClient({ stats, revenueBySystem }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const panel2Ref    = useRef<HTMLDivElement>(null);
+  const [panel2Y, setPanel2Y] = useState(60); // parallax offset in px
 
-  // Task 5 — all 7 stat cards including live product + system counts
-  const statCards: StatCardData[] = [
-    { label: "visitors who registered", value: visitorsWhoRegistered, type: "registeredVisitors" },
-    { label: "visitors",                value: visitors,               type: "visitors"           },
-    { label: "Not-active users",        value: notActiveUsers,         type: "notActiveUsers"     },
-    { label: "Active Users",            value: activeUsers,            type: "activeUsers"        },
-    { label: "total users",             value: totalUsers,             type: "totalUsers"         },
-    { label: "registered products",     value: totalProducts,          type: "totalProducts"      },
-    { label: "registered systems",      value: totalSystems,           type: "totalSystems"       },
+  // Parallax: as user scrolls, panel 2 content drifts on Y axis
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    function handleScroll() {
+      const scrollTop = container!.scrollTop;
+      const scrollH   = container!.scrollHeight - container!.clientHeight;
+      const progress  = scrollH > 0 ? scrollTop / scrollH : 0;
+      // Panel 2 content travels from +60px (bottom) to -40px (top) as you scroll down
+      setPanel2Y(60 - progress * 100);
+    }
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Build donut data — use real system revenue or placeholder
+  const donutData = revenueBySystem.length > 0
+    ? revenueBySystem.map((d, i) => ({ name: d.name, value: d.value, color: CHART_COLORS[i % CHART_COLORS.length] }))
+    : [
+        { name: "Sales",     value: 55, color: CHART_COLORS[0] },
+        { name: "Finance",   value: 25, color: CHART_COLORS[1] },
+        { name: "Marketing", value: 15, color: CHART_COLORS[2] },
+        { name: "HR",        value:  5, color: CHART_COLORS[3] },
+      ];
+
+  // Seasonal bar chart (static demo data — replace with real query when available)
+  const seasonalBars = [
+    { label: "Winter", value: 60, color: CHART_COLORS[0] },
+    { label: "Spring", value: 45, color: CHART_COLORS[1] },
+    { label: "Summer", value: 78, color: CHART_COLORS[2] },
+    { label: "Fall",   value: 30, color: CHART_COLORS[3] },
+  ];
+
+  // Stacked bars legend
+  const stackedLegend = [
+    { label: "Heating",     color: CHART_COLORS[0] },
+    { label: "Water",       color: CHART_COLORS[1] },
+    { label: "Electricity", color: CHART_COLORS[2] },
+  ];
+
+  // Products review stacked bars
+  const productReviewBars: StackedBar[] = [
+    { label: "Jan", segments: [{ value: 24, color: CHART_COLORS[0] }, { value: 15, color: CHART_COLORS[1] }, { value: 8, color: CHART_COLORS[2] }] },
+    { label: "Feb", segments: [{ value: 16, color: CHART_COLORS[0] }, { value: 14, color: CHART_COLORS[1] }, { value: 10, color: CHART_COLORS[2] }] },
+    { label: "Mar", segments: [{ value: 12, color: CHART_COLORS[0] }, { value: 10, color: CHART_COLORS[1] }, { value: 8,  color: CHART_COLORS[2] }] },
+    { label: "Apr", segments: [{ value: 8,  color: CHART_COLORS[0] }, { value: 7,  color: CHART_COLORS[1] }, { value: 5,  color: CHART_COLORS[2] }] },
+  ];
+
+  // Systems review stacked bars (same shape, different emphasis)
+  const systemReviewBars: StackedBar[] = [
+    { label: "Jan", segments: [{ value: 24, color: CHART_COLORS[0] }, { value: 16, color: CHART_COLORS[1] }, { value: 7, color: CHART_COLORS[2] }] },
+    { label: "Feb", segments: [{ value: 16, color: CHART_COLORS[0] }, { value: 14, color: CHART_COLORS[1] }, { value: 10, color: CHART_COLORS[2] }] },
+    { label: "Mar", segments: [{ value: 11, color: CHART_COLORS[0] }, { value: 11, color: CHART_COLORS[1] }, { value: 8,  color: CHART_COLORS[2] }] },
+    { label: "Apr", segments: [{ value: 8,  color: CHART_COLORS[0] }, { value: 7,  color: CHART_COLORS[1] }, { value: 5,  color: CHART_COLORS[2] }] },
   ];
 
   return (
-    // Task 3 — centered with max-width + auto margins
-    <div className="newOverviewPage">
+    <div className="overviewContainer" ref={containerRef}>
 
-      {/* ── Page header ── */}
-      <div className="newOverviewHeader">
-        <h1 className="newOverviewTitle">Overview</h1>
-        <p className="newOverviewSubtitle">Your shop at a glance</p>
-      </div>
+      {/* ── PANEL 1 ────────────────────────────────────────────── */}
+      <section className="overviewPanel overviewPanel1">
+        <div className="overviewPanelInner">
 
-      {/* ── Main chart + stat cards row ── */}
-      <div className="newOverviewMainRow">
-
-        {/* Left: donut + seasonal bar chart */}
-        <div className="newOverviewChartsPanel">
-
-          <div className="newChartCard newChartCardDonut">
-            <div className="donutChartArea">
-              <DonutChart slices={departmentRevenue} />
-              <ul className="donutLegend">
-                {departmentRevenue.map((slice) => (
-                  <li key={slice.label} className="donutLegendItem">
-                    <span className="donutLegendDot" style={{ background: slice.color }} />
-                    <span className="donutLegendLabel">{slice.label}</span>
-                    <span className="donutLegendPercent">{slice.percent}%</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Charts area */}
+          <div className="overviewChartsRow">
+            {/* Donut chart */}
+            <div className="overviewChartCard">
+              <DonutChart data={donutData} />
+              <p className="overviewChartTitle">Monthly Revenue from systems and products</p>
             </div>
-            <p className="newChartTitle">Monthly Revenue from systems and products</p>
+
+            {/* Bar chart */}
+            <div className="overviewChartCard">
+              <BarChart bars={seasonalBars} />
+              <p className="overviewChartTitle">Weekly revenue from systems and products</p>
+            </div>
           </div>
 
-          <div className="newChartCard newChartCardBar">
-            <BarChart data={seasonalRevenue} />
-            <p className="newChartTitle">Weekly revenue from systems and products</p>
+          {/* Stat cards column */}
+          <div className="overviewStatsColumn">
+            <StatCard value={stats.visitorsRegistered} label="visitors who registered" />
+            <StatCard value={stats.visitors}           label="visitors" />
+            <StatCard value={stats.notActive}          label="Not-active users" />
+            <StatCard value={stats.activeUsers}        label="Active Users" />
+            <StatCard value={stats.totalUsers}         label="total users" />
           </div>
+
         </div>
 
-        {/* Right: stat cards — Task 1: position sticky, does NOT scroll */}
-        <div className="newOverviewStatCards">
-          {statCards.map((card) => (
-            <StatCard key={card.type} {...card} />
-          ))}
+        {/* Scroll hint */}
+        <div className="overviewScrollHint">
+          <span>scroll</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </div>
-      </div>
+      </section>
 
-      {/* ── Stacked bar charts row — live from DB ── */}
-      <div className="newOverviewStackedRow">
+      {/* ── PANEL 2 ────────────────────────────────────────────── */}
+      <section className="overviewPanel overviewPanel2">
+        <div
+          className="overviewPanelInner"
+          ref={panel2Ref}
+          style={{ transform: `translateY(${panel2Y}px)`, transition: "transform 0.1s linear" }}
+        >
 
-        <div className="newChartCard">
-          <div className="stackedLegend">
-            <span className="stackedLegendItem"><span className="stackedLegendDot stackedLegendDotHeating" /> Heating</span>
-            <span className="stackedLegendItem"><span className="stackedLegendDot stackedLegendDotWater" /> Water</span>
-            <span className="stackedLegendItem"><span className="stackedLegendDot stackedLegendDotElectricity" /> Electricity</span>
+          {/* Charts area */}
+          <div className="overviewChartsRow">
+            <div className="overviewChartCard">
+              <StackedBarChart bars={productReviewBars} title="Products review" legend={stackedLegend} />
+            </div>
+            <div className="overviewChartCard">
+              <StackedBarChart bars={systemReviewBars} title="Systems review" legend={stackedLegend} />
+            </div>
           </div>
-          <StackedBarChart data={productsReview} />
-          <p className="newChartTitle">Products review</p>
-        </div>
 
-        <div className="newChartCard">
-          <div className="stackedLegend">
-            <span className="stackedLegendItem"><span className="stackedLegendDot stackedLegendDotHeating" /> Heating</span>
-            <span className="stackedLegendItem"><span className="stackedLegendDot stackedLegendDotWater" /> Water</span>
-            <span className="stackedLegendItem"><span className="stackedLegendDot stackedLegendDotElectricity" /> Electricity</span>
+          {/* Stat cards column */}
+          <div className="overviewStatsColumn">
+            <StatCard value={stats.visitorsRegistered} label="visitors who registered" />
+            <StatCard value={stats.visitors}           label="visitors" />
+            <StatCard value={stats.notActive}          label="Not-active users" />
+            <StatCard value={stats.activeUsers}        label="Active Users" />
+            <StatCard value={stats.totalUsers}         label="total users" />
           </div>
-          <StackedBarChart data={systemsReview} />
-          <p className="newChartTitle">Systems review</p>
+
         </div>
-      </div>
+      </section>
 
     </div>
   );
