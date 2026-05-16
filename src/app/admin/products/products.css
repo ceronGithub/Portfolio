@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 /* ================================================
    products.css — Admin Products & Systems page styles.
    Product table, system accordion cards, addon grid.
    ================================================ */
 
 .adminProductsPage {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 2.5rem;
 }
 
@@ -253,3 +256,7 @@
   padding: 1rem;
   text-align: center;
 }
+
+.adminProductsPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+.adminOrdersPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }

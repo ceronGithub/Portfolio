@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 /* ================================================
    orders.css — Admin Orders page styles.
    Stats strip, filter tabs, orders table.
    ================================================ */
 
 .adminOrdersPage {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 2.5rem;
 }
 
@@ -199,3 +202,7 @@
   padding: 2rem;
   text-align: center;
 }
+
+.adminProductsPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+.adminOrdersPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
