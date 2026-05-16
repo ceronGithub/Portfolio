@@ -1,0 +1,207 @@
+/* ================================================
+   mediaQueries.css — All responsive breakpoints.
+   Never put breakpoints inside component CSS files.
+   ================================================ */
+
+/* — Tablet: 768px and below — */
+@media (max-width: 768px) {
+
+  /* Navbar */
+  .navbar {
+    padding: 0 1.25rem;
+  }
+
+  .navLinks {
+    gap: 0.85rem;
+  }
+
+  /* Hero */
+  .heroPage {
+    padding: 5rem 1.25rem 2rem;
+  }
+
+  .heroActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .heroBtnPrimary,
+  .heroBtnSecondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Systems */
+  .systemsPage {
+    padding: 5rem 1.25rem 3rem;
+  }
+
+  .systemsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dashboards */
+  .adminPage,
+  .dashboardPage {
+    padding: 4.5rem 1.25rem 2rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  /* User table — stack on tablet */
+  .userTableHeader,
+  .userTableRow {
+    grid-template-columns: 1fr 2fr 1fr;
+  }
+
+  /* Hide less critical columns on tablet */
+  .userTableHeader span:nth-child(n+4),
+  .userTableRow span:nth-child(n+4),
+  .userTableRow > div:nth-child(n+4) {
+    display: none;
+  }
+}
+
+/* — Floating Pill Navbar: Tablet — */
+@media (max-width: 768px) {
+  .floatNavItem {
+    width: 62px;
+  }
+
+  .floatBubble {
+    width: 70px;
+    height: 116px;
+    margin-left: -4px;
+  }
+}
+
+/* — Admin Shell: Tablet — */
+@media (max-width: 768px) {
+  .adminSidebar {
+    width: 64px;
+  }
+
+  .adminSidebarLogo,
+  .adminNavItemLabel,
+  .adminThemeToggleLabel,
+  .adminSidebarAdminName,
+  .adminNavItemDot {
+    display: none;
+  }
+
+  .adminMain {
+    margin-left: 64px;
+  }
+
+  .adminStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adminOverviewBottom {
+    grid-template-columns: 1fr;
+  }
+
+  .adminOverviewPage,
+  .adminUsersPage,
+  .adminProductsPage,
+  .adminOrdersPage {
+    padding: 1.5rem;
+  }
+
+  .adminUsersTableHeader,
+  .adminUsersTableRow {
+    grid-template-columns: 1.5fr 2fr 1fr;
+  }
+
+  .adminUsersTableHeader span:nth-child(n+4),
+  .adminUsersTableRow span:nth-child(n+4) {
+    display: none;
+  }
+
+  .adminOrdersTableHeader,
+  .adminOrdersTableRow {
+    grid-template-columns: 1fr 2fr 1.5fr 1fr;
+  }
+
+  .adminOrdersTableHeader span:nth-child(n+5),
+  .adminOrdersTableRow span:nth-child(n+5) {
+    display: none;
+  }
+}
+
+/* — Mobile: 480px and below — */
+@media (max-width: 480px) {
+
+  /* Floating pill — compact on mobile */
+  .floatNav {
+    bottom: 1.25rem;
+  }
+
+  .floatPill {
+    height: 56px;
+    padding: 0 4px;
+  }
+
+  .floatNavItem {
+    width: 48px;
+    height: 44px;
+  }
+
+  .floatBubble {
+    width: 48px;
+    height: 68px;
+    top: -14px;
+  }
+
+  .floatNavIcon svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  /* Navbar */
+  .navBadge {
+    display: none;
+  }
+
+  /* Hero */
+  .heroPage {
+    padding: 4.5rem 1rem 2rem;
+  }
+
+  /* Systems */
+  .systemCard {
+    padding: 1.5rem;
+  }
+
+  .systemCardFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .systemCardBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Dashboards */
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .adminTitle,
+  .dashboardTitle {
+    font-size: 1.4rem;
+  }
+
+  /* Login card */
+  .loginCard {
+    padding: 1.75rem 1.25rem;
+  }
+}

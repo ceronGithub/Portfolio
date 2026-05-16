@@ -1,0 +1,150 @@
+/* new-asset-section.css */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
+
+.newAssetSection {
+  position:    relative;
+  width:       100%;
+  min-height:  100vh;
+  background:  #000;
+  overflow:    hidden;
+  display:     flex;
+  align-items: center;
+  font-family: 'Syne', sans-serif;
+}
+
+/* ── Parallax BG image — left portrait ── */
+.newAssetBgWrap {
+  position:       absolute;
+  left:           0; top: -15%;
+  width:          48%;
+  height:         130%;           /* extra for parallax travel */
+  pointer-events: none;
+  z-index:        1;
+  overflow:       hidden;
+}
+
+.newAssetBgImg {
+  width:           100%;
+  height:          100%;
+  object-fit:      cover;
+  object-position: center top;
+  display:         block;
+  will-change:     transform;
+  opacity:         0.9;
+}
+
+.newAssetBgFade {
+  position:   absolute; inset: 0;
+  background: linear-gradient(
+    to right,
+    transparent 35%,
+    rgba(0,0,0,0.65) 65%,
+    #000 92%
+  );
+}
+
+/* ── Content ── */
+.newAssetContent {
+  position:        relative;
+  z-index:         10;
+  margin-left:     44%;
+  width:           54%;
+  padding:         5rem 3rem 5rem 2rem;
+  display:         flex;
+  flex-direction:  column;
+  gap:             2.5rem;
+}
+
+.newAssetHeaderRow {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1.5rem;
+}
+
+.newAssetLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  margin-bottom:  0.6rem;
+}
+
+.newAssetTitle {
+  font-size:      clamp(1.4rem, 2.8vw, 2.2rem);
+  font-weight:    700;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  line-height:    1.2;
+}
+
+.newAssetComingSoon {
+  flex-shrink:    0;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  font-weight:    400;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.35);
+  background:     rgba(34,197,94,0.08);
+  padding:        0.4rem 1rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space:    nowrap;
+  margin-top:     0.25rem;
+}
+
+.newAssetCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap:     1.25rem;
+}
+
+.newAssetCard {
+  background:    #0d0d0d;
+  border:        1px solid #1a1a1a;
+  border-radius: 20px;
+  aspect-ratio:  4/3;
+  position:      relative;
+  overflow:      hidden;
+  transition:    border-color 0.25s;
+}
+
+.newAssetCard:hover { border-color: #2a2a2a; }
+
+.newAssetCardInner {
+  position:        absolute; inset: 0;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.75rem;
+}
+
+.newAssetCardIcon  { font-size: 2rem; opacity: 0.25; }
+
+.newAssetCardLabel {
+  font-size:      0.78rem;
+  color:          rgba(255,255,255,0.2);
+  font-family:    'DM Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 768px) {
+  .newAssetContent      { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
+  .newAssetBgImg        { opacity: 0.18; }
+  .newAssetCards        { grid-template-columns: 1fr; }
+  .newAssetHeaderRow    { flex-direction: column; }
+}
+/* ── Fire canvas — right side overlay ── */
+.newAssetFireCanvas {
+  position:       absolute;
+  right:          0; top: 0;
+  width:          56%;
+  height:         100%;
+  z-index:        5;
+  pointer-events: none;
+  will-change:    transform;
+}

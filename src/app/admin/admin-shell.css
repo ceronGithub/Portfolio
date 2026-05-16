@@ -1,0 +1,487 @@
+/* ================================================
+   admin-shell.css — AdminShell layout styles.
+   Sidebar + main content area. Light/dark theme vars.
+   ================================================ */
+
+/* ── CSS Variables: Light theme (default) ─────── */
+.adminShell {
+  --shell-bg:           #f5f4f1;
+  --sidebar-bg:         #ffffff;
+  --sidebar-border:     #e8e4de;
+  --sidebar-text:       #555;
+  --sidebar-text-hover: #1a1a1a;
+  --nav-active-bg:      #f0ede8;
+  --nav-active-text:    #1a1a1a;
+  --nav-active-dot:     #1a1a1a;
+  --logo-mark-bg:       #1a1a1a;
+  --logo-mark-color:    #fff;
+  --collapse-btn-bg:    #f0ede8;
+  --collapse-btn-color: #888;
+  --theme-track-bg:     #e8e4de;
+  --theme-thumb-bg:     #1a1a1a;
+  --footer-border:      #f0ede8;
+  --admin-name-color:   #aaa;
+  --signout-color:      #999;
+  --signout-hover:      #e74c3c;
+  --main-bg:            #f5f4f1;
+  --content-color:      #1a1a1a;
+
+  display: flex;
+  min-height: 100vh;
+  background: var(--shell-bg);
+  color: var(--content-color);
+  position: relative;
+}
+
+/* ── CSS Variables: Dark theme ────────────────── */
+.adminShellDark {
+  --shell-bg:           #0d0d0d;
+  --sidebar-bg:         #141414;
+  --sidebar-border:     #252525;
+  --sidebar-text:       #666;
+  --sidebar-text-hover: #e8e4de;
+  --nav-active-bg:      #1e1e1e;
+  --nav-active-text:    #f0ede8;
+  --nav-active-dot:     #c9a96e;
+  --logo-mark-bg:       #c9a96e;
+  --logo-mark-color:    #0d0d0d;
+  --collapse-btn-bg:    #1e1e1e;
+  --collapse-btn-color: #555;
+  --theme-track-bg:     #252525;
+  --theme-thumb-bg:     #c9a96e;
+  --footer-border:      #1e1e1e;
+  --admin-name-color:   #444;
+  --signout-color:      #555;
+  --signout-hover:      #e74c3c;
+  --main-bg:            #0d0d0d;
+  --content-color:      #e8e4de;
+}
+
+/* ── Sidebar ──────────────────────────────────── */
+.adminSidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 50;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.adminSidebarCollapsed {
+  width: 64px;
+}
+
+/* ── Sidebar Header ───────────────────────────── */
+.adminSidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  min-height: 64px;
+  border-bottom: 1px solid var(--sidebar-border);
+  flex-shrink: 0;
+}
+
+.adminSidebarLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+
+.adminSidebarLogoMark {
+  width: 28px;
+  height: 28px;
+  background: var(--logo-mark-bg);
+  color: var(--logo-mark-color);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
+}
+
+.adminSidebarLogoText {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--sidebar-text-hover);
+  letter-spacing: -0.02em;
+}
+
+/* Collapse button */
+.adminCollapseBtn {
+  background: var(--collapse-btn-bg);
+  border: none;
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--collapse-btn-color);
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.adminCollapseBtn:hover {
+  color: var(--sidebar-text-hover);
+}
+
+.adminCollapseBtnIcon {
+  display: flex;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.adminCollapseBtnIconFlipped {
+  transform: rotate(180deg);
+}
+
+/* ── Sidebar Nav ──────────────────────────────── */
+.adminSidebarNav {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.adminNavItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+  font-family: inherit;
+}
+
+.adminNavItem:hover {
+  background: var(--nav-active-bg);
+  color: var(--sidebar-text-hover);
+}
+
+.adminNavItemActive {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+  font-weight: 600;
+}
+
+.adminNavItemIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.adminNavItemActive .adminNavItemIcon {
+  opacity: 1;
+}
+
+.adminNavItemLabel {
+  flex: 1;
+}
+
+/* Active indicator dot */
+.adminNavItemDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nav-active-dot);
+  flex-shrink: 0;
+}
+
+/* ── Sidebar Footer ───────────────────────────── */
+.adminSidebarFooter {
+  padding: 0.75rem;
+  border-top: 1px solid var(--footer-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Theme toggle */
+.adminThemeToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.adminThemeToggle:hover {
+  background: var(--nav-active-bg);
+  color: var(--sidebar-text-hover);
+}
+
+.adminThemeToggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Custom toggle track + thumb */
+.adminThemeToggleTrack {
+  width: 32px;
+  height: 18px;
+  background: var(--theme-track-bg);
+  border-radius: 999px;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.adminThemeToggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--theme-thumb-bg);
+  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
+}
+
+.adminThemeToggleThumbDark {
+  left: 16px;
+}
+
+/* Admin name display */
+.adminSidebarAdminName {
+  font-size: 0.72rem;
+  color: var(--admin-name-color);
+  padding: 0 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+/* Sign out button */
+.adminSignOutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--signout-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.adminSignOutBtn:hover {
+  background: rgba(231, 76, 60, 0.08);
+  color: var(--signout-hover);
+}
+
+/* ── Main Content Area ────────────────────────── */
+.adminMain {
+  flex: 1;
+  margin-left: 220px;
+  min-height: 100vh;
+  background: var(--main-bg);
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--content-color);
+}
+
+/* When sidebar is collapsed */
+.adminSidebarCollapsed ~ .adminMain,
+.adminShell:has(.adminSidebarCollapsed) .adminMain {
+  margin-left: 64px;
+}
+
+/* ── Collapsed: floating dark pill sidebar ────── */
+.adminSidebarPill {
+  position: fixed;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: #1a1a1a;
+  border-radius: 999px;
+  padding: 0.75rem 0.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  min-width: 52px;
+}
+
+/* Dark theme pill */
+.adminShellDark .adminSidebarPill {
+  background: #111;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* ── Pill avatar (star + Admin label) ─────────── */
+.adminPillAvatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: #2a2a2a;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  color: #e8e4de;
+  transition: background 0.2s, transform 0.2s;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.adminPillAvatar:hover {
+  background: #333;
+  transform: scale(1.06);
+}
+
+.adminPillAvatarLabel {
+  display: none; /* hidden — tooltip handled by title attr */
+}
+
+/* ── Pill nav icon buttons ─────────────────────── */
+.adminPillNav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  width: 100%;
+}
+
+.adminPillNavItem {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.adminPillNavItem:hover {
+  background: rgba(255,255,255,0.08);
+  color: #e8e4de;
+}
+
+.adminPillNavItemActive {
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+}
+
+/* Dark theme pill: golden accent on active */
+.adminShellDark .adminPillNavItemActive {
+  color: #c9a96e;
+}
+
+/* ── Pill theme button ─────────────────────────── */
+.adminPillThemeBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.adminPillThemeBtn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #e8e4de;
+}
+
+/* ── Pill sign-out button ─────────────────────── */
+.adminPillSignOut {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.adminPillSignOut:hover {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+/* ── Main content shift when pill is shown ─────── */
+.adminMainCollapsed {
+  margin-left: 80px;
+}
+
+/* ── No-sidebar layout (sidebar removed, Navbar pill handles nav) ─── */
+.adminShellNoSidebar {
+  display: flex;
+  min-height: 100vh;
+  background: var(--shell-bg);
+  color: var(--content-color);
+}
+
+.adminMainFull {
+  flex: 1;
+  min-height: 100vh;
+  background: var(--main-bg);
+  color: var(--content-color);
+  /* No margin-left — no sidebar */
+  margin-left: 0;
+  padding-bottom: 6rem; /* space for floating pill at bottom */
+}

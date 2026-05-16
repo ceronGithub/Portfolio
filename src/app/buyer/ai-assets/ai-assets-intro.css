@@ -1,0 +1,162 @@
+/* ai-assets-intro.css — Full cinematic effects */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+/* ── Section ── */
+.aiAssetsIntroSection {
+  position:   relative;
+  width:      100%;
+  height:     500vh;
+  background: #000;
+}
+
+/* ── Sticky viewport ── */
+.aiAssetsSticky {
+  position:   sticky;
+  top:        0;
+  height:     100vh;
+  overflow:   hidden;
+  background: #000;
+}
+
+/* LAYER 1 — Images (z: 5) */
+.aiAssetsImageLeft {
+  position:    absolute;
+  left:        0; top: 0;
+  width:       48%; height: 100%;
+  overflow:    hidden;
+  z-index:     5;
+  will-change: transform;
+}
+
+.aiAssetsImageRight {
+  position:    absolute;
+  right:       0; top: 0;
+  width:       48%; height: 100%;
+  overflow:    hidden;
+  z-index:     0;
+  will-change: transform;
+}
+
+.aiAssetsImg {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+}
+
+.aiAssetsImgLeft  { object-position: center top; }
+.aiAssetsImgRight { object-position: center center; }
+
+/* LAYER 2 — Image edge fades (z: 6) */
+.aiAssetsLeftFade {
+  position:   absolute; inset: 0;
+  z-index:    6;
+  background: linear-gradient(to right, transparent 10%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.95) 75%, rgba(0,0,0,0.95) 100%);
+}
+
+.aiAssetsRightFade {
+  position:   absolute; inset: 0;
+  z-index:    6;
+  background: linear-gradient(to left, transparent 10%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.95) 75%, rgba(0,0,0,0.95) 100%);
+}
+
+/* LAYER 3 — Scanlines removed (caused visible horizontal stripe) */
+
+/* LAYER 4 — Dust canvas (z: 10) */
+.aiAssetsDustCanvas {
+  position:       absolute;
+  inset:          0;
+  width:          100%;
+  height:         100%;
+  z-index:        10;
+  pointer-events: none;
+}
+
+/* LAYER 5 — Fog SVG removed (caused visible horizontal line) */
+
+/* LAYER 6 — Color grade (z: 14) */
+.aiAssetsColorGrade {
+  position:       absolute;
+  inset:          0;
+  z-index:        14;
+  pointer-events: none;
+}
+
+/* LAYER 7 — Vignette pulse (z: 16) */
+.aiAssetsVignette {
+  position:       absolute;
+  inset:          0;
+  z-index:        16;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.45) 100%),
+    linear-gradient(to right,  rgba(0,0,0,0.3)  0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3)  100%);
+  transition:     opacity 0.08s linear;
+}
+
+/* LAYER 8 — Center text (z: 20) */
+.aiAssetsCenterText {
+  position:        absolute;
+  inset:           0;
+  z-index:         20;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.75rem;
+  text-align:      center;
+  padding:         0 6%;
+  pointer-events:  none;
+}
+
+.aiAssetsEyebrow {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin-bottom:  0.4rem;
+}
+
+/* ── Tagline lines ── */
+.aiAssetsLines {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.1rem;
+}
+
+.aiAssetsLine {
+  font-family:    'Cormorant Garamond', Georgia, serif;
+  font-size:      clamp(2rem, 4.5vw, 3.8rem);
+  font-weight:    300;
+  font-style:     italic;
+  color:          #fff;
+  line-height:    1.3;
+  will-change:    transform, opacity, filter, letter-spacing;
+  margin:         0;
+  padding:        0;
+}
+
+/* ── CTA ── */
+.aiAssetsCta {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.22);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top:     1rem;
+  will-change:    opacity;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .aiAssetsImageLeft,
+  .aiAssetsImageRight { opacity: 0.28; }
+
+  .aiAssetsLine {
+    font-size: clamp(1.4rem, 5.5vw, 2rem);
+  }
+}

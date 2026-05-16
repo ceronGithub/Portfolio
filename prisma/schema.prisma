@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  BUYER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  role      Role     @default(BUYER)
+  createdAt DateTime @default(now())
+
+  orders    Order[]
+  ownership Ownership[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  fileKey     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  orders    Order[]
+  ownership Ownership[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  productId       String
+  status          OrderStatus @default(PENDING)
+  paymongoOrderId String?
+  amountPaid      Int?
+  createdAt       DateTime    @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Ownership {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  grantedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+// ── System catalog ─────────────────────────────────────────────────
+// Stores all 10 systems with base pricing, features, and metadata.
+
+model System {
+  id           String        @id @default(cuid())
+  tag          String        @unique  // "HR", "Construction", etc.
+  title        String
+  basePrice    Int                    // in PHP (e.g. 33000)
+  accent       String                 // hex color
+  timeline     String
+  deploy       String
+  description  String
+  features     String[]               // base feature list
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+
+  addons       SystemAddon[]
+}
+
+// ── System add-ons ─────────────────────────────────────────────────
+// Each row is one purchasable add-on belonging to a System.
+
+model SystemAddon {
+  id          String   @id @default(cuid())
+  addonKey    String              // original id e.g. "hr1", "co5"
+  label       String
+  price       Int                 // in PHP
+  category    String
+  description String?
+  systemId    String
+  createdAt   DateTime @default(now())
+
+  system      System   @relation(fields: [systemId], references: [id])
+
+  @@unique([systemId, addonKey])
+  @@index([systemId])
+}

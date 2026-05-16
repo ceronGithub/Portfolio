@@ -1,0 +1,255 @@
+/* ================================================
+   products.css — Admin Products & Systems page styles.
+   Product table, system accordion cards, addon grid.
+   ================================================ */
+
+.adminProductsPage {
+  padding: 2.5rem;
+}
+
+.adminProductsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Section ──────────────────────────────────── */
+.adminProductsSection {}
+
+.adminProductsSectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sidebar-text, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Products Table ───────────────────────────── */
+.adminProductsTableWrap {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.adminProductsTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--sidebar-border, #e8e4de);
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.adminProductsTableHeader span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sidebar-text, #aaa);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.adminProductsTableRow {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.adminProductsTableRow:last-child { border-bottom: none; }
+.adminProductsTableRow:hover { background: var(--nav-active-bg, #f5f4f1); }
+
+.adminProductsCell {
+  font-size: 0.85rem;
+  color: var(--content-color, #1a1a1a);
+  font-weight: 500;
+  padding-right: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminProductsCellName  { font-weight: 600; }
+.adminProductsCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
+.adminProductsCellMono  { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ── Active badge ─────────────────────────────── */
+.adminActiveBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.adminActiveBadgeOn  { background: rgba(56, 161, 105, 0.12); color: #2f855a; }
+.adminActiveBadgeOff { background: rgba(229, 62, 62, 0.1);   color: #c53030; }
+
+/* ── Toggle button ────────────────────────────── */
+.adminToggleBtn {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.adminToggleBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.adminToggleBtnDeactivate {
+  background: rgba(229, 62, 62, 0.08);
+  color: #c53030;
+  border-color: rgba(229, 62, 62, 0.2);
+}
+.adminToggleBtnDeactivate:hover:not(:disabled) {
+  background: rgba(229, 62, 62, 0.15);
+}
+
+.adminToggleBtnActivate {
+  background: rgba(56, 161, 105, 0.1);
+  color: #2f855a;
+  border-color: rgba(56, 161, 105, 0.25);
+}
+.adminToggleBtnActivate:hover:not(:disabled) {
+  background: rgba(56, 161, 105, 0.18);
+}
+
+/* ── Systems list ─────────────────────────────── */
+.adminSystemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── System accordion card ────────────────────── */
+.adminSystemCard {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.adminSystemCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.adminSystemCardHeader:hover {
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.adminSystemCardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.adminSystemTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adminSystemTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--content-color, #1a1a1a);
+}
+
+.adminSystemCardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.adminSystemBasePrice {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  font-variant-numeric: tabular-nums;
+}
+
+.adminSystemAddonCount {
+  font-size: 0.78rem;
+  color: var(--sidebar-text, #888);
+}
+
+.adminSystemExpandIcon {
+  font-size: 0.65rem;
+  color: var(--sidebar-text, #aaa);
+}
+
+/* ── Expanded add-ons area ────────────────────── */
+.adminSystemAddons {
+  border-top: 1px solid var(--sidebar-border, #f0ede8);
+  padding: 1.25rem;
+}
+
+.adminSystemDesc {
+  font-size: 0.83rem;
+  color: var(--sidebar-text, #888);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.adminAddonsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.adminAddonRow {
+  display: grid;
+  grid-template-columns: 1.2fr 3fr 1fr;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.adminAddonCategory {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sidebar-text, #888);
+}
+
+.adminAddonLabel {
+  font-size: 0.83rem;
+  color: var(--content-color, #1a1a1a);
+  font-weight: 500;
+}
+
+.adminAddonPrice {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #c9a96e;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.adminEmptyNote {
+  font-size: 0.83rem;
+  color: var(--sidebar-text, #aaa);
+  padding: 1rem;
+  text-align: center;
+}

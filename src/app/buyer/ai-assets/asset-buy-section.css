@@ -1,0 +1,393 @@
+/* asset-buy-section.css */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
+
+/* ════════════════════════════════
+   SECTION
+   ════════════════════════════════ */
+.assetBuySection {
+  position:    relative;
+  width:       100%;
+  min-height:  100vh;
+  background:  #000;
+  overflow:    hidden;
+  display:     flex;
+  align-items: center;
+  font-family: 'Syne', sans-serif;
+  border-top:  1px solid #111;
+}
+
+/* BG orc */
+.assetBuyBgOrc {
+  position: absolute;
+  left: 0; top: 0;
+  width: 45%; height: 100%;
+  pointer-events: none;
+}
+
+.assetBuyBgOrcImg {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  opacity: 0.8;
+}
+
+.assetBuyBgOrcFade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, transparent 20%, rgba(0,0,0,0.75) 60%, #000 100%);
+}
+
+/* ── Fog canvas — cinematic ground fog rising from the bottom ── */
+/* Full width, pinned to bottom 55% of the section, sits above the orc bg */
+.assetBuyFogCanvas {
+  position:       absolute;
+  left:           0;
+  bottom:         0;
+  width:          100%;
+  height:         55%;
+  z-index:        4;
+  pointer-events: none;
+  will-change:    transform;
+}
+
+/* Content */
+.assetBuyContent {
+  position:        relative;
+  z-index:         10;
+  margin-left:     42%;
+  width:           54%;
+  padding:         5rem 3rem 5rem 2rem;
+  display:         flex;
+  flex-direction:  column;
+  gap:             2.5rem;
+}
+
+/* Header row */
+.assetBuyHeaderRow {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1.5rem;
+  flex-wrap:       wrap;
+}
+
+.assetBuyLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  margin-bottom:  0.6rem;
+}
+
+.assetBuyTitle {
+  font-size:      clamp(1.4rem, 2.8vw, 2.4rem);
+  font-weight:    700;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  line-height:    1.2;
+}
+
+/* Action buttons */
+.assetBuyActions {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  flex-shrink: 0;
+  margin-top:  0.5rem;
+}
+
+.assetBuyBtn {
+  padding:       0.65rem 2rem;
+  border-radius: 999px;
+  background:    #22c55e;
+  color:         #000;
+  font-family:   'Syne', sans-serif;
+  font-size:     0.78rem;
+  font-weight:   800;
+  letter-spacing: 0.06em;
+  border:        none;
+  cursor:        pointer;
+  transition:    opacity 0.2s, transform 0.15s;
+}
+
+.assetBuyBtn:hover {
+  opacity:   0.85;
+  transform: translateY(-1px);
+}
+
+.assetBrowseBtn {
+  padding:       0.65rem 1.75rem;
+  border-radius: 999px;
+  background:    #4a2e18;
+  color:         #c9935e;
+  font-family:   'Syne', sans-serif;
+  font-size:     0.78rem;
+  font-weight:   700;
+  letter-spacing: 0.06em;
+  border:        1px solid rgba(201,147,94,0.25);
+  cursor:        pointer;
+  transition:    opacity 0.2s, background 0.2s;
+}
+
+.assetBrowseBtn:hover {
+  background: #5a3a20;
+  opacity:    0.9;
+}
+
+/* Placeholder cards */
+.assetBuyCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap:     1.25rem;
+}
+
+.assetBuyCard {
+  background:    #080808;
+  border:        1px solid #141414;
+  border-radius: 20px;
+  aspect-ratio:  4/3;
+  position:      relative;
+  overflow:      hidden;
+  transition:    border-color 0.25s;
+}
+
+.assetBuyCard:hover { border-color: #252525; }
+
+.assetBuyCardInner {
+  position:        absolute; inset: 0;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.75rem;
+}
+
+.assetBuyCardIcon  { font-size: 2rem; opacity: 0.25; }
+.assetBuyCardLabel {
+  font-size:      0.75rem;
+  color:          rgba(255,255,255,0.18);
+  font-family:    'DM Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+/* ════════════════════════════════
+   BROWSE MODAL
+   ════════════════════════════════ */
+.assetModalOverlay {
+  position:        fixed; inset: 0;
+  background:      rgba(0,0,0,0.88);
+  backdrop-filter: blur(10px);
+  z-index:         1000;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1rem;
+}
+
+.assetModal {
+  background:    #0d0d0d;
+  border:        1px solid #1e1e1e;
+  border-radius: 20px;
+  width:         100%;
+  max-width:     640px;
+  max-height:    88vh;
+  display:       flex;
+  flex-direction: column;
+  overflow:      hidden;
+}
+
+/* Modal header */
+.assetModalHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         1.25rem 1.5rem;
+  border-bottom:   1px solid #1a1a1a;
+  flex-shrink:     0;
+}
+
+.assetModalTabs {
+  display: flex;
+  gap:     0.5rem;
+}
+
+.assetModalTab {
+  font-family:    'Syne', sans-serif;
+  font-size:      0.78rem;
+  font-weight:    700;
+  padding:        0.4rem 1.1rem;
+  border-radius:  999px;
+  border:         1px solid #2a2a2a;
+  background:     transparent;
+  color:          #555;
+  cursor:         pointer;
+  transition:     all 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.assetModalTab:hover      { color: #888; border-color: #333; }
+.assetModalTabActive      { background: #fff; color: #000; border-color: #fff; }
+
+.assetModalClose {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.78rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.assetModalClose:hover { background: #222; color: #fff; }
+
+/* Scrollable list */
+.assetModalList {
+  overflow-y:  auto;
+  flex:        1;
+  padding:     0.75rem;
+  display:     flex;
+  flex-direction: column;
+  gap:         0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.assetModalList::-webkit-scrollbar       { width: 4px; }
+.assetModalList::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+/* Asset row */
+.assetModalRow {
+  display:       flex;
+  align-items:   center;
+  gap:           1rem;
+  padding:       0.75rem;
+  border-radius: 12px;
+  border:        1px solid #1a1a1a;
+  background:    #111;
+  cursor:        pointer;
+  transition:    border-color 0.2s, background 0.2s;
+}
+
+.assetModalRow:hover     { border-color: #2a2a2a; background: #141414; }
+.assetModalRowActive     { border-color: #22c55e44; background: rgba(34,197,94,0.05); }
+
+/* Thumbnail */
+.assetModalThumb {
+  width:         72px;
+  height:        72px;
+  border-radius: 10px;
+  overflow:      hidden;
+  flex-shrink:   0;
+  background:    #0a0a0a;
+}
+
+.assetModalThumbVideo {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Row info */
+.assetModalRowInfo { flex: 1; min-width: 0; }
+
+.assetModalRowLabel {
+  font-size:   0.88rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.assetModalRowCategory {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  color:          #444;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top:     0.2rem;
+}
+
+/* Row right */
+.assetModalRowRight {
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-end;
+  gap:            0.4rem;
+  flex-shrink:    0;
+}
+
+.assetModalRowPrice {
+  font-size:   0.9rem;
+  font-weight: 800;
+  color:       #fff;
+  letter-spacing: -0.02em;
+}
+
+.assetModalSelectBtn {
+  font-size:     0.68rem;
+  font-weight:   700;
+  padding:       0.25rem 0.75rem;
+  border-radius: 999px;
+  background:    transparent;
+  border:        1px solid #2a2a2a;
+  color:         #555;
+  cursor:        pointer;
+  transition:    all 0.2s;
+  font-family:   'Syne', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.assetModalSelectBtn:hover { border-color: #22c55e; color: #22c55e; }
+
+/* Modal footer */
+.assetModalFooter {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         1rem 1.5rem;
+  border-top:      1px solid #1a1a1a;
+  flex-shrink:     0;
+  gap:             1rem;
+}
+
+.assetModalFooterNote {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.7rem;
+  color:        #444;
+  flex:         1;
+}
+
+.assetModalBuyBtn {
+  padding:       0.6rem 1.5rem;
+  border-radius: 999px;
+  background:    #22c55e;
+  color:         #000;
+  font-family:   'Syne', sans-serif;
+  font-size:     0.82rem;
+  font-weight:   800;
+  border:        none;
+  cursor:        pointer;
+  transition:    opacity 0.2s;
+  white-space:   nowrap;
+}
+.assetModalBuyBtn:hover { opacity: 0.85; }
+
+@media (max-width: 768px) {
+  .assetBuyContent  { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
+  .assetBuyBgOrc    { width: 100%; opacity: 0.12; }
+  .assetBuyCards    { grid-template-columns: 1fr; }
+  .assetBuyHeaderRow { flex-direction: column; }
+}
+/* ── MP4 video playing inside card 2 after asset selection ── */
+.assetBuyCardVideo {
+  position:   absolute; inset: 0;
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+  border-radius: 20px;
+}

@@ -1,0 +1,57 @@
+/* ================================================
+   dashboard.css — Light premium theme overrides
+   for Admin and Buyer dashboard pages.
+   ================================================ */
+
+/* — Navbar (dashboard context) — */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  background: rgba(250, 249, 247, 0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #e8e4de;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  z-index: 100;
+}
+
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.navLogoImg {
+  height: 28px;
+  width: 28px;
+  object-fit: cover;
+  object-position: left center;
+  border-radius: 4px;
+}
+
+.navLogoText {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -0.01em;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.navLink {
+  color: #888;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navLink:hover { color: #1a1a1a; }

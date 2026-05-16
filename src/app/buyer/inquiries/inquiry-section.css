@@ -1,0 +1,222 @@
+/* ================================================
+   inquiry-section.css — Inquiry / Contact section
+   ================================================ */
+
+.inquirySection {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 7rem;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .inquirySection { grid-template-columns: 1fr; gap: 2.5rem; }
+}
+
+/* ── Left copy ── */
+.inquiryLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.inquiryTitle {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  font-style: italic;
+  color: #fff;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+}
+
+.inquiryDesc {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+
+.inquiryContacts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.inquiryContactItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.inquiryContactIcon {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.inquiryContactText {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ── Right form ── */
+.inquiryRight {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 20px;
+  padding: 2rem;
+}
+
+.inquiryForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inquiryRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 500px) {
+  .inquiryRow { grid-template-columns: 1fr; }
+}
+
+.inquiryField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inquiryFieldLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.inquiryInput {
+  background: #0d0d0d;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: #fff;
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.inquiryInput:focus {
+  border-color: #22c55e;
+}
+
+.inquiryInput::placeholder {
+  color: #333;
+}
+
+.inquirySelect {
+  appearance: none;
+  cursor: pointer;
+}
+
+.inquiryTextarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.inquiryError {
+  font-size: 0.82rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Submit — green CTA */
+.inquirySubmitBtn {
+  background: #22c55e;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.2s, transform 0.15s;
+  align-self: flex-start;
+}
+
+.inquirySubmitBtn:hover:not(:disabled) {
+  background: #16a34a;
+  transform: translate3d(0, -2px, 0);
+}
+
+.inquirySubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Success state ── */
+.inquirySent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.inquirySentIcon {
+  font-size: 2.5rem;
+  color: #22c55e;
+  background: #22c55e18;
+  border: 1px solid #22c55e44;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inquirySentTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.inquirySentSub {
+  font-size: 0.88rem;
+  color: #555;
+}
+
+.inquiryResetBtn {
+  margin-top: 0.5rem;
+  background: none;
+  border: 1px solid #2a2a2a;
+  color: #666;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.inquiryResetBtn:hover {
+  border-color: #444;
+  color: #aaa;
+}
