@@ -1,289 +1,247 @@
-// OverviewClient.tsx — Client component for Admin Overview.
-// Two full-viewport scroll-snap panels.
-// Panel 1: Donut + Bar chart + STICKY stat cards (right column).
-// Panel 2: Two stacked bar charts + STICKY stat cards.
-// Parallax: panel 2 content drifts on Y as user scrolls.
+// OverviewClient.tsx — Admin Overview. Single page layout (no duplicate panels).
+// Left: Donut + Bar chart. Right: single stat card column.
+// Below: two stacked bar charts side by side.
+// Parallax on scroll. Inter font.
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import "./dashboard.css";
 
-interface RevenueBySystem { name: string; value: number; }
+const COLORS = ["#6c8af5", "#b57bee", "#f5b86c", "#f5d46c"];
 
 interface Stats {
   visitorsRegistered: number;
-  visitors: number;
-  notActive: number;
-  activeUsers: number;
-  totalUsers: number;
-  totalRevenue: number;
-  productCount: number;
-  orderCount: number;
-  systemCount: number;
+  visitors:           number;
+  notActive:          number;
+  activeUsers:        number;
+  totalUsers:         number;
+  productCount:       number;
+  systemCount:        number;
+  totalRevenue:       number;
+  orderCount:         number;
 }
 
 interface Props {
-  stats: Stats;
-  revenueBySystem: RevenueBySystem[];
+  stats:           Stats;
+  revenueBySystem: { name: string; value: number }[];
 }
 
-const CHART_COLORS = ["#6c8af5", "#b57bee", "#f5b86c", "#f5d46c"];
-
-// ── Donut Chart ───────────────────────────────────────────────────────
+// ── Donut ─────────────────────────────────────────────────────────────
 function DonutChart({ data }: { data: { name: string; value: number; color: string }[] }) {
   const total = data.reduce((s, d) => s + d.value, 0) || 1;
-  const cx = 110; const cy = 110; const r = 80; const innerR = 52;
-  const circumference = 2 * Math.PI * r;
-  let cumulative = 0;
+  const cx = 90; const cy = 90; const r = 68; const stroke = 22;
+  const circ = 2 * Math.PI * r;
+  let cum = 0;
   const arcs = data.map(d => {
-    const pct    = d.value / total;
-    const dash   = pct * circumference;
-    const gap    = circumference - dash;
-    const offset = -cumulative * circumference;
-    cumulative += pct;
-    return { ...d, dash, gap, offset };
+    const pct = d.value / total;
+    const dash = pct * circ;
+    const offset = -cum * circ;
+    cum += pct;
+    return { ...d, dash, gap: circ - dash, offset };
   });
   return (
-    <div className="overviewDonutWrap">
-      <svg viewBox="0 0 220 220" className="overviewDonutSvg">
-        {arcs.map((arc, i) => (
+    <div className="ovDonutWrap">
+      <svg viewBox="0 0 180 180" className="ovDonutSvg">
+        {arcs.map((a, i) => (
           <circle key={i} cx={cx} cy={cy} r={r} fill="none"
-            stroke={arc.color} strokeWidth="28"
-            strokeDasharray={`${arc.dash} ${arc.gap}`}
-            strokeDashoffset={arc.offset}
-            transform={`rotate(-90 ${cx} ${cy})`} />
+            stroke={a.color} strokeWidth={stroke}
+            strokeDasharray={`${a.dash} ${a.gap}`}
+            strokeDashoffset={a.offset}
+            transform={`rotate(-90 ${cx} ${cy})`}
+            strokeLinecap="butt" />
         ))}
-        <circle cx={cx} cy={cy} r={innerR} fill="#12121f" />
+        <circle cx={cx} cy={cy} r={r - stroke / 2 - 2} fill="var(--shell-bg,#0d0d0d)" />
       </svg>
-      <div className="overviewDonutLabels">
+      <ul className="ovDonutLegend">
         {data.map((d, i) => (
-          <div key={i} className="overviewDonutLabel">
-            <span className="overviewDonutDot" style={{ background: d.color }} />
-            <span className="overviewDonutName">{d.name}</span>
-            <span className="overviewDonutPct">
-              {Math.round((d.value / total) * 100)}%
-            </span>
-          </div>
+          <li key={i} className="ovDonutLegendItem">
+            <span className="ovDonutDot" style={{ background: d.color }} />
+            <span className="ovDonutName">{d.name}</span>
+            <span className="ovDonutPct">{Math.round((d.value / total) * 100)}%</span>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
 
 // ── Bar Chart ─────────────────────────────────────────────────────────
 function BarChart({ bars }: { bars: { label: string; value: number; color: string }[] }) {
-  const maxVal = Math.max(...bars.map(b => b.value), 1);
-  const chartH = 160; const barW = 44; const gap = 24;
-  const totalW = bars.length * (barW + gap) - gap + 30;
+  const max = Math.max(...bars.map(b => b.value), 1);
   return (
-    <div className="overviewBarWrap">
-      <svg viewBox={`0 0 ${totalW} ${chartH + 40}`} className="overviewBarSvg">
-        {[0, 20, 40, 60, 80].map(v => (
-          <g key={v}>
-            <line x1="18" y1={chartH - (v / 80) * chartH}
-              x2={totalW} y2={chartH - (v / 80) * chartH}
-              stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-            <text x="0" y={chartH - (v / 80) * chartH + 3}
-              fill="rgba(255,255,255,0.3)" fontSize="9">{v}</text>
-          </g>
+    <div className="ovBarWrap">
+      <div className="ovBarYAxis">
+        {[80, 60, 40, 20, 0].map(v => <span key={v}>{v}</span>)}
+      </div>
+      <div className="ovBarBars">
+        {bars.map((b, i) => (
+          <div key={i} className="ovBarGroup">
+            <div className="ovBar" style={{ height: `${(b.value / 80) * 100}%`, background: b.color }} />
+            <span className="ovBarLabel">{b.label}</span>
+          </div>
         ))}
-        {bars.map((bar, i) => {
-          const barH = (bar.value / maxVal) * chartH;
-          const x    = i * (barW + gap) + 18;
-          const y    = chartH - barH;
-          return (
-            <g key={i}>
-              <rect x={x} y={y} width={barW} height={barH} rx="6" fill={bar.color} />
-              <text x={x + barW / 2} y={chartH + 18} textAnchor="middle"
-                fill="rgba(255,255,255,0.5)" fontSize="11">{bar.label}</text>
-            </g>
-          );
-        })}
-      </svg>
+      </div>
     </div>
   );
 }
 
 // ── Stacked Bar Chart ─────────────────────────────────────────────────
-interface StackedBar { label: string; segments: { value: number; color: string }[]; }
-
-function StackedBarChart({ bars, title, legend }: {
-  bars: StackedBar[];
-  title: string;
+function StackedBarChart({
+  bars, title, legend,
+}: {
+  bars:   { label: string; segments: { value: number; color: string }[] }[];
+  title:  string;
   legend: { label: string; color: string }[];
 }) {
-  const maxVal = Math.max(...bars.map(b => b.segments.reduce((s, seg) => s + seg.value, 0)), 1);
-  const chartH = 180; const barW = 44; const gap = 30;
-  const totalW = bars.length * (barW + gap) - gap + 30;
+  const max = Math.max(...bars.map(b => b.segments.reduce((s, sg) => s + sg.value, 0)), 1);
   return (
-    <div className="overviewStackedWrap">
-      <div className="overviewStackedLegend">
+    <div className="ovStackedWrap">
+      <div className="ovStackedLegend">
         {legend.map((l, i) => (
-          <div key={i} className="overviewStackedLegendItem">
-            <span className="overviewStackedLegendDot" style={{ background: l.color }} />
-            <span>{l.label}</span>
-          </div>
+          <span key={i} className="ovStackedLegendItem">
+            <span className="ovStackedDot" style={{ background: l.color }} />{l.label}
+          </span>
         ))}
       </div>
-      <svg viewBox={`0 0 ${totalW} ${chartH + 40}`} className="overviewStackedSvg">
-        {[0, 10, 20, 30, 40, 50].map(v => (
-          <g key={v}>
-            <line x1="18" y1={chartH - (v / 50) * chartH}
-              x2={totalW} y2={chartH - (v / 50) * chartH}
-              stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-            <text x="0" y={chartH - (v / 50) * chartH + 3}
-              fill="rgba(255,255,255,0.3)" fontSize="9">{v}</text>
-          </g>
-        ))}
-        {bars.map((bar, i) => {
-          const x = i * (barW + gap) + 18;
-          let yOffset = chartH;
-          const totalH = bar.segments.reduce((s, seg) => s + (seg.value / maxVal) * chartH, 0);
-          return (
-            <g key={i}>
-              {bar.segments.map((seg, j) => {
-                const segH = (seg.value / maxVal) * chartH;
-                yOffset -= segH;
-                return (
-                  <rect key={j} x={x} y={yOffset} width={barW} height={segH} fill={seg.color} />
-                );
-              })}
-              <rect x={x} y={chartH - totalH} width={barW} height={7} rx="4"
-                fill={bar.segments[bar.segments.length - 1]?.color} />
-              <text x={x + barW / 2} y={chartH + 18} textAnchor="middle"
-                fill="rgba(255,255,255,0.5)" fontSize="11">{bar.label}</text>
-            </g>
-          );
-        })}
-      </svg>
-      <p className="overviewStackedTitle">{title}</p>
+      <div className="ovStackedBars">
+        <div className="ovStackedYAxis">
+          {[50, 40, 30, 20, 10, 0].map(v => <span key={v}>{v}</span>)}
+        </div>
+        <div className="ovStackedBarArea">
+          {bars.map((b, i) => {
+            const total = b.segments.reduce((s, sg) => s + sg.value, 0);
+            return (
+              <div key={i} className="ovStackedBarGroup">
+                <div className="ovStackedBar" style={{ height: `${(total / max) * 100}%` }}>
+                  {[...b.segments].reverse().map((sg, j) => (
+                    <div key={j} className="ovStackedSeg"
+                      style={{ flex: sg.value, background: sg.color }} />
+                  ))}
+                </div>
+                <span className="ovStackedLabel">{b.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <p className="ovStackedTitle">{title}</p>
     </div>
   );
 }
 
 // ── Stat Card ─────────────────────────────────────────────────────────
-function StatCard({ value, label }: { value: string | number; label: string }) {
+function StatCard({ value, label, color = "#e8e4de" }: {
+  value: string | number; label: string; color?: string;
+}) {
   return (
-    <div className="overviewStatCard">
-      <span className="overviewStatValue">{value}</span>
-      <span className="overviewStatLabel">{label}</span>
+    <div className="ovStatCard">
+      <span className="ovStatValue" style={{ color }}>{value}</span>
+      <span className="ovStatLabel">{label}</span>
     </div>
   );
 }
 
+// ── Parallax ──────────────────────────────────────────────────────────
+function useParallax() {
+  useEffect(() => {
+    const sections = document.querySelectorAll<HTMLElement>("[data-parallax]");
+    function onScroll() {
+      const y = window.scrollY;
+      sections.forEach((el, i) => {
+        const depth = parseFloat(el.dataset.parallax ?? "0.06");
+        el.style.transform = `translateY(${y * depth * (i % 2 === 0 ? 1 : -1)}px)`;
+      });
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+}
+
 // ── Main ──────────────────────────────────────────────────────────────
 export default function OverviewClient({ stats, revenueBySystem }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [panel2Y, setPanel2Y] = useState(50);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    function handleScroll() {
-      const scrollTop = container!.scrollTop;
-      const scrollH   = container!.scrollHeight - container!.clientHeight;
-      const progress  = scrollH > 0 ? scrollTop / scrollH : 0;
-      setPanel2Y(50 - progress * 90);
-    }
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+  useParallax();
 
   const donutData = revenueBySystem.length > 0
-    ? revenueBySystem.map((d, i) => ({ name: d.name, value: d.value, color: CHART_COLORS[i % CHART_COLORS.length] }))
+    ? revenueBySystem.map((d, i) => ({ ...d, color: COLORS[i % COLORS.length] }))
     : [
-        { name: "Sales",     value: 55, color: CHART_COLORS[0] },
-        { name: "Finance",   value: 25, color: CHART_COLORS[1] },
-        { name: "Marketing", value: 15, color: CHART_COLORS[2] },
-        { name: "HR",        value:  5, color: CHART_COLORS[3] },
+        { name: "Sales",     value: 55, color: COLORS[0] },
+        { name: "Finance",   value: 25, color: COLORS[1] },
+        { name: "Marketing", value: 15, color: COLORS[2] },
+        { name: "HR",        value:  5, color: COLORS[3] },
       ];
 
   const seasonalBars = [
-    { label: "Winter", value: 60, color: CHART_COLORS[0] },
-    { label: "Spring", value: 45, color: CHART_COLORS[1] },
-    { label: "Summer", value: 78, color: CHART_COLORS[2] },
-    { label: "Fall",   value: 30, color: CHART_COLORS[3] },
+    { label: "Winter", value: 60, color: COLORS[0] },
+    { label: "Spring", value: 45, color: COLORS[1] },
+    { label: "Summer", value: 78, color: COLORS[2] },
+    { label: "Fall",   value: 30, color: COLORS[3] },
   ];
 
-  const stackedLegend = [
-    { label: "Heating",     color: CHART_COLORS[0] },
-    { label: "Water",       color: CHART_COLORS[1] },
-    { label: "Electricity", color: CHART_COLORS[2] },
+  const legend = [
+    { label: "Heating",     color: COLORS[0] },
+    { label: "Water",       color: COLORS[1] },
+    { label: "Electricity", color: COLORS[2] },
   ];
 
-  const productReviewBars: StackedBar[] = [
-    { label: "Jan", segments: [{ value: 24, color: CHART_COLORS[0] }, { value: 15, color: CHART_COLORS[1] }, { value: 8,  color: CHART_COLORS[2] }] },
-    { label: "Feb", segments: [{ value: 16, color: CHART_COLORS[0] }, { value: 14, color: CHART_COLORS[1] }, { value: 10, color: CHART_COLORS[2] }] },
-    { label: "Mar", segments: [{ value: 12, color: CHART_COLORS[0] }, { value: 10, color: CHART_COLORS[1] }, { value: 8,  color: CHART_COLORS[2] }] },
-    { label: "Apr", segments: [{ value: 8,  color: CHART_COLORS[0] }, { value: 7,  color: CHART_COLORS[1] }, { value: 5,  color: CHART_COLORS[2] }] },
+  const productBars = [
+    { label: "Jan", segments: [{ value: 24, color: COLORS[0] }, { value: 15, color: COLORS[1] }, { value: 8,  color: COLORS[2] }] },
+    { label: "Feb", segments: [{ value: 16, color: COLORS[0] }, { value: 14, color: COLORS[1] }, { value: 10, color: COLORS[2] }] },
+    { label: "Mar", segments: [{ value: 12, color: COLORS[0] }, { value: 10, color: COLORS[1] }, { value: 8,  color: COLORS[2] }] },
+    { label: "Apr", segments: [{ value: 8,  color: COLORS[0] }, { value: 7,  color: COLORS[1] }, { value: 5,  color: COLORS[2] }] },
   ];
 
-  const systemReviewBars: StackedBar[] = [
-    { label: "Jan", segments: [{ value: 24, color: CHART_COLORS[0] }, { value: 16, color: CHART_COLORS[1] }, { value: 7,  color: CHART_COLORS[2] }] },
-    { label: "Feb", segments: [{ value: 16, color: CHART_COLORS[0] }, { value: 14, color: CHART_COLORS[1] }, { value: 10, color: CHART_COLORS[2] }] },
-    { label: "Mar", segments: [{ value: 11, color: CHART_COLORS[0] }, { value: 11, color: CHART_COLORS[1] }, { value: 8,  color: CHART_COLORS[2] }] },
-    { label: "Apr", segments: [{ value: 8,  color: CHART_COLORS[0] }, { value: 7,  color: CHART_COLORS[1] }, { value: 5,  color: CHART_COLORS[2] }] },
+  const systemBars = [
+    { label: "Jan", segments: [{ value: 24, color: COLORS[0] }, { value: 16, color: COLORS[1] }, { value: 7,  color: COLORS[2] }] },
+    { label: "Feb", segments: [{ value: 16, color: COLORS[0] }, { value: 14, color: COLORS[1] }, { value: 10, color: COLORS[2] }] },
+    { label: "Mar", segments: [{ value: 11, color: COLORS[0] }, { value: 11, color: COLORS[1] }, { value: 8,  color: COLORS[2] }] },
+    { label: "Apr", segments: [{ value: 8,  color: COLORS[0] }, { value: 7,  color: COLORS[1] }, { value: 5,  color: COLORS[2] }] },
   ];
-
-  // Shared stat cards — same on both panels
-  const statCards = (
-    <div className="overviewStatsColumn">
-      <StatCard value={stats.visitorsRegistered} label="visitors who registered" />
-      <StatCard value={stats.visitors}           label="visitors" />
-      <StatCard value={stats.notActive}          label="Not-active users" />
-      <StatCard value={stats.activeUsers}        label="Active Users" />
-      <StatCard value={stats.totalUsers}         label="total users" />
-      <StatCard value={stats.productCount}       label="Products" />
-      <StatCard value={stats.systemCount}        label="Systems" />
-    </div>
-  );
 
   return (
-    <div className="overviewContainer" ref={containerRef}>
+    <div className="ovPage">
 
-      {/* ── PANEL 1 ──────────────────────────────────────────── */}
-      <section className="overviewPanel overviewPanel1">
-        <div className="overviewPanelInner">
-          <div className="overviewChartsArea">
-            <div className="overviewChartsRow">
-              <div className="overviewChartCard">
-                <DonutChart data={donutData} />
-                <p className="overviewChartTitle">Monthly Revenue from systems and products</p>
-              </div>
-              <div className="overviewChartCard">
-                <BarChart bars={seasonalBars} />
-                <p className="overviewChartTitle">Weekly revenue from systems and products</p>
-              </div>
-            </div>
-          </div>
-          {statCards}
-        </div>
-        <div className="overviewScrollHint">
-          <span>scroll</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </div>
-      </section>
+      {/* Header */}
+      <div className="ovHeader">
+        <h1 className="ovTitle">Overview</h1>
+        <p className="ovSubtitle">Your shop at a glance</p>
+      </div>
 
-      {/* ── PANEL 2 ──────────────────────────────────────────── */}
-      <section className="overviewPanel overviewPanel2">
-        <div className="overviewPanelInner">
-          <div
-            className="overviewChartsArea"
-            style={{ transform: `translateY(${panel2Y}px)`, transition: "transform 0.12s linear" }}
-          >
-            <div className="overviewChartsRow">
-              <div className="overviewChartCard">
-                <StackedBarChart bars={productReviewBars} title="Products review" legend={stackedLegend} />
-              </div>
-              <div className="overviewChartCard">
-                <StackedBarChart bars={systemReviewBars} title="Systems review" legend={stackedLegend} />
-              </div>
-            </div>
+      {/* Main row: charts + stat column */}
+      <div className="ovMainRow" data-parallax="0.04">
+
+        {/* Charts side */}
+        <div className="ovChartsCol">
+          <div className="ovChartCard">
+            <DonutChart data={donutData} />
+            <p className="ovChartTitle">Monthly Revenue from systems and products</p>
           </div>
-          {statCards}
+          <div className="ovChartCard">
+            <BarChart bars={seasonalBars} />
+            <p className="ovChartTitle">Weekly revenue from systems and products</p>
+          </div>
         </div>
-      </section>
+
+        {/* Single stat column */}
+        <div className="ovStatCol">
+          <StatCard value={stats.visitorsRegistered} label="visitors who registered" color="#63b3ed" />
+          <StatCard value={stats.visitors}           label="visitors"                color="#e8e4de" />
+          <StatCard value={stats.notActive}          label="Not-active users"        color="#fc8181" />
+          <StatCard value={stats.activeUsers}        label="Active Users"            color="#68d391" />
+          <StatCard value={stats.totalUsers}         label="total users"             color="#e8e4de" />
+          <StatCard value={stats.productCount}       label="Products"                color="#f6ad55" />
+          <StatCard value={stats.systemCount}        label="Systems"                 color="#c9a96e" />
+        </div>
+      </div>
+
+      {/* Stacked bar row */}
+      <div className="ovStackedRow" data-parallax="0.07">
+        <div className="ovChartCard">
+          <StackedBarChart bars={productBars} title="Products review" legend={legend} />
+        </div>
+        <div className="ovChartCard">
+          <StackedBarChart bars={systemBars} title="Systems review" legend={legend} />
+        </div>
+      </div>
 
     </div>
   );

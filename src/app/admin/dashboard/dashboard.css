@@ -1,276 +1,334 @@
-/* ================================================
-   dashboard.css — Admin Overview. Dark theme.
-   Two scroll-snap panels. Sticky stat cards.
-   Parallax on charts area only (not cards).
-   ================================================ */
+/* dashboard.css — Admin Overview page. Inter font, dark theme. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ── Scroll container ─────────────────────────── */
-.overviewContainer {
-  height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  background: #12121f;
+/* ── Page ─────────────────────────────────────── */
+.ovPage {
+  padding: 2.5rem 2rem 7rem;
+  max-width: 1300px;
+  font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* ── Panel base ───────────────────────────────── */
-.overviewPanel {
-  height: 100vh;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+.ovHeader { margin-bottom: 2rem; }
+
+.ovTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--content-color, #e8e4de);
+  letter-spacing: -0.03em;
+  margin: 0 0 0.2rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.ovSubtitle {
+  font-size: 0.875rem;
+  color: var(--sidebar-text, #888);
+  margin: 0;
+}
+
+/* ── Main row ─────────────────────────────────── */
+.ovMainRow {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  align-items: start;
+  will-change: transform;
+}
+
+/* ── Charts column ────────────────────────────── */
+.ovChartsCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+/* ── Generic chart card ───────────────────────── */
+.ovChartCard {
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 16px;
+  padding: 1.4rem 1.4rem 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  padding: 0 2.5rem;
+  gap: 0.75rem;
 }
 
-.overviewPanel1 {
-  background: radial-gradient(ellipse at 20% 50%, rgba(108,138,245,0.07) 0%, transparent 60%), #12121f;
-}
-
-.overviewPanel2 {
-  background: radial-gradient(ellipse at 80% 50%, rgba(181,123,238,0.07) 0%, transparent 60%), #12121f;
-}
-
-/* ── Panel inner — flex row: charts | cards ───── */
-.overviewPanelInner {
-  display: flex;
-  align-items: flex-start;       /* key: allow sticky to work */
-  gap: 2rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  /* full height so sticky has room */
-  height: 100vh;
-  padding: 2.5rem 0;
-  box-sizing: border-box;
-}
-
-/* ── Charts area (left — takes remaining width) ── */
-.overviewChartsArea {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-/* ── Charts row ───────────────────────────────── */
-.overviewChartsRow {
-  display: flex;
-  gap: 2.5rem;
-  align-items: flex-end;
-  width: 100%;
-}
-
-/* ── Chart card ───────────────────────────────── */
-.overviewChartCard {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.overviewChartTitle {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.45);
+.ovChartTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sidebar-text, #666);
   text-align: center;
-  font-weight: 500;
-  line-height: 1.5;
-  max-width: 200px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  font-family: 'Inter', sans-serif;
 }
 
 /* ── Donut ────────────────────────────────────── */
-.overviewDonutWrap {
+.ovDonutWrap {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  justify-content: center;
+  gap: 0.85rem;
+}
+
+.ovDonutSvg { width: 160px; height: 160px; display: block; }
+
+.ovDonutLegend {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
   width: 100%;
 }
 
-.overviewDonutSvg {
-  width: 180px;
-  height: 180px;
-  flex-shrink: 0;
-}
-
-.overviewDonutLabels {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.overviewDonutLabel {
+.ovDonutLegendItem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.65);
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
 }
 
-.overviewDonutDot {
+.ovDonutDot {
   width: 9px; height: 9px;
-  border-radius: 50%;
+  border-radius: 3px;
   flex-shrink: 0;
 }
 
-.overviewDonutName { flex: 1; color: rgba(255,255,255,0.55); min-width: 60px; }
-.overviewDonutPct  { font-weight: 700; color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
+.ovDonutName { flex: 1; color: var(--sidebar-text, #888); }
+.ovDonutPct  { font-weight: 700; color: var(--content-color, #e8e4de); }
 
 /* ── Bar chart ────────────────────────────────── */
-.overviewBarWrap {
-  width: 100%;
+.ovBarWrap {
   display: flex;
-  justify-content: center;
+  gap: 0.5rem;
+  height: 160px;
 }
 
-.overviewBarSvg {
-  width: 100%;
-  max-width: 320px;
-  height: auto;
-  overflow: visible;
-}
-
-/* ── Stacked bar ──────────────────────────────── */
-.overviewStackedWrap {
-  width: 100%;
+.ovBarYAxis {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.65rem;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+}
+.ovBarYAxis span {
+  font-size: 0.6rem;
+  color: var(--sidebar-text, #555);
+  text-align: right;
+  width: 18px;
+  font-family: 'Inter', sans-serif;
 }
 
-.overviewStackedLegend {
+.ovBarBars {
+  flex: 1;
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
+  position: relative;
 }
 
-.overviewStackedLegendItem {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.5);
-}
-
-.overviewStackedLegendDot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.overviewStackedSvg {
-  width: 100%;
-  max-width: 260px;
-  height: auto;
-  overflow: visible;
-}
-
-.overviewStackedTitle {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  text-align: center;
-  font-weight: 500;
-}
-
-/* ── Stat cards column — STICKY ───────────────── */
-.overviewStatsColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  width: 210px;
-  flex-shrink: 0;
-  /* STICKY: stays in view while charts scroll */
-  position: sticky;
-  top: 2rem;
-  align-self: flex-start;
-}
-
-/* ── Stat card ────────────────────────────────── */
-.overviewStatCard {
-  background: rgba(255,255,255,0.055);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 0.8rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  backdrop-filter: blur(8px);
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.overviewStatCard:hover {
-  background: rgba(255,255,255,0.085);
-  border-color: rgba(255,255,255,0.13);
-}
-
-.overviewStatValue {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.overviewStatLabel {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.42);
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-/* ── Scroll hint ──────────────────────────────── */
-.overviewScrollHint {
+.ovBarBars::before {
+  content: "";
   position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  color: rgba(255,255,255,0.22);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  animation: overviewBounce 2s ease-in-out infinite;
+  inset: 0 0 1.5rem 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--sidebar-border, #222) 0, var(--sidebar-border, #222) 1px,
+    transparent 1px, transparent 25%
+  );
   pointer-events: none;
 }
 
-@keyframes overviewBounce {
-  0%,100% { transform: translateX(-50%) translateY(0);   opacity: 0.35; }
-  50%      { transform: translateX(-50%) translateY(7px); opacity: 0.75; }
+.ovBarGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  gap: 0.3rem;
 }
 
-/* ── Responsive ───────────────────────────────── */
-@media (max-width: 900px) {
-  .overviewPanelInner {
-    flex-direction: column;
-    height: auto;
-    padding: 2rem 0;
-    align-items: center;
-  }
+.ovBar {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  min-height: 4px;
+  transition: opacity 0.2s;
+}
+.ovBar:hover { opacity: 0.8; }
 
-  .overviewStatsColumn {
-    position: static;
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
+.ovBarLabel {
+  font-size: 0.6rem;
+  color: var(--sidebar-text, #555);
+  white-space: nowrap;
+  position: absolute;
+  bottom: 0;
+  font-family: 'Inter', sans-serif;
+}
 
-  .overviewStatCard { flex: 1; min-width: 120px; }
+/* ── Stat column ──────────────────────────────── */
+.ovStatCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
 
-  .overviewChartsRow { flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
-  .overviewChartCard { min-width: 220px; }
+.ovStatCard {
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.ovStatCard:hover {
+  border-color: rgba(255,255,255,0.12);
+  transform: translateX(3px);
+}
 
-  .overviewPanel {
-    height: auto;
-    min-height: 100vh;
-    padding: 2rem 1.5rem;
-  }
+.ovStatValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+.ovStatLabel {
+  font-size: 0.72rem;
+  color: var(--sidebar-text, #888);
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Stacked row ──────────────────────────────── */
+.ovStackedRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  will-change: transform;
+}
+
+/* ── Stacked bar chart ────────────────────────── */
+.ovStackedWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ovStackedLegend {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.ovStackedLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--sidebar-text, #888);
+  font-family: 'Inter', sans-serif;
+}
+
+.ovStackedDot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+}
+
+.ovStackedBars {
+  display: flex;
+  gap: 0.5rem;
+  height: 170px;
+}
+
+.ovStackedYAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+}
+.ovStackedYAxis span {
+  font-size: 0.6rem;
+  color: var(--sidebar-text, #555);
+  text-align: right;
+  width: 18px;
+  font-family: 'Inter', sans-serif;
+}
+
+.ovStackedBarArea {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.65rem;
+  padding-bottom: 1.5rem;
+  position: relative;
+}
+
+.ovStackedBarArea::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 1.5rem 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--sidebar-border, #222) 0, var(--sidebar-border, #222) 1px,
+    transparent 1px, transparent 16.666%
+  );
+  pointer-events: none;
+}
+
+.ovStackedBarGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  gap: 0.3rem;
+}
+
+.ovStackedBar {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+}
+
+.ovStackedSeg { width: 100%; }
+
+.ovStackedLabel {
+  font-size: 0.6rem;
+  color: var(--sidebar-text, #555);
+  position: absolute;
+  bottom: 0;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+}
+
+.ovStackedTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sidebar-text, #666);
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+/* ── Legacy classes kept for other admin pages ── */
+.adminPageTitle {
+  font-size: 1.7rem; font-weight: 800;
+  color: var(--content-color, #e8e4de);
+  letter-spacing: -0.03em; margin-bottom: 0.2rem;
+  font-family: 'Inter', sans-serif;
+}
+.adminPageSubtitle {
+  font-size: 0.875rem; color: var(--sidebar-text, #888); font-weight: 400;
+  font-family: 'Inter', sans-serif;
 }

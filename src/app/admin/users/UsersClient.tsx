@@ -124,6 +124,7 @@ function AllUsersCard({ users }: { users: User[] }) {
           <span>Joined</span>
           <span>Owned</span>
         </div>
+        <div className="umTableBody">
         {users.length === 0 && <p className="umEmpty">No users yet.</p>}
         {users.map(user => (
           <div key={user.id} className="umTableRow umTableRow--all">
@@ -144,6 +145,7 @@ function AllUsersCard({ users }: { users: User[] }) {
             </span>
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
@@ -216,6 +218,7 @@ function ActiveUsersCard({
           <span>Owned</span>
           <span>Actions</span>
         </div>
+        <div className="umTableBody">
         {filtered.length === 0 && <p className="umEmpty">{search ? "No users match your search." : "No active users."}</p>}
         {filtered.map(user => (
           <div key={user.id} className="umTableRow umTableRow--active">
@@ -250,6 +253,7 @@ function ActiveUsersCard({
             </span>
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
@@ -297,6 +301,7 @@ function NonActiveUsersCard({
           <span>Joined</span>
           <span>Actions</span>
         </div>
+        <div className="umTableBody">
         {users.length === 0 && <p className="umEmpty">No non-active or banned users.</p>}
         {users.map(user => (
           <div key={user.id} className="umTableRow umTableRow--inactive">
@@ -323,6 +328,7 @@ function NonActiveUsersCard({
             </span>
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
