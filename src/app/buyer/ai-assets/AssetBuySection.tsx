@@ -1,56 +1,17 @@
 // AssetBuySection — Character / Weapon buying section.
+// TASK 2: Bundle pricing — select multiple assets, get tiered discount.
+//   2 items = 5% off, 3–4 items = 10% off, 5+ items = 15% off.
+//   Cart lives in local state; total updates live as assets are toggled.
+// TASK 3: Owned asset state — ownedAssetIds prop marks owned assets.
+//   Owned items show "✓ Owned" badge instead of Select/Buy.
 // Layout: orc-blue bg left, content right.
-// Two cards: 3D OBJ file + MP4 animation (placeholders).
-// BUY button → checkout. Browse button → modal with scrollable list.
-// Select in modal → closes modal → auto-plays selected asset video in second card.
-// Fog canvas: cinematic ground fog rising from the bottom of the section.
+// BUY button → checkout with selected bundle. Browse button → modal.
+// Select in modal → closes modal → auto-plays selected asset video in card 2.
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import "./asset-buy-section.css";
-
-// ── FogWisp: elliptical radial gradient blob spawned at the bottom, rises upward ──
-// Three layers control size, speed, and opacity for a convincing depth stack.
-interface FogWisp {
-  x: number; y: number;            // current canvas position
-  vx: number;                       // horizontal drift per frame
-  vy: number;                       // vertical rise per frame (negative = up)
-  swayAmplitude: number;            // horizontal sine sway width
-  swayFrequency: number;            // horizontal sine sway speed
-  swayOffset: number;               // phase so each wisp sways differently
-  radiusX: number; radiusY: number; // ellipse half-axes
-  life: number; maxLife: number;    // age tracking for fade in/out
-  opacity: number;                  // peak alpha — intentionally high for visibility
-  layer: number;                    // 0 = deep/large/slow, 1 = mid, 2 = surface/small/fast
-}
-
-// Spawns a wisp just below the bottom edge, spread across full canvas width
-function spawnFogWisp(canvasWidth: number, canvasHeight: number): FogWisp {
-  const layer = Math.floor(Math.random() * 3);
-
-  // Larger and slower at deep layer, smaller and faster at surface
-  const radiusScale  = [2.2, 1.5, 0.95][layer];
-  const riseSpeed    = [0.15, 0.26, 0.40][layer];
-  // Higher opacity so the fog is clearly visible against the dark background
-  const peakOpacity  = [0.32, 0.25, 0.18][layer];
-
-  return {
-    x:             Math.random() * canvasWidth * 1.3 - canvasWidth * 0.15,
-    y:             canvasHeight + Math.random() * 80,
-    vx:            (Math.random() - 0.5) * 0.28,
-    vy:            -(Math.random() * riseSpeed + 0.08),
-    swayAmplitude: Math.random() * 28 + 10,
-    swayFrequency: Math.random() * 0.003 + 0.001,
-    swayOffset:    Math.random() * Math.PI * 2,
-    radiusX:       (Math.random() * 210 + 170) * radiusScale,
-    radiusY:       (Math.random() * 65  + 42)  * radiusScale,
-    life:          0,
-    maxLife:       Math.random() * 500 + 350,
-    opacity:       peakOpacity * (Math.random() * 0.25 + 0.88),
-    layer,
-  };
-}
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
 
@@ -59,199 +20,171 @@ interface AssetItem {
   label:    string;
   category: "Character" | "Weapon";
   videoSrc: string;
-  price:    string;
+  price:    number;
+}
+
+interface Props {
+  ownedAssetIds?: Set<string>;
+  onAddToWishlist?: (id: string) => void;
+  wishlistIds?: Set<string>;
 }
 
 const ALL_ASSETS: AssetItem[] = [
-  // Characters
-  { id:"orc-01", label:"Orc 01 — Warrior",     category:"Character", videoSrc:`${SB}/character/orc-01-animation.mp4`, price:"₱5,500" },
-  { id:"orc-02", label:"Orc 02 — Fighter",      category:"Character", videoSrc:`${SB}/character/orc-02-animation.mp4`, price:"₱5,500" },
-  { id:"orc-03", label:"Orc 03 — Red Skin",     category:"Character", videoSrc:`${SB}/character/orc-03-animation.mp4`, price:"₱5,500" },
-  { id:"orc-04", label:"Orc 04 — Armored",      category:"Character", videoSrc:`${SB}/character/orc-04-animation.mp4`, price:"₱5,500" },
-  { id:"orc-05", label:"Orc 05 — Shaman",       category:"Character", videoSrc:`${SB}/character/orc-05-animation.mp4`, price:"₱5,500" },
-  { id:"orc-06", label:"Orc 06 — Berserker",    category:"Character", videoSrc:`${SB}/character/orc-06-animation.mp4`, price:"₱5,500" },
-  { id:"orc-07", label:"Orc 07 — Heavy",        category:"Character", videoSrc:`${SB}/character/orc-07-animation.mp4`, price:"₱5,500" },
-  { id:"orc-08", label:"Orc 08 — Scout",        category:"Character", videoSrc:`${SB}/character/orc-08-animation.mp4`, price:"₱5,500" },
-  { id:"orc-09", label:"Orc 09 — Elite",        category:"Character", videoSrc:`${SB}/character/orc-09-animation.mp4`, price:"₱5,500" },
-  { id:"orc-11", label:"Orc 11 — Warlord",      category:"Character", videoSrc:`${SB}/character/orc-11-animation.mp4`, price:"₱5,500" },
-  // Weapons
-  { id:"axe-01", label:"Axe 01 — Battle Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-01-animation.mp4`,    price:"₱3,500" },
-  { id:"axe-02", label:"Axe 02 — War Axe",      category:"Weapon",    videoSrc:`${SB}/weapon/axe-02-animation.mp4`,    price:"₱3,500" },
-  { id:"axe-03", label:"Axe 03 — Runic Axe",    category:"Weapon",    videoSrc:`${SB}/weapon/axe-03-animation.mp4`,    price:"₱3,500" },
-  { id:"axe-04", label:"Axe 04 — Viking Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-04-animation.mp4`,    price:"₱3,500" },
-  { id:"axe-05", label:"Axe 05 — Ornate Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-05-animation.mp4`,    price:"₱3,500" },
-  { id:"axe-07", label:"Axe 07 — Bloodied Axe", category:"Weapon",    videoSrc:`${SB}/weapon/axe-07-animation.mp4`,    price:"₱3,500" },
+  { id:"orc-01", label:"Orc 01 — Warrior",     category:"Character", videoSrc:`${SB}/character/orc-01-animation.mp4`, price:5500 },
+  { id:"orc-02", label:"Orc 02 — Fighter",      category:"Character", videoSrc:`${SB}/character/orc-02-animation.mp4`, price:5500 },
+  { id:"orc-03", label:"Orc 03 — Red Skin",     category:"Character", videoSrc:`${SB}/character/orc-03-animation.mp4`, price:5500 },
+  { id:"orc-04", label:"Orc 04 — Armored",      category:"Character", videoSrc:`${SB}/character/orc-04-animation.mp4`, price:5500 },
+  { id:"orc-05", label:"Orc 05 — Shaman",       category:"Character", videoSrc:`${SB}/character/orc-05-animation.mp4`, price:5500 },
+  { id:"orc-06", label:"Orc 06 — Berserker",    category:"Character", videoSrc:`${SB}/character/orc-06-animation.mp4`, price:5500 },
+  { id:"orc-07", label:"Orc 07 — Heavy",        category:"Character", videoSrc:`${SB}/character/orc-07-animation.mp4`, price:5500 },
+  { id:"orc-08", label:"Orc 08 — Scout",        category:"Character", videoSrc:`${SB}/character/orc-08-animation.mp4`, price:5500 },
+  { id:"orc-09", label:"Orc 09 — Elite",        category:"Character", videoSrc:`${SB}/character/orc-09-animation.mp4`, price:5500 },
+  { id:"orc-11", label:"Orc 11 — Warlord",      category:"Character", videoSrc:`${SB}/character/orc-11-animation.mp4`, price:5500 },
+  { id:"axe-01", label:"Axe 01 — Battle Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-01-animation.mp4`,    price:3500 },
+  { id:"axe-02", label:"Axe 02 — War Axe",      category:"Weapon",    videoSrc:`${SB}/weapon/axe-02-animation.mp4`,    price:3500 },
+  { id:"axe-03", label:"Axe 03 — Runic Axe",    category:"Weapon",    videoSrc:`${SB}/weapon/axe-03-animation.mp4`,    price:3500 },
+  { id:"axe-04", label:"Axe 04 — Viking Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-04-animation.mp4`,    price:3500 },
+  { id:"axe-05", label:"Axe 05 — Ornate Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-05-animation.mp4`,    price:3500 },
+  { id:"axe-07", label:"Axe 07 — Bloodied Axe", category:"Weapon",    videoSrc:`${SB}/weapon/axe-07-animation.mp4`,    price:3500 },
 ];
 
-export default function AssetBuySection() {
+// Bundle discount tiers: 2 items = 5%, 3–4 = 10%, 5+ = 15%
+function getBundleDiscount(count: number): number {
+  if (count >= 5) return 0.15;
+  if (count >= 3) return 0.10;
+  if (count >= 2) return 0.05;
+  return 0;
+}
+
+function discountLabel(count: number): string {
+  if (count >= 5) return "15% off";
+  if (count >= 3) return "10% off";
+  if (count >= 2) return "5% off";
+  return "";
+}
+
+function fmt(p: number): string {
+  return "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
+}
+
+export default function AssetBuySection({
+  ownedAssetIds = new Set(),
+  onAddToWishlist,
+  wishlistIds = new Set(),
+}: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Character" | "Weapon">("Character");
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
+  const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const videoCardRef = useRef<HTMLVideoElement>(null);
-  const fogCanvasRef = useRef<HTMLCanvasElement>(null);
-  const fogRafRef    = useRef<number>(0);
-  const fogWisps     = useRef<FogWisp[]>([]);
 
   const filteredAssets = ALL_ASSETS.filter(a => a.category === browseTab);
+  const cartItems      = ALL_ASSETS.filter(a => cartIds.has(a.id));
+  const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
+  const discountRate   = getBundleDiscount(cartItems.length);
+  const discountAmount = Math.round(rawTotal * discountRate);
+  const finalTotal     = rawTotal - discountAmount;
 
-  // ── Fog canvas animation ─────────────────────────────────────────────────────
-  // Ground fog: wisps spawn at bottom, rise upward with horizontal sine sway.
-  // Deep layer (0) renders first so it sits behind mid and surface layers.
-  // Canvas size matches its CSS size on mount and every resize.
-  useEffect(() => {
-    const canvas = fogCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  const toggleCart = useCallback((id: string) => {
+    if (ownedAssetIds.has(id)) return;
+    setCartIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, [ownedAssetIds]);
 
-    // Match canvas pixel size to its CSS layout size
-    function resize() {
-      canvas!.width  = canvas!.offsetWidth;
-      canvas!.height = canvas!.offsetHeight;
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    // Pre-seed 30 wisps distributed across their lifecycle so fog is dense on load
-    for (let i = 0; i < 30; i++) {
-      const wisp   = spawnFogWisp(canvas.width, canvas.height);
-      wisp.life    = Math.random() * wisp.maxLife * 0.7;
-      // Walk position forward proportionally to age
-      wisp.x      += wisp.vx * wisp.life;
-      wisp.y       = (canvas.height + 80) + wisp.vy * wisp.life;
-      wisp.x      += Math.sin(wisp.life * wisp.swayFrequency + wisp.swayOffset) * wisp.swayAmplitude;
-      fogWisps.current.push(wisp);
-    }
-
-    function drawFog() {
-      const cw = canvas!.width;
-      const ch = canvas!.height;
-      ctx!.clearRect(0, 0, cw, ch);
-
-      // Keep steady supply — target 36 wisps on screen at all times
-      if (fogWisps.current.length < 36 && Math.random() < 0.55)
-        fogWisps.current.push(spawnFogWisp(cw, ch));
-
-      // Cull expired wisps
-      fogWisps.current = fogWisps.current.filter(p => p.life < p.maxLife);
-
-      // Render deep → surface so surface layer appears in front
-      const sorted = [...fogWisps.current].sort((a, b) => a.layer - b.layer);
-
-      for (const p of sorted) {
-        // Advance physics
-        p.life += 1;
-        p.x    += p.vx + Math.sin(p.life * p.swayFrequency + p.swayOffset) * 0.35;
-        p.y    += p.vy;
-
-        const ratio = p.life / p.maxLife;
-
-        // Smooth fade in (first 15%) → hold → fade out (last 22%)
-        const fadeIn  = Math.min(1, ratio / 0.15);
-        const fadeOut = ratio > 0.78 ? Math.max(0, 1 - (ratio - 0.78) / 0.22) : 1;
-        const alpha   = p.opacity * fadeIn * fadeOut;
-
-        if (alpha < 0.003) continue;
-
-        // Color by layer — deep = cool blue-grey, surface = warm white-grey
-        const r = p.layer === 0 ? 185 : p.layer === 1 ? 205 : 222;
-        const g = p.layer === 0 ? 200 : p.layer === 1 ? 215 : 225;
-        const b = p.layer === 0 ? 230 : p.layer === 1 ? 228 : 230;
-
-        // Draw as squashed ellipse via scale transform + radial gradient
-        ctx!.save();
-        ctx!.translate(p.x, p.y);
-        ctx!.scale(1, p.radiusY / p.radiusX);
-        const grad = ctx!.createRadialGradient(0, 0, 0, 0, 0, p.radiusX);
-        grad.addColorStop(0,    `rgba(${r},${g},${b},${alpha})`);
-        grad.addColorStop(0.4,  `rgba(${r},${g},${b},${alpha * 0.6})`);
-        grad.addColorStop(0.75, `rgba(${r},${g},${b},${alpha * 0.2})`);
-        grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
-        ctx!.beginPath();
-        ctx!.arc(0, 0, p.radiusX, 0, Math.PI * 2);
-        ctx!.fillStyle = grad;
-        ctx!.fill();
-        ctx!.restore();
-      }
-
-      fogRafRef.current = requestAnimationFrame(drawFog);
-    }
-
-    fogRafRef.current = requestAnimationFrame(drawFog);
-    return () => {
-      cancelAnimationFrame(fogRafRef.current);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  // ── Auto-play video card when selectedAsset changes and modal is closed ──
-  // When a new asset is selected and browseOpen becomes false, load + play the video.
   useEffect(() => {
     if (!browseOpen && selectedAsset && videoCardRef.current) {
       const video = videoCardRef.current;
       video.load();
-      video.play().catch(() => {
-        // Autoplay blocked by browser — video will play on first user interaction
-      });
+      video.play().catch(() => {});
     }
   }, [browseOpen, selectedAsset]);
 
-  // ── Select handler: set asset + close modal ──
   function handleSelectAsset(asset: AssetItem) {
     setSelectedAsset(asset);
+    if (!ownedAssetIds.has(asset.id)) {
+      setCartIds(prev => new Set([...prev, asset.id]));
+    }
     setBrowseOpen(false);
   }
 
   return (
     <>
       <section className="assetBuySection">
-
-        {/* Background orc — left */}
         <div className="assetBuyBgOrc">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/orc-blue.png" alt="" className="assetBuyBgOrcImg" />
           <div className="assetBuyBgOrcFade" />
         </div>
 
-        {/* ── Fog canvas — ground fog rising from the bottom ── */}
-        <canvas ref={fogCanvasRef} className="assetBuyFogCanvas" />
-
-        {/* Content */}
         <div className="assetBuyContent">
-
           <div className="assetBuyHeaderRow">
             <div>
               <p className="assetBuyLabel">Character & Weapon</p>
               <h2 className="assetBuyTitle">One time Purchase.<br />Lifetime access</h2>
             </div>
             <div className="assetBuyActions">
-              <button className="assetBuyBtn" onClick={() => {}}>BUY</button>
+              <button
+                className={"assetBuyBtn" + (cartItems.length === 0 ? " assetBuyBtnDisabled" : "")}
+                disabled={cartItems.length === 0}
+                onClick={() => {}}
+                title={cartItems.length === 0 ? "Select assets first" : `Buy ${cartItems.length} item${cartItems.length > 1 ? "s" : ""}`}
+              >
+                {cartItems.length > 0 ? `BUY (${cartItems.length})` : "BUY"}
+              </button>
               <button className="assetBrowseBtn" onClick={() => setBrowseOpen(true)}>Browse</button>
             </div>
           </div>
 
-          {/* Two cards: OBJ placeholder + MP4 video card */}
-          <div className="assetBuyCards">
+          {/* Bundle pricing bar */}
+          {cartItems.length >= 2 && (
+            <div className="assetBundleBar">
+              <div className="assetBundleBarLeft">
+                <span className="assetBundleTag">{discountLabel(cartItems.length)}</span>
+                <span className="assetBundleInfo">Bundle — {cartItems.length} items</span>
+              </div>
+              <div className="assetBundleBarRight">
+                {discountAmount > 0 && (
+                  <span className="assetBundleSaving">−{fmt(discountAmount)}</span>
+                )}
+                <span className="assetBundleTotal">{fmt(finalTotal)}</span>
+              </div>
+            </div>
+          )}
 
-            {/* Card 1 — 3D obj placeholder */}
+          {/* Cart pills */}
+          {cartItems.length > 0 && (
+            <div className="assetCartPills">
+              {cartItems.map(item => (
+                <div key={item.id} className="assetCartPill">
+                  <span className="assetCartPillLabel">{item.label}</span>
+                  <span className="assetCartPillPrice">{fmt(item.price)}</span>
+                  <button
+                    className="assetCartPillRemove"
+                    onClick={() => toggleCart(item.id)}
+                    aria-label={`Remove ${item.label}`}
+                  >×</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="assetBuyCards">
             <div className="assetBuyCard">
               <div className="assetBuyCardInner">
                 <span className="assetBuyCardIcon">📦</span>
                 <p className="assetBuyCardLabel">3D obj file here</p>
               </div>
             </div>
-
-            {/* Card 2 — MP4 animation: shows selected asset video or placeholder */}
             <div className="assetBuyCard">
               {selectedAsset ? (
                 <video
                   ref={videoCardRef}
                   src={selectedAsset.videoSrc}
                   className="assetBuyCardVideo"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
+                  autoPlay muted loop playsInline
                 />
               ) : (
                 <div className="assetBuyCardInner">
@@ -260,18 +193,13 @@ export default function AssetBuySection() {
                 </div>
               )}
             </div>
-
           </div>
-
         </div>
       </section>
 
-      {/* ── Browse Modal ── */}
       {browseOpen && (
         <div className="assetModalOverlay" onClick={() => setBrowseOpen(false)}>
           <div className="assetModal" onClick={e => e.stopPropagation()}>
-
-            {/* Modal header */}
             <div className="assetModalHeader">
               <div className="assetModalTabs">
                 {(["Character", "Weapon"] as const).map(tab => (
@@ -284,58 +212,86 @@ export default function AssetBuySection() {
                   </button>
                 ))}
               </div>
+              {cartItems.length > 0 && (
+                <span className="assetModalCartBadge">
+                  {cartItems.length} in bundle{discountRate > 0 ? ` · ${discountLabel(cartItems.length)}` : ""}
+                </span>
+              )}
               <button className="assetModalClose" onClick={() => setBrowseOpen(false)}>✕</button>
             </div>
 
-            {/* Scrollable list */}
             <div className="assetModalList">
-              {filteredAssets.map(asset => (
-                <div
-                  key={asset.id}
-                  className={`assetModalRow ${selectedAsset?.id === asset.id ? "assetModalRowActive" : ""}`}
-                  onClick={() => setSelectedAsset(asset)}
-                >
-                  {/* Video thumbnail */}
-                  <div className="assetModalThumb">
-                    <video
-                      src={asset.videoSrc}
-                      autoPlay muted loop playsInline
-                      className="assetModalThumbVideo"
-                    />
+              {filteredAssets.map(asset => {
+                const isOwned      = ownedAssetIds.has(asset.id);
+                const isInCart     = cartIds.has(asset.id);
+                const isWishlisted = wishlistIds.has(asset.id);
+                return (
+                  <div
+                    key={asset.id}
+                    className={[
+                      "assetModalRow",
+                      selectedAsset?.id === asset.id ? "assetModalRowActive" : "",
+                      isInCart  ? "assetModalRowInCart" : "",
+                      isOwned   ? "assetModalRowOwned"  : "",
+                    ].join(" ")}
+                    onClick={() => !isOwned && setSelectedAsset(asset)}
+                  >
+                    <div className="assetModalThumb">
+                      <video src={asset.videoSrc} autoPlay muted loop playsInline className="assetModalThumbVideo" />
+                    </div>
+                    <div className="assetModalRowInfo">
+                      <p className="assetModalRowLabel">{asset.label}</p>
+                      <p className="assetModalRowCategory">{asset.category}</p>
+                    </div>
+                    <div className="assetModalRowRight">
+                      <p className="assetModalRowPrice">{fmt(asset.price)}</p>
+                      {isOwned ? (
+                        <span className="assetModalOwnedBadge">✓ Owned</span>
+                      ) : (
+                        <div className="assetModalRowBtns">
+                          {onAddToWishlist && (
+                            <button
+                              className={"assetModalWishlistBtn" + (isWishlisted ? " assetModalWishlistBtnActive" : "")}
+                              onClick={e => { e.stopPropagation(); onAddToWishlist(asset.id); }}
+                              aria-label="Save to wishlist"
+                            >
+                              {isWishlisted ? "♥" : "♡"}
+                            </button>
+                          )}
+                          <button
+                            className={"assetModalSelectBtn" + (isInCart ? " assetModalSelectBtnActive" : "")}
+                            onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
+                          >
+                            {isInCart ? "✓ Added" : "Select"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Info */}
-                  <div className="assetModalRowInfo">
-                    <p className="assetModalRowLabel">{asset.label}</p>
-                    <p className="assetModalRowCategory">{asset.category}</p>
-                  </div>
-
-                  {/* Price + select */}
-                  <div className="assetModalRowRight">
-                    <p className="assetModalRowPrice">{asset.price}</p>
-                    <button
-                      className="assetModalSelectBtn"
-                      onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
-                    >
-                      Select
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* Modal footer */}
             <div className="assetModalFooter">
-              <p className="assetModalFooterNote">
-                {selectedAsset ? `Selected: ${selectedAsset.label}` : "Select an asset to purchase"}
-              </p>
-              {selectedAsset && (
+              <div className="assetModalFooterLeft">
+                <p className="assetModalFooterNote">
+                  {cartItems.length === 0 ? "Select assets to build a bundle" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
+                </p>
+                {cartItems.length === 1 && (
+                  <p className="assetModalBundleHint">Add 1 more for 5% bundle discount</p>
+                )}
+                {cartItems.length >= 2 && discountRate > 0 && (
+                  <p className="assetModalBundleHint assetModalBundleHintActive">
+                    {discountLabel(cartItems.length)} applied — saving {fmt(discountAmount)}
+                  </p>
+                )}
+              </div>
+              {cartItems.length > 0 && (
                 <button className="assetModalBuyBtn">
-                  Buy Now — {selectedAsset.price}
+                  Buy Bundle — {fmt(finalTotal)}
                 </button>
               )}
             </div>
-
           </div>
         </div>
       )}

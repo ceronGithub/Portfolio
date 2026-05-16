@@ -37,19 +37,6 @@
   background: linear-gradient(to right, transparent 20%, rgba(0,0,0,0.75) 60%, #000 100%);
 }
 
-/* ── Fog canvas — cinematic ground fog rising from the bottom ── */
-/* Full width, pinned to bottom 55% of the section, sits above the orc bg */
-.assetBuyFogCanvas {
-  position:       absolute;
-  left:           0;
-  bottom:         0;
-  width:          100%;
-  height:         55%;
-  z-index:        4;
-  pointer-events: none;
-  will-change:    transform;
-}
-
 /* Content */
 .assetBuyContent {
   position:        relative;
@@ -390,4 +377,214 @@
   object-fit: cover;
   display:    block;
   border-radius: 20px;
+}
+/* ════════════════════════════════
+   TASK 2 — BUNDLE PRICING
+   ════════════════════════════════ */
+
+/* BUY button disabled state */
+.assetBuyBtnDisabled {
+  opacity:        0.35;
+  cursor:         not-allowed;
+  pointer-events: none;
+}
+
+/* Bundle summary bar — appears below header when 2+ in cart */
+.assetBundleBar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  background:      rgba(34,197,94,0.06);
+  border:          1px solid rgba(34,197,94,0.18);
+  border-radius:   14px;
+  padding:         0.75rem 1.1rem;
+  gap:             1rem;
+}
+
+.assetBundleBarLeft {
+  display:     flex;
+  align-items: center;
+  gap:         0.65rem;
+}
+
+.assetBundleTag {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    400;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.35);
+  background:     rgba(34,197,94,0.1);
+  padding:        0.2rem 0.65rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space:    nowrap;
+}
+
+.assetBundleInfo {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.7rem;
+  color:          rgba(255,255,255,0.35);
+  letter-spacing: 0.04em;
+}
+
+.assetBundleBarRight {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  flex-shrink: 0;
+}
+
+.assetBundleSaving {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.72rem;
+  color:          #22c55e;
+  letter-spacing: 0.02em;
+}
+
+.assetBundleTotal {
+  font-size:      1.05rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+}
+
+/* Cart pills — compact row of selected items */
+.assetCartPills {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       0.4rem;
+}
+
+.assetCartPill {
+  display:       flex;
+  align-items:   center;
+  gap:           0.4rem;
+  background:    #111;
+  border:        1px solid #1e1e1e;
+  border-radius: 999px;
+  padding:       0.28rem 0.5rem 0.28rem 0.7rem;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.65rem;
+  color:         rgba(255,255,255,0.55);
+  transition:    border-color 0.2s;
+}
+
+.assetCartPill:hover { border-color: #2a2a2a; }
+
+.assetCartPillLabel { color: rgba(255,255,255,0.7); }
+
+.assetCartPillPrice {
+  color:      #22c55e;
+  font-size:  0.62rem;
+}
+
+.assetCartPillRemove {
+  width:         18px; height: 18px;
+  border-radius: 50%;
+  background:    #1a1a1a;
+  border:        1px solid #2a2a2a;
+  color:         #555;
+  font-size:     0.75rem;
+  line-height:   1;
+  cursor:        pointer;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    color 0.15s;
+  flex-shrink:   0;
+}
+
+.assetCartPillRemove:hover { color: #e55; }
+
+/* ════════════════════════════════
+   TASK 2 — MODAL ADDITIONS
+   ════════════════════════════════ */
+
+/* Bundle badge in modal header */
+.assetModalCartBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.25);
+  background:     rgba(34,197,94,0.07);
+  padding:        0.25rem 0.75rem;
+  border-radius:  999px;
+  letter-spacing: 0.06em;
+  white-space:    nowrap;
+  margin-right:   auto;
+  margin-left:    0.75rem;
+}
+
+/* Row states */
+.assetModalRowInCart  { border-color: rgba(34,197,94,0.28); background: rgba(34,197,94,0.04); }
+.assetModalRowOwned   { opacity: 0.55; cursor: default; }
+
+/* Row button group */
+.assetModalRowBtns {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+}
+
+/* Wishlist heart button */
+.assetModalWishlistBtn {
+  width:         28px; height: 28px;
+  border-radius: 50%;
+  background:    transparent;
+  border:        1px solid #2a2a2a;
+  color:         #444;
+  font-size:     0.9rem;
+  cursor:        pointer;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    border-color 0.2s, color 0.2s;
+  line-height:   1;
+}
+
+.assetModalWishlistBtn:hover       { border-color: #e55; color: #e55; }
+.assetModalWishlistBtnActive       { border-color: #e55; color: #e55; }
+
+/* Select button active state */
+.assetModalSelectBtnActive {
+  border-color: #22c55e !important;
+  color:        #22c55e !important;
+}
+
+/* Modal footer left column */
+.assetModalFooterLeft {
+  flex:           1;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.2rem;
+}
+
+/* Bundle hint lines */
+.assetModalBundleHint {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          #444;
+  letter-spacing: 0.04em;
+  margin:         0;
+}
+
+.assetModalBundleHintActive { color: #22c55e; }
+
+/* ════════════════════════════════
+   TASK 3 — OWNED BADGE
+   ════════════════════════════════ */
+
+.assetModalOwnedBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    400;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.3);
+  background:     rgba(34,197,94,0.07);
+  padding:        0.25rem 0.65rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space:    nowrap;
 }

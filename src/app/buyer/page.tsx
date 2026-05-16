@@ -1,18 +1,17 @@
 // buyer/page.tsx — Server Component.
-// Fetches session + System table (with addons) + ownership.
-// Field names match prisma schema exactly.
+// Fetches session + systems (with addons) + ownership from DB.
+// Passes data to BuyerDashboardClient (Client Component) which owns:
+//   - Wishlist state (Task 1)
+//   - Bundle pricing (Task 2) via AssetBuySection + ArchitectureBuySection
+//   - Owned asset state (Task 3)
+//   - Architecture Asset Studio sections (Task 4)
 
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { prisma }           from "@/lib/prisma";
 import { redirect }         from "next/navigation";
 import DashboardHero        from "./DashboardHero";
-import SystemsClient        from "./system/SystemsClient";
-import AISection            from "./ai/AISection";
-import InquirySection       from "./inquiries/InquirySection";
-import AIAssetsIntro       from "./ai-assets/AIAssetsIntro";
-import NewAssetSection      from "./ai-assets/NewAssetSection";
-import AssetBuySection      from "./ai-assets/AssetBuySection";
+import BuyerDashboardClient from "./BuyerDashboardClient";
 
 export default async function BuyerPage() {
   const session = await getServerSession(authOptions);
@@ -53,17 +52,17 @@ export default async function BuyerPage() {
   };
 
   const items = systems.map(s => ({
-    id:          s.id,
-    name:        s.title,
-    tag:         s.tag,
-    accent:      s.accent,
-    description: s.description ?? "",
-    basePrice:   s.basePrice,
-    timeline:    s.timeline ?? "",
+    id:           s.id,
+    name:         s.title,
+    tag:          s.tag,
+    accent:       s.accent,
+    description:  s.description ?? "",
+    basePrice:    s.basePrice,
+    timeline:     s.timeline ?? "",
     demoVideoUrl: demoVideos[s.tag] ?? null,
-    bgVideoUrl:   bgVideos[s.tag] ?? null,
-    owned:       ownedSet.has(s.id),
-    addons:      s.addons.map(a => ({
+    bgVideoUrl:   bgVideos[s.tag]   ?? null,
+    owned:        ownedSet.has(s.id),
+    addons:       s.addons.map(a => ({
       id:       a.id,
       label:    a.label,
       desc:     a.description ?? "",
@@ -73,15 +72,16 @@ export default async function BuyerPage() {
     })),
   }));
 
+  // Pass all owned IDs (system + asset) to the client
+  const ownedAssetIds = ownerships.map(o => o.productId);
+
   return (
     <div className="dashboardLanding">
       <DashboardHero userName={userName} />
-      <SystemsClient items={items} />
-      <AISection />
-      <AIAssetsIntro />
-      <NewAssetSection />
-      <AssetBuySection />      
-      <InquirySection />
+      <BuyerDashboardClient
+        items={items}
+        ownedAssetIds={ownedAssetIds}
+      />
     </div>
   );
 }

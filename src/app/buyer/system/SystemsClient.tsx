@@ -18,7 +18,11 @@ interface SystemItem {
   description: string; basePrice: number; timeline: string;
   demoVideoUrl: string | null; bgVideoUrl: string | null; owned: boolean; addons: AddonItem[];
 }
-interface Props { items: SystemItem[] }
+interface Props {
+  items: SystemItem[];
+  wishlistIds?:      Set<string>;
+  onToggleWishlist?: (id: string) => void;
+}
 
 const fmt = (p: number) =>
   "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
@@ -181,10 +185,11 @@ function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void })
 
 /* ─── Card ───────────────────────────────────────────────────────────── */
 function SystemCard({
-  item, index, isActive, onClick, onPreviewClick,
+  item, index, isActive, onClick, onPreviewClick, isWishlisted, onToggleWishlist,
 }: {
   item: SystemItem; index: number; isActive: boolean;
   onClick: () => void; onPreviewClick: () => void;
+  isWishlisted?: boolean; onToggleWishlist?: (id: string) => void;
 }) {
   return (
     <div
@@ -198,12 +203,27 @@ function SystemCard({
           {/* Top row */}
           <div className="vSysCardTopRow">
             <span className="vSysCardNum">{String(index + 1).padStart(2, "0")}</span>
-            <span
-              className="vSysCardDeployBadge"
-              style={{ color: item.accent, borderColor: item.accent + "44", background: item.accent + "12" }}
-            >
-              WEB / IIS
-            </span>
+            <div className="vSysCardTopRight">
+              {/* Wishlist heart */}
+              {onToggleWishlist && (
+                <button
+                  className={"vSysCardWishlistBtn" + (isWishlisted ? " vSysCardWishlistBtnActive" : "")}
+                  onClick={e => { e.stopPropagation(); onToggleWishlist(item.id); }}
+                  aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                  title={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill={isWishlisted ? "#e55" : "none"} stroke={isWishlisted ? "#e55" : "currentColor"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+              )}
+              <span
+                className="vSysCardDeployBadge"
+                style={{ color: item.accent, borderColor: item.accent + "44", background: item.accent + "12" }}
+              >
+                WEB / IIS
+              </span>
+            </div>
           </div>
 
           {/* Tag + title */}
@@ -313,27 +333,21 @@ function SystemCard({
 }
 
 /* ─── Main ───────────────────────────────────────────────────────────── */
-export default function SystemsClient({ items }: Props) {
+export default function SystemsClient({ items, wishlistIds, onToggleWishlist }: Props) {
   const [modalItem,   setModalItem]   = useState<SystemItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging,  setIsDragging]  = useState(false);
   const [dragStartX,  setDragStartX]  = useState(0);
   const [dragDelta,   setDragDelta]   = useState(0);
   const vpRef    = useRef<HTMLDivElement>(null);
-  const [vpWidth, setVpWidth] = useState<number>(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1200
-  );
+  const [vpWidth, setVpWidth] = useState(0);
 
   const CARD_W = 400;
   const GAP    = 28;
   const total  = items.length;
 
-  // Read actual viewport width after mount and on every resize
   useEffect(() => {
-    const update = () => {
-      if (vpRef.current) setVpWidth(vpRef.current.offsetWidth);
-    };
-    // Fire immediately — DOM is available after mount
+    const update = () => { if (vpRef.current) setVpWidth(vpRef.current.offsetWidth); };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
@@ -406,7 +420,6 @@ export default function SystemsClient({ items }: Props) {
               style={{
                 transform:  `translate3d(${translateX}px, 0, 0)`,
                 transition: isDragging ? "none" : "transform 0.48s cubic-bezier(0.25,1,0.5,1)",
-                visibility: vpWidth > 200 ? "visible" : "hidden",
               }}
             >
               {items.map((item, index) => (
@@ -417,6 +430,8 @@ export default function SystemsClient({ items }: Props) {
                   isActive={index === activeIndex}
                   onClick={() => goTo(index)}
                   onPreviewClick={() => setModalItem(item)}
+                  isWishlisted={wishlistIds?.has(item.id) ?? false}
+                  onToggleWishlist={onToggleWishlist}
                 />
               ))}
             </div>
