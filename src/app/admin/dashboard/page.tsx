@@ -16,7 +16,7 @@ export default async function AdminDashboardPage() {
 
   const adminName = session.user?.name ?? session.user?.email ?? "Admin";
 
-  const [userCount, productCount, orderCount, revenue, activeUsers, systemRevenue] =
+  const [userCount, productCount, orderCount, revenue, activeUsers, systemRevenue, systemCount] =
     await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
@@ -32,6 +32,7 @@ export default async function AdminDashboardPage() {
         orderBy: { _sum: { amountPaid: "desc" } },
         take: 4,
       }),
+      prisma.system.count(),
     ]);
 
   // Resolve product names for chart data
@@ -57,6 +58,7 @@ export default async function AdminDashboardPage() {
     totalRevenue,
     productCount,
     orderCount,
+    systemCount,
   };
 
   return (

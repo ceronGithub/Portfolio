@@ -1,154 +1,342 @@
 /* ================================================
-   users.css — Admin User Management page styles.
-   Full-width user table, role badges, owned tags.
+   users.css — User Management. 3 cards layout.
+   Card 1: All users. Card 2: Active + actions.
+   Card 3: Non-active + actions.
    ================================================ */
 
-.adminUsersPage {
-  padding: 2.5rem;
+.adminUsersPage { padding: 2.5rem; }
+
+/* ── Root ─────────────────────────────────────── */
+.umRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
 }
 
-/* ── Table wrapper ────────────────────────────── */
-.adminUsersTableWrap {
+/* ── Toast ────────────────────────────────────── */
+.umToast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 999;
+  animation: umToastIn 0.25s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.umToast--ok  { background: #1a1a1a; color: #68d391; border: 1px solid rgba(104,211,145,0.2); }
+.umToast--err { background: #1a1a1a; color: #fc8181; border: 1px solid rgba(252,129,129,0.2); }
+
+@keyframes umToastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card ─────────────────────────────────────── */
+.umCard {
   background: var(--sidebar-bg, #fff);
   border: 1px solid var(--sidebar-border, #e8e4de);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
 }
 
-/* ── Table header row ─────────────────────────── */
-.adminUsersTableHeader {
-  display: grid;
-  grid-template-columns: 1.5fr 2.5fr 1fr 1.2fr 2fr 2fr;
-  padding: 0.75rem 1.25rem;
+.umCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1.4rem;
   border-bottom: 1px solid var(--sidebar-border, #e8e4de);
   background: var(--nav-active-bg, #f5f4f1);
 }
 
-.adminUsersTableHeader span {
+.umCardTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  letter-spacing: -0.01em;
+}
+
+/* Count badge */
+.umCardBadge {
   font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--sidebar-border, #e8e4de);
+  color: var(--sidebar-text, #888);
+  font-variant-numeric: tabular-nums;
+}
+.umCardBadge--active   { background: rgba(56,161,105,0.12);  color: #2f855a; }
+.umCardBadge--inactive { background: rgba(229,62,62,0.1);    color: #c53030; }
+
+/* ── Search ───────────────────────────────────── */
+.umSearchWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  background: var(--sidebar-bg, #fff);
+}
+
+.umSearchIcon { color: var(--sidebar-text, #aaa); flex-shrink: 0; }
+
+.umSearchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: var(--content-color, #1a1a1a);
+  font-family: inherit;
+  outline: none;
+}
+.umSearchInput::placeholder { color: var(--sidebar-text, #bbb); }
+
+.umSearchClear {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: var(--sidebar-text, #aaa);
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+.umSearchClear:hover { color: var(--content-color, #1a1a1a); }
+
+/* ── Table ────────────────────────────────────── */
+.umTable { display: flex; flex-direction: column; }
+
+/* All users: 6 columns */
+.umTableHead--all,
+.umTableRow--all {
+  display: grid;
+  grid-template-columns: 1.5fr 2.5fr 1fr 1fr 1.5fr 2fr;
+}
+
+/* Active users: 5 columns */
+.umTableHead--active,
+.umTableRow--active {
+  display: grid;
+  grid-template-columns: 1.5fr 2.5fr 1.5fr 1.5fr 2.5fr;
+}
+
+/* Non-active: 5 columns */
+.umTableHead--inactive,
+.umTableRow--inactive {
+  display: grid;
+  grid-template-columns: 1.5fr 2.5fr 1fr 1.5fr 2fr;
+}
+
+.umTableHead--all,
+.umTableHead--active,
+.umTableHead--inactive {
+  padding: 0.6rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.umTableHead--all span,
+.umTableHead--active span,
+.umTableHead--inactive span {
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--sidebar-text, #aaa);
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
 
-/* ── Table data row ───────────────────────────── */
-.adminUsersTableRow {
-  display: grid;
-  grid-template-columns: 1.5fr 2.5fr 1fr 1.2fr 2fr 2fr;
-  padding: 0.85rem 1.25rem;
+.umTableRow--all,
+.umTableRow--active,
+.umTableRow--inactive {
+  padding: 0.8rem 1.4rem;
   border-bottom: 1px solid var(--sidebar-border, #f0ede8);
   align-items: center;
   transition: background 0.15s;
 }
 
-.adminUsersTableRow:last-child {
-  border-bottom: none;
-}
+.umTableRow--all:last-child,
+.umTableRow--active:last-child,
+.umTableRow--inactive:last-child { border-bottom: none; }
 
-.adminUsersTableRow:hover {
-  background: var(--nav-active-bg, #f5f4f1);
-}
+.umTableRow--all:hover,
+.umTableRow--active:hover,
+.umTableRow--inactive:hover { background: var(--nav-active-bg, #f5f4f1); }
 
-/* ── Cell styles ──────────────────────────────── */
-.adminUsersCell {
-  font-size: 0.85rem;
+/* ── Cells ────────────────────────────────────── */
+.umCell {
+  font-size: 0.83rem;
   color: var(--content-color, #1a1a1a);
   font-weight: 500;
+  padding-right: 0.75rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 0.75rem;
+  display: flex;
+  align-items: center;
 }
 
-.adminUsersCellName  { font-weight: 600; }
-.adminUsersCellEmail { color: var(--sidebar-text, #666); font-weight: 400; }
-.adminUsersCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
+.umCellName  { font-weight: 600; }
+.umCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
 
-/* Owned systems cell — allows wrapping for multiple tags */
-.adminUsersCellOwned {
-  display: flex;
+.umCellOwned {
+  gap: 0.3rem;
   flex-wrap: wrap;
-  gap: 0.35rem;
   white-space: normal;
   overflow: visible;
 }
 
-.adminCellEmpty {
-  color: var(--sidebar-text, #bbb);
-  font-weight: 400;
+.umCellActions {
+  overflow: visible;
+  white-space: normal;
 }
 
-/* ── Role badges ──────────────────────────────── */
-.adminRoleBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
+.umNone { color: var(--sidebar-text, #bbb); font-style: normal; font-weight: 400; }
 
-.adminRoleBadgeadmin { background: rgba(201, 169, 110, 0.15); color: #a07d3a; }
-.adminRoleBadgebuyer { background: rgba(99, 179, 237, 0.12);  color: #2b6cb0; }
-
-/* ── Owned system tags ────────────────────────── */
-.adminOwnedTag {
+/* ── Owned tags ───────────────────────────────── */
+.umOwnedTag {
   display: inline-flex;
-  align-items: center;
   background: var(--nav-active-bg, #f0ede8);
   color: var(--content-color, #555);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  padding: 0.2rem 0.55rem;
+  padding: 0.18rem 0.5rem;
   border-radius: 6px;
   border: 1px solid var(--sidebar-border, #e8e4de);
 }
 
-/* ── Empty note ───────────────────────────────── */
-.adminEmptyNote {
-  font-size: 0.85rem;
-  color: var(--sidebar-text, #aaa);
-  padding: 2rem;
-  text-align: center;
-}
-
-/* ── ManualUnlockButton overrides ─────────────── */
-.unlockGroup {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.unlockSelect {
-  font-size: 0.8rem;
-  padding: 0.35rem 0.6rem;
-  border: 1px solid var(--sidebar-border, #ddd8d0);
-  border-radius: 7px;
-  background: var(--main-bg, #f5f4f1);
-  color: var(--content-color, #1a1a1a);
-  font-family: inherit;
-  cursor: pointer;
-  max-width: 160px;
-}
-
-.unlockBtn {
+.umOwnedCount {
   font-size: 0.78rem;
-  padding: 0.35rem 0.85rem;
-  border: none;
+  font-weight: 600;
+  color: var(--content-color, #555);
+}
+
+/* ── Role badge ───────────────────────────────── */
+.umRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.umRoleBadge--admin { background: rgba(201,169,110,0.15); color: #a07d3a; }
+.umRoleBadge--buyer { background: rgba(99,179,237,0.12);  color: #2b6cb0; }
+
+/* ── Status badge ─────────────────────────────── */
+.umStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.umStatusBadge--active   { background: rgba(56,161,105,0.12);  color: #2f855a; }
+.umStatusBadge--inactive { background: rgba(246,173,85,0.12);  color: #b7791f; }
+.umStatusBadge--banned   { background: rgba(229,62,62,0.1);    color: #c53030; }
+
+/* ── Actions group ────────────────────────────── */
+.umActionsGroup {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+/* ── Action buttons ───────────────────────────── */
+.umActionBtn {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.7rem;
   border-radius: 7px;
-  background: #1a1a1a;
-  color: #fff;
+  border: 1px solid transparent;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+.umActionBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.umActionBtn--ban        { background: rgba(229,62,62,0.08);    color: #c53030; border-color: rgba(229,62,62,0.2); }
+.umActionBtn--ban:hover:not(:disabled)        { background: rgba(229,62,62,0.16); }
+
+.umActionBtn--deactivate { background: rgba(246,173,85,0.1);   color: #b7791f; border-color: rgba(246,173,85,0.25); }
+.umActionBtn--deactivate:hover:not(:disabled) { background: rgba(246,173,85,0.2); }
+
+.umActionBtn--delete     { background: rgba(113,128,150,0.08); color: #718096; border-color: rgba(113,128,150,0.2); }
+.umActionBtn--delete:hover:not(:disabled)     { background: rgba(229,62,62,0.1); color: #c53030; border-color: rgba(229,62,62,0.2); }
+
+.umActionBtn--activate   { background: rgba(56,161,105,0.1);   color: #2f855a; border-color: rgba(56,161,105,0.25); }
+.umActionBtn--activate:hover:not(:disabled)   { background: rgba(56,161,105,0.2); }
+
+.umActionBtn--unban      { background: rgba(99,179,237,0.1);   color: #2b6cb0; border-color: rgba(99,179,237,0.25); }
+.umActionBtn--unban:hover:not(:disabled)      { background: rgba(99,179,237,0.2); }
+
+/* ── Confirm popover ──────────────────────────── */
+.umConfirmPopover {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  min-width: 210px;
 }
 
-.unlockBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-.unlockBtn:hover:not(:disabled) { background: #333; }
+.umConfirmMsg {
+  font-size: 0.78rem;
+  color: var(--content-color, #1a1a1a);
+  line-height: 1.4;
+}
 
-.allOwned  { font-size: 0.78rem; color: var(--sidebar-text, #aaa); }
-.unlockDone { font-size: 0.78rem; color: #38a169; font-weight: 600; }
+.umConfirmBtns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.umConfirmCancel {
+  flex: 1;
+  padding: 0.3rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  background: transparent;
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--sidebar-text, #888);
+  cursor: pointer;
+}
+.umConfirmCancel:hover { background: var(--nav-active-bg, #f5f4f1); }
+
+.umConfirmOk {
+  flex: 1;
+  padding: 0.3rem 0.6rem;
+  border-radius: 7px;
+  border: none;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.umConfirmOk:hover { background: #333; }
+.umConfirmOkDanger { background: #c53030; }
+.umConfirmOkDanger:hover { background: #9b2c2c; }
+
+/* ── Empty ────────────────────────────────────── */
+.umEmpty {
+  font-size: 0.83rem;
+  color: var(--sidebar-text, #aaa);
+  padding: 1.5rem;
+  text-align: center;
+}
