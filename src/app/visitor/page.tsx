@@ -2770,6 +2770,7 @@ export default function VisitorPage() {
 
 
       {/* ── AI Visual Systems ─────────────────────────────────────────────── */}
+      {/* ── AI Visual Systems — Header only, contained ── */}
       <section className="vAiSection" id="ai-visuals">
         <div className="vAiSectionInner">
           <div className="vAiHeader">
@@ -2789,149 +2790,127 @@ export default function VisitorPage() {
               </p>
             </Reveal>
           </div>
+        </div>
+      </section>
 
-          {/* ═══════════════════════════════════════════════════════════
-              SECTION 1 — ARCHITECTURE
-              Sticky scroll-jacking → chairs + table reveal → videos
-          ═══════════════════════════════════════════════════════════ */}
-          <ArchitectureSection>
-            {/* Interior videos */}
-            <MagazineSection
-              label="AI Interior Film"
-              labelAccent="#7dc9a0"
-              title="8 Interior."
-              titleAccent="#7dc9a0"
-              italicLine="Yours forever."
-              desc="Warm light, material depth, and spatial atmosphere — AI-generated at full resolution. Purchase once, download anytime from your dashboard."
-              accent="#7dc9a0"
-              gradient="linear-gradient(135deg, #0d1a12 0%, #122018 60%, #0d0c0b 100%)"
-              cards={interiorCards}
-              ctaLabel="Get Interior Access"
-              delay={0}
-            />
+      {/* ═══════════════════════════════════════════════════════════════
+          STANDALONE SECTION 1 — ARCHITECTURE
+          Full-width sticky scroll-jacking: chairs + table → videos
+      ═══════════════════════════════════════════════════════════════ */}
+      <ArchitectureSection>
+        <MagazineSection
+          label="AI Interior Film"
+          labelAccent="#7dc9a0"
+          title="8 Interior."
+          titleAccent="#7dc9a0"
+          italicLine="Yours forever."
+          desc="Warm light, material depth, and spatial atmosphere — AI-generated at full resolution. Purchase once, download anytime from your dashboard."
+          accent="#7dc9a0"
+          gradient="linear-gradient(135deg, #0d1a12 0%, #122018 60%, #0d0c0b 100%)"
+          cards={interiorCards}
+          ctaLabel="Get Interior Access"
+          delay={0}
+        />
+        <MagazineSection
+          label="AI Exterior Design"
+          labelAccent="#8fc99a"
+          title="6 Exterior."
+          titleAccent="#8fc99a"
+          italicLine="Yours forever."
+          desc="Drone sweeps, architectural facades, and atmospheric landscapes — cinematic AI films at full resolution. One purchase, lifetime access."
+          accent="#8fc99a"
+          gradient="linear-gradient(135deg, #0d1a10 0%, #142018 60%, #0d0c0b 100%)"
+          cards={exteriorCards}
+          ctaLabel="Get Exterior Access"
+          delay={0.05}
+        />
+      </ArchitectureSection>
 
-            {/* Exterior videos */}
-            <MagazineSection
-              label="AI Exterior Design"
-              labelAccent="#8fc99a"
-              title="6 Exterior."
-              titleAccent="#8fc99a"
-              italicLine="Yours forever."
-              desc="Drone sweeps, architectural facades, and atmospheric landscapes — cinematic AI films at full resolution. One purchase, lifetime access."
-              accent="#8fc99a"
-              gradient="linear-gradient(135deg, #0d1a10 0%, #142018 60%, #0d0c0b 100%)"
-              cards={exteriorCards}
-              ctaLabel="Get Exterior Access"
-              delay={0.05}
-            />
-          </ArchitectureSection>
+      {/* ── Divider ── */}
+      <div className="vAiSectionDivider">
+        <div className="vAiSectionDividerLine" />
+        <span className="vAiSectionDividerLabel">3D Modeling</span>
+        <div className="vAiSectionDividerLine" />
+      </div>
 
-          {/* ── Section divider between Architecture and Modeling ── */}
-          <div className="vAiSectionDivider">
-            <div className="vAiSectionDividerLine" />
-            <span className="vAiSectionDividerLabel">3D Modeling</span>
-            <div className="vAiSectionDividerLine" />
+      {/* ═══════════════════════════════════════════════════════════════
+          STANDALONE SECTION 2 — MODELING
+          Full-width sticky scroll-jacking: orcs → videos
+      ═══════════════════════════════════════════════════════════════ */}
+      <ModelingSection>
+        <MagazineSection
+          label="3D Animation"
+          labelAccent="#4ade80"
+          title="3 Animations."
+          titleAccent="#4ade80"
+          italicLine="Rendered in Blender."
+          desc="Hand-modelled 3D assets animated in Blender — cinematic camera orbits, HDRI lighting, and photorealistic metal shaders. Full resolution MP4, lifetime access."
+          accent="#4ade80"
+          gradient="linear-gradient(135deg, #061a0e 0%, #0e2a18 60%, #0d0c0b 100%)"
+          cards={animationCards}
+          ctaLabel="Get Animation Access"
+          delay={0.1}
+        />
+        <div className="vObjNote">
+          <div className="vObjNoteLeft">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#4ade80", flexShrink: 0 }}>
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            <div>
+              <p className="vObjNoteTitle"><span style={{ color: "#4ade80" }}>.OBJ source files included</span> with every 3D animation purchase.</p>
+              <p className="vObjNoteDesc">Every weapon animation comes with the original <strong>.OBJ + .MTL source files</strong> — import directly into Blender, Maya, or Cinema 4D. Files are <strong>not publicly accessible</strong> — delivered privately to your email upon purchase.</p>
+              <div className="vObjNoteBadges">
+                {[".OBJ", ".MTL", "Blender", "Maya", "Cinema 4D"].map(b => <span key={b} className="vObjBadge">{b}</span>)}
+                <span className="vObjBadgePrivate">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Once purchased, lifetime access.
+                </span>
+              </div>
+            </div>
           </div>
-
-          {/* ═══════════════════════════════════════════════════════════
-              SECTION 2 — MODELING
-              Sticky scroll-jacking → orc characters reveal → videos
-          ═══════════════════════════════════════════════════════════ */}
-          <ModelingSection>
-            {/* 3D Animation (weapons) */}
-            <MagazineSection
-              label="3D Animation"
-              labelAccent="#4ade80"
-              title="3 Animations."
-              titleAccent="#4ade80"
-              italicLine="Rendered in Blender."
-              desc="Hand-modelled 3D assets animated in Blender — cinematic camera orbits, HDRI lighting, and photorealistic metal shaders. Full resolution MP4, lifetime access."
-              accent="#4ade80"
-              gradient="linear-gradient(135deg, #061a0e 0%, #0e2a18 60%, #0d0c0b 100%)"
-              cards={animationCards}
-              ctaLabel="Get Animation Access"
-              delay={0.1}
-            />
-
-            {/* OBJ note — weapons */}
-            <div className="vObjNote">
-              <div className="vObjNoteLeft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#4ade80", flexShrink: 0 }}>
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                  <line x1="12" y1="22.08" x2="12" y2="12"/>
-                </svg>
-                <div>
-                  <p className="vObjNoteTitle">
-                    <span style={{ color: "#4ade80" }}>.OBJ source files included</span> with every 3D animation purchase.
-                  </p>
-                  <p className="vObjNoteDesc">
-                    Every weapon and character animation comes with the original <strong>.OBJ + .MTL source files</strong> — import directly into Blender, Maya, or Cinema 4D. Apply your own materials, modify geometry, or re-render at any resolution. Files are <strong>not publicly accessible</strong> — delivered privately to your email upon purchase.
-                  </p>
-                  <div className="vObjNoteBadges">
-                    <span className="vObjBadge">.OBJ</span>
-                    <span className="vObjBadge">.MTL</span>
-                    <span className="vObjBadge">Blender</span>
-                    <span className="vObjBadge">Maya</span>
-                    <span className="vObjBadge">Cinema 4D</span>
-                    <span className="vObjBadgePrivate">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                      </svg>
-                      Once purchased, lifetime access.
-                    </span>
-                  </div>
-                </div>
+        </div>
+        <MagazineSection
+          label="3D Character Animation"
+          labelAccent="#86efac"
+          title="3 Characters."
+          titleAccent="#86efac"
+          italicLine="Sculpted in Blender."
+          desc="High-poly orc character animations rendered in Blender — cinematic camera orbits, HDRI environment lighting, procedural skin shaders, and full shadow passes. Full resolution MP4, lifetime access."
+          accent="#86efac"
+          gradient="linear-gradient(135deg, #061a0a 0%, #0e2a12 60%, #0d0c0b 100%)"
+          cards={orcCards}
+          ctaLabel="Get Character Access"
+          delay={0.15}
+        />
+        <div className="vObjNote" style={{ borderColor: "rgba(134,239,172,0.18)", background: "rgba(134,239,172,0.05)" }}>
+          <div className="vObjNoteLeft">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#86efac", flexShrink: 0 }}>
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            <div>
+              <p className="vObjNoteTitle"><span style={{ color: "#86efac" }}>.OBJ source files included</span> with every 3D character animation purchase.</p>
+              <p className="vObjNoteDesc">Every character animation comes with the original <strong>.OBJ + .MTL source files</strong> — import directly into Blender, Maya, or Cinema 4D. Modify the mesh, apply your own shaders, or re-render at any resolution. Files delivered privately to your email upon purchase.</p>
+              <div className="vObjNoteBadges">
+                {[".OBJ", ".MTL", "Blender", "Maya", "Cinema 4D"].map(b => (
+                  <span key={b} className="vObjBadge" style={{ color: "#86efac", background: "rgba(134,239,172,0.1)", borderColor: "rgba(134,239,172,0.2)" }}>{b}</span>
+                ))}
+                <span className="vObjBadgePrivate">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Once purchased, lifetime access.
+                </span>
               </div>
             </div>
+          </div>
+        </div>
+      </ModelingSection>
 
-            {/* 3D Character Animation (ORC) */}
-            <MagazineSection
-              label="3D Character Animation"
-              labelAccent="#86efac"
-              title="3 Characters."
-              titleAccent="#86efac"
-              italicLine="Sculpted in Blender."
-              desc="High-poly orc character animations rendered in Blender — cinematic camera orbits, HDRI environment lighting, procedural skin shaders, and full shadow passes. Full resolution MP4, lifetime access."
-              accent="#86efac"
-              gradient="linear-gradient(135deg, #061a0a 0%, #0e2a12 60%, #0d0c0b 100%)"
-              cards={orcCards}
-              ctaLabel="Get Character Access"
-              delay={0.15}
-            />
-
-            {/* OBJ note — characters */}
-            <div className="vObjNote" style={{ borderColor: "rgba(134,239,172,0.18)", background: "rgba(134,239,172,0.05)" }}>
-              <div className="vObjNoteLeft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#86efac", flexShrink: 0 }}>
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                  <line x1="12" y1="22.08" x2="12" y2="12"/>
-                </svg>
-                <div>
-                  <p className="vObjNoteTitle">
-                    <span style={{ color: "#86efac" }}>.OBJ source files included</span> with every 3D character animation purchase.
-                  </p>
-                  <p className="vObjNoteDesc">
-                    Every character animation comes with the original <strong>.OBJ + .MTL source files</strong> — import directly into Blender, Maya, or Cinema 4D. Modify the mesh, apply your own shaders, rig differently, or re-render at any resolution. Files are <strong>not publicly accessible</strong> — delivered privately to your email upon purchase.
-                  </p>
-                  <div className="vObjNoteBadges">
-                    {[".OBJ", ".MTL", "Blender", "Maya", "Cinema 4D"].map(b => (
-                      <span key={b} className="vObjBadge" style={{ color: "#86efac", background: "rgba(134,239,172,0.1)", borderColor: "rgba(134,239,172,0.2)" }}>{b}</span>
-                    ))}
-                    <span className="vObjBadgePrivate">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                      </svg>
-                      Once purchased, lifetime access.
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ModelingSection>
-
-          {/* ── Get Access CTA ── */}
+      {/* ── Final AI CTA — contained block ── */}
+      <section className="vAiCtaSection">
+        <div className="vAiSectionInner">
           <div className="vAiSectionBlock vAiCtaBlock">
             <p className="vAiCtaEyebrow">20 videos · .OBJ source files · Full resolution · Lifetime access</p>
             <h3 className="vAiCtaTitle">
@@ -2946,7 +2925,6 @@ export default function VisitorPage() {
               </svg>
             </a>
           </div>
-
         </div>
       </section>
 
