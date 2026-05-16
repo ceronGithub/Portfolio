@@ -1,9 +1,9 @@
-/* dashboard.css — Admin Overview page. Inter font, dark theme. */
+/* dashboard.css — Admin Overview. Inter font. Dark theme. */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ── Page ─────────────────────────────────────── */
 .ovPage {
-  padding: 2.5rem 2rem 7rem;
+  padding: 2.5rem 2rem 8rem;
   max-width: 1300px;
   font-family: 'Inter', -apple-system, sans-serif;
 }
@@ -11,128 +11,115 @@
 .ovHeader { margin-bottom: 2rem; }
 
 .ovTitle {
-  font-size: 1.75rem;
-  font-weight: 800;
+  font-size: 1.75rem; font-weight: 800;
   color: var(--content-color, #e8e4de);
-  letter-spacing: -0.03em;
-  margin: 0 0 0.2rem;
+  letter-spacing: -0.03em; margin: 0 0 0.2rem;
+  font-family: 'Inter', sans-serif;
+}
+.ovSubtitle {
+  font-size: 0.85rem; color: var(--sidebar-text, #888); margin: 0;
   font-family: 'Inter', sans-serif;
 }
 
-.ovSubtitle {
-  font-size: 0.875rem;
-  color: var(--sidebar-text, #888);
-  margin: 0;
-}
-
-/* ── Main row ─────────────────────────────────── */
-.ovMainRow {
+/* ── Row 1: KPI cards ─────────────────────────── */
+.ovKpiRow {
   display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 1.25rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
   margin-bottom: 1.25rem;
-  align-items: start;
   will-change: transform;
 }
 
-/* ── Charts column ────────────────────────────── */
-.ovChartsCol {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+.ovKpiCard {
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.ovKpiCard:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+.ovKpiTop { margin-bottom: 0.35rem; }
+
+.ovKpiIcon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
 }
 
-/* ── Generic chart card ───────────────────────── */
+.ovKpiValue {
+  font-size: 1.8rem; font-weight: 800;
+  letter-spacing: -0.04em; line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+.ovKpiLabel {
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--sidebar-text, #888);
+  font-family: 'Inter', sans-serif;
+}
+
+.ovKpiSub {
+  font-size: 0.7rem; color: var(--sidebar-text, #666);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Row 2 ────────────────────────────────────── */
+.ovRow2 {
+  display: grid;
+  grid-template-columns: 1fr 280px 220px;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  will-change: transform;
+  align-items: start;
+}
+
+/* ── Row 3 ────────────────────────────────────── */
+.ovRow3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  will-change: transform;
+}
+
+/* ── Chart card ───────────────────────────────── */
 .ovChartCard {
   background: var(--sidebar-bg, #141414);
   border: 1px solid var(--sidebar-border, #252525);
   border-radius: 16px;
-  padding: 1.4rem 1.4rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  padding: 1.25rem 1.4rem 1rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
 }
 
-.ovChartTitle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--sidebar-text, #666);
-  text-align: center;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+.ovChartLabel {
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--sidebar-text, #888);
+  letter-spacing: 0.01em; margin: 0;
   font-family: 'Inter', sans-serif;
 }
-
-/* ── Donut ────────────────────────────────────── */
-.ovDonutWrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.85rem;
-}
-
-.ovDonutSvg { width: 160px; height: 160px; display: block; }
-
-.ovDonutLegend {
-  list-style: none;
-  margin: 0; padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  width: 100%;
-}
-
-.ovDonutLegendItem {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.75rem;
-  font-family: 'Inter', sans-serif;
-}
-
-.ovDonutDot {
-  width: 9px; height: 9px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-
-.ovDonutName { flex: 1; color: var(--sidebar-text, #888); }
-.ovDonutPct  { font-weight: 700; color: var(--content-color, #e8e4de); }
 
 /* ── Bar chart ────────────────────────────────── */
 .ovBarWrap {
-  display: flex;
-  gap: 0.5rem;
-  height: 160px;
+  display: flex; gap: 0.5rem;
 }
 
 .ovBarYAxis {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   justify-content: space-between;
   padding-bottom: 1.5rem;
 }
 .ovBarYAxis span {
-  font-size: 0.6rem;
-  color: var(--sidebar-text, #555);
-  text-align: right;
-  width: 18px;
+  font-size: 0.58rem; color: var(--sidebar-text, #555);
+  text-align: right; width: 24px;
   font-family: 'Inter', sans-serif;
 }
 
 .ovBarBars {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
-  padding-bottom: 1.5rem;
-  position: relative;
+  flex: 1; display: flex; align-items: flex-end;
+  gap: 0.45rem; padding-bottom: 1.5rem; position: relative;
 }
-
 .ovBarBars::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 1.5rem 0;
+  content: ""; position: absolute; inset: 0 0 1.5rem 0;
   background: repeating-linear-gradient(
     to bottom,
     var(--sidebar-border, #222) 0, var(--sidebar-border, #222) 1px,
@@ -142,193 +129,73 @@
 }
 
 .ovBarGroup {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
-  position: relative;
-  gap: 0.3rem;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  height: 100%; position: relative; gap: 0.3rem;
 }
 
 .ovBar {
-  width: 100%;
-  border-radius: 5px 5px 0 0;
-  min-height: 4px;
+  width: 100%; border-radius: 5px 5px 0 0; min-height: 3px;
   transition: opacity 0.2s;
 }
-.ovBar:hover { opacity: 0.8; }
+.ovBar:hover { opacity: 0.75; }
 
 .ovBarLabel {
-  font-size: 0.6rem;
-  color: var(--sidebar-text, #555);
-  white-space: nowrap;
-  position: absolute;
-  bottom: 0;
+  font-size: 0.58rem; color: var(--sidebar-text, #555);
+  white-space: nowrap; position: absolute; bottom: 0;
   font-family: 'Inter', sans-serif;
 }
 
-/* ── Stat column ──────────────────────────────── */
-.ovStatCol {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+/* ── Donut chart ──────────────────────────────── */
+.ovDonutWrap {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
 }
+.ovDonutSvg { width: 130px; height: 130px; display: block; }
 
-.ovStatCard {
+.ovDonutLegend { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 0.3rem; }
+
+.ovDonutLegendItem {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.72rem; font-family: 'Inter', sans-serif;
+}
+.ovDonutDot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.ovDonutName { flex: 1; color: var(--sidebar-text, #888); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ovDonutPct  { font-weight: 700; color: var(--content-color, #e8e4de); }
+
+/* ── Stat panel ───────────────────────────────── */
+.ovStatPanel {
   background: var(--sidebar-bg, #141414);
   border: 1px solid var(--sidebar-border, #252525);
-  border-radius: 12px;
-  padding: 0.9rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.ovStatCard:hover {
-  border-color: rgba(255,255,255,0.12);
-  transform: translateX(3px);
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0;
 }
 
-.ovStatValue {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  font-family: 'Inter', sans-serif;
-}
-
-.ovStatLabel {
-  font-size: 0.72rem;
+.ovStatPanelTitle {
+  font-size: 0.78rem; font-weight: 700;
   color: var(--sidebar-text, #888);
-  font-weight: 500;
+  margin: 0 0 0.75rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.ovStatRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--sidebar-border, #1e1e1e);
+}
+.ovStatRow:last-child { border-bottom: none; }
+
+.ovStatRowLabel {
+  font-size: 0.72rem; color: var(--sidebar-text, #888);
   font-family: 'Inter', sans-serif;
 }
-
-/* ── Stacked row ──────────────────────────────── */
-.ovStackedRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  will-change: transform;
-}
-
-/* ── Stacked bar chart ────────────────────────── */
-.ovStackedWrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.ovStackedLegend {
-  display: flex;
-  gap: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.ovStackedLegendItem {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.7rem;
-  color: var(--sidebar-text, #888);
+.ovStatRowValue {
+  font-size: 0.85rem; font-weight: 700;
   font-family: 'Inter', sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
-.ovStackedDot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-}
-
-.ovStackedBars {
-  display: flex;
-  gap: 0.5rem;
-  height: 170px;
-}
-
-.ovStackedYAxis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-bottom: 1.5rem;
-}
-.ovStackedYAxis span {
-  font-size: 0.6rem;
-  color: var(--sidebar-text, #555);
-  text-align: right;
-  width: 18px;
-  font-family: 'Inter', sans-serif;
-}
-
-.ovStackedBarArea {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 0.65rem;
-  padding-bottom: 1.5rem;
-  position: relative;
-}
-
-.ovStackedBarArea::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 1.5rem 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--sidebar-border, #222) 0, var(--sidebar-border, #222) 1px,
-    transparent 1px, transparent 16.666%
-  );
-  pointer-events: none;
-}
-
-.ovStackedBarGroup {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
-  position: relative;
-  gap: 0.3rem;
-}
-
-.ovStackedBar {
-  width: 100%;
-  border-radius: 5px 5px 0 0;
-  display: flex;
-  flex-direction: column-reverse;
-  overflow: hidden;
-}
-
-.ovStackedSeg { width: 100%; }
-
-.ovStackedLabel {
-  font-size: 0.6rem;
-  color: var(--sidebar-text, #555);
-  position: absolute;
-  bottom: 0;
-  white-space: nowrap;
-  font-family: 'Inter', sans-serif;
-}
-
-.ovStackedTitle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--sidebar-text, #666);
-  text-align: center;
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-}
-
-/* ── Legacy classes kept for other admin pages ── */
-.adminPageTitle {
-  font-size: 1.7rem; font-weight: 800;
-  color: var(--content-color, #e8e4de);
-  letter-spacing: -0.03em; margin-bottom: 0.2rem;
-  font-family: 'Inter', sans-serif;
-}
-.adminPageSubtitle {
-  font-size: 0.875rem; color: var(--sidebar-text, #888); font-weight: 400;
-  font-family: 'Inter', sans-serif;
-}
+/* ── Legacy ───────────────────────────────────── */
+.adminPageTitle { font-size: 1.7rem; font-weight: 800; color: var(--content-color,#e8e4de); letter-spacing: -0.03em; margin-bottom: 0.2rem; font-family: 'Inter',sans-serif; }
+.adminPageSubtitle { font-size: 0.875rem; color: var(--sidebar-text,#888); font-family: 'Inter',sans-serif; }

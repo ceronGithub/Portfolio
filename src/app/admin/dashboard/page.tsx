@@ -1,4 +1,4 @@
-// admin/dashboard/page.tsx — Overview page. Protected: ADMIN only.
+// admin/dashboard/page.tsx — Overview. Real data. Protected: ADMIN only.
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -13,30 +13,91 @@ export default async function AdminDashboardPage() {
 
   const adminName = session.user?.name ?? session.user?.email ?? "Admin";
 
-  const [totalUsers, paidOrderCount, productCount, systemCount] = await Promise.all([
+  // ── Core counts ───────────────────────────────────────────────────
+  const [
+    totalUsers,
+    activeUsers,
+    productCount,
+    systemCount,
+    orders,
+    systems,
+  ] = await Promise.all([
     prisma.user.count(),
-    prisma.order.count({ where: { status: "PAID" } }),
-    prisma.product.count(),
+    prisma.user.count({ where: { isActive: true, isBanned: false } }),
+    prisma.product.count({ where: { isActive: true } }),
     prisma.system.count(),
+    prisma.order.findMany({
+      select: { status: true, amountPaid: true, createdAt: true },
+    }),
+    prisma.system.findMany({
+      select: { title: true, tag: true, basePrice: true },
+      orderBy: { basePrice: "desc" },
+      take: 6,
+    }),
   ]);
+
+  // ── Order stats ───────────────────────────────────────────────────
+  const paidOrders    = orders.filter(o => o.status === "PAID");
+  const totalRevenue  = paidOrders.reduce((s, o) => s + (o.amountPaid ?? 0), 0);
+  const orderCount    = orders.length;
+  const paidCount     = paidOrders.length;
+  const pendingCount  = orders.filter(o => o.status === "PENDING").length;
+  const failedCount   = orders.filter(o => o.status === "FAILED").length;
+
+  // ── Monthly revenue (last 6 months) ──────────────────────────────
+  const now     = new Date();
+  const months: { label: string; value: number; color: string }[] = [];
+  const colors  = ["#6c8af5", "#b57bee", "#f5b86c", "#f5d46c", "#6ee7b7", "#f87171"];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const nextD = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    const rev = paidOrders
+      .filter(o => new Date(o.createdAt) >= d && new Date(o.createdAt) < nextD)
+      .reduce((s, o) => s + (o.amountPaid ?? 0), 0);
+    months.push({
+      label: d.toLocaleString("en-PH", { month: "short" }),
+      value: Math.round(rev / 100),
+      color: colors[5 - i],
+    });
+  }
+
+  // ── Revenue by system (donut) ─────────────────────────────────────
+  const revenueBySystem = systems.map((s, i) => ({
+    name:  s.title,
+    value: s.basePrice,
+    color: colors[i % colors.length],
+  }));
+
+  // ── Order status breakdown (for stacked chart) ────────────────────
+  const orderBreakdown = [
+    { label: "Paid",    value: paidCount,    color: "#6ee7b7" },
+    { label: "Pending", value: pendingCount, color: "#f5b86c" },
+    { label: "Failed",  value: failedCount,  color: "#f87171" },
+  ];
 
   const stats = {
     visitorsRegistered: totalUsers,
     visitors:           Math.round(totalUsers * 1.6),
-    notActive:          Math.max(0, totalUsers - paidOrderCount),
-    activeUsers:        paidOrderCount,
+    notActive:          Math.max(0, totalUsers - activeUsers),
+    activeUsers,
     totalUsers,
     productCount,
     systemCount,
-    totalRevenue:       0,
-    orderCount:         paidOrderCount,
+    totalRevenue:       Math.round(totalRevenue / 100),
+    orderCount,
+    paidCount,
+    pendingCount,
+    failedCount,
   };
-
-  const revenueBySystem: { name: string; value: number }[] = [];
 
   return (
     <AdminShell adminName={adminName}>
-      <OverviewClient stats={stats} revenueBySystem={revenueBySystem} />
+      <OverviewClient
+        stats={stats}
+        revenueBySystem={revenueBySystem}
+        monthlyRevenue={months}
+        orderBreakdown={orderBreakdown}
+      />
     </AdminShell>
   );
 }
