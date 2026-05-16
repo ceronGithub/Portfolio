@@ -1,0 +1,577 @@
+/* ================================================
+   uploads.css — Admin Uploads page styles.
+   Upload dropzone, folder chips, file list,
+   progress bar, results panel.
+   ================================================ */
+
+/* ── Page root ────────────────────────────────── */
+.uploadsPage {
+  padding: 2.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Header ───────────────────────────────────── */
+.uploadsHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.uploadsTitle {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.uploadsSubtitle {
+  font-size: 0.85rem;
+  color: var(--sidebar-text, #888);
+  margin: 0;
+}
+
+/* ── Drive connected badge ────────────────────── */
+.uploadsDriveStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #48bb78;
+  background: rgba(72, 187, 120, 0.1);
+  border: 1px solid rgba(72, 187, 120, 0.2);
+  border-radius: 100px;
+  padding: 0.4rem 0.85rem;
+  white-space: nowrap;
+}
+
+.uploadsDriveStatusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #48bb78;
+  flex-shrink: 0;
+}
+
+/* ── Connect card (not connected state) ───────── */
+.uploadsConnectCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 20px;
+  max-width: 480px;
+  margin: 4rem auto;
+}
+
+.uploadsConnectIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploadsConnectTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  margin: 0;
+}
+
+.uploadsConnectDesc {
+  font-size: 0.875rem;
+  color: var(--sidebar-text, #888);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.uploadsConnectBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.uploadsConnectBtn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+/* ── Main layout ──────────────────────────────── */
+.uploadsLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ── Config panel (left) ──────────────────────── */
+.uploadsConfigPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Step blocks ──────────────────────────────── */
+.uploadsStep {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+.uploadsStepHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.uploadsStepNumber {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uploadsStepLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Folder chips ─────────────────────────────── */
+.uploadsFolderGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.uploadsFolderChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 100px;
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  background: transparent;
+  color: var(--content-color, #444);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.uploadsFolderChip:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.uploadsFolderChipActive {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.uploadsTypeChip {
+  border-radius: 8px;
+}
+
+.uploadsFolderLoading,
+.uploadsFolderError,
+.uploadsEmptyFolders {
+  font-size: 0.82rem;
+  color: var(--sidebar-text, #888);
+  margin: 0;
+}
+
+.uploadsFolderError { color: #fc8181; }
+
+.uploadsRetryBtn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* ── Dropzone ─────────────────────────────────── */
+.uploadsDropzone {
+  border: 2px dashed var(--sidebar-border, #ddd);
+  border-radius: 12px;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--sidebar-text, #aaa);
+  position: relative;
+}
+
+.uploadsDropzone:hover {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.04);
+  color: #6366f1;
+}
+
+.uploadsDropzoneText {
+  font-size: 0.875rem;
+  color: var(--content-color, #444);
+  margin: 0;
+}
+
+.uploadsDropzoneText span {
+  color: #6366f1;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.uploadsDropzoneHint {
+  font-size: 0.75rem;
+  color: var(--sidebar-text, #aaa);
+  margin: 0;
+}
+
+.uploadsHiddenInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Files panel (right) ──────────────────────── */
+.uploadsFilesPanel {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.uploadsFilesEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--sidebar-text, #bbb);
+  text-align: center;
+}
+
+.uploadsFilesEmpty p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.uploadsFilesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.uploadsFilesCount {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.uploadsClearBtn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: var(--sidebar-text, #aaa);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.uploadsClearBtn:hover { color: #fc8181; }
+
+/* ── File list ────────────────────────────────── */
+.uploadsFilesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.uploadsFileRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--sidebar-border, #f0ede8);
+  background: var(--nav-active-bg, #fafafa);
+  transition: border-color 0.15s;
+}
+
+.uploadsFileRowSupabase {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.uploadsFileIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.uploadsFileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.uploadsFileName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--content-color, #1a1a1a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uploadsFileSize {
+  font-size: 0.72rem;
+  color: var(--sidebar-text, #aaa);
+}
+
+.uploadsFileActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* ── Supabase toggle button ───────────────────── */
+.uploadsSupabaseToggle {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--sidebar-border, #ddd);
+  background: transparent;
+  color: var(--sidebar-text, #aaa);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.uploadsSupabaseToggle:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.uploadsSupabaseToggleOn {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+}
+
+.uploadsRemoveBtn {
+  background: none;
+  border: none;
+  color: var(--sidebar-text, #ccc);
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.uploadsRemoveBtn:hover { color: #fc8181; }
+
+/* ── Supabase summary hint ────────────────────── */
+.uploadsSupabaseSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--sidebar-text, #888);
+  padding: 0.6rem 0.75rem;
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+/* ── Upload submit button ─────────────────────── */
+.uploadsSubmitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.uploadsSubmitBtn:hover:not(.uploadsSubmitBtnDisabled) {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.uploadsSubmitBtnDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Progress bar ─────────────────────────────── */
+.uploadsProgressBar {
+  height: 4px;
+  background: var(--sidebar-border, #eee);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.uploadsProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+/* ── Spinner ──────────────────────────────────── */
+.uploadsSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: uploadsSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes uploadsSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Error banner ─────────────────────────────── */
+.uploadsErrorBanner {
+  padding: 0.75rem 1rem;
+  background: rgba(252, 129, 129, 0.1);
+  border: 1px solid rgba(252, 129, 129, 0.3);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #fc8181;
+}
+
+/* ── Results ──────────────────────────────────── */
+.uploadsResults {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.uploadsResultsTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.25rem;
+}
+
+.uploadsResultRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(72, 187, 120, 0.06);
+  border: 1px solid rgba(72, 187, 120, 0.15);
+}
+
+.uploadsResultRowError {
+  background: rgba(252, 129, 129, 0.06);
+  border-color: rgba(252, 129, 129, 0.2);
+}
+
+.uploadsResultIcon { font-size: 0.9rem; flex-shrink: 0; }
+
+.uploadsResultInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.uploadsResultName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--content-color, #1a1a1a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uploadsResultBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  width: fit-content;
+}
+
+.uploadsResultBadgeDrive    { background: rgba(72,187,120,0.15); color: #48bb78; }
+.uploadsResultBadgeSupabase { background: rgba(99,102,241,0.15); color: #6366f1; }
+
+.uploadsResultError {
+  font-size: 0.75rem;
+  color: #fc8181;
+}

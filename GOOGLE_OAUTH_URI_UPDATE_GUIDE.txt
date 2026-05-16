@@ -1,0 +1,197 @@
+================================================================
+  MATTHEW STUDIO — Google OAuth URI Update Guide
+  How to update Authorized JavaScript Origins &
+  Authorized Redirect URIs in Google Cloud Console
+================================================================
+
+When you deploy your app to a live domain (e.g. https://matthewstudio.com),
+you MUST add your production URLs to Google Cloud Console. This guide walks
+you through the exact steps.
+
+You do NOT remove the localhost entries — just ADD the new ones alongside them.
+
+----------------------------------------------------------------
+  WHEN DO YOU NEED THIS?
+----------------------------------------------------------------
+
+  - You deployed your app to Vercel, Railway, Render, or any host
+  - You changed your domain name
+  - localhost is working but production Google login is failing
+  - You see error: "redirect_uri_mismatch" or "origin not allowed"
+
+----------------------------------------------------------------
+  STEP 1 — Open Google Cloud Console
+----------------------------------------------------------------
+
+  1. Open your browser and go to:
+     https://console.cloud.google.com
+
+  2. Make sure you are signed in with the same Google account
+     you used to create the project (the one with the C icon).
+
+  3. At the top left, confirm you are in the correct project:
+     "My First Project"
+     (or whichever project you created the OAuth client in)
+
+----------------------------------------------------------------
+  STEP 2 — Navigate to Your OAuth Client
+----------------------------------------------------------------
+
+  1. In the top search bar, type:
+     "Credentials"
+     and click the result under "APIs & Services"
+
+  2. You will see the Credentials page.
+
+  3. Under "OAuth 2.0 Client IDs", find:
+     "Matthew Studio Drive"
+
+  4. Click the pencil (edit) icon on the right side of that row.
+
+  This opens the OAuth client editor.
+
+----------------------------------------------------------------
+  STEP 3 — Add Authorized JavaScript Origins
+----------------------------------------------------------------
+
+  This section controls which DOMAINS are allowed to make
+  requests to Google. You need to add your live domain here.
+
+  Current entries (do NOT delete these):
+    http://localhost:3000
+
+  What to do:
+  1. Scroll down to the section titled:
+     "Authorized JavaScript origins"
+
+  2. Click the button:
+     "+ Add URI"
+
+  3. In the new input field that appears, type your live domain:
+     https://yourdomain.com
+
+     EXAMPLES:
+       https://matthewstudio.com
+       https://matthewstudio.vercel.app
+       https://www.matthewstudio.com
+
+  4. Do NOT include a trailing slash ( / ) at the end.
+  4. Do NOT include any path after the domain.
+     WRONG:  https://matthewstudio.com/admin
+     RIGHT:  https://matthewstudio.com
+
+  After adding, you should have TWO entries:
+    http://localhost:3000
+    https://yourdomain.com
+
+----------------------------------------------------------------
+  STEP 4 — Add Authorized Redirect URIs
+----------------------------------------------------------------
+
+  This section controls where Google sends the user AFTER
+  they approve access. Must match exactly what your app uses.
+
+  Current entries (do NOT delete these):
+    http://localhost:3000/api/auth/google/callback
+
+  What to do:
+  1. Scroll down to the section titled:
+     "Authorized redirect URIs"
+
+  2. Click the button:
+     "+ Add URI"
+
+  3. In the new input field, type your live callback URL:
+     https://yourdomain.com/api/auth/google/callback
+
+     EXAMPLES:
+       https://matthewstudio.com/api/auth/google/callback
+       https://matthewstudio.vercel.app/api/auth/google/callback
+
+  4. The path /api/auth/google/callback must be EXACT.
+     This is the route in your Next.js app that handles
+     the OAuth response from Google.
+
+  After adding, you should have TWO entries:
+    http://localhost:3000/api/auth/google/callback
+    https://yourdomain.com/api/auth/google/callback
+
+----------------------------------------------------------------
+  STEP 5 — Save
+----------------------------------------------------------------
+
+  1. Scroll to the bottom of the page.
+
+  2. Click the blue "Save" button.
+
+  3. You will be redirected back to the Credentials list page.
+
+  4. Google may take up to 5 minutes to apply the changes.
+     If it still fails right away, wait 5 minutes and try again.
+
+----------------------------------------------------------------
+  STEP 6 — Update Your .env File on the Server
+----------------------------------------------------------------
+
+  After updating Google Console, also update your environment
+  variables on your hosting platform (Vercel, Railway, etc.)
+
+  Find the variable:
+    GOOGLE_REDIRECT_URI
+
+  Change it from:
+    http://localhost:3000/api/auth/google/callback
+
+  To:
+    https://yourdomain.com/api/auth/google/callback
+
+  On Vercel:
+    1. Go to your project dashboard on vercel.com
+    2. Click "Settings" → "Environment Variables"
+    3. Find GOOGLE_REDIRECT_URI → click Edit
+    4. Update the value → Save
+    5. Redeploy your app for the change to take effect
+
+----------------------------------------------------------------
+  TROUBLESHOOTING
+----------------------------------------------------------------
+
+  ERROR: "redirect_uri_mismatch"
+  → The redirect URI in your .env does not match what Google
+    has in the Authorized Redirect URIs list. Double-check
+    both match exactly, including https:// and the path.
+
+  ERROR: "origin not allowed"
+  → Your domain is not in Authorized JavaScript Origins.
+    Go back to Step 3 and add it.
+
+  ERROR: "Access blocked: This app's request is invalid"
+  → Your OAuth consent screen may not be published.
+    Go to: Google Cloud Console → APIs & Services →
+    OAuth consent screen → click "Publish App"
+
+  Still failing after changes?
+  → Wait 5–10 minutes. Google changes can take time to propagate.
+  → Make sure you clicked Save in Step 5.
+  → Make sure your hosting platform has the updated env variable.
+
+----------------------------------------------------------------
+  QUICK REFERENCE — All URLs at a Glance
+----------------------------------------------------------------
+
+  JAVASCRIPT ORIGINS:
+    Local:       http://localhost:3000
+    Production:  https://yourdomain.com
+
+  REDIRECT URIs:
+    Local:       http://localhost:3000/api/auth/google/callback
+    Production:  https://yourdomain.com/api/auth/google/callback
+
+  ENV VARIABLE (GOOGLE_REDIRECT_URI):
+    Local:       http://localhost:3000/api/auth/google/callback
+    Production:  https://yourdomain.com/api/auth/google/callback
+
+================================================================
+  END OF DOCUMENT
+  Replace "yourdomain.com" with your actual domain everywhere.
+================================================================
