@@ -21,6 +21,7 @@ export default async function AdminDashboardPage() {
     systemCount,
     orders,
     systems,
+    topProductsRaw,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { isActive: true, isBanned: false } }),
@@ -33,6 +34,14 @@ export default async function AdminDashboardPage() {
       select: { title: true, tag: true, basePrice: true },
       orderBy: { basePrice: "desc" },
       take: 6,
+    }),
+    prisma.order.groupBy({
+      by: ["productId"],
+      where: { status: "PAID" },
+      _count: { id: true },
+      _sum: { amountPaid: true },
+      orderBy: { _count: { id: "desc" } },
+      take: 5,
     }),
   ]);
 
@@ -75,6 +84,19 @@ export default async function AdminDashboardPage() {
     { label: "Failed",  value: failedCount,  color: "#f87171" },
   ];
 
+  // Resolve product names for top products chart
+  const productIds = topProductsRaw.map(p => p.productId);
+  const productNames = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    select: { id: true, name: true },
+  });
+  const nameMap = new Map(productNames.map(p => [p.id, p.name]));
+  const topProducts = topProductsRaw.map((p, i) => ({
+    label: (nameMap.get(p.productId) ?? "Unknown").slice(0, 10),
+    value: p._count.id,
+    color: colors[i % colors.length],
+  }));
+
   const stats = {
     visitorsRegistered: totalUsers,
     visitors:           Math.round(totalUsers * 1.6),
@@ -95,6 +117,7 @@ export default async function AdminDashboardPage() {
       <OverviewClient
         stats={stats}
         revenueBySystem={revenueBySystem}
+        topProducts={topProducts}
         monthlyRevenue={months}
         orderBreakdown={orderBreakdown}
       />

@@ -17,7 +17,7 @@
 }
 
 /* ── Section ──────────────────────────────────── */
-.adminProductsSection {}
+.adminProductsSection { display: flex; flex-direction: column; gap: 0; }
 
 .adminProductsSectionTitle {
   font-size: 0.85rem;
@@ -260,3 +260,141 @@
 .adminProductsPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
 .adminOrdersPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+/* ── T2: Scrollable addons ────────────────────── */
+.adminAddonsScrollWrap {
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  border-radius: 8px;
+}
+.adminAddonsScrollWrap::-webkit-scrollbar { width: 4px; }
+.adminAddonsScrollWrap::-webkit-scrollbar-track { background: transparent; }
+.adminAddonsScrollWrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* ── T3: Section header with controls ─────────── */
+.prdSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.prdSectionControls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* T3: Search bar */
+.prdSearchWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  color: var(--sidebar-text, #666);
+}
+
+.prdSearchInput {
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  color: var(--content-color, #e8e4de);
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  width: 180px;
+}
+.prdSearchInput::placeholder { color: var(--sidebar-text, #555); }
+
+.prdSearchClear {
+  background: none; border: none;
+  font-size: 0.7rem; color: var(--sidebar-text, #666);
+  cursor: pointer; padding: 0;
+}
+.prdSearchClear:hover { color: var(--content-color, #e8e4de); }
+
+/* T3: Asset table grid (7 cols) */
+.adminProductsTableHeaderAsset,
+.adminProductsTableRowAsset {
+  grid-template-columns: 2fr 1fr 2.5fr 1fr 1fr 1.2fr 1.2fr !important;
+}
+
+/* T3: Category badge */
+.prdCatBadge {
+  display: inline-flex;
+  padding: 0.18rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.06);
+  color: var(--content-color, #e8e4de);
+  border: 1px solid var(--sidebar-border, #252525);
+  font-family: 'Inter', sans-serif;
+}
+
+/* T4: Category filter dropdown */
+.prdCatFilterWrap {
+  position: relative;
+}
+
+.prdCatFilterBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--content-color, #e8e4de);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+.prdCatFilterBtn:hover { border-color: rgba(255,255,255,0.15); }
+
+.prdCatDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  z-index: 50;
+  min-width: 160px;
+}
+
+.prdCatOption {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text, #888);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.12s, color 0.12s;
+}
+.prdCatOption:hover { background: rgba(255,255,255,0.05); color: var(--content-color, #e8e4de); }
+.prdCatOptionActive { background: rgba(255,255,255,0.08); color: var(--content-color, #e8e4de); font-weight: 700; }

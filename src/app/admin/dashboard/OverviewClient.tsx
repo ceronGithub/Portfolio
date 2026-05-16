@@ -30,6 +30,7 @@ interface Props {
   revenueBySystem: { name: string; value: number; color: string }[];
   monthlyRevenue:  { label: string; value: number; color: string }[];
   orderBreakdown:  { label: string; value: number; color: string }[];
+  topProducts:     { label: string; value: number; color: string }[];
 }
 
 // ── KPI Card ──────────────────────────────────────────────────────────
@@ -144,7 +145,7 @@ function useParallax() {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────
-export default function OverviewClient({ stats, revenueBySystem, monthlyRevenue, orderBreakdown }: Props) {
+export default function OverviewClient({ stats, revenueBySystem, monthlyRevenue, orderBreakdown, topProducts }: Props) {
   useParallax();
 
   const donutData = revenueBySystem.length > 0
@@ -232,11 +233,11 @@ export default function OverviewClient({ stats, revenueBySystem, monthlyRevenue,
         </div>
 
         <div className="ovChartCard ovChartCardWide">
-          <p className="ovChartLabel">System Pricing (₱)</p>
+          <p className="ovChartLabel">Top Products by Sales (orders)</p>
           <BarChart
-            bars={revenueBySystem.length > 0
-              ? revenueBySystem.map(s => ({ ...s, label: s.name.length > 8 ? s.name.slice(0, 8) + "…" : s.name }))
-              : [{ label: "None", value: 0, color: "#333" }]}
+            bars={topProducts.length > 0
+              ? topProducts
+              : [{ label: "No data", value: 0, color: "#333" }]}
             height={130}
           />
         </div>
