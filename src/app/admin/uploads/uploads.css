@@ -1,7 +1,9 @@
 /* ================================================
    uploads.css — Admin Uploads page styles.
-   Upload dropzone, folder chips, file list,
-   progress bar, results panel.
+   Fonts match admin > overview exactly:
+     Title  : 1.7rem / 800 / var(--content-color)
+     Subtitle: 0.875rem / 400 / var(--sidebar-text)
+     Step labels: 0.82rem / 700 / uppercase
    ================================================ */
 
 /* ── Page root ────────────────────────────────── */
@@ -11,7 +13,7 @@
   margin: 0 auto;
 }
 
-/* ── Header ───────────────────────────────────── */
+/* ── Header — matches .newOverviewHeader ──────── */
 .uploadsHeader {
   display: flex;
   align-items: flex-start;
@@ -21,17 +23,20 @@
   flex-wrap: wrap;
 }
 
+/* matches .newOverviewTitle exactly */
 .uploadsTitle {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
   color: var(--content-color, #1a1a1a);
   margin: 0 0 0.25rem;
   letter-spacing: -0.02em;
 }
 
+/* matches .newOverviewSubtitle exactly */
 .uploadsSubtitle {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--sidebar-text, #888);
+  font-weight: 400;
   margin: 0;
 }
 
@@ -84,6 +89,7 @@
   justify-content: center;
 }
 
+/* matches .newOverviewTitle weight for card title */
 .uploadsConnectTitle {
   font-size: 1.2rem;
   font-weight: 700;
@@ -91,6 +97,7 @@
   margin: 0;
 }
 
+/* matches .newOverviewSubtitle for card desc */
 .uploadsConnectDesc {
   font-size: 0.875rem;
   color: var(--sidebar-text, #888);
@@ -110,11 +117,44 @@
   font-weight: 600;
   text-decoration: none;
   transition: background 0.15s, transform 0.1s;
+  border: none;
+  cursor: pointer;
 }
 
 .uploadsConnectBtn:hover {
   background: #4f46e5;
   transform: translateY(-1px);
+}
+
+/* ── Reconnect banner ─────────────────────────── */
+.uploadsReconnectBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(246, 173, 85, 0.1);
+  border: 1px solid rgba(246, 173, 85, 0.3);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.uploadsReconnectText {
+  font-size: 0.82rem;
+  color: #f6ad55;
+  margin: 0;
+}
+
+.uploadsReconnectLink {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f6ad55;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
 }
 
 /* ── Main layout ──────────────────────────────── */
@@ -161,6 +201,7 @@
   flex-shrink: 0;
 }
 
+/* matches .adminProductsSectionTitle pattern */
 .uploadsStepLabel {
   font-size: 0.82rem;
   font-weight: 700;
@@ -204,9 +245,7 @@
   font-weight: 600;
 }
 
-.uploadsTypeChip {
-  border-radius: 8px;
-}
+.uploadsTypeChip { border-radius: 8px; }
 
 .uploadsFolderLoading,
 .uploadsFolderError,
@@ -249,6 +288,7 @@
   color: #6366f1;
 }
 
+/* matches .newOverviewSubtitle size */
 .uploadsDropzoneText {
   font-size: 0.875rem;
   color: var(--content-color, #444);
@@ -310,6 +350,7 @@
   justify-content: space-between;
 }
 
+/* matches step label style */
 .uploadsFilesCount {
   font-size: 0.82rem;
   font-weight: 700;
@@ -355,10 +396,7 @@
   background: rgba(99, 102, 241, 0.04);
 }
 
-.uploadsFileIcon {
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
+.uploadsFileIcon { font-size: 1.1rem; flex-shrink: 0; }
 
 .uploadsFileInfo {
   display: flex;
@@ -389,7 +427,7 @@
   flex-shrink: 0;
 }
 
-/* ── Supabase toggle button ───────────────────── */
+/* ── Supabase toggle ──────────────────────────── */
 .uploadsSupabaseToggle {
   font-size: 0.7rem;
   font-weight: 600;
@@ -403,16 +441,8 @@
   white-space: nowrap;
 }
 
-.uploadsSupabaseToggle:hover {
-  border-color: #6366f1;
-  color: #6366f1;
-}
-
-.uploadsSupabaseToggleOn {
-  border-color: #6366f1;
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
-}
+.uploadsSupabaseToggle:hover      { border-color: #6366f1; color: #6366f1; }
+.uploadsSupabaseToggleOn          { border-color: #6366f1; background: rgba(99,102,241,0.12); color: #6366f1; }
 
 .uploadsRemoveBtn {
   background: none;
@@ -464,10 +494,7 @@
   transform: translateY(-1px);
 }
 
-.uploadsSubmitBtnDisabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+.uploadsSubmitBtnDisabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ── Progress bar ─────────────────────────────── */
 .uploadsProgressBar {
@@ -488,22 +515,20 @@
 .uploadsSpinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: uploadsSpin 0.7s linear infinite;
   flex-shrink: 0;
 }
 
-@keyframes uploadsSpin {
-  to { transform: rotate(360deg); }
-}
+@keyframes uploadsSpin { to { transform: rotate(360deg); } }
 
 /* ── Error banner ─────────────────────────────── */
 .uploadsErrorBanner {
   padding: 0.75rem 1rem;
-  background: rgba(252, 129, 129, 0.1);
-  border: 1px solid rgba(252, 129, 129, 0.3);
+  background: rgba(252,129,129,0.1);
+  border: 1px solid rgba(252,129,129,0.3);
   border-radius: 10px;
   font-size: 0.82rem;
   color: #fc8181;
@@ -516,6 +541,7 @@
   gap: 0.5rem;
 }
 
+/* matches step label pattern */
 .uploadsResultsTitle {
   font-size: 0.82rem;
   font-weight: 700;
@@ -531,16 +557,16 @@
   gap: 0.6rem;
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
-  background: rgba(72, 187, 120, 0.06);
-  border: 1px solid rgba(72, 187, 120, 0.15);
+  background: rgba(72,187,120,0.06);
+  border: 1px solid rgba(72,187,120,0.15);
 }
 
 .uploadsResultRowError {
-  background: rgba(252, 129, 129, 0.06);
-  border-color: rgba(252, 129, 129, 0.2);
+  background: rgba(252,129,129,0.06);
+  border-color: rgba(252,129,129,0.2);
 }
 
-.uploadsResultIcon { font-size: 0.9rem; flex-shrink: 0; }
+.uploadsResultIcon   { font-size: 0.9rem; flex-shrink: 0; }
 
 .uploadsResultInfo {
   display: flex;
@@ -570,8 +596,4 @@
 
 .uploadsResultBadgeDrive    { background: rgba(72,187,120,0.15); color: #48bb78; }
 .uploadsResultBadgeSupabase { background: rgba(99,102,241,0.15); color: #6366f1; }
-
-.uploadsResultError {
-  font-size: 0.75rem;
-  color: #fc8181;
-}
+.uploadsResultError         { font-size: 0.75rem; color: #fc8181; }

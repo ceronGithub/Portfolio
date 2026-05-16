@@ -54,6 +54,7 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
   const [driveFolders,     setDriveFolders]     = useState<DriveFolder[]>([]);
   const [foldersLoading,   setFoldersLoading]   = useState(false);
   const [foldersError,     setFoldersError]     = useState<string | null>(null);
+  const [needsReconnect,   setNeedsReconnect]   = useState(false);
 
   // Form state
   const [selectedDriveFolder,  setSelectedDriveFolder]  = useState<DriveFolder | null>(null);
@@ -63,10 +64,10 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
   const [supabaseSelectedMp4s, setSupabaseSelectedMp4s] = useState<Set<string>>(new Set());
 
   // Upload state
-  const [uploading,    setUploading]    = useState(false);
+  const [uploading,      setUploading]      = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [results,      setResults]      = useState<UploadResult[]>([]);
-  const [uploadError,  setUploadError]  = useState<string | null>(null);
+  const [results,        setResults]        = useState<UploadResult[]>([]);
+  const [uploadError,    setUploadError]    = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,16 +75,22 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
   const fetchDriveFolders = useCallback(async () => {
     setFoldersLoading(true);
     setFoldersError(null);
+    setNeedsReconnect(false);
     try {
-      const res = await fetch("/api/admin/drive/folders");
+      const res  = await fetch("/api/admin/drive/folders");
+      const data = await res.json();
       if (res.status === 401) {
-        setFoldersError("not_connected");
+        setNeedsReconnect(true);
+        setFoldersError(`Session expired (${data.error ?? "401"}): ${data.message ?? "Please reconnect Google Drive."}`);
         return;
       }
-      const data = await res.json();
+      if (!res.ok) {
+        setFoldersError(`Error ${res.status} — ${data.error ?? ""}: ${data.message ?? "Could not load folders."}`);
+        return;
+      }
       setDriveFolders(data.folders ?? []);
     } catch {
-      setFoldersError("Failed to load Drive folders.");
+      setFoldersError("Network error loading folders.");
     } finally {
       setFoldersLoading(false);
     }
@@ -218,6 +225,18 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
           Google Drive connected
         </div>
       </div>
+
+      {/* ── Reconnect banner — shown when token expired ── */}
+      {needsReconnect && (
+        <div className="uploadsReconnectBanner">
+          <p className="uploadsReconnectText">
+            ⚠️ Google Drive session expired. Reconnect to load your folders.
+          </p>
+          <a href={googleAuthUrl} className="uploadsConnectBtn" style={{ fontSize: "0.8rem", padding: "0.4rem 0.85rem" }}>
+            Reconnect Drive
+          </a>
+        </div>
+      )}
 
       <div className="uploadsLayout">
 
