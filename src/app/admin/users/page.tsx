@@ -1,8 +1,6 @@
 // admin/users/page.tsx — User Management page.
-// 3 cards: All Users | Active Users | Non-active Users.
-// Active card: search + ban/delete/deactivate actions.
-// Non-active card: delete/activate actions.
 // Protected: ADMIN only.
+// Requires migration: npx prisma migrate dev --name add_user_active_banned
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -19,7 +17,24 @@ export default async function AdminUsersPage() {
 
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
-    include: { ownership: { include: { product: { select: { name: true } } } } },
+    select: {
+      id:        true,
+      name:      true,
+      email:     true,
+      role:      true,
+      isActive:  true,
+      isBanned:  true,
+      createdAt: true,
+      ownership: {
+        select: {
+          id:        true,
+          productId: true,
+          userId:    true,
+          grantedAt: true,
+          product:   { select: { name: true } },
+        },
+      },
+    },
   });
 
   return (
@@ -29,7 +44,9 @@ export default async function AdminUsersPage() {
           <div>
             <h1 className="adminPageTitle">User Management</h1>
             <p className="adminPageSubtitle">
-              {users.length} total &middot; {users.filter((u: { isActive: boolean; isBanned: boolean }) => u.isActive && !u.isBanned).length} active &middot; {users.filter((u: { isActive: boolean; isBanned: boolean }) => !u.isActive || u.isBanned).length} non-active
+              {users.length} total &middot;{" "}
+              {users.filter((u) => u.isActive && !u.isBanned).length} active &middot;{" "}
+              {users.filter((u) => !u.isActive || u.isBanned).length} non-active
             </p>
           </div>
         </div>
