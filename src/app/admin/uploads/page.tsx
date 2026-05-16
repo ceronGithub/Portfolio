@@ -12,7 +12,7 @@ import UploadsClient        from "./UploadsClient";
 import "./uploads.css";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
-const REDIRECT_URI     = process.env.GOOGLE_REDIRECT_URI ?? "http://localhost:3000/api/auth/google/callback";
+const REDIRECT_URI     = process.env.GOOGLE_REDIRECT_URI ?? "http://localhost:3000/api/google/callback";
 
 // Builds the Google OAuth URL for Drive access
 function buildGoogleAuthUrl(): string {

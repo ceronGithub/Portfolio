@@ -1,18 +1,18 @@
-// Auth.js v4 config. JWT session. Role exposed in token and session.
+// auth.ts — NextAuth options only. No handler export here.
+// Handler is created directly in the route file to avoid
+// Next.js 16 Turbopack re-export issues.
 import NextAuth, { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
     CredentialsProvider({
       credentials: {
-        email: { label: "Email", type: "email" },
+        email:    { label: "Email",    type: "email"    },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -31,19 +31,16 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
-        token.id = user.id;
+        token.id   = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
+        (session.user as any).id   = token.id;
       }
       return session;
     },
   },
 };
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
