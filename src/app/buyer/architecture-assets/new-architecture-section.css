@@ -1,42 +1,32 @@
 /* new-architecture-section.css */
-/* NewArchitectureSection — Coming Soon teaser. Text only, no media. */
+/* NewArchitectureSection — Coming Soon. Text only, right center aligned. */
 
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
 
 /* ── Section shell ──────────────────────────────────────────────────────── */
 .newArchSection {
-  position:    relative;
-  width:       100%;
-  min-height:  60vh;
-  background:  #000;
-  overflow:    hidden;
-  display:     flex;
-  align-items: center;
-  font-family: 'Syne', sans-serif;
-  border-top:  1px solid #111;
-}
-
-/* ── Content ────────────────────────────────────────────────────────────── */
-.newArchContent {
   position:        relative;
-  z-index:         10;
-  margin-left:     8%;
-  width:           54%;
-  padding:         5rem 3rem 5rem 0;
+  width:           100%;
+  min-height:      150vh;
+  background:      #000;
+  border-top:      1px solid #111;
   display:         flex;
-  flex-direction:  column;
-  gap:             2.5rem;
+  align-items:     center;
+  justify-content: flex-end;
+  font-family:     'Syne', sans-serif;
 }
 
-/* ── Header row ─────────────────────────────────────────────────────────── */
-.newArchHeaderRow {
-  display:         flex;
-  align-items:     flex-start;
-  justify-content: space-between;
-  gap:             1.5rem;
-  flex-wrap:       wrap;
+/* ── Content — right center ─────────────────────────────────────────────── */
+.newArchContent {
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-start;
+  gap:            1.25rem;
+  width:          42%;
+  padding:        5rem 6% 5rem 2rem;
 }
 
+/* ── Label ───────────────────────────────────────────────────────────────── */
 .newArchLabel {
   font-family:    'DM Mono', monospace;
   font-size:      0.62rem;
@@ -44,18 +34,20 @@
   color:          rgba(201, 163, 110, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  margin-bottom:  0.6rem;
+  margin:         0;
 }
 
+/* ── Title ───────────────────────────────────────────────────────────────── */
 .newArchTitle {
-  font-size:      clamp(1.8rem, 3.5vw, 3rem);
+  font-size:      clamp(1.6rem, 3vw, 2.6rem);
   font-weight:    800;
   color:          #fff;
   letter-spacing: -0.03em;
   line-height:    1.1;
+  margin:         0;
 }
 
-/* ── Badges ─────────────────────────────────────────────────────────────── */
+/* ── Badges ──────────────────────────────────────────────────────────────── */
 .newArchLiveBadge {
   font-family:    'DM Mono', monospace;
   font-size:      0.68rem;
@@ -66,8 +58,6 @@
   border-radius:  999px;
   letter-spacing: 0.08em;
   white-space:    nowrap;
-  flex-shrink:    0;
-  margin-top:     0.3rem;
 }
 
 .newArchComingSoon {
@@ -80,15 +70,14 @@
   border-radius:  999px;
   letter-spacing: 0.08em;
   white-space:    nowrap;
-  flex-shrink:    0;
-  margin-top:     0.3rem;
 }
 
-/* ── Asset meta (shown only when isLive = true) ─────────────────────────── */
+/* ── Asset meta (shown only when isLive = true) ──────────────────────────── */
 .newArchDualMeta {
   display:     flex;
   align-items: flex-start;
   gap:         0;
+  width:       100%;
 }
 
 .newArchMetaItem {
@@ -111,62 +100,8 @@
 .newArchMetaPrice { font-size: 0.85rem; font-weight: 800; color: #c9a36e; margin: 0; }
 .newArchMetaNote  { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.2); letter-spacing: 0.04em; margin: 0; }
 
-/* ── Teaser cards — text only ───────────────────────────────────────────── */
-.newArchCards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap:     1.25rem;
-}
-
-.newArchCard {
-  background:    #080808;
-  border:        1px solid #161616;
-  border-radius: 20px;
-  aspect-ratio:  4 / 3;
-  position:      relative;
-  overflow:      hidden;
-  transition:    border-color 0.25s;
-}
-
-.newArchCard:hover { border-color: rgba(201, 163, 110, 0.18); }
-
-.newArchCardInner {
-  position:        absolute;
-  inset:           0;
-  display:         flex;
-  flex-direction:  column;
-  align-items:     center;
-  justify-content: center;
-  gap:             0.6rem;
-}
-
-.newArchCardIcon {
-  font-size: 2rem;
-  opacity:   0.2;
-}
-
-.newArchCardLabel {
-  font-family:    'Syne', sans-serif;
-  font-size:      0.82rem;
-  font-weight:    700;
-  color:          rgba(255, 255, 255, 0.25);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin:         0;
-}
-
-.newArchCardSub {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.6rem;
-  color:          rgba(201, 163, 110, 0.25);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin:         0;
-}
-
-/* ── Responsive ─────────────────────────────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .newArchContent    { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
-  .newArchCards      { grid-template-columns: 1fr; }
-  .newArchHeaderRow  { flex-direction: column; }
+  .newArchSection  { justify-content: flex-start; }
+  .newArchContent  { width: 100%; padding: 4rem 1.5rem; }
 }

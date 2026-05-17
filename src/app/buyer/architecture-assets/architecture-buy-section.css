@@ -4,7 +4,7 @@
 .archBuySection {
   position:    relative;
   width:       100%;
-  min-height:  100vh;
+  min-height:  150vh;
   background:  #000;
   overflow:    hidden;
   display:     flex;

@@ -1,6 +1,6 @@
 // NewArchitectureSection — Architecture Studio latest drop teaser.
-// Coming Soon state — text only, no videos, no fire canvas, no parallax.
-// Flip isLive to true and populate asset fields when the drop is ready.
+// Coming Soon state — text only, no cards, no media.
+// Content aligned to the right center of the section.
 
 "use client";
 
@@ -27,21 +27,18 @@ export default function NewArchitectureSection() {
 
   return (
     <section className="newArchSection">
-
       <div className="newArchContent">
-        <div className="newArchHeaderRow">
-          <div>
-            <p className="newArchLabel">Latest Drop</p>
-            <h2 className="newArchTitle">New Architecture Assets.</h2>
-          </div>
-          {isLive ? (
-            <span className="newArchLiveBadge">● Live</span>
-          ) : (
-            <span className="newArchComingSoon">Coming Soon</span>
-          )}
-        </div>
 
-        {/* Dual asset meta — hidden until live */}
+        <p className="newArchLabel">Latest Drop on Exterior & Interior Design</p>
+        <h2 className="newArchTitle">New Architecture Assets.</h2>
+
+        {isLive ? (
+          <span className="newArchLiveBadge">● Live</span>
+        ) : (
+          <span className="newArchComingSoon">Coming Soon</span>
+        )}
+
+        {/* Asset meta — hidden until live */}
         {isLive && (
           <div className="newArchDualMeta">
             <div className="newArchMetaItem">
@@ -58,28 +55,7 @@ export default function NewArchitectureSection() {
           </div>
         )}
 
-        {/* Teaser cards — text only, no media */}
-        <div className="newArchCards">
-
-          <div className="newArchCard">
-            <div className="newArchCardInner">
-              <span className="newArchCardIcon">🏗️</span>
-              <p className="newArchCardLabel">Exterior</p>
-              <p className="newArchCardSub">Coming Soon</p>
-            </div>
-          </div>
-
-          <div className="newArchCard">
-            <div className="newArchCardInner">
-              <span className="newArchCardIcon">🪟</span>
-              <p className="newArchCardLabel">Interior</p>
-              <p className="newArchCardSub">Coming Soon</p>
-            </div>
-          </div>
-
-        </div>
       </div>
-
     </section>
   );
 }
