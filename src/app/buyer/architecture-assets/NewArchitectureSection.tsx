@@ -1,7 +1,8 @@
-// NewArchitectureSection — "Latest Drop" for Architecture Asset Studio.
-// UPDATED: Real exterior video wired in from Supabase.
-//   Card 1 — MP4 exterior drone shot (latest drop).
-//   Card 2 — Interior render placeholder.
+// NewArchitectureSection — Latest Drop for Architecture Studio.
+// Fire canvas right side. Parallax exterior video bg left.
+// Card 1 — latest exterior drop (live video).
+// Card 2 — latest interior drop (live video).
+// Update LATEST_EXTERIOR and LATEST_INTERIOR when new content drops.
 
 "use client";
 
@@ -10,14 +11,21 @@ import "./new-architecture-section.css";
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
 
-// ── Latest drop config — update when new architecture asset drops ─────────
-const LATEST = {
-  title:       "Exterior — Drone Reveal 01",
-  subtitle:    "New Architecture Asset. Available now",
-  videoSrc:    `${SB}/exterior/Drone_shot_revealing_landscape_202605061517.mp4`,
+// ── Update these when a new drop is available ─────────────────────────────
+const LATEST_EXTERIOR = {
+  label:       "Drone Reveal — Project 05",
+  videoSrc:    `${SB}/exterior/project-05.mp4`,
   price:       "₱8,500",
+  releaseNote: "4K · exterior scene · editable Blender file",
   isLive:      true,
-  releaseNote: "4K render · exterior scene · editable Blender file",
+};
+
+const LATEST_INTERIOR = {
+  label:       "Interior 07 — Luxury Suite",
+  videoSrc:    `${SB}/interior/interior-07.mp4`,
+  price:       "₱7,500",
+  releaseNote: "4K · interior walkthrough · editable Blender file",
+  isLive:      true,
 };
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -28,10 +36,10 @@ interface FireParticle {
   size: number;
 }
 
-function spawnFireParticle(canvasWidth: number, canvasHeight: number): FireParticle {
+function spawnFireParticle(w: number, h: number): FireParticle {
   return {
-    x:       canvasWidth * 0.72 + (Math.random() - 0.5) * canvasWidth * 0.28,
-    y:       canvasHeight,
+    x:       w * 0.72 + (Math.random() - 0.5) * w * 0.28,
+    y:       h,
     vx:      (Math.random() - 0.5) * 0.6,
     vy:      -(Math.random() * 2.8 + 1.2),
     life:    0,
@@ -47,6 +55,7 @@ export default function NewArchitectureSection() {
   const fireParticles = useRef<FireParticle[]>([]);
   const [parallaxY, setParallaxY] = useState(0);
 
+  // ── Fire canvas ─────────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = fireCanvasRef.current;
     if (!canvas) return;
@@ -91,14 +100,13 @@ export default function NewArchitectureSection() {
         else if (ratio < 0.6)  { r = 255; g = 100; b = 10;  }
         else                   { r = 180; g = 20;  b = 0;   }
 
-        const currentSize = p.size * (1 - ratio * 0.4);
-        const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentSize);
+        const sz   = p.size * (1 - ratio * 0.4);
+        const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, sz);
         grad.addColorStop(0,   `rgba(${r},${g},${b},${alpha})`);
         grad.addColorStop(0.5, `rgba(${r},${Math.max(0, g - 40)},0,${alpha * 0.6})`);
         grad.addColorStop(1,   `rgba(0,0,0,0)`);
-
         ctx!.beginPath();
-        ctx!.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
+        ctx!.arc(p.x, p.y, sz, 0, Math.PI * 2);
         ctx!.fillStyle = grad;
         ctx!.fill();
       }
@@ -110,6 +118,7 @@ export default function NewArchitectureSection() {
     return () => { cancelAnimationFrame(fireRafRef.current); window.removeEventListener("resize", resize); };
   }, []);
 
+  // ── Parallax scroll ─────────────────────────────────────────────────────
   useEffect(() => {
     function onScroll() {
       const el = sectionRef.current;
@@ -126,10 +135,12 @@ export default function NewArchitectureSection() {
   return (
     <section ref={sectionRef} className="newArchSection">
 
-      {/* Parallax background — blank placeholder */}
+      {/* Parallax bg — exterior drone video */}
       <div className="newArchBgWrap">
-        <div
-          className="newArchBgPlaceholder"
+        <video
+          src={`${SB}/exterior/Drone_shot_revealing_landscape_202605061517.mp4`}
+          autoPlay muted loop playsInline
+          className="newArchBgVideo"
           style={{ transform: `translate3d(0, ${parallaxY}px, 0)` }}
         />
         <div className="newArchBgFade" />
@@ -143,41 +154,52 @@ export default function NewArchitectureSection() {
         <div className="newArchHeaderRow">
           <div>
             <p className="newArchLabel">Latest Drop</p>
-            <h2 className="newArchTitle">{LATEST.subtitle}</h2>
+            <h2 className="newArchTitle">New Architecture Assets.<br />Available now</h2>
           </div>
-          {LATEST.isLive ? (
+          {(LATEST_EXTERIOR.isLive || LATEST_INTERIOR.isLive) ? (
             <span className="newArchLiveBadge">● Live</span>
           ) : (
             <span className="newArchComingSoon">Coming Soon</span>
           )}
         </div>
 
-        {/* Asset meta */}
-        <div className="newArchMeta">
-          <p className="newArchMetaName">{LATEST.title}</p>
-          <p className="newArchMetaPrice">{LATEST.price}</p>
-          <p className="newArchMetaNote">{LATEST.releaseNote}</p>
+        {/* Dual asset meta */}
+        <div className="newArchDualMeta">
+          <div className="newArchMetaItem">
+            <p className="newArchMetaName">{LATEST_EXTERIOR.label}</p>
+            <p className="newArchMetaPrice">{LATEST_EXTERIOR.price}</p>
+            <p className="newArchMetaNote">{LATEST_EXTERIOR.releaseNote}</p>
+          </div>
+          <div className="newArchMetaDivider" />
+          <div className="newArchMetaItem">
+            <p className="newArchMetaName">{LATEST_INTERIOR.label}</p>
+            <p className="newArchMetaPrice">{LATEST_INTERIOR.price}</p>
+            <p className="newArchMetaNote">{LATEST_INTERIOR.releaseNote}</p>
+          </div>
         </div>
 
         <div className="newArchCards">
-          {/* Card 1 — placeholder for new exterior asset */}
-          <div className="newArchCard">
-            <div className="newArchCardInner">
-              <span className="newArchCardIcon">🏙️</span>
-              <p className="newArchCardLabel">Exterior render here</p>
-            </div>
+          {/* Card 1 — Latest exterior */}
+          <div className="newArchCard newArchCardVideo">
+            <video
+              src={LATEST_EXTERIOR.videoSrc}
+              autoPlay muted loop playsInline
+              className="newArchCardVideoEl"
+            />
+            <div className="newArchCardVideoLabel">Exterior</div>
           </div>
 
-          {/* Card 2 — placeholder for new interior asset */}
-          <div className="newArchCard">
-            <div className="newArchCardInner">
-              <span className="newArchCardIcon">🏠</span>
-              <p className="newArchCardLabel">Interior render here</p>
-            </div>
+          {/* Card 2 — Latest interior */}
+          <div className="newArchCard newArchCardVideo">
+            <video
+              src={LATEST_INTERIOR.videoSrc}
+              autoPlay muted loop playsInline
+              className="newArchCardVideoEl"
+            />
+            <div className="newArchCardVideoLabel">Interior</div>
           </div>
         </div>
       </div>
-
     </section>
   );
 }

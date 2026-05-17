@@ -463,3 +463,29 @@
   .archBuyCards     { grid-template-columns: 1fr; }
   .archBuyHeaderRow { flex-direction: column; }
 }
+/* ── Dual meta row ── */
+.newArchDualMeta {
+  display:     flex;
+  align-items: flex-start;
+  gap:         0;
+}
+
+.newArchMetaItem {
+  flex:           1;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.22rem;
+}
+
+.newArchMetaDivider {
+  width:      1px;
+  height:     52px;
+  background: #1e1e1e;
+  margin:     0 1.5rem;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.newArchMetaName  { font-size: 0.9rem; font-weight: 800; color: #fff; letter-spacing: -0.01em; margin: 0; }
+.newArchMetaPrice { font-size: 0.85rem; font-weight: 800; color: #22c55e; margin: 0; }
+.newArchMetaNote  { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.2); letter-spacing: 0.04em; margin: 0; }

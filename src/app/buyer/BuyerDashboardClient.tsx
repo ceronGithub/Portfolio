@@ -3,7 +3,7 @@
 // down to AssetBuySection.
 // Renders the floating wishlist button and WishlistPanel drawer.
 // All data (items, ownedIds) comes from the Server Component via props.
-// Architecture Studio sections removed — not live yet.
+// Architecture Studio — wired and live.
 
 "use client";
 
@@ -16,6 +16,9 @@ import InquirySection            from "./inquiries/InquirySection";
 import AIAssetsIntro             from "./ai-weapon-character/AIAssetsIntro";
 import NewAssetSection           from "./ai-weapon-character/NewAssetSection";
 import AssetBuySection           from "./ai-weapon-character/AssetBuySection";
+import ArchitectureAssetsIntro   from "./architecture-assets/ArchitectureAssetsIntro";
+import NewArchitectureSection    from "./architecture-assets/NewArchitectureSection";
+import ArchitectureBuySection    from "./architecture-assets/ArchitectureBuySection";
 import "./wishlist/wishlist-panel.css";
 import "./buyer-dashboard-client.css";
 
@@ -59,6 +62,22 @@ const ASSET_META: Record<string, { name: string; category: string; price: string
   "axe-04": { name: "Axe 04 — Viking Axe",    category: "Weapon",    price: "₱3,500",  accent: "#c9935e" },
   "axe-05": { name: "Axe 05 — Ornate Axe",    category: "Weapon",    price: "₱3,500",  accent: "#c9935e" },
   "axe-07": { name: "Axe 07 — Bloodied Axe",  category: "Weapon",    price: "₱3,500",  accent: "#c9935e" },
+  // Exterior
+  "ext-drone-01": { name: "Drone Reveal 01", category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  "ext-drone-02": { name: "Drone Reveal 02", category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  "ext-proj-01":  { name: "Project 01",       category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  "ext-proj-02":  { name: "Project 02",       category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  "ext-proj-03":  { name: "Project 03",       category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  "ext-proj-04":  { name: "Project 04",       category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  "ext-proj-05":  { name: "Project 05",       category: "Exterior", price: "₱8,500", accent: "#c9a36e" },
+  // Interior
+  "int-01": { name: "Interior 01 — Suite",   category: "Interior", price: "₱7,500", accent: "#a36ec9" },
+  "int-02": { name: "Interior 02 — Living",  category: "Interior", price: "₱7,500", accent: "#a36ec9" },
+  "int-03": { name: "Interior 03 — Kitchen", category: "Interior", price: "₱7,500", accent: "#a36ec9" },
+  "int-04": { name: "Interior 04 — Bedroom", category: "Interior", price: "₱7,500", accent: "#a36ec9" },
+  "int-05": { name: "Interior 05 — Lobby",   category: "Interior", price: "₱7,500", accent: "#a36ec9" },
+  "int-06": { name: "Interior 06 — Office",  category: "Interior", price: "₱7,500", accent: "#a36ec9" },
+  "int-07": { name: "Interior 07 — Luxury",  category: "Interior", price: "₱7,500", accent: "#a36ec9" },
 };
 
 // ── Build wishlist entries for the panel ─────────────────────────────────────
@@ -161,6 +180,15 @@ export default function BuyerDashboardClient({ items, ownedAssetIds }: Props) {
       <AIAssetsIntro />
       <NewAssetSection />
       <AssetBuySection
+        ownedAssetIds={ownedSet}
+        wishlistIds={wishlistIds}
+        onAddToWishlist={toggleWishlist}
+      />
+
+      {/* Architecture Studio */}
+      <ArchitectureAssetsIntro />
+      <NewArchitectureSection />
+      <ArchitectureBuySection
         ownedAssetIds={ownedSet}
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}

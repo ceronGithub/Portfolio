@@ -22,8 +22,26 @@ interface Props {
   wishlistIds?: Set<string>;
 }
 
-// Blank asset list — populate when content is ready
-const ALL_ARCH_ASSETS: ArchAssetItem[] = [];
+const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+
+const ALL_ARCH_ASSETS: ArchAssetItem[] = [
+  // ── Exterior ──
+  { id:"ext-drone-01", label:"Drone Reveal 01",  category:"Exterior", videoSrc:`${SB}/exterior/Drone_shot_revealing_landscape_202605061517.mp4`, price:8500 },
+  { id:"ext-drone-02", label:"Drone Reveal 02",  category:"Exterior", videoSrc:`${SB}/exterior/Drone_shot_revealing_landscape_202605061518.mp4`, price:8500 },
+  { id:"ext-proj-01",  label:"Project 01",        category:"Exterior", videoSrc:`${SB}/exterior/project-01.mp4`, price:8500 },
+  { id:"ext-proj-02",  label:"Project 02",        category:"Exterior", videoSrc:`${SB}/exterior/project-02.mp4`, price:8500 },
+  { id:"ext-proj-03",  label:"Project 03",        category:"Exterior", videoSrc:`${SB}/exterior/project-03.mp4`, price:8500 },
+  { id:"ext-proj-04",  label:"Project 04",        category:"Exterior", videoSrc:`${SB}/exterior/project-04.mp4`, price:8500 },
+  { id:"ext-proj-05",  label:"Project 05",        category:"Exterior", videoSrc:`${SB}/exterior/project-05.mp4`, price:8500 },
+  // ── Interior ──
+  { id:"int-01", label:"Interior 01 — Suite",    category:"Interior", videoSrc:`${SB}/interior/interior-01.mp4`, price:7500 },
+  { id:"int-02", label:"Interior 02 — Living",   category:"Interior", videoSrc:`${SB}/interior/interior-02.mp4`, price:7500 },
+  { id:"int-03", label:"Interior 03 — Kitchen",  category:"Interior", videoSrc:`${SB}/interior/interior-03.mp4`, price:7500 },
+  { id:"int-04", label:"Interior 04 — Bedroom",  category:"Interior", videoSrc:`${SB}/interior/interior-04.mp4`, price:7500 },
+  { id:"int-05", label:"Interior 05 — Lobby",    category:"Interior", videoSrc:`${SB}/interior/interior-05.mp4`, price:7500 },
+  { id:"int-06", label:"Interior 06 — Office",   category:"Interior", videoSrc:`${SB}/interior/interior-06.mp4`, price:7500 },
+  { id:"int-07", label:"Interior 07 — Luxury",   category:"Interior", videoSrc:`${SB}/interior/interior-07.mp4`, price:7500 },
+];
 
 function getBundleDiscount(count: number): number {
   if (count >= 5) return 0.15;
