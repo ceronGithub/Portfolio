@@ -18,44 +18,70 @@ const TAGLINES = [
 ];
 
 export default function ArchitectureAssetsIntro() {
-  const sectionRef  = useRef<HTMLDivElement>(null);
-  const videoRef    = useRef<HTMLVideoElement>(null);
-  const rafRef      = useRef<number | null>(null);
+  const sectionRef    = useRef<HTMLDivElement>(null);
+  const videoRef      = useRef<HTMLVideoElement>(null);
+  const rafRef        = useRef<number | null>(null);
+  const targetTimeRef = useRef(0);
+  const currentTimeRef = useRef(0);
   const [progress, setProgress] = useState(0);
 
-  // ── Scroll → video.currentTime ─────────────────────────────────────────
+  // ── Scroll → video.currentTime (lerp-smoothed) ─────────────────────────
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    // Guard: exit early if the video element is not yet mounted.
+    // Cast to non-null so TypeScript does not flag it inside closures.
+    if (!videoRef.current) return;
+    const videoElement = videoRef.current as HTMLVideoElement;
 
-    video.preload     = "auto";
-    video.muted       = true;
-    video.playsInline = true;
+    videoElement.preload     = "auto";
+    videoElement.muted       = true;
+    videoElement.playsInline = true;
 
-    function scrub() {
+    // Lerp factor — lower = smoother/slower, higher = snappier.
+    // 0.12 gives a silky ~8-frame ease-out on each scroll tick.
+    const LERP = 0.12;
+
+    // Returns scroll progress (0–1) relative to the sticky section height.
+    function getScrollProgress(): number {
       const el = sectionRef.current;
-      if (!el || !video) return;
+      if (!el) return 0;
       const top        = el.getBoundingClientRect().top;
       const scrollable = el.scrollHeight - window.innerHeight;
-      if (scrollable <= 0) return;
-      const p = Math.max(0, Math.min(1, -top / scrollable));
-      if (video.duration && isFinite(video.duration)) {
-        video.currentTime = p * video.duration;
-      }
-      setProgress(p);
+      if (scrollable <= 0) return 0;
+      return Math.max(0, Math.min(1, -top / scrollable));
     }
 
-    function onScroll() {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(scrub);
+    // Runs every animation frame — lerps currentTime toward targetTime for smooth scrubbing.
+    function animate(): void {
+      rafRef.current = requestAnimationFrame(animate);
+      const duration = videoElement.duration;
+      if (!duration || !isFinite(duration)) return;
+
+      const diff = targetTimeRef.current - currentTimeRef.current;
+      if (Math.abs(diff) < 0.001) return;
+      currentTimeRef.current   += diff * LERP;
+      videoElement.currentTime  = currentTimeRef.current;
+      setProgress(currentTimeRef.current / duration);
     }
 
+    // Updates the target time on every scroll event — animate() smooths toward it.
+    function onScroll(): void {
+      const duration = videoElement.duration;
+      if (!duration || !isFinite(duration)) return;
+      targetTimeRef.current = getScrollProgress() * duration;
+    }
+
+    // Kick off the animation loop
+    rafRef.current = requestAnimationFrame(animate);
     window.addEventListener("scroll", onScroll, { passive: true });
-    scrub();
+
+    // Sync on first paint
+    onScroll();
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
+
   }, []);
 
   return (

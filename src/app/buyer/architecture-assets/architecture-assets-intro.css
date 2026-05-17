@@ -29,6 +29,8 @@
   object-position: center;
   z-index:         1;
   display:         block;
+  will-change:     transform;
+  transform:       translateZ(0);
 }
 
 /* ── Subtle dark scrim — text legibility only ── */
