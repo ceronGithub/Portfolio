@@ -1,8 +1,9 @@
 // BuyerDashboardClient.tsx — Client wrapper for the entire buyer dashboard.
 // Owns wishlist state (useWishlist hook). Passes wishlistIds + toggleWishlist
-// down to AssetBuySection and ArchitectureBuySection.
+// down to AssetBuySection.
 // Renders the floating wishlist button and WishlistPanel drawer.
 // All data (items, ownedIds) comes from the Server Component via props.
+// Architecture Studio sections removed — not live yet.
 
 "use client";
 
@@ -15,9 +16,6 @@ import InquirySection            from "./inquiries/InquirySection";
 import AIAssetsIntro             from "./ai-assets/AIAssetsIntro";
 import NewAssetSection           from "./ai-assets/NewAssetSection";
 import AssetBuySection           from "./ai-assets/AssetBuySection";
-import ArchitectureAssetsIntro   from "./architecture-assets/ArchitectureAssetsIntro";
-import NewArchitectureSection    from "./architecture-assets/NewArchitectureSection";
-import ArchitectureBuySection    from "./architecture-assets/ArchitectureBuySection";
 import "./wishlist/wishlist-panel.css";
 import "./buyer-dashboard-client.css";
 
@@ -163,15 +161,6 @@ export default function BuyerDashboardClient({ items, ownedAssetIds }: Props) {
       <AIAssetsIntro />
       <NewAssetSection />
       <AssetBuySection
-        ownedAssetIds={ownedSet}
-        wishlistIds={wishlistIds}
-        onAddToWishlist={toggleWishlist}
-      />
-
-      {/* Architecture Studio */}
-      <ArchitectureAssetsIntro />
-      <NewArchitectureSection />
-      <ArchitectureBuySection
         ownedAssetIds={ownedSet}
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}

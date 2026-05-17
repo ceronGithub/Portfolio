@@ -77,6 +77,97 @@ export default function AssetBuySection({
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const videoCardRef = useRef<HTMLVideoElement>(null);
+  const fogCanvasRef = useRef<HTMLCanvasElement>(null);
+  const fogRafRef    = useRef<number>(0);
+
+  // ── Ground fog canvas — rises from bottom of the section ─────────────────
+  useEffect(() => {
+    const canvas = fogCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    interface FogWisp {
+      x: number; y: number; vx: number; vy: number;
+      swayAmp: number; swayFreq: number; swayOff: number;
+      rx: number; ry: number;
+      life: number; maxLife: number; opacity: number; layer: number;
+    }
+
+    function resize() {
+      canvas!.width  = canvas!.offsetWidth;
+      canvas!.height = canvas!.offsetHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    function spawn(): FogWisp {
+      const layer   = Math.floor(Math.random() * 3);
+      const rs      = [2.1, 1.45, 0.9][layer];
+      const speed   = [0.14, 0.25, 0.38][layer];
+      const opacity = [0.30, 0.22, 0.15][layer] * (Math.random() * 0.25 + 0.88);
+      return {
+        x: Math.random() * canvas!.width * 1.3 - canvas!.width * 0.15,
+        y: canvas!.height + Math.random() * 60,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: -(Math.random() * speed + 0.08),
+        swayAmp: Math.random() * 25 + 8,
+        swayFreq: Math.random() * 0.003 + 0.001,
+        swayOff: Math.random() * Math.PI * 2,
+        rx: (Math.random() * 200 + 160) * rs,
+        ry: (Math.random() * 62 + 40) * rs,
+        life: 0, maxLife: Math.random() * 480 + 340,
+        opacity, layer,
+      };
+    }
+
+    const wisps: FogWisp[] = [];
+    for (let i = 0; i < 28; i++) {
+      const w = spawn();
+      w.life  = Math.random() * w.maxLife * 0.65;
+      w.y     = canvas.height + 80 + w.vy * w.life;
+      wisps.push(w);
+    }
+
+    function draw() {
+      const cw = canvas!.width, ch = canvas!.height;
+      ctx!.clearRect(0, 0, cw, ch);
+      if (wisps.length < 34 && Math.random() < 0.5) wisps.push(spawn());
+      for (let i = wisps.length - 1; i >= 0; i--) {
+        if (wisps[i].life >= wisps[i].maxLife) { wisps.splice(i, 1); continue; }
+      }
+      wisps.sort((a, b) => a.layer - b.layer);
+      for (const p of wisps) {
+        p.life += 1;
+        p.x    += p.vx + Math.sin(p.life * p.swayFreq + p.swayOff) * 0.3;
+        p.y    += p.vy;
+        const ratio   = p.life / p.maxLife;
+        const fadeIn  = Math.min(1, ratio / 0.15);
+        const fadeOut = ratio > 0.78 ? Math.max(0, 1 - (ratio - 0.78) / 0.22) : 1;
+        const alpha   = p.opacity * fadeIn * fadeOut;
+        if (alpha < 0.003) continue;
+        const r = p.layer === 0 ? 185 : p.layer === 1 ? 205 : 222;
+        const g = p.layer === 0 ? 200 : p.layer === 1 ? 215 : 225;
+        const b = p.layer === 0 ? 230 : p.layer === 1 ? 228 : 230;
+        ctx!.save();
+        ctx!.translate(p.x, p.y);
+        ctx!.scale(1, p.ry / p.rx);
+        const grad = ctx!.createRadialGradient(0, 0, 0, 0, 0, p.rx);
+        grad.addColorStop(0,    `rgba(${r},${g},${b},${alpha})`);
+        grad.addColorStop(0.42, `rgba(${r},${g},${b},${alpha * 0.58})`);
+        grad.addColorStop(0.76, `rgba(${r},${g},${b},${alpha * 0.18})`);
+        grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
+        ctx!.beginPath();
+        ctx!.arc(0, 0, p.rx, 0, Math.PI * 2);
+        ctx!.fillStyle = grad;
+        ctx!.fill();
+        ctx!.restore();
+      }
+      fogRafRef.current = requestAnimationFrame(draw);
+    }
+    fogRafRef.current = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(fogRafRef.current); window.removeEventListener("resize", resize); };
+  }, []);
 
   const filteredAssets = ALL_ASSETS.filter(a => a.category === browseTab);
   const cartItems      = ALL_ASSETS.filter(a => cartIds.has(a.id));
@@ -118,6 +209,9 @@ export default function AssetBuySection({
           <img src="/images/orc-blue.png" alt="" className="assetBuyBgOrcImg" />
           <div className="assetBuyBgOrcFade" />
         </div>
+
+        {/* ── Ground fog — rises from bottom of section ── */}
+        <canvas ref={fogCanvasRef} className="assetBuyFogCanvas" />
 
         <div className="assetBuyContent">
           <div className="assetBuyHeaderRow">
