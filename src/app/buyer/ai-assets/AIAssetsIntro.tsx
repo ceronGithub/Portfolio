@@ -14,23 +14,32 @@ const TAGLINES = [
   "and stay in their minds.",
 ];
 
+// Depth field particle — each has a depth layer (0=far/small/slow, 1=near/large/fast)
 interface Particle {
   x: number; y: number;
   vx: number; vy: number;
   size: number; opacity: number;
   life: number; maxLife: number;
+  depth: number;   // 0.0 far → 1.0 near
+  blur:  number;   // pre-computed CSS blur equivalent (drawn as soft glow)
 }
 
 function spawnParticle(w: number, h: number): Particle {
+  const depth = Math.random();                    // 0=far, 1=near
+  const speed = 0.08 + depth * 0.55;             // near particles move faster
+  const size  = 0.3  + depth * 2.8;              // near particles larger
+  const life  = Math.round(280 - depth * 110);   // near particles shorter lived
   return {
-    x: Math.random() * w,
-    y: h + 10,
-    vx: (Math.random() - 0.5) * 0.35,
-    vy: -(Math.random() * 0.55 + 0.15),
-    size: Math.random() * 1.8 + 0.4,
-    opacity: Math.random() * 0.3 + 0.04,
-    life: 0,
-    maxLife: Math.random() * 320 + 180,
+    x:       Math.random() * w,
+    y:       h + 10,
+    vx:      (Math.random() - 0.5) * (0.15 + depth * 0.4),
+    vy:      -(speed * (Math.random() * 0.4 + 0.8)),
+    size,
+    opacity: 0.06 + (1 - depth) * 0.18 + depth * 0.06, // far = slightly more visible
+    life:    0,
+    maxLife: life + Math.round(Math.random() * 120),
+    depth,
+    blur:    (1 - depth) * 1.8,  // far particles slightly blurred
   };
 }
 
@@ -81,18 +90,58 @@ export default function AIAssetsIntro() {
       const w = canvas!.width;
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
-      if (particles.current.length < 75 && Math.random() < 0.45)
+
+      // Spawn new particles — more frequent for richer field
+      if (particles.current.length < 90 && Math.random() < 0.55)
         particles.current.push(spawnParticle(w, h));
       particles.current = particles.current.filter(p => p.life < p.maxLife);
+
+      // Sort by depth so far particles render first (painter's algorithm)
+      particles.current.sort((a, b) => a.depth - b.depth);
+
       for (const p of particles.current) {
-        p.life += 1; p.x += p.vx; p.y += p.vy;
+        p.life += 1;
+        p.x    += p.vx;
+        p.y    += p.vy;
+
         const lr    = p.life / p.maxLife;
-        const alpha = p.opacity * Math.min(1, lr * 6) * (1 - Math.max(0, (lr - 0.7) / 0.3));
-        ctx!.beginPath();
-        ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(210,200,185,${alpha})`;
-        ctx!.fill();
+        const alpha = p.opacity
+          * Math.min(1, lr * 5)
+          * (1 - Math.max(0, (lr - 0.72) / 0.28));
+
+        if (alpha <= 0.002) continue;
+
+        // Near particles (depth > 0.65): draw as soft radial glow
+        // Far particles (depth < 0.35): draw as sharp tiny dot
+        if (p.depth > 0.65) {
+          // Soft bokeh glow for near-field particles
+          const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2.2);
+          grad.addColorStop(0,   `rgba(230,220,200,${alpha})`);
+          grad.addColorStop(0.4, `rgba(215,205,185,${alpha * 0.55})`);
+          grad.addColorStop(1,   `rgba(195,185,165,0)`);
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
+          ctx!.fillStyle = grad;
+          ctx!.fill();
+        } else if (p.depth > 0.35) {
+          // Mid-field: medium soft dot
+          const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 1.4);
+          grad.addColorStop(0,   `rgba(220,210,192,${alpha})`);
+          grad.addColorStop(0.6, `rgba(210,200,182,${alpha * 0.4})`);
+          grad.addColorStop(1,   `rgba(200,190,172,0)`);
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, p.size * 1.4, 0, Math.PI * 2);
+          ctx!.fillStyle = grad;
+          ctx!.fill();
+        } else {
+          // Far-field: tiny sharp crisp dot
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx!.fillStyle = `rgba(200,192,178,${alpha * 0.7})`;
+          ctx!.fill();
+        }
       }
+
       rafRef.current = requestAnimationFrame(draw);
     }
     rafRef.current = requestAnimationFrame(draw);

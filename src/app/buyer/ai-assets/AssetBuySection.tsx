@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import "./asset-buy-section.css";
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
@@ -74,6 +74,8 @@ export default function AssetBuySection({
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Character" | "Weapon">("Character");
+  const [browseSearch,  setBrowseSearch]  = useState("");
+  const [browseSort,    setBrowseSort]    = useState<"default" | "price-asc" | "price-desc" | "name">("default");
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const videoCardRef = useRef<HTMLVideoElement>(null);
@@ -169,7 +171,15 @@ export default function AssetBuySection({
     return () => { cancelAnimationFrame(fogRafRef.current); window.removeEventListener("resize", resize); };
   }, []);
 
-  const filteredAssets = ALL_ASSETS.filter(a => a.category === browseTab);
+  const filteredAssets = useMemo(() => {
+    let list = ALL_ASSETS.filter(a => a.category === browseTab);
+    if (browseSearch.trim())
+      list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
+    if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
+    if (browseSort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
+    if (browseSort === "name")       list = [...list].sort((a, b) => a.label.localeCompare(b.label));
+    return list;
+  }, [browseTab, browseSearch, browseSort]);
   const cartItems      = ALL_ASSETS.filter(a => cartIds.has(a.id));
   const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
   const discountRate   = getBundleDiscount(cartItems.length);
@@ -300,7 +310,7 @@ export default function AssetBuySection({
                   <button
                     key={tab}
                     className={`assetModalTab ${browseTab === tab ? "assetModalTabActive" : ""}`}
-                    onClick={() => setBrowseTab(tab)}
+                    onClick={() => { setBrowseTab(tab); setBrowseSearch(""); }}
                   >
                     {tab}
                   </button>
@@ -312,6 +322,32 @@ export default function AssetBuySection({
                 </span>
               )}
               <button className="assetModalClose" onClick={() => setBrowseOpen(false)}>✕</button>
+            </div>
+
+            {/* ── Search + Sort controls ── */}
+            <div className="assetModalControls">
+              <div className="assetModalSearchWrap">
+                <input
+                  className="assetModalSearch"
+                  type="text"
+                  placeholder="Search assets…"
+                  value={browseSearch}
+                  onChange={e => setBrowseSearch(e.target.value)}
+                />
+                {browseSearch && (
+                  <button className="assetModalSearchClear" onClick={() => setBrowseSearch("")}>✕</button>
+                )}
+              </div>
+              <select
+                className="assetModalSort"
+                value={browseSort}
+                onChange={e => setBrowseSort(e.target.value as typeof browseSort)}
+              >
+                <option value="default">Default</option>
+                <option value="price-asc">Price: Low → High</option>
+                <option value="price-desc">Price: High → Low</option>
+                <option value="name">Name A–Z</option>
+              </select>
             </div>
 
             <div className="assetModalList">
