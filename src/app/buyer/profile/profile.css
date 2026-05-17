@@ -1,0 +1,439 @@
+/* profile.css — Buyer profile page */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+.profilePage {
+  min-height:      100vh;
+  background:      #080808;
+  font-family:     'Syne', sans-serif;
+  padding:         7rem 1.5rem 6rem;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             2.5rem;
+  opacity:         0;
+  transform:       translate3d(0, 24px, 0);
+  transition:      opacity 0.6s ease, transform 0.6s ease;
+}
+
+.profilePageMounted {
+  opacity:   1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ── Back link ── */
+.profileBackLink {
+  align-self:     flex-start;
+  display:        flex;
+  align-items:    center;
+  gap:            0.4rem;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.72rem;
+  color:          rgba(255,255,255,0.25);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition:     color 0.2s;
+  margin-left:    max(0px, calc((100% - 640px) / 2));
+}
+
+.profileBackLink:hover { color: rgba(255,255,255,0.6); }
+
+/* ── Hero ── */
+.profileHero {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            1rem;
+  position:       relative;
+  width:          100%;
+  max-width:      640px;
+  padding-top:    1rem;
+}
+
+/* Ambient glow */
+.profileAvatarGlow {
+  position:      absolute;
+  top:           -20px;
+  left:          50%;
+  transform:     translateX(-50%);
+  width:         180px;
+  height:        180px;
+  border-radius: 50%;
+  background:    radial-gradient(circle, rgba(201,163,110,0.18) 0%, transparent 70%);
+  pointer-events: none;
+  filter:        blur(18px);
+}
+
+/* Avatar */
+.profileAvatar {
+  width:           88px;
+  height:          88px;
+  border-radius:   50%;
+  background:      #111;
+  border:          2px solid #c9a36e;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  position:        relative;
+  z-index:         1;
+  box-shadow:      0 0 0 6px rgba(201,163,110,0.07);
+}
+
+.profileAvatarInitials {
+  font-size:      1.9rem;
+  font-weight:    800;
+  color:          #c9a36e;
+  letter-spacing: -0.02em;
+  line-height:    1;
+}
+
+/* Name row */
+.profileNameRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  flex-wrap:   wrap;
+  justify-content: center;
+}
+
+.profileNameBtn {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  background:  transparent;
+  border:      none;
+  cursor:      pointer;
+  padding:     0;
+}
+
+.profileName {
+  font-size:      clamp(1.6rem, 4vw, 2.4rem);
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.03em;
+  margin:         0;
+  line-height:    1.1;
+}
+
+.profileNameEditIcon {
+  color:      rgba(255,255,255,0.2);
+  display:    flex;
+  align-items: center;
+  transition: color 0.2s;
+  margin-top: 4px;
+}
+
+.profileNameBtn:hover .profileNameEditIcon { color: rgba(255,255,255,0.5); }
+
+/* Inline name edit */
+.profileNameEdit {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+}
+
+.profileNameInput {
+  font-family:   'Syne', sans-serif;
+  font-size:     1.6rem;
+  font-weight:   800;
+  color:         #fff;
+  background:    transparent;
+  border:        none;
+  border-bottom: 2px solid #c9a36e;
+  outline:       none;
+  letter-spacing: -0.03em;
+  width:         260px;
+  padding:       0.1rem 0;
+}
+
+.profileNameSaveBtn {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.7rem;
+  font-weight:    500;
+  color:          #000;
+  background:     #c9a36e;
+  border:         none;
+  padding:        0.3rem 0.8rem;
+  border-radius:  999px;
+  cursor:         pointer;
+  transition:     opacity 0.2s;
+}
+
+.profileNameSaveBtn:hover { opacity: 0.85; }
+
+.profileNameCancelBtn {
+  font-size:     0.75rem;
+  color:         #555;
+  background:    transparent;
+  border:        1px solid #2a2a2a;
+  width:         26px; height: 26px;
+  border-radius: 50%;
+  cursor:        pointer;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    color 0.2s;
+}
+
+.profileNameCancelBtn:hover { color: #e55; }
+
+.profileSaveMsg {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  color:          #22c55e;
+  letter-spacing: 0.08em;
+}
+
+.profileEmail {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.78rem;
+  color:          rgba(255,255,255,0.25);
+  letter-spacing: 0.04em;
+  margin:         0;
+}
+
+.profileRoleBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    500;
+  color:          #c9a36e;
+  border:         1px solid rgba(201,163,110,0.28);
+  background:     rgba(201,163,110,0.07);
+  padding:        0.2rem 0.75rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* ── Stats strip ── */
+.profileStats {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0;
+  background:      #0e0e0e;
+  border:          1px solid #1a1a1a;
+  border-radius:   20px;
+  width:           100%;
+  max-width:       640px;
+  overflow:        hidden;
+}
+
+.profileStat {
+  flex:            1;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  padding:         1.5rem 1rem;
+  gap:             0.3rem;
+}
+
+.profileStatNum {
+  font-size:      1.25rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  line-height:    1;
+}
+
+.profileStatLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.profileStatDivider {
+  width:      1px;
+  height:     36px;
+  background: #1e1e1e;
+  flex-shrink: 0;
+}
+
+/* ── Section ── */
+.profileSection {
+  width:     100%;
+  max-width: 640px;
+}
+
+.profileSectionHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   1rem;
+}
+
+.profileSectionLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  margin:         0;
+}
+
+.profileSectionCount {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          rgba(255,255,255,0.15);
+  border:         1px solid #1e1e1e;
+  background:     #111;
+  padding:        0.15rem 0.55rem;
+  border-radius:  999px;
+}
+
+/* ── Empty state ── */
+.profileEmpty {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  text-align:      center;
+  padding:         3rem 1.5rem;
+  background:      #0e0e0e;
+  border:          1px solid #1a1a1a;
+  border-radius:   20px;
+  gap:             0.65rem;
+}
+
+.profileEmptyIcon  { font-size: 2.2rem; opacity: 0.2; }
+.profileEmptyText  { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.3); margin: 0; }
+.profileEmptySub   { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.12); max-width: 280px; line-height: 1.7; margin: 0; }
+
+.profileEmptyLink {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.7rem;
+  color:          #c9a36e;
+  text-decoration: none;
+  border:         1px solid rgba(201,163,110,0.25);
+  background:     rgba(201,163,110,0.06);
+  padding:        0.4rem 1rem;
+  border-radius:  999px;
+  margin-top:     0.25rem;
+  transition:     background 0.2s;
+}
+
+.profileEmptyLink:hover { background: rgba(201,163,110,0.12); }
+
+/* ── Order list ── */
+.profileOrderList {
+  background:    #0e0e0e;
+  border:        1px solid #1a1a1a;
+  border-radius: 20px;
+  overflow:      hidden;
+}
+
+.profileOrderHeader {
+  display:               grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap:                   1rem;
+  padding:               0.75rem 1.25rem;
+  border-bottom:         1px solid #141414;
+  font-family:           'DM Mono', monospace;
+  font-size:             0.58rem;
+  font-weight:           300;
+  color:                 rgba(255,255,255,0.18);
+  text-transform:        uppercase;
+  letter-spacing:        0.18em;
+}
+
+.profileOrderRow {
+  display:               grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap:                   1rem;
+  padding:               1rem 1.25rem;
+  border-bottom:         1px solid #111;
+  align-items:           center;
+  animation:             profileRowIn 0.35s ease both;
+  transition:            background 0.15s;
+}
+
+.profileOrderRow:last-child { border-bottom: none; }
+.profileOrderRow:hover      { background: rgba(255,255,255,0.015); }
+
+@keyframes profileRowIn {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.profileOrderProduct {
+  font-size:     0.88rem;
+  font-weight:   700;
+  color:         rgba(255,255,255,0.8);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.profileOrderDate {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.25);
+  white-space: nowrap;
+}
+
+.profileOrderAmount {
+  font-size:      0.88rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.01em;
+  white-space:    nowrap;
+}
+
+.profileOrderStatus {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    500;
+  padding:        0.2rem 0.6rem;
+  border-radius:  999px;
+  border:         1px solid;
+  white-space:    nowrap;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Actions ── */
+.profileActions {
+  width:          100%;
+  max-width:      640px;
+  display:        flex;
+  justify-content: flex-end;
+  padding-top:    0.5rem;
+}
+
+.profileSignOutBtn {
+  display:        flex;
+  align-items:    center;
+  gap:            0.5rem;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.72rem;
+  font-weight:    400;
+  color:          rgba(255,255,255,0.25);
+  background:     transparent;
+  border:         1px solid #1e1e1e;
+  padding:        0.5rem 1.1rem;
+  border-radius:  999px;
+  cursor:         pointer;
+  letter-spacing: 0.06em;
+  transition:     border-color 0.2s, color 0.2s;
+}
+
+.profileSignOutBtn:hover { border-color: #e55; color: #e55; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .profilePage { padding: 5rem 1rem 5rem; }
+
+  .profileStats { flex-wrap: wrap; }
+  .profileStat  { min-width: 40%; }
+
+  .profileOrderHeader,
+  .profileOrderRow {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  /* Hide date on mobile */
+  .profileOrderHeader span:nth-child(2),
+  .profileOrderDate { display: none; }
+}

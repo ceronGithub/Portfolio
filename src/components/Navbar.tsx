@@ -73,15 +73,6 @@ function IconAdmin({ size = 22 }: { size?: number }) {
   );
 }
 
-function IconUpload({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" />
-      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-    </svg>
-  );
-}
-
 function IconSignIn({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -197,10 +188,11 @@ export default function Navbar() {
 
   /* ── Nav items — context-aware ──────────────────────────────────── */
 
-  // Buyer on /buyer pages: only Dash + Systems + Sign Out
+  // Buyer on /buyer pages: Dash + Systems + Profile + Sign Out
   const buyerItems: NavItem[] = [
     { label: "Dash",     href: "/buyer",        icon: <IconDashboard /> },
     { label: "Systems",  href: "/buyer", icon: <IconSystems />, isHash: true, hashId: "buyerSystems" },
+    { label: "Profile",  href: "/buyer/profile", icon: <IconAbout /> },
     { label: "Sign Out", href: "#",             icon: <IconSignOut />, signOut: true },
   ];
 
@@ -210,7 +202,6 @@ export default function Navbar() {
     { label: "Users",    href: "/admin/users",     icon: <IconAbout />                               },
     { label: "Products", href: "/admin/products",  icon: <IconSystems />                             },
     { label: "Orders",   href: "/admin/orders",    icon: <IconPricing />                             },
-    { label: "Uploads",  href: "/admin/uploads",   icon: <IconUpload />                              },
     { label: isDark ? "Light" : "Dark", href: "#", icon: isDark ? <IconSun /> : <IconMoon />, toggleTheme: true },
     { label: "Sign Out", href: "#",                icon: <IconSignOut />, signOut: true              },
   ];

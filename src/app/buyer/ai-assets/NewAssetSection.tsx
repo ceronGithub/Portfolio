@@ -1,11 +1,27 @@
-// NewAssetSection — "Latest Drop" section.
-// Background: new orc-red image, parallax scroll on image, smoke SVG overlay.
-// Right side: canvas-based fire particle effect.
+// NewAssetSection — "Latest Drop" section for Character / Weapon studio.
+// UPDATED: Real content wired in.
+//   Card 1 — MP4 video from Supabase (latest orc drop).
+//   Card 2 — 3D OBJ placeholder (swap with real file when ready).
+//   Title and badge reflect actual latest asset.
+//   "Coming Soon" badge hidden when SHOW_LIVE = true.
 
 "use client";
 
 import { useRef, useEffect, useState } from "react";
 import "./new-asset-section.css";
+
+const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+
+// ── Latest drop config — change these when a new asset drops ──────────────
+const LATEST = {
+  title:       "Orc 11 — Warlord",
+  subtitle:    "New Character. Available now",
+  videoSrc:    `${SB}/character/orc-11-animation.mp4`,
+  price:       "₱5,500",
+  isLive:      true,          // false = show "Coming Soon" badge
+  releaseNote: "Full rig · 4K textures · OBJ + FBX included",
+};
+// ──────────────────────────────────────────────────────────────────────────
 
 interface FireParticle {
   x: number; y: number;
@@ -14,7 +30,6 @@ interface FireParticle {
   size: number;
 }
 
-// Spawns a fire particle along the right-side column of the canvas
 function spawnFireParticle(canvasWidth: number, canvasHeight: number): FireParticle {
   return {
     x:       canvasWidth * 0.72 + (Math.random() - 0.5) * canvasWidth * 0.28,
@@ -34,8 +49,6 @@ export default function NewAssetSection() {
   const fireParticles = useRef<FireParticle[]>([]);
   const [parallaxY, setParallaxY] = useState(0);
 
-  // ── Fire canvas animation ─────────────────────────────────────────
-  // Draws radial gradient particles: white-hot core → yellow → orange → red → fade
   useEffect(() => {
     const canvas = fireCanvasRef.current;
     if (!canvas) return;
@@ -49,7 +62,6 @@ export default function NewAssetSection() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Seed particles spread across lifecycle so fire appears immediately
     for (let i = 0; i < 40; i++) {
       const p = spawnFireParticle(canvas.width, canvas.height);
       p.life = Math.random() * p.maxLife;
@@ -75,7 +87,6 @@ export default function NewAssetSection() {
         const ratio = p.life / p.maxLife;
         const alpha = Math.max(0, (1 - ratio) * (ratio < 0.2 ? ratio * 5 : 1));
 
-        // Color band: white-hot → yellow → orange → deep red
         let r: number, g: number, b: number;
         if (ratio < 0.15)      { r = 255; g = 255; b = 220; }
         else if (ratio < 0.35) { r = 255; g = 200; b = 60;  }
@@ -104,7 +115,6 @@ export default function NewAssetSection() {
     };
   }, []);
 
-  // ── Parallax scroll ───────────────────────────────────────────────
   useEffect(() => {
     function onScroll() {
       const el = sectionRef.current;
@@ -121,7 +131,7 @@ export default function NewAssetSection() {
   return (
     <section ref={sectionRef} className="newAssetSection">
 
-      {/* ── Parallax orc-red background ── */}
+      {/* Parallax orc-red background */}
       <div className="newAssetBgWrap">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -133,30 +143,46 @@ export default function NewAssetSection() {
         <div className="newAssetBgFade" />
       </div>
 
-      {/* ── Fire particle canvas — covers right side ── */}
+      {/* Fire canvas */}
       <canvas ref={fireCanvasRef} className="newAssetFireCanvas" />
 
-      {/* ── Content ── */}
+      {/* Content */}
       <div className="newAssetContent">
         <div className="newAssetHeaderRow">
           <div>
             <p className="newAssetLabel">Latest Drop</p>
-            <h2 className="newAssetTitle">New Asset. Available now</h2>
+            <h2 className="newAssetTitle">{LATEST.subtitle}</h2>
           </div>
-          <span className="newAssetComingSoon">Coming Soon</span>
+          {LATEST.isLive ? (
+            <span className="newAssetLiveBadge">● Live</span>
+          ) : (
+            <span className="newAssetComingSoon">Coming Soon</span>
+          )}
+        </div>
+
+        {/* Asset name + price + release note */}
+        <div className="newAssetMeta">
+          <p className="newAssetMetaName">{LATEST.title}</p>
+          <p className="newAssetMetaPrice">{LATEST.price}</p>
+          <p className="newAssetMetaNote">{LATEST.releaseNote}</p>
         </div>
 
         <div className="newAssetCards">
-          <div className="newAssetCard">
-            <div className="newAssetCardInner">
-              <span className="newAssetCardIcon">🎬</span>
-              <p className="newAssetCardLabel">Video animation here</p>
-            </div>
+          {/* Card 1 — Live MP4 preview */}
+          <div className="newAssetCard newAssetCardVideo">
+            <video
+              src={LATEST.videoSrc}
+              autoPlay muted loop playsInline
+              className="newAssetCardVideoEl"
+            />
+            <div className="newAssetCardVideoLabel">Animation Preview</div>
           </div>
+
+          {/* Card 2 — 3D OBJ placeholder */}
           <div className="newAssetCard">
             <div className="newAssetCardInner">
               <span className="newAssetCardIcon">📦</span>
-              <p className="newAssetCardLabel">3D obj file here</p>
+              <p className="newAssetCardLabel">3D OBJ / FBX</p>
             </div>
           </div>
         </div>

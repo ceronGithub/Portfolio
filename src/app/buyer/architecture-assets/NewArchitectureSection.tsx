@@ -1,11 +1,25 @@
-// NewArchitectureSection — "Latest Drop" section for Architecture Asset Studio.
-// Same structure as NewAssetSection (fire canvas, parallax bg, two cards).
-// Left and right cards blank for now — content TBD.
+// NewArchitectureSection — "Latest Drop" for Architecture Asset Studio.
+// UPDATED: Real exterior video wired in from Supabase.
+//   Card 1 — MP4 exterior drone shot (latest drop).
+//   Card 2 — Interior render placeholder.
 
 "use client";
 
 import { useRef, useEffect, useState } from "react";
 import "./new-architecture-section.css";
+
+const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+
+// ── Latest drop config — update when new architecture asset drops ─────────
+const LATEST = {
+  title:       "Exterior — Drone Reveal 01",
+  subtitle:    "New Architecture Asset. Available now",
+  videoSrc:    `${SB}/exterior/Drone_shot_revealing_landscape_202605061517.mp4`,
+  price:       "₱8,500",
+  isLive:      true,
+  releaseNote: "4K render · exterior scene · editable Blender file",
+};
+// ─────────────────────────────────────────────────────────────────────────
 
 interface FireParticle {
   x: number; y: number;
@@ -112,10 +126,12 @@ export default function NewArchitectureSection() {
   return (
     <section ref={sectionRef} className="newArchSection">
 
-      {/* Parallax background — blank for now */}
+      {/* Parallax exterior background video */}
       <div className="newArchBgWrap">
-        <div
-          className="newArchBgPlaceholder"
+        <video
+          src={`${SB}/exterior/project-01.mp4`}
+          autoPlay muted loop playsInline
+          className="newArchBgVideo"
           style={{ transform: `translate3d(0, ${parallaxY}px, 0)` }}
         />
         <div className="newArchBgFade" />
@@ -129,22 +145,38 @@ export default function NewArchitectureSection() {
         <div className="newArchHeaderRow">
           <div>
             <p className="newArchLabel">Latest Drop</p>
-            <h2 className="newArchTitle">New Architecture Asset.<br />Available now</h2>
+            <h2 className="newArchTitle">{LATEST.subtitle}</h2>
           </div>
-          <span className="newArchComingSoon">Coming Soon</span>
+          {LATEST.isLive ? (
+            <span className="newArchLiveBadge">● Live</span>
+          ) : (
+            <span className="newArchComingSoon">Coming Soon</span>
+          )}
+        </div>
+
+        {/* Asset meta */}
+        <div className="newArchMeta">
+          <p className="newArchMetaName">{LATEST.title}</p>
+          <p className="newArchMetaPrice">{LATEST.price}</p>
+          <p className="newArchMetaNote">{LATEST.releaseNote}</p>
         </div>
 
         <div className="newArchCards">
-          <div className="newArchCard">
-            <div className="newArchCardInner">
-              <span className="newArchCardIcon">🎬</span>
-              <p className="newArchCardLabel">Video animation here</p>
-            </div>
+          {/* Card 1 — Live video preview */}
+          <div className="newArchCard newArchCardVideo">
+            <video
+              src={LATEST.videoSrc}
+              autoPlay muted loop playsInline
+              className="newArchCardVideoEl"
+            />
+            <div className="newArchCardVideoLabel">Exterior Preview</div>
           </div>
+
+          {/* Card 2 — Interior placeholder */}
           <div className="newArchCard">
             <div className="newArchCardInner">
-              <span className="newArchCardIcon">🏗️</span>
-              <p className="newArchCardLabel">3D architecture file here</p>
+              <span className="newArchCardIcon">🏠</span>
+              <p className="newArchCardLabel">Interior render here</p>
             </div>
           </div>
         </div>

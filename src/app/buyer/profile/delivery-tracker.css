@@ -1,0 +1,246 @@
+/* delivery-tracker.css — Per-order delivery status timeline */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ── Container ── */
+.deliveryTracker {
+  width:     100%;
+  max-width: 640px;
+}
+
+.dtHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   1rem;
+}
+
+.dtLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  margin:         0;
+}
+
+.dtCount {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          rgba(255,255,255,0.15);
+  border:         1px solid #1e1e1e;
+  background:     #111;
+  padding:        0.15rem 0.55rem;
+  border-radius:  999px;
+}
+
+/* ── Order card ── */
+.dtList {
+  display:        flex;
+  flex-direction: column;
+  gap:            1rem;
+}
+
+.dtOrder {
+  background:    #0e0e0e;
+  border:        1px solid #1a1a1a;
+  border-radius: 20px;
+  padding:       1.5rem;
+  display:       flex;
+  flex-direction: column;
+  gap:           1.5rem;
+  transition:    border-color 0.2s;
+}
+
+.dtOrder:hover   { border-color: #222; }
+.dtOrderFailed   { opacity: 0.45; }
+
+/* ── Order header ── */
+.dtOrderHeader {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+}
+
+.dtOrderInfo { flex: 1; min-width: 0; }
+
+.dtOrderName {
+  font-size:     0.95rem;
+  font-weight:   700;
+  color:         rgba(255,255,255,0.85);
+  margin:        0 0 0.25rem;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.dtOrderMeta {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  color:          rgba(255,255,255,0.2);
+  letter-spacing: 0.04em;
+  margin:         0;
+}
+
+.dtOrderRight {
+  display:     flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap:         0.35rem;
+  flex-shrink: 0;
+}
+
+.dtOrderAmount {
+  font-size:      0.95rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  margin:         0;
+}
+
+.dtFailedBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  color:          #ef4444;
+  border:         1px solid rgba(239,68,68,0.25);
+  background:     rgba(239,68,68,0.07);
+  padding:        0.15rem 0.55rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Timeline ── */
+.dtTimeline {
+  display:     flex;
+  align-items: flex-start;
+  position:    relative;
+}
+
+.dtStageWrap {
+  flex:        1;
+  display:     flex;
+  align-items: center;
+  position:    relative;
+}
+
+/* Connector line between stages */
+.dtConnector {
+  flex:       1;
+  height:     1px;
+  background: #1e1e1e;
+  margin-top: -14px; /* align with center of node */
+  transition: background 0.4s;
+}
+
+.dtConnectorFilled { background: #22c55e; }
+
+/* Stage item */
+.dtStage {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.45rem;
+  flex-shrink:    0;
+  min-width:      52px;
+}
+
+/* Node circle */
+.dtStageNode {
+  width:           28px;
+  height:          28px;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  position:        relative;
+  z-index:         1;
+  transition:      all 0.35s;
+}
+
+/* Past — filled green with check */
+.dtStagePast .dtStageNode {
+  background:  #22c55e;
+  border:      2px solid #22c55e;
+  color:       #000;
+}
+
+/* Active — glowing ring */
+.dtStageActive .dtStageNode {
+  background:  #0a1a0a;
+  border:      2px solid #22c55e;
+  box-shadow:  0 0 0 4px rgba(34,197,94,0.15), 0 0 12px rgba(34,197,94,0.25);
+  animation:   dtActivePulse 2.2s ease-in-out infinite;
+}
+
+@keyframes dtActivePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(34,197,94,0.15), 0 0 12px rgba(34,197,94,0.25); }
+  50%       { box-shadow: 0 0 0 7px rgba(34,197,94,0.08), 0 0 20px rgba(34,197,94,0.35); }
+}
+
+/* Future — dim */
+.dtStageFuture .dtStageNode {
+  background: #111;
+  border:     2px solid #2a2a2a;
+}
+
+.dtStageActiveDot {
+  width:         8px;
+  height:        8px;
+  border-radius: 50%;
+  background:    #22c55e;
+}
+
+.dtStageFutureDot {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  background:    #2a2a2a;
+}
+
+/* Stage label */
+.dtStageLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.56rem;
+  font-weight:    400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align:     center;
+  line-height:    1.3;
+  margin:         0;
+  white-space:    nowrap;
+}
+
+.dtStagePast .dtStageLabel   { color: #22c55e; }
+.dtStageActive .dtStageLabel { color: rgba(255,255,255,0.75); }
+.dtStageFuture .dtStageLabel { color: rgba(255,255,255,0.18); }
+
+/* ── Admin note ── */
+.dtNote {
+  display:     flex;
+  align-items: flex-start;
+  gap:         0.6rem;
+  background:  rgba(34,197,94,0.04);
+  border:      1px solid rgba(34,197,94,0.12);
+  border-radius: 12px;
+  padding:     0.75rem 1rem;
+}
+
+.dtNoteIcon { font-size: 0.9rem; flex-shrink: 0; line-height: 1.5; }
+
+.dtNoteText {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.72rem;
+  color:          rgba(255,255,255,0.45);
+  line-height:    1.6;
+  letter-spacing: 0.02em;
+  margin:         0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .dtStageLabel { font-size: 0.48rem; }
+  .dtStageNode  { width: 22px; height: 22px; }
+  .dtOrder      { padding: 1.1rem; }
+}

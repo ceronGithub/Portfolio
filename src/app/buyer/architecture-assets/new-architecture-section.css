@@ -140,3 +140,74 @@
   .newArchCards      { grid-template-columns: 1fr; }
   .newArchHeaderRow  { flex-direction: column; }
 }
+
+/* ── Background video (replaces placeholder div) ── */
+.newArchBgVideo {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  object-position: center;
+  display:    block;
+  will-change: transform;
+}
+
+/* ── Live badge ── */
+.newArchLiveBadge {
+  flex-shrink:    0;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  font-weight:    400;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.35);
+  background:     rgba(34,197,94,0.08);
+  padding:        0.4rem 1rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space:    nowrap;
+  margin-top:     0.25rem;
+  animation:      archLivePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes archLivePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+/* ── Asset meta ── */
+.newArchMeta {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+}
+
+.newArchMetaName  { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin: 0; }
+.newArchMetaPrice { font-size: 0.95rem; font-weight: 800; color: #22c55e; margin: 0; letter-spacing: -0.01em; }
+.newArchMetaNote  { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.22); letter-spacing: 0.04em; margin: 0; }
+
+/* ── Card video ── */
+.newArchCardVideo {
+  position: relative;
+  overflow: hidden;
+}
+
+.newArchCardVideoEl {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.newArchCardVideoLabel {
+  position:       absolute;
+  bottom:         0.75rem;
+  left:           0.75rem;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  color:          rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background:     rgba(0,0,0,0.5);
+  padding:        0.2rem 0.6rem;
+  border-radius:  999px;
+}

@@ -14,17 +14,12 @@ enum Role {
 }
 
 enum OrderStatus {
-  PENDING
-  PAID
-  FAILED
-}
-
-enum UserAction {
-  BAN
-  UNBAN
-  DEACTIVATE
-  ACTIVATE
-  DELETE
+  PENDING          // Inquiry submitted, awaiting downpayment
+  PAID             // Downpayment received — development starts
+  IN_DEVELOPMENT   // Actively being built
+  IN_TESTING       // QA / UAT phase
+  DELIVERED        // Handed over to buyer
+  FAILED           // Payment failed or order cancelled
 }
 
 model User {
@@ -33,8 +28,6 @@ model User {
   email     String   @unique
   password  String?
   role      Role     @default(BUYER)
-  isActive  Boolean  @default(true)
-  isBanned  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   orders    Order[]
@@ -61,6 +54,9 @@ model Order {
   status          OrderStatus @default(PENDING)
   paymongoOrderId String?
   amountPaid      Int?
+  deliveryNote    String?     // Admin-set note for current stage
+  estimatedAt     DateTime?   // Estimated delivery date
+  deliveredAt     DateTime?   // Actual delivery timestamp
   createdAt       DateTime    @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
@@ -77,25 +73,6 @@ model Ownership {
   product Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
-}
-
-// ── User action log ────────────────────────────────────────────────
-// Records every admin action taken on a user (ban/unban/deactivate/activate/delete).
-
-model UserActionLog {
-  id             String     @id @default(cuid())
-  action         UserAction
-  targetUserId   String                // ID of the user acted on
-  targetEmail    String                // stored separately — survives user deletion
-  targetName     String?               // stored separately
-  adminId        String                // ID of admin who took action
-  adminEmail     String                // admin email at time of action
-  reason         String?               // optional reason supplied by admin
-  createdAt      DateTime   @default(now())
-
-  @@index([action])
-  @@index([targetUserId])
-  @@index([createdAt])
 }
 // ── System catalog ─────────────────────────────────────────────────
 // Stores all 10 systems with base pricing, features, and metadata.
