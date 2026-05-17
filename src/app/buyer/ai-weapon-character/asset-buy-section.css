@@ -7,7 +7,7 @@
 .assetBuySection {
   position:    relative;
   width:       100%;
-  min-height:  100vh;
+  min-height:  140vh;
   background:  #000;
   overflow:    hidden;
   display:     flex;
@@ -20,7 +20,7 @@
 .assetBuyBgOrc {
   position: absolute;
   left: 0; top: 0;
-  width: 45%; height: 100%;
+  width: 80%; height: 100%;
   pointer-events: none;
 }
 
@@ -55,7 +55,7 @@
   z-index:         10;
   margin-left:     42%;
   width:           54%;
-  padding:         5rem 3rem 5rem 2rem;
+  padding:         7rem 3rem 7rem 2rem;
   display:         flex;
   flex-direction:  column;
   gap:             2.5rem;
@@ -146,7 +146,7 @@
   background:    #080808;
   border:        1px solid #141414;
   border-radius: 20px;
-  aspect-ratio:  4/3;
+  aspect-ratio:  3/2;
   position:      relative;
   overflow:      hidden;
   transition:    border-color 0.25s;

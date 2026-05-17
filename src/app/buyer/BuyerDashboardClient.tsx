@@ -13,9 +13,9 @@ import WishlistPanel             from "./wishlist/WishlistPanel";
 import SystemsClient             from "./system/SystemsClient";
 import AISection                 from "./ai/AISection";
 import InquirySection            from "./inquiries/InquirySection";
-import AIAssetsIntro             from "./ai-assets/AIAssetsIntro";
-import NewAssetSection           from "./ai-assets/NewAssetSection";
-import AssetBuySection           from "./ai-assets/AssetBuySection";
+import AIAssetsIntro             from "./ai-weapon-character/AIAssetsIntro";
+import NewAssetSection           from "./ai-weapon-character/NewAssetSection";
+import AssetBuySection           from "./ai-weapon-character/AssetBuySection";
 import "./wishlist/wishlist-panel.css";
 import "./buyer-dashboard-client.css";
 
