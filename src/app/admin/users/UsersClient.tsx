@@ -119,13 +119,13 @@ function AllUsersCard({ users }: { users: User[] }) {
         <span className="umCardBadge">{users.length}</span>
       </div>
       <div className="umTable">
-        <div className="umTableHead" style={{ gridTemplateColumns: "1.5fr 2.5fr 1fr 1fr 1.5fr 2fr" }}>
+        <div className="umTableHead umGrid--all">
           <span>Name</span><span>Email</span><span>Role</span>
           <span>Status</span><span>Joined</span><span>Owned</span>
         </div>
         {users.length === 0 && <p className="umEmpty">No users yet.</p>}
         {users.map(u => (
-          <div key={u.id} className="umTableRow" style={{ gridTemplateColumns: "1.5fr 2.5fr 1fr 1fr 1.5fr 2fr" }}>
+          <div key={u.id} className="umTableRow umGrid--all">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
             <span className="umCell umCellMuted">{u.email}</span>
             <span className="umCell"><RoleBadge role={u.role} /></span>
@@ -174,12 +174,12 @@ function ActiveUsersCard({ users, onAction, pendingId }: {
         {search && <button className="umSearchClear" onClick={() => setSearch("")}>✕</button>}
       </div>
       <div className="umTable">
-        <div className="umTableHead" style={{ gridTemplateColumns: "1.5fr 2.5fr 1.5fr 1.5fr 2.8fr" }}>
+        <div className="umTableHead umGrid--active">
           <span>Name</span><span>Email</span><span>Joined</span><span>Owned</span><span>Actions</span>
         </div>
         {filtered.length === 0 && <p className="umEmpty">{search ? "No users match." : "No active users."}</p>}
         {filtered.map(u => (
-          <div key={u.id} className="umTableRow" style={{ gridTemplateColumns: "1.5fr 2.5fr 1.5fr 1.5fr 2.8fr" }}>
+          <div key={u.id} className="umTableRow umGrid--active">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
             <span className="umCell umCellMuted">{u.email}</span>
             <span className="umCell umCellMuted">
@@ -230,12 +230,12 @@ function NonActiveUsersCard({ users, onAction, pendingId }: {
         <span className="umCardBadge umCardBadge--inactive">{users.length}</span>
       </div>
       <div className="umTable">
-        <div className="umTableHead" style={{ gridTemplateColumns: "1.5fr 2.5fr 1fr 1.5fr 2.5fr" }}>
+        <div className="umTableHead umGrid--inactive">
           <span>Name</span><span>Email</span><span>Status</span><span>Joined</span><span>Actions</span>
         </div>
         {users.length === 0 && <p className="umEmpty">No non-active or banned users.</p>}
         {users.map(u => (
-          <div key={u.id} className="umTableRow" style={{ gridTemplateColumns: "1.5fr 2.5fr 1fr 1.5fr 2.5fr" }}>
+          <div key={u.id} className="umTableRow umGrid--inactive">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
             <span className="umCell umCellMuted">{u.email}</span>
             <span className="umCell"><StatusBadge isActive={u.isActive} isBanned={u.isBanned} /></span>
@@ -309,7 +309,7 @@ function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
 
       {/* Table */}
       <div className="umTable">
-        <div className="umTableHead" style={{ gridTemplateColumns: "1fr 2fr 2fr 2fr 1.5fr 2fr" }}>
+        <div className="umTableHead umGrid--log">
           <span>Action</span><span>Target User</span><span>Target Email</span>
           <span>By Admin</span><span>Reason</span><span>Date &amp; Time</span>
         </div>
@@ -317,7 +317,7 @@ function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
           <p className="umEmpty">No {activeTab.toLowerCase()} actions recorded yet.</p>
         )}
         {filtered.map(log => (
-          <div key={log.id} className="umTableRow" style={{ gridTemplateColumns: "1fr 2fr 2fr 2fr 1.5fr 2fr" }}>
+          <div key={log.id} className="umTableRow umGrid--log">
             <span className="umCell"><ActionLogBadge action={log.action} /></span>
             <span className="umCell umCellName">{log.targetName ?? <em className="umNone">—</em>}</span>
             <span className="umCell umCellMuted">{log.targetEmail}</span>
