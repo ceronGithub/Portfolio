@@ -1,51 +1,23 @@
 /* ================================================
-   users.css — User Management page.
-   Self-contained: includes page header, typography,
-   and all card/table styles.
+   users.css — User Management. 3 cards layout.
+   Card 1: All users. Card 2: Active + actions.
+   Card 3: Non-active + actions.
    ================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+.adminUsersPage { padding: 2.5rem; }
 
-/* ── Page root ────────────────────────────────── */
-.adminUsersPage {
-  padding: 2.5rem 2rem 7rem;
-  max-width: 1100px;
-  margin: 0 auto;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* ── Page header ──────────────────────────────── */
-.adminPageHeader {
-  margin-bottom: 2rem;
-}
-
-.adminPageTitle {
-  font-size: 1.7rem;
-  font-weight: 800;
-  color: var(--content-color, #e8e4de);
-  letter-spacing: -0.03em;
-  margin: 0 0 0.25rem;
-  font-family: 'Inter', sans-serif;
-}
-
-.adminPageSubtitle {
-  font-size: 0.875rem;
-  color: var(--sidebar-text, #888);
-  font-weight: 400;
-  margin: 0;
-}
-
-/* ── Card stack ───────────────────────────────── */
+/* ── Root ─────────────────────────────────────── */
 .umRoot {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  position: relative;
 }
 
 /* ── Toast ────────────────────────────────────── */
 .umToast {
   position: fixed;
-  bottom: 6rem;
+  bottom: 2rem;
   right: 2rem;
   padding: 0.75rem 1.25rem;
   border-radius: 10px;
@@ -53,11 +25,10 @@
   font-weight: 600;
   z-index: 999;
   animation: umToastIn 0.25s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
-.umToast--ok  { background: #1a1a1a; color: #68d391; border: 1px solid rgba(104,211,145,0.25); }
-.umToast--err { background: #1a1a1a; color: #fc8181; border: 1px solid rgba(252,129,129,0.25); }
+.umToast--ok  { background: #1a1a1a; color: #68d391; border: 1px solid rgba(104,211,145,0.2); }
+.umToast--err { background: #1a1a1a; color: #fc8181; border: 1px solid rgba(252,129,129,0.2); }
 
 @keyframes umToastIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -66,8 +37,8 @@
 
 /* ── Card ─────────────────────────────────────── */
 .umCard {
-  background: var(--sidebar-bg, #141414);
-  border: 1px solid var(--sidebar-border, #252525);
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
   border-radius: 16px;
   overflow: hidden;
 }
@@ -76,89 +47,85 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem 1.4rem;
-  border-bottom: 1px solid var(--sidebar-border, #252525);
-  background: var(--nav-active-bg, #1a1a1a);
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #e8e4de);
+  background: var(--nav-active-bg, #f5f4f1);
 }
 
 .umCardTitle {
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--content-color, #e8e4de);
+  color: var(--content-color, #1a1a1a);
   letter-spacing: -0.01em;
-  font-family: 'Inter', sans-serif;
 }
 
+/* Count badge */
 .umCardBadge {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  background: var(--sidebar-border, #2a2a2a);
+  background: var(--sidebar-border, #e8e4de);
   color: var(--sidebar-text, #888);
   font-variant-numeric: tabular-nums;
 }
-.umCardBadge--active   { background: rgba(56,161,105,0.15);  color: #68d391; }
-.umCardBadge--inactive { background: rgba(229,62,62,0.12);   color: #fc8181; }
+.umCardBadge--active   { background: rgba(56,161,105,0.12);  color: #2f855a; }
+.umCardBadge--inactive { background: rgba(229,62,62,0.1);    color: #c53030; }
 
 /* ── Search ───────────────────────────────────── */
 .umSearchWrap {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.7rem 1.4rem;
-  border-bottom: 1px solid var(--sidebar-border, #252525);
-  background: var(--sidebar-bg, #141414);
+  padding: 0.75rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  background: var(--sidebar-bg, #fff);
 }
 
-.umSearchIcon { color: var(--sidebar-text, #555); flex-shrink: 0; }
+.umSearchIcon { color: var(--sidebar-text, #aaa); flex-shrink: 0; }
 
 .umSearchInput {
   flex: 1;
   border: none;
   background: transparent;
   font-size: 0.85rem;
-  color: var(--content-color, #e8e4de);
-  font-family: 'Inter', sans-serif;
+  color: var(--content-color, #1a1a1a);
+  font-family: inherit;
   outline: none;
 }
-.umSearchInput::placeholder { color: var(--sidebar-text, #555); }
+.umSearchInput::placeholder { color: var(--sidebar-text, #bbb); }
 
 .umSearchClear {
   background: none;
   border: none;
   font-size: 0.75rem;
-  color: var(--sidebar-text, #666);
+  color: var(--sidebar-text, #aaa);
   cursor: pointer;
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
 }
-.umSearchClear:hover { color: var(--content-color, #e8e4de); }
+.umSearchClear:hover { color: var(--content-color, #1a1a1a); }
 
 /* ── Table ────────────────────────────────────── */
 .umTable { display: flex; flex-direction: column; }
 
-/* Scrollable tbody — shows 5 rows then scrolls */
-.umTableBody {
-  max-height: 280px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
-}
-.umTableBody::-webkit-scrollbar { width: 4px; }
-.umTableBody::-webkit-scrollbar-track { background: transparent; }
-.umTableBody::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-.umTableHead--all, .umTableRow--all {
+/* All users: 6 columns */
+.umTableHead--all,
+.umTableRow--all {
   display: grid;
   grid-template-columns: 1.5fr 2.5fr 1fr 1fr 1.5fr 2fr;
 }
-.umTableHead--active, .umTableRow--active {
+
+/* Active users: 5 columns */
+.umTableHead--active,
+.umTableRow--active {
   display: grid;
   grid-template-columns: 1.5fr 2.5fr 1.5fr 1.5fr 2.5fr;
 }
-.umTableHead--inactive, .umTableRow--inactive {
+
+/* Non-active: 5 columns */
+.umTableHead--inactive,
+.umTableRow--inactive {
   display: grid;
   grid-template-columns: 1.5fr 2.5fr 1fr 1.5fr 2fr;
 }
@@ -166,27 +133,26 @@
 .umTableHead--all,
 .umTableHead--active,
 .umTableHead--inactive {
-  padding: 0.55rem 1.4rem;
-  border-bottom: 1px solid var(--sidebar-border, #252525);
-  background: var(--nav-active-bg, #1a1a1a);
+  padding: 0.6rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  background: var(--nav-active-bg, #f5f4f1);
 }
 
 .umTableHead--all span,
 .umTableHead--active span,
 .umTableHead--inactive span {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--sidebar-text, #555);
+  color: var(--sidebar-text, #aaa);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.07em;
 }
 
 .umTableRow--all,
 .umTableRow--active,
 .umTableRow--inactive {
-  padding: 0.85rem 1.4rem;
-  border-bottom: 1px solid var(--sidebar-border, #1e1e1e);
+  padding: 0.8rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
   align-items: center;
   transition: background 0.15s;
 }
@@ -197,12 +163,12 @@
 
 .umTableRow--all:hover,
 .umTableRow--active:hover,
-.umTableRow--inactive:hover { background: var(--nav-active-bg, #1a1a1a); }
+.umTableRow--inactive:hover { background: var(--nav-active-bg, #f5f4f1); }
 
 /* ── Cells ────────────────────────────────────── */
 .umCell {
   font-size: 0.83rem;
-  color: var(--content-color, #e8e4de);
+  color: var(--content-color, #1a1a1a);
   font-weight: 500;
   padding-right: 0.75rem;
   overflow: hidden;
@@ -210,151 +176,257 @@
   white-space: nowrap;
   display: flex;
   align-items: center;
-  font-family: 'Inter', sans-serif;
 }
 
-.umCellName  { font-weight: 600; color: var(--content-color, #e8e4de); }
-.umCellMuted { color: var(--sidebar-text, #666); font-weight: 400; }
-.umCellOwned { gap: 0.3rem; flex-wrap: wrap; white-space: normal; overflow: visible; }
-.umCellActions { overflow: visible; white-space: normal; }
-.umNone { color: var(--sidebar-text, #444); font-style: normal; font-weight: 400; }
+.umCellName  { font-weight: 600; }
+.umCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
+
+.umCellOwned {
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  white-space: normal;
+  overflow: visible;
+}
+
+.umCellActions {
+  overflow: visible;
+  white-space: normal;
+}
+
+.umNone { color: var(--sidebar-text, #bbb); font-style: normal; font-weight: 400; }
 
 /* ── Owned tags ───────────────────────────────── */
 .umOwnedTag {
   display: inline-flex;
-  background: rgba(255,255,255,0.05);
-  color: var(--content-color, #aaa);
-  font-size: 0.68rem;
+  background: var(--nav-active-bg, #f0ede8);
+  color: var(--content-color, #555);
+  font-size: 0.7rem;
   font-weight: 600;
   padding: 0.18rem 0.5rem;
   border-radius: 6px;
-  border: 1px solid var(--sidebar-border, #2a2a2a);
-  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--sidebar-border, #e8e4de);
 }
 
 .umOwnedCount {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--content-color, #aaa);
+  color: var(--content-color, #555);
 }
 
 /* ── Role badge ───────────────────────────────── */
 .umRoleBadge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.06em;
 }
-.umRoleBadge--admin { background: rgba(201,169,110,0.15); color: #c9a96e; }
-.umRoleBadge--buyer { background: rgba(99,179,237,0.12);  color: #63b3ed; }
+.umRoleBadge--admin { background: rgba(201,169,110,0.15); color: #a07d3a; }
+.umRoleBadge--buyer { background: rgba(99,179,237,0.12);  color: #2b6cb0; }
 
 /* ── Status badge ─────────────────────────────── */
 .umStatusBadge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.05em;
 }
-.umStatusBadge--active   { background: rgba(56,161,105,0.15);  color: #68d391; }
-.umStatusBadge--inactive { background: rgba(246,173,85,0.12);  color: #f6ad55; }
-.umStatusBadge--banned   { background: rgba(229,62,62,0.12);   color: #fc8181; }
+.umStatusBadge--active   { background: rgba(56,161,105,0.12);  color: #2f855a; }
+.umStatusBadge--inactive { background: rgba(246,173,85,0.12);  color: #b7791f; }
+.umStatusBadge--banned   { background: rgba(229,62,62,0.1);    color: #c53030; }
 
 /* ── Actions group ────────────────────────────── */
-.umActionsGroup { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.umActionsGroup {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
 
 /* ── Action buttons ───────────────────────────── */
 .umActionBtn {
-  font-size: 0.71rem;
-  padding: 0.3rem 0.75rem;
+  font-size: 0.72rem;
+  padding: 0.28rem 0.7rem;
   border-radius: 7px;
   border: 1px solid transparent;
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
   white-space: nowrap;
 }
-.umActionBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+.umActionBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.umActionBtn--ban        { background: rgba(229,62,62,0.1);    color: #fc8181; border-color: rgba(229,62,62,0.2); }
-.umActionBtn--ban:hover:not(:disabled)        { background: rgba(229,62,62,0.2); }
-.umActionBtn--deactivate { background: rgba(246,173,85,0.1);   color: #f6ad55; border-color: rgba(246,173,85,0.2); }
+.umActionBtn--ban        { background: rgba(229,62,62,0.08);    color: #c53030; border-color: rgba(229,62,62,0.2); }
+.umActionBtn--ban:hover:not(:disabled)        { background: rgba(229,62,62,0.16); }
+
+.umActionBtn--deactivate { background: rgba(246,173,85,0.1);   color: #b7791f; border-color: rgba(246,173,85,0.25); }
 .umActionBtn--deactivate:hover:not(:disabled) { background: rgba(246,173,85,0.2); }
+
 .umActionBtn--delete     { background: rgba(113,128,150,0.08); color: #718096; border-color: rgba(113,128,150,0.2); }
-.umActionBtn--delete:hover:not(:disabled)     { background: rgba(229,62,62,0.12); color: #fc8181; border-color: rgba(229,62,62,0.2); }
-.umActionBtn--activate   { background: rgba(56,161,105,0.12);  color: #68d391; border-color: rgba(56,161,105,0.2); }
+.umActionBtn--delete:hover:not(:disabled)     { background: rgba(229,62,62,0.1); color: #c53030; border-color: rgba(229,62,62,0.2); }
+
+.umActionBtn--activate   { background: rgba(56,161,105,0.1);   color: #2f855a; border-color: rgba(56,161,105,0.25); }
 .umActionBtn--activate:hover:not(:disabled)   { background: rgba(56,161,105,0.2); }
-.umActionBtn--unban      { background: rgba(99,179,237,0.1);   color: #63b3ed; border-color: rgba(99,179,237,0.2); }
+
+.umActionBtn--unban      { background: rgba(99,179,237,0.1);   color: #2b6cb0; border-color: rgba(99,179,237,0.25); }
 .umActionBtn--unban:hover:not(:disabled)      { background: rgba(99,179,237,0.2); }
 
 /* ── Confirm popover ──────────────────────────── */
 .umConfirmPopover {
-  background: #1e1e1e;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 0.8rem 1rem;
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  min-width: 220px;
+  gap: 0.55rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  min-width: 210px;
 }
 
 .umConfirmMsg {
   font-size: 0.78rem;
-  color: #e8e4de;
-  line-height: 1.45;
-  font-family: 'Inter', sans-serif;
+  color: var(--content-color, #1a1a1a);
+  line-height: 1.4;
 }
 
-.umConfirmBtns { display: flex; gap: 0.4rem; }
+.umConfirmBtns {
+  display: flex;
+  gap: 0.4rem;
+}
 
 .umConfirmCancel {
   flex: 1;
-  padding: 0.35rem 0.6rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 7px;
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--sidebar-border, #e8e4de);
   background: transparent;
   font-size: 0.75rem;
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-weight: 600;
-  color: #888;
+  color: var(--sidebar-text, #888);
   cursor: pointer;
 }
-.umConfirmCancel:hover { background: #2a2a2a; }
+.umConfirmCancel:hover { background: var(--nav-active-bg, #f5f4f1); }
 
 .umConfirmOk {
   flex: 1;
-  padding: 0.35rem 0.6rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 7px;
   border: none;
-  background: #2a2a2a;
-  color: #e8e4de;
+  background: #1a1a1a;
+  color: #fff;
   font-size: 0.75rem;
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
 }
 .umConfirmOk:hover { background: #333; }
-.umConfirmOkDanger { background: rgba(197,48,48,0.8); color: #fff; }
-.umConfirmOkDanger:hover { background: #c53030; }
+.umConfirmOkDanger { background: #c53030; }
+.umConfirmOkDanger:hover { background: #9b2c2c; }
 
 /* ── Empty ────────────────────────────────────── */
 .umEmpty {
   font-size: 0.83rem;
-  color: var(--sidebar-text, #555);
-  padding: 2rem;
+  color: var(--sidebar-text, #aaa);
+  padding: 1.5rem;
   text-align: center;
-  font-family: 'Inter', sans-serif;
 }
+
+/* ── Action log tabs ──────────────────────────── */
+.umLogTabs {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.85rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  background: var(--sidebar-bg, #fff);
+}
+
+.umLogTab {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--sidebar-text, #888);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.umLogTab:hover {
+  background: var(--nav-active-bg, #f5f4f1);
+  color: var(--content-color, #1a1a1a);
+}
+
+.umLogTabActive {
+  background: var(--sidebar-bg, #fff);
+  font-weight: 700;
+  border-color: currentColor;
+}
+
+.umLogTabCount {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--nav-active-bg, #f0ede8);
+  color: var(--sidebar-text, #888);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.umLogTabActive .umLogTabCount {
+  background: rgba(0,0,0,0.07);
+}
+
+/* ── Action log badge ─────────────────────────── */
+.umActionLogBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.umActionLogBadge--ban        { background: rgba(229,62,62,0.1);    color: #c53030; }
+.umActionLogBadge--unban      { background: rgba(99,179,237,0.1);   color: #2b6cb0; }
+.umActionLogBadge--deactivate { background: rgba(246,173,85,0.12);  color: #b7791f; }
+.umActionLogBadge--activate   { background: rgba(56,161,105,0.12);  color: #2f855a; }
+.umActionLogBadge--delete     { background: rgba(113,128,150,0.1);  color: #718096; }
+
+/* ── Log time ─────────────────────────────────── */
+.umLogTime {
+  color: var(--sidebar-text, #bbb);
+  font-size: 0.78rem;
+}
+
+/* ── Confirm reason input ─────────────────────── */
+.umConfirmReason {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  background: var(--main-bg, #f5f4f1);
+  color: var(--content-color, #1a1a1a);
+  outline: none;
+}
+
+.umConfirmReason::placeholder { color: var(--sidebar-text, #bbb); }
+.umConfirmReason:focus { border-color: rgba(0,0,0,0.25); }
