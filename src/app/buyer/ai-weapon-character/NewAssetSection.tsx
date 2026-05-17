@@ -150,7 +150,7 @@ export default function NewAssetSection() {
       <div className="newAssetContent">
         <div className="newAssetHeaderRow">
           <div>
-            <p className="newAssetLabel">Latest Drop</p>
+            <p className="newAssetLabel">Latest Drop on Character & Weapon</p>
             <h2 className="newAssetTitle">{LATEST.subtitle}</h2>
           </div>
           {LATEST.isLive ? (

@@ -202,7 +202,7 @@ export default function AIAssetsIntro() {
 
         {/* ── Center tagline ── */}
         <div className="aiAssetsCenterText">
-          <p className="aiAssetsEyebrow">AI Asset Studio</p>
+          <p className="aiAssetsEyebrow">AI Character & Weapon</p>
 
           <div className="aiAssetsLines">
             {TAGLINES.map((line, i) => {
