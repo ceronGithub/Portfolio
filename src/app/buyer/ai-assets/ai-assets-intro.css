@@ -160,3 +160,31 @@
     font-size: clamp(1.4rem, 5.5vw, 2rem);
   }
 }
+/* ════════════════════════════════
+   TASK 5 — Bottom fog animation
+   ════════════════════════════════ */
+
+.aiAssetsBottomFog {
+  position:       absolute;
+  bottom:         0;
+  left:           0;
+  right:          0;
+  height:         38%;          /* fog occupies bottom 38% of sticky viewport */
+  z-index:        22;           /* above images, below center text */
+  pointer-events: none;
+  will-change:    transform;
+  animation:      aiBottomFogRise 6s ease-in-out infinite alternate;
+}
+
+/* Subtle vertical breathe — fog gently rises and falls */
+@keyframes aiBottomFogRise {
+  0%   { transform: translate3d(0, 6px,  0); opacity: 0.78; }
+  100% { transform: translate3d(0, -6px, 0); opacity: 1;    }
+}
+
+.aiAssetsBottomFogSvg {
+  width:  100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}

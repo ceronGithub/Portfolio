@@ -437,3 +437,33 @@
   .profileOrderHeader span:nth-child(2),
   .profileOrderDate { display: none; }
 }
+
+/* ════════════════════════════════
+   TASK 2 — System history header (3-col)
+   ════════════════════════════════ */
+
+.profileOrderHeaderSys {
+  grid-template-columns: 1fr auto auto !important;
+}
+
+/* ════════════════════════════════
+   TASK 4 — Scrollable list
+   ════════════════════════════════ */
+
+.profileOrderListScroll {
+  max-height:  320px;
+  overflow-y:  auto;
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e1e transparent;
+}
+
+.profileOrderListScroll::-webkit-scrollbar       { width: 3px; }
+.profileOrderListScroll::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 2px; }
+
+/* Sticky header row inside scrollable list */
+.profileOrderListScroll .profileOrderHeader {
+  position: sticky;
+  top:      0;
+  z-index:  1;
+  background: #0e0e0e;
+}

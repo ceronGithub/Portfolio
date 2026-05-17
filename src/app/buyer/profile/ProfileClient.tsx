@@ -1,11 +1,11 @@
-// ProfileClient.tsx — Buyer profile page, client component.
-// Sections: identity hero, stats strip, delivery tracker, order history.
+// ProfileClient.tsx — Buyer profile page.
+// Task 2: Added system/owned history section.
+// Task 3: Removed back link + sign out button (navbar handles nav/signout).
+// Task 4: Scrollable order history + system history (max-height + overflow-y).
 
 "use client";
 
 import { useState, useEffect } from "react";
-import { signOut }             from "next-auth/react";
-import Link                    from "next/link";
 import DeliveryTracker         from "./DeliveryTracker";
 import "./profile.css";
 
@@ -20,6 +20,12 @@ interface Order {
   createdAt:    string;
 }
 
+interface OwnedItem {
+  productId:   string;
+  productName: string;
+  grantedAt:   string;
+}
+
 interface Props {
   user: {
     id:          string;
@@ -30,6 +36,7 @@ interface Props {
   };
   orders:     Order[];
   ownedCount: number;
+  ownedItems: OwnedItem[];
 }
 
 function fmt(p: number) {
@@ -49,16 +56,16 @@ function getInitials(name: string, email: string): string {
   return email[0].toUpperCase();
 }
 
-const STATUS_CONFIG = {
-  PAID:           { label: "Paid",        color: "#22c55e" },
-  PENDING:        { label: "Pending",     color: "#f59e0b" },
-  IN_DEVELOPMENT: { label: "In Dev",      color: "#3b82f6" },
-  IN_TESTING:     { label: "Testing",     color: "#a855f7" },
-  DELIVERED:      { label: "Delivered",   color: "#22c55e" },
-  FAILED:         { label: "Cancelled",   color: "#ef4444" },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  PAID:           { label: "Paid",      color: "#22c55e" },
+  PENDING:        { label: "Pending",   color: "#f59e0b" },
+  IN_DEVELOPMENT: { label: "In Dev",    color: "#3b82f6" },
+  IN_TESTING:     { label: "Testing",   color: "#a855f7" },
+  DELIVERED:      { label: "Delivered", color: "#22c55e" },
+  FAILED:         { label: "Cancelled", color: "#ef4444" },
 };
 
-export default function ProfileClient({ user, orders, ownedCount }: Props) {
+export default function ProfileClient({ user, orders, ownedCount, ownedItems }: Props) {
   const [name,    setName]    = useState(user.name);
   const [editing, setEditing] = useState(false);
   const [editVal, setEditVal] = useState(user.name);
@@ -72,11 +79,11 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
   }, []);
 
   const initials   = getInitials(name, user.email);
-  const totalSpent = orders.filter(o => o.status === "PAID" || o.status === "DELIVERED")
+  const totalSpent = orders
+    .filter(o => o.status === "PAID" || o.status === "DELIVERED")
     .reduce((s, o) => s + o.amount, 0);
   const memberYear = new Date(user.memberSince).getFullYear();
 
-  // Active = anything that is in progress (not just PAID or PENDING)
   const activeOrders = orders.filter(o =>
     o.status === "PAID" || o.status === "IN_DEVELOPMENT" || o.status === "IN_TESTING"
   );
@@ -104,15 +111,7 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
   return (
     <div className={"profilePage" + (mounted ? " profilePageMounted" : "")}>
 
-      {/* Back link */}
-      <Link href="/buyer" className="profileBackLink">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-        Dashboard
-      </Link>
-
-      {/* Hero identity card */}
+      {/* ── Hero identity card ── */}
       <div className="profileHero">
         <div className="profileAvatarGlow" />
         <div className="profileAvatar">
@@ -126,7 +125,10 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
                 className="profileNameInput"
                 value={editVal}
                 onChange={e => setEditVal(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setEditing(false); }}
+                onKeyDown={e => {
+                  if (e.key === "Enter")  saveName();
+                  if (e.key === "Escape") setEditing(false);
+                }}
                 autoFocus
                 maxLength={60}
               />
@@ -153,7 +155,7 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
         <div className="profileRoleBadge">{user.role}</div>
       </div>
 
-      {/* Stats strip */}
+      {/* ── Stats strip ── */}
       <div className="profileStats">
         <div className="profileStat">
           <span className="profileStatNum">{orders.length}</span>
@@ -181,7 +183,7 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
         </div>
       </div>
 
-      {/* Delivery Tracker — only show if there are in-progress orders */}
+      {/* ── Delivery Tracker ── */}
       {activeOrders.length > 0 && (
         <DeliveryTracker
           orders={orders.map(o => ({
@@ -197,7 +199,48 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
         />
       )}
 
-      {/* Order history */}
+      {/* ── Task 2 — System / Owned History ── */}
+      <div className="profileSection">
+        <div className="profileSectionHeader">
+          <p className="profileSectionLabel">System History</p>
+          <span className="profileSectionCount">{ownedItems.length}</span>
+        </div>
+
+        {ownedItems.length === 0 ? (
+          <div className="profileEmpty">
+            <span className="profileEmptyIcon">🖥️</span>
+            <p className="profileEmptyText">No systems owned yet</p>
+            <p className="profileEmptySub">Systems you purchase will appear here with access details.</p>
+          </div>
+        ) : (
+
+          <div className="profileOrderList profileOrderListScroll">
+            <div className="profileOrderHeader profileOrderHeaderSys">
+              <span>System</span>
+              <span>Granted</span>
+              <span>Access</span>
+            </div>
+            {ownedItems.map((item, i) => (
+              <div
+                key={item.productId}
+                className="profileOrderRow"
+                style={{ animationDelay: `${i * 0.04}s` }}
+              >
+                <span className="profileOrderProduct">{item.productName}</span>
+                <span className="profileOrderDate">{fmtDate(item.grantedAt)}</span>
+                <span
+                  className="profileOrderStatus"
+                  style={{ color: "#22c55e", borderColor: "#22c55e33", background: "#22c55e10" }}
+                >
+                  ✓ Owned
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Order History — Task 4 scrollable ── */}
       <div className="profileSection">
         <div className="profileSectionHeader">
           <p className="profileSectionLabel">Order History</p>
@@ -208,11 +251,10 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
           <div className="profileEmpty">
             <span className="profileEmptyIcon">📦</span>
             <p className="profileEmptyText">No orders yet</p>
-            <p className="profileEmptySub">Head back to the dashboard to browse available systems and assets.</p>
-            <Link href="/buyer" className="profileEmptyLink">Browse now →</Link>
+            <p className="profileEmptySub">Browse systems and assets from the dashboard.</p>
           </div>
         ) : (
-          <div className="profileOrderList">
+          <div className="profileOrderList profileOrderListScroll">
             <div className="profileOrderHeader">
               <span>Product</span>
               <span>Date</span>
@@ -241,21 +283,6 @@ export default function ProfileClient({ user, orders, ownedCount }: Props) {
             })}
           </div>
         )}
-      </div>
-
-      {/* Account actions */}
-      <div className="profileActions">
-        <button
-          className="profileSignOutBtn"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Sign Out
-        </button>
       </div>
 
     </div>

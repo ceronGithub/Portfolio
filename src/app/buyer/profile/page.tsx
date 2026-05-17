@@ -1,5 +1,5 @@
 // /buyer/profile/page.tsx — Server Component.
-// Fetches session + user + orders (with delivery fields) + ownerships.
+// Task 2: Also fetches ownedItems for system history section.
 
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -21,10 +21,20 @@ export default async function ProfilePage() {
     prisma.order.findMany({
       where:   { userId },
       orderBy: { createdAt: "desc" },
-      include: { product: { select: { name: true, price: true } } },
+      select: {
+        id:           true,
+        status:       true,
+        amountPaid:   true,
+        deliveryNote: true,
+        estimatedAt:  true,
+        deliveredAt:  true,
+        createdAt:    true,
+        product: { select: { name: true, price: true } },
+      },
     }),
     prisma.ownership.findMany({
       where:   { userId },
+      orderBy: { grantedAt: "desc" },
       include: { product: { select: { name: true } } },
     }),
   ]);
@@ -45,12 +55,17 @@ export default async function ProfilePage() {
         productName:  o.product.name,
         amount:       o.amountPaid ?? o.product.price,
         status:       o.status,
-        deliveryNote: o.deliveryNote ?? null,
-        estimatedAt:  o.estimatedAt?.toISOString() ?? null,
-        deliveredAt:  o.deliveredAt?.toISOString() ?? null,
+        deliveryNote: (o.deliveryNote as string | null) ?? null,
+        estimatedAt:  o.estimatedAt ? (o.estimatedAt as Date).toISOString() : null,
+        deliveredAt:  o.deliveredAt ? (o.deliveredAt as Date).toISOString() : null,
         createdAt:    o.createdAt.toISOString(),
       }))}
       ownedCount={ownerships.length}
+      ownedItems={ownerships.map(o => ({
+        productId:   o.productId,
+        productName: o.product.name,
+        grantedAt:   o.grantedAt.toISOString(),
+      }))}
     />
   );
 }

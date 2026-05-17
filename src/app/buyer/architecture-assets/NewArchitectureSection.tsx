@@ -126,12 +126,10 @@ export default function NewArchitectureSection() {
   return (
     <section ref={sectionRef} className="newArchSection">
 
-      {/* Parallax exterior background video */}
+      {/* Parallax background — blank placeholder */}
       <div className="newArchBgWrap">
-        <video
-          src={`${SB}/exterior/project-01.mp4`}
-          autoPlay muted loop playsInline
-          className="newArchBgVideo"
+        <div
+          className="newArchBgPlaceholder"
           style={{ transform: `translate3d(0, ${parallaxY}px, 0)` }}
         />
         <div className="newArchBgFade" />
@@ -162,17 +160,15 @@ export default function NewArchitectureSection() {
         </div>
 
         <div className="newArchCards">
-          {/* Card 1 — Live video preview */}
-          <div className="newArchCard newArchCardVideo">
-            <video
-              src={LATEST.videoSrc}
-              autoPlay muted loop playsInline
-              className="newArchCardVideoEl"
-            />
-            <div className="newArchCardVideoLabel">Exterior Preview</div>
+          {/* Card 1 — placeholder for new exterior asset */}
+          <div className="newArchCard">
+            <div className="newArchCardInner">
+              <span className="newArchCardIcon">🏙️</span>
+              <p className="newArchCardLabel">Exterior render here</p>
+            </div>
           </div>
 
-          {/* Card 2 — Interior placeholder */}
+          {/* Card 2 — placeholder for new interior asset */}
           <div className="newArchCard">
             <div className="newArchCardInner">
               <span className="newArchCardIcon">🏠</span>

@@ -1,7 +1,7 @@
-/* new-architecture-section.css */
+/* architecture-buy-section.css */
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
 
-.newArchSection {
+.archBuySection {
   position:    relative;
   width:       100%;
   min-height:  100vh;
@@ -10,36 +10,33 @@
   display:     flex;
   align-items: center;
   font-family: 'Syne', sans-serif;
+  border-top:  1px solid #111;
 }
 
-.newArchBgWrap {
-  position:       absolute;
-  left:           0; top: -15%;
-  width:          48%;
-  height:         130%;
+/* Left bg — blank placeholder */
+.archBuyBgLeft {
+  position: absolute;
+  left: 0; top: 0;
+  width: 45%; height: 100%;
   pointer-events: none;
-  z-index:        1;
-  overflow:       hidden;
 }
 
-/* Blank placeholder bg — swap with <img> when content is ready */
-.newArchBgPlaceholder {
-  width:      100%;
-  height:     100%;
-  background: #0a0a0a;
-  display:    block;
-  will-change: transform;
+.archBuyBgPlaceholder {
+  width: 100%; height: 100%;
+  background: #070707;
+  display: block;
 }
 
-.newArchBgFade {
-  position:   absolute; inset: 0;
-  background: linear-gradient(to right, transparent 35%, rgba(0,0,0,0.65) 65%, #000 92%);
+.archBuyBgFade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, transparent 20%, rgba(0,0,0,0.75) 60%, #000 100%);
 }
 
-.newArchContent {
+/* Content */
+.archBuyContent {
   position:        relative;
   z-index:         10;
-  margin-left:     44%;
+  margin-left:     42%;
   width:           54%;
   padding:         5rem 3rem 5rem 2rem;
   display:         flex;
@@ -47,14 +44,15 @@
   gap:             2.5rem;
 }
 
-.newArchHeaderRow {
+.archBuyHeaderRow {
   display:         flex;
   align-items:     flex-start;
   justify-content: space-between;
   gap:             1.5rem;
+  flex-wrap:       wrap;
 }
 
-.newArchLabel {
+.archBuyLabel {
   font-family:    'DM Mono', monospace;
   font-size:      0.62rem;
   font-weight:    300;
@@ -64,39 +62,134 @@
   margin-bottom:  0.6rem;
 }
 
-.newArchTitle {
-  font-size:      clamp(1.4rem, 2.8vw, 2.2rem);
+.archBuyTitle {
+  font-size:      clamp(1.4rem, 2.8vw, 2.4rem);
   font-weight:    700;
   color:          #fff;
   letter-spacing: -0.02em;
   line-height:    1.2;
 }
 
-.newArchComingSoon {
-  flex-shrink:    0;
-  font-family:    'DM Mono', monospace;
-  font-size:      0.65rem;
-  font-weight:    400;
-  color:          #22c55e;
-  border:         1px solid rgba(34,197,94,0.35);
-  background:     rgba(34,197,94,0.08);
-  padding:        0.4rem 1rem;
-  border-radius:  999px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  white-space:    nowrap;
-  margin-top:     0.25rem;
+.archBuyActions {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  flex-shrink: 0;
+  margin-top:  0.5rem;
 }
 
-.newArchCards {
+.archBuyBtn {
+  padding:        0.65rem 2rem;
+  border-radius:  999px;
+  background:     #22c55e;
+  color:          #000;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.78rem;
+  font-weight:    800;
+  letter-spacing: 0.06em;
+  border:         none;
+  cursor:         pointer;
+  transition:     opacity 0.2s, transform 0.15s;
+}
+
+.archBuyBtn:hover   { opacity: 0.85; transform: translateY(-1px); }
+.archBuyBtnDisabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+.archBrowseBtn {
+  padding:        0.65rem 1.75rem;
+  border-radius:  999px;
+  background:     #4a2e18;
+  color:          #c9935e;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.78rem;
+  font-weight:    700;
+  letter-spacing: 0.06em;
+  border:         1px solid rgba(201,147,94,0.25);
+  cursor:         pointer;
+  transition:     opacity 0.2s, background 0.2s;
+}
+
+.archBrowseBtn:hover { background: #5a3a20; opacity: 0.9; }
+
+/* Bundle bar */
+.archBundleBar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  background:      rgba(34,197,94,0.06);
+  border:          1px solid rgba(34,197,94,0.18);
+  border-radius:   14px;
+  padding:         0.75rem 1.1rem;
+  gap:             1rem;
+}
+
+.archBundleBarLeft  { display: flex; align-items: center; gap: 0.65rem; }
+
+.archBundleTag {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.35);
+  background:     rgba(34,197,94,0.1);
+  padding:        0.2rem 0.65rem;
+  border-radius:  999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space:    nowrap;
+}
+
+.archBundleInfo {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.7rem;
+  color:          rgba(255,255,255,0.35);
+}
+
+.archBundleBarRight { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+.archBundleSaving   { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: #22c55e; }
+.archBundleTotal    { font-size: 1.05rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+
+/* Cart pills */
+.archCartPills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.archCartPill {
+  display:       flex;
+  align-items:   center;
+  gap:           0.4rem;
+  background:    #111;
+  border:        1px solid #1e1e1e;
+  border-radius: 999px;
+  padding:       0.28rem 0.5rem 0.28rem 0.7rem;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.65rem;
+  color:         rgba(255,255,255,0.55);
+}
+
+.archCartPillLabel  { color: rgba(255,255,255,0.7); }
+.archCartPillPrice  { color: #22c55e; font-size: 0.62rem; }
+
+.archCartPillRemove {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #555; font-size: 0.75rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s;
+}
+
+.archCartPillRemove:hover { color: #e55; }
+
+/* Preview cards */
+.archBuyCards {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap:     1.25rem;
 }
 
-.newArchCard {
-  background:    #0d0d0d;
-  border:        1px solid #1a1a1a;
+.archBuyCard {
+  background:    #080808;
+  border:        1px solid #141414;
   border-radius: 20px;
   aspect-ratio:  4/3;
   position:      relative;
@@ -104,9 +197,9 @@
   transition:    border-color 0.25s;
 }
 
-.newArchCard:hover { border-color: #2a2a2a; }
+.archBuyCard:hover { border-color: #252525; }
 
-.newArchCardInner {
+.archBuyCardInner {
   position:        absolute; inset: 0;
   display:         flex;
   flex-direction:  column;
@@ -115,99 +208,258 @@
   gap:             0.75rem;
 }
 
-.newArchCardIcon  { font-size: 2rem; opacity: 0.25; }
+.archBuyCardIcon  { font-size: 2rem; opacity: 0.25; }
 
-.newArchCardLabel {
-  font-size:      0.78rem;
-  color:          rgba(255,255,255,0.2);
+.archBuyCardLabel {
+  font-size:      0.75rem;
+  color:          rgba(255,255,255,0.18);
   font-family:    'DM Mono', monospace;
   letter-spacing: 0.06em;
 }
 
-.newArchFireCanvas {
-  position:       absolute;
-  right:          0; top: 0;
-  width:          56%;
-  height:         100%;
-  z-index:        5;
-  pointer-events: none;
-  will-change:    transform;
-}
-
-@media (max-width: 768px) {
-  .newArchContent    { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
-  .newArchBgPlaceholder { opacity: 0.1; }
-  .newArchCards      { grid-template-columns: 1fr; }
-  .newArchHeaderRow  { flex-direction: column; }
-}
-
-/* ── Background video (replaces placeholder div) ── */
-.newArchBgVideo {
-  width:      100%;
-  height:     100%;
-  object-fit: cover;
-  object-position: center;
-  display:    block;
-  will-change: transform;
-}
-
-/* ── Live badge ── */
-.newArchLiveBadge {
-  flex-shrink:    0;
-  font-family:    'DM Mono', monospace;
-  font-size:      0.65rem;
-  font-weight:    400;
-  color:          #22c55e;
-  border:         1px solid rgba(34,197,94,0.35);
-  background:     rgba(34,197,94,0.08);
-  padding:        0.4rem 1rem;
-  border-radius:  999px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  white-space:    nowrap;
-  margin-top:     0.25rem;
-  animation:      archLivePulse 2.5s ease-in-out infinite;
-}
-
-@keyframes archLivePulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.55; }
-}
-
-/* ── Asset meta ── */
-.newArchMeta {
-  display:        flex;
-  flex-direction: column;
-  gap:            0.25rem;
-}
-
-.newArchMetaName  { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin: 0; }
-.newArchMetaPrice { font-size: 0.95rem; font-weight: 800; color: #22c55e; margin: 0; letter-spacing: -0.01em; }
-.newArchMetaNote  { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.22); letter-spacing: 0.04em; margin: 0; }
-
-/* ── Card video ── */
-.newArchCardVideo {
-  position: relative;
-  overflow: hidden;
-}
-
-.newArchCardVideoEl {
+.archBuyCardVideo {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 20px;
 }
 
-.newArchCardVideoLabel {
-  position:       absolute;
-  bottom:         0.75rem;
-  left:           0.75rem;
-  font-family:    'DM Mono', monospace;
-  font-size:      0.58rem;
-  color:          rgba(255,255,255,0.35);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  background:     rgba(0,0,0,0.5);
-  padding:        0.2rem 0.6rem;
+/* ── Modal ── */
+.archModalOverlay {
+  position:        fixed; inset: 0;
+  background:      rgba(0,0,0,0.82);
+  backdrop-filter: blur(8px);
+  z-index:         1000;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1rem;
+}
+
+.archModal {
+  background:     #0d0d0d;
+  border:         1px solid #1e1e1e;
+  border-radius:  20px;
+  width:          100%;
+  max-width:      620px;
+  max-height:     88vh;
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+}
+
+.archModalHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         1.25rem 1.5rem;
+  border-bottom:   1px solid #1a1a1a;
+  flex-shrink:     0;
+}
+
+.archModalTabs    { display: flex; gap: 0.5rem; }
+
+.archModalTab {
+  font-family:    'Syne', sans-serif;
+  font-size:      0.78rem;
+  font-weight:    700;
+  padding:        0.4rem 1.1rem;
   border-radius:  999px;
+  border:         1px solid #2a2a2a;
+  background:     transparent;
+  color:          #555;
+  cursor:         pointer;
+  transition:     all 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.archModalTab:hover    { color: #888; border-color: #333; }
+.archModalTabActive    { background: #fff; color: #000; border-color: #fff; }
+
+.archModalClose {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #666; cursor: pointer;
+  font-size: 0.78rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.archModalClose:hover { background: #222; color: #fff; }
+
+.archModalCartBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          #22c55e;
+  border:         1px solid rgba(34,197,94,0.25);
+  background:     rgba(34,197,94,0.07);
+  padding:        0.25rem 0.75rem;
+  border-radius:  999px;
+  letter-spacing: 0.06em;
+  white-space:    nowrap;
+  margin-right:   auto;
+  margin-left:    0.75rem;
+}
+
+.archModalList {
+  overflow-y:  auto;
+  flex:        1;
+  padding:     0.75rem;
+  display:     flex;
+  flex-direction: column;
+  gap:         0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.archModalList::-webkit-scrollbar       { width: 4px; }
+.archModalList::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+/* Empty state */
+.archModalEmpty {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  min-height:      220px;
+  gap:             0.75rem;
+  text-align:      center;
+  padding:         2rem;
+}
+
+.archModalEmptyIcon { font-size: 2.5rem; opacity: 0.2; }
+.archModalEmptyText { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.3); margin: 0; }
+.archModalEmptySub  { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: rgba(255,255,255,0.15); margin: 0; max-width: 240px; line-height: 1.6; }
+
+/* Row */
+.archModalRow {
+  display:       flex;
+  align-items:   center;
+  gap:           1rem;
+  padding:       0.75rem;
+  border-radius: 12px;
+  border:        1px solid #1a1a1a;
+  background:    #111;
+  cursor:        pointer;
+  transition:    border-color 0.2s, background 0.2s;
+}
+
+.archModalRow:hover        { border-color: #2a2a2a; background: #141414; }
+.archModalRowActive        { border-color: #22c55e44; background: rgba(34,197,94,0.05); }
+.archModalRowInCart        { border-color: rgba(34,197,94,0.28); background: rgba(34,197,94,0.04); }
+.archModalRowOwned         { opacity: 0.55; cursor: default; }
+
+.archModalThumb {
+  width: 72px; height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #0a0a0a;
+}
+
+.archModalThumbVideo { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.archModalRowInfo { flex: 1; min-width: 0; }
+
+.archModalRowLabel {
+  font-size: 0.88rem; font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.archModalRowCategory {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; color: #444;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem;
+}
+
+.archModalRowRight {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 0.4rem; flex-shrink: 0;
+}
+
+.archModalRowPrice { font-size: 0.9rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+
+.archModalRowBtns  { display: flex; align-items: center; gap: 0.4rem; }
+
+.archModalWishlistBtn {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: transparent; border: 1px solid #2a2a2a;
+  color: #444; font-size: 0.9rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, color 0.2s; line-height: 1;
+}
+
+.archModalWishlistBtn:hover     { border-color: #e55; color: #e55; }
+.archModalWishlistBtnActive     { border-color: #e55; color: #e55; }
+
+.archModalSelectBtn {
+  font-size: 0.68rem; font-weight: 700;
+  padding: 0.25rem 0.75rem; border-radius: 999px;
+  background: transparent; border: 1px solid #2a2a2a;
+  color: #555; cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Syne', sans-serif; letter-spacing: 0.05em;
+}
+
+.archModalSelectBtn:hover      { border-color: #22c55e; color: #22c55e; }
+.archModalSelectBtnActive      { border-color: #22c55e !important; color: #22c55e !important; }
+
+.archModalOwnedBadge {
+  font-family: 'DM Mono', monospace; font-size: 0.62rem;
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+  background: rgba(34,197,94,0.07);
+  padding: 0.25rem 0.65rem; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap;
+}
+
+.archModalFooter {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         1rem 1.5rem;
+  border-top:      1px solid #1a1a1a;
+  flex-shrink:     0;
+  gap:             1rem;
+}
+
+.archModalFooterLeft { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+
+.archModalFooterNote {
+  font-family: 'DM Mono', monospace; font-size: 0.7rem;
+  color: #444; flex: 1;
+}
+
+.archModalBundleHint {
+  font-family: 'DM Mono', monospace; font-size: 0.62rem;
+  color: #444; letter-spacing: 0.04em; margin: 0;
+}
+
+.archModalBundleHintActive { color: #22c55e; }
+
+.archModalBuyBtn {
+  padding:       0.6rem 1.5rem;
+  border-radius: 999px;
+  background:    #22c55e;
+  color:         #000;
+  font-family:   'Syne', sans-serif;
+  font-size:     0.82rem;
+  font-weight:   800;
+  border:        none;
+  cursor:        pointer;
+  transition:    opacity 0.2s;
+  white-space:   nowrap;
+}
+
+.archModalBuyBtn:hover { opacity: 0.85; }
+
+@media (max-width: 768px) {
+  .archBuyContent   { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
+  .archBuyBgLeft    { width: 100%; opacity: 0.08; }
+  .archBuyCards     { grid-template-columns: 1fr; }
+  .archBuyHeaderRow { flex-direction: column; }
 }

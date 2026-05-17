@@ -195,6 +195,65 @@ export default function AIAssetsIntro() {
           </p>
         </div>
 
+        {/* Task 5 — Bottom fog layer: animated turbulence sweeps upward */}
+        <div className="aiAssetsBottomFog" aria-hidden="true">
+          <svg
+            className="aiAssetsBottomFogSvg"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <filter id="aiBottomFogFilter" x="-10%" y="-50%" width="120%" height="200%">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.012 0.006"
+                  numOctaves="5"
+                  seed="7"
+                  result="noise"
+                >
+                  <animate
+                    attributeName="baseFrequency"
+                    values="0.012 0.006;0.018 0.009;0.012 0.006"
+                    dur="14s"
+                    repeatCount="indefinite"
+                  />
+                  <animate
+                    attributeName="seed"
+                    values="7;12;7"
+                    dur="22s"
+                    repeatCount="indefinite"
+                  />
+                </feTurbulence>
+                <feColorMatrix
+                  type="matrix"
+                  values="0 0 0 0 0.03
+                          0 0 0 0 0.03
+                          0 0 0 0 0.05
+                          0 0 0 0.72 0"
+                  in="noise"
+                  result="fog"
+                />
+                <feGaussianBlur stdDeviation="6" in="fog" result="softFog" />
+                <feComposite in="softFog" in2="SourceGraphic" operator="over" />
+              </filter>
+              <linearGradient id="aiBottomFogGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#000" stopOpacity="0" />
+                <stop offset="45%"  stopColor="#000" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="#000" stopOpacity="0.95" />
+              </linearGradient>
+            </defs>
+            {/* Noise fog layer */}
+            <rect
+              width="100%" height="100%"
+              fill="transparent"
+              filter="url(#aiBottomFogFilter)"
+              opacity="0.85"
+            />
+            {/* Gradient fade to black at bottom edge */}
+            <rect width="100%" height="100%" fill="url(#aiBottomFogGrad)" />
+          </svg>
+        </div>
+
       </div>
     </section>
   );
