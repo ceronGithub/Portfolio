@@ -11,7 +11,7 @@ import "./checkout.css";
 type PaymentMethod = "gcash" | "card" | "bank";
 
 interface Props {
-  productId:   string;
+  checkoutProductId: string;
   productName: string;
   price:       number;
   description: string;
@@ -23,7 +23,7 @@ function fmt(p: number) {
 }
 
 export default function CheckoutClient({
-  productId,
+  checkoutProductId,
   productName,
   price,
   description,

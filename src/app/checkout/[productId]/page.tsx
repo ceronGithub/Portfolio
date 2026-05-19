@@ -29,7 +29,7 @@ export default async function CheckoutPage({ params }: Props) {
   if (system) {
     return (
       <CheckoutClient
-        productId={system.id}
+        checkoutProductId={system.id}
         productName={system.title}
         price={system.basePrice}
         description={system.description ?? ""}
@@ -38,9 +38,9 @@ export default async function CheckoutPage({ params }: Props) {
     );
   }
 
-  // Fall back to Product table (assets)
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
+  // Fall back to Product table (assets) — resolve by cuid id OR slug (e.g. "orc-01")
+  const product = await prisma.product.findFirst({
+    where: { OR: [{ id: productId }, { slug: productId }] },
     select: { id: true, name: true, price: true, description: true },
   });
 
@@ -48,7 +48,7 @@ export default async function CheckoutPage({ params }: Props) {
 
   return (
     <CheckoutClient
-      productId={product.id}
+      checkoutProductId={product.id}
       productName={product.name}
       price={product.price}
       description={product.description ?? ""}
