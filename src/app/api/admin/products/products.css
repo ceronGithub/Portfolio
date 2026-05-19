@@ -1,0 +1,555 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ================================================
+   products.css — Admin Products & Systems page styles.
+   Product table, system accordion cards, addon grid.
+   ================================================ */
+
+.adminProductsPage {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 2.5rem;
+}
+
+.adminProductsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Section ──────────────────────────────────── */
+.adminProductsSection { display: flex; flex-direction: column; gap: 0; }
+
+.adminProductsSectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sidebar-text, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Products Table ───────────────────────────── */
+.adminProductsTableWrap {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.adminProductsTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--sidebar-border, #e8e4de);
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.adminProductsTableHeader span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sidebar-text, #aaa);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.adminProductsTableRow {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.adminProductsTableRow:last-child { border-bottom: none; }
+.adminProductsTableRow:hover { background: var(--nav-active-bg, #f5f4f1); }
+
+.adminProductsCell {
+  font-size: 0.85rem;
+  color: var(--content-color, #1a1a1a);
+  font-weight: 500;
+  padding-right: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminProductsCellName  { font-weight: 600; }
+.adminProductsCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
+.adminProductsCellMono  { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ── Active badge ─────────────────────────────── */
+.adminActiveBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.adminActiveBadgeOn  { background: rgba(56, 161, 105, 0.12); color: #2f855a; }
+.adminActiveBadgeOff { background: rgba(229, 62, 62, 0.1);   color: #c53030; }
+
+/* ── Toggle button ────────────────────────────── */
+.adminToggleBtn {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.adminToggleBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.adminToggleBtnDeactivate {
+  background: rgba(229, 62, 62, 0.08);
+  color: #c53030;
+  border-color: rgba(229, 62, 62, 0.2);
+}
+.adminToggleBtnDeactivate:hover:not(:disabled) {
+  background: rgba(229, 62, 62, 0.15);
+}
+
+.adminToggleBtnActivate {
+  background: rgba(56, 161, 105, 0.1);
+  color: #2f855a;
+  border-color: rgba(56, 161, 105, 0.25);
+}
+.adminToggleBtnActivate:hover:not(:disabled) {
+  background: rgba(56, 161, 105, 0.18);
+}
+
+/* ── Systems list ─────────────────────────────── */
+.adminSystemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── System accordion card ────────────────────── */
+.adminSystemCard {
+  background: var(--sidebar-bg, #fff);
+  border: 1px solid var(--sidebar-border, #e8e4de);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.adminSystemCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.adminSystemCardHeader:hover {
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.adminSystemCardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.adminSystemTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adminSystemTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--content-color, #1a1a1a);
+}
+
+.adminSystemCardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.adminSystemBasePrice {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--content-color, #1a1a1a);
+  font-variant-numeric: tabular-nums;
+}
+
+.adminSystemAddonCount {
+  font-size: 0.78rem;
+  color: var(--sidebar-text, #888);
+}
+
+.adminSystemExpandIcon {
+  font-size: 0.65rem;
+  color: var(--sidebar-text, #aaa);
+}
+
+/* ── Expanded add-ons area ────────────────────── */
+.adminSystemAddons {
+  border-top: 1px solid var(--sidebar-border, #f0ede8);
+  padding: 1.25rem;
+}
+
+.adminSystemDesc {
+  font-size: 0.83rem;
+  color: var(--sidebar-text, #888);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.adminAddonsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.adminAddonRow {
+  display: grid;
+  grid-template-columns: 1.2fr 3fr 1fr;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  background: var(--nav-active-bg, #f5f4f1);
+}
+
+.adminAddonCategory {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sidebar-text, #888);
+}
+
+.adminAddonLabel {
+  font-size: 0.83rem;
+  color: var(--content-color, #1a1a1a);
+  font-weight: 500;
+}
+
+.adminAddonPrice {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #c9a96e;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.adminEmptyNote {
+  font-size: 0.83rem;
+  color: var(--sidebar-text, #aaa);
+  padding: 1rem;
+  text-align: center;
+}
+
+.adminProductsPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+.adminOrdersPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+/* ── T2: Scrollable addons ────────────────────── */
+.adminAddonsScrollWrap {
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  border-radius: 8px;
+}
+.adminAddonsScrollWrap::-webkit-scrollbar { width: 4px; }
+.adminAddonsScrollWrap::-webkit-scrollbar-track { background: transparent; }
+.adminAddonsScrollWrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* ── T3: Section header with controls ─────────── */
+.prdSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.prdSectionControls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* T3: Search bar */
+.prdSearchWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  color: var(--sidebar-text, #666);
+}
+
+.prdSearchInput {
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  color: var(--content-color, #e8e4de);
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  width: 180px;
+}
+.prdSearchInput::placeholder { color: var(--sidebar-text, #555); }
+
+.prdSearchClear {
+  background: none; border: none;
+  font-size: 0.7rem; color: var(--sidebar-text, #666);
+  cursor: pointer; padding: 0;
+}
+.prdSearchClear:hover { color: var(--content-color, #e8e4de); }
+
+/* T3: Asset table grid (7 cols) */
+.adminProductsTableHeaderAsset,
+.adminProductsTableRowAsset {
+  grid-template-columns: 2fr 1fr 2.5fr 1fr 1fr 1.2fr 1.2fr !important;
+}
+
+/* T3: Category badge */
+.prdCatBadge {
+  display: inline-flex;
+  padding: 0.18rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.06);
+  color: var(--content-color, #e8e4de);
+  border: 1px solid var(--sidebar-border, #252525);
+  font-family: 'Inter', sans-serif;
+}
+
+/* T4: Category filter dropdown */
+.prdCatFilterWrap {
+  position: relative;
+}
+
+.prdCatFilterBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--sidebar-bg, #141414);
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--content-color, #e8e4de);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+.prdCatFilterBtn:hover { border-color: rgba(255,255,255,0.15); }
+
+.prdCatDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  z-index: 50;
+  min-width: 160px;
+}
+
+.prdCatOption {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text, #888);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.12s, color 0.12s;
+}
+.prdCatOption:hover { background: rgba(255,255,255,0.05); color: var(--content-color, #e8e4de); }
+.prdCatOptionActive { background: rgba(255,255,255,0.08); color: var(--content-color, #e8e4de); font-weight: 700; }
+
+/* ── Inline edit field ────────────────────────── */
+.sysEditField {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  color: var(--content-color, #e8e4de);
+  font-size: 0.83rem;
+  font-family: 'Inter', sans-serif;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.15s;
+  padding-bottom: 1px;
+}
+.sysEditField:hover { border-color: rgba(255,255,255,0.2); }
+.sysEditField:hover .sysEditPencil { opacity: 1; }
+
+.sysEditFieldSmall { font-size: 0.78rem; }
+
+.sysEditPencil {
+  opacity: 0;
+  color: var(--sidebar-text, #666);
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.sysEditActive { display: inline-flex; align-items: center; }
+
+.sysEditInput {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.83rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--content-color, #e8e4de);
+  outline: none;
+  min-width: 120px;
+}
+.sysEditInput:focus { border-color: rgba(108,138,245,0.6); }
+.sysEditInputSmall { font-size: 0.75rem; min-width: 80px; padding: 0.2rem 0.4rem; }
+
+/* ── System card saving state ─────────────────── */
+.adminSystemCardSaving { opacity: 0.7; pointer-events: none; }
+
+/* ── System field grid ────────────────────────── */
+.sysFieldGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 1.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  border: 1px solid var(--sidebar-border, #252525);
+}
+
+.sysFieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sysFieldRowFull { grid-column: 1 / -1; }
+
+.sysFieldLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--sidebar-text, #666);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Accent color picker ──────────────────────── */
+.sysAccentRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sysColorPicker {
+  width: 32px;
+  height: 28px;
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  padding: 1px;
+}
+
+.sysAccentHex {
+  font-size: 0.78rem;
+  color: var(--sidebar-text, #888);
+  font-family: 'Inter', monospace;
+}
+
+/* ── Addons section ───────────────────────────── */
+.sysAddonsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.sysAddonsTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--sidebar-text, #666);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Addon row editable ───────────────────────── */
+.adminAddonRowEdit {
+  grid-template-columns: 1.2fr 2.5fr 1fr 32px !important;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adminAddonRowHead {
+  grid-template-columns: 1.2fr 2.5fr 1fr 32px !important;
+  padding: 0.3rem 0.75rem;
+  background: transparent !important;
+}
+.adminAddonRowHead span {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--sidebar-text, #555);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Addon delete button ──────────────────────── */
+.sysAddonDeleteBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--sidebar-text, #555);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.sysAddonDeleteBtn:hover {
+  background: rgba(229,62,62,0.12);
+  color: #fc8181;
+  border-color: rgba(229,62,62,0.2);
+}
