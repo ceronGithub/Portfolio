@@ -28,11 +28,11 @@ export default async function BuyerPage() {
     }),
     prisma.ownership.findMany({
       where:  { userId },
-      select: { productId: true },
+      select: { productId: true, product: { select: { name: true } } },
     }),
   ]);
 
-  const ownedSet = new Set(ownerships.map(o => o.productId));
+  const ownedSet = new Set(ownerships.map((o: any) => o.productId));
 
   const demoVideos: Record<string, string> = {
     Restaurant: "/videos/restaurant-demo.mp4",
@@ -51,7 +51,7 @@ export default async function BuyerPage() {
     HR:            "/videos/hr-bg.mp4",
   };
 
-  const items = systems.map(s => ({
+  const items = systems.map((s: any) => ({
     id:           s.id,
     name:         s.title,
     tag:          s.tag,
@@ -62,7 +62,7 @@ export default async function BuyerPage() {
     demoVideoUrl: demoVideos[s.tag] ?? null,
     bgVideoUrl:   bgVideos[s.tag]   ?? null,
     owned:        ownedSet.has(s.id),
-    addons:       s.addons.map(a => ({
+    addons:       s.addons.map((a: any) => ({
       id:       a.id,
       label:    a.label,
       desc:     a.description ?? "",
@@ -73,7 +73,8 @@ export default async function BuyerPage() {
   }));
 
   // Pass all owned IDs (system + asset) to the client
-  const ownedAssetIds = ownerships.map(o => o.productId);
+  const ownedAssetIds  = ownerships.map((o: any) => o.productId);
+  const ownedProducts  = ownerships.map((o: any) => ({ id: o.productId, name: o.product.name }));
 
   return (
     <div className="dashboardLanding">
@@ -81,6 +82,7 @@ export default async function BuyerPage() {
       <BuyerDashboardClient
         items={items}
         ownedAssetIds={ownedAssetIds}
+        ownedProducts={ownedProducts}
       />
     </div>
   );

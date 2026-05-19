@@ -1,0 +1,357 @@
+/* review-section.css — Review & Rating section */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ── Section ── */
+.rvSection {
+  width:       100%;
+  background:  #000;
+  padding:     6rem 4% 6rem;
+  border-top:  1px solid #111;
+}
+
+.rvInner {
+  max-width:      860px;
+  margin:         0 auto;
+  display:        flex;
+  flex-direction: column;
+  gap:            2.5rem;
+}
+
+/* ── Header ── */
+.rvHeader { text-align: center; }
+
+.rvEyebrow {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin:         0 0 0.5rem;
+}
+
+.rvTitle {
+  font-size:      clamp(1.5rem, 3vw, 2.2rem);
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.03em;
+  margin:         0 0 0.35rem;
+}
+
+.rvSub {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.68rem;
+  color:       rgba(255,255,255,0.22);
+  margin:      0;
+}
+
+/* ── Top row — stats + form ── */
+.rvTopRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap:     2rem;
+  align-items: start;
+}
+
+/* ── Rating summary ── */
+.rvSummary {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  20px;
+  padding:        1.75rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+}
+
+.rvSummaryScore {
+  display:     flex;
+  align-items: center;
+  gap:         1rem;
+}
+
+.rvSummaryAvg {
+  font-size:      3rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.04em;
+  line-height:    1;
+}
+
+.rvSummaryRight {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.4rem;
+}
+
+.rvSummaryCount {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.2);
+  margin:      0;
+}
+
+/* Rating bars */
+.rvRatingBars {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.5rem;
+}
+
+.rvRatingBar {
+  display:     flex;
+  align-items: center;
+  gap:         0.65rem;
+}
+
+.rvRatingBarLabel {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.3);
+  width:       20px;
+  flex-shrink: 0;
+}
+
+.rvRatingBarTrack {
+  flex:          1;
+  height:        4px;
+  background:    #1e1e1e;
+  border-radius: 999px;
+  overflow:      hidden;
+}
+
+.rvRatingBarFill {
+  height:        100%;
+  background:    #f59e0b;
+  border-radius: 999px;
+  transition:    width 0.4s ease;
+}
+
+.rvRatingBarCount {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.58rem;
+  color:       rgba(255,255,255,0.18);
+  width:       16px;
+  text-align:  right;
+  flex-shrink: 0;
+}
+
+/* ── Submit form ── */
+.rvForm {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  20px;
+  padding:        1.75rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.9rem;
+}
+
+.rvFormTitle {
+  font-size:   0.88rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.7);
+  margin:      0;
+}
+
+.rvFormSelect {
+  background:  #111;
+  border:      1px solid #222;
+  border-radius: 10px;
+  padding:     0.55rem 0.85rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.55);
+  appearance:  none;
+  outline:     none;
+  cursor:      pointer;
+  width:       100%;
+}
+
+.rvFormStarRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+}
+
+.rvFormStarLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rvFormTextarea {
+  background:    #111;
+  border:        1px solid #222;
+  border-radius: 10px;
+  padding:       0.7rem 0.9rem;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.7rem;
+  color:         rgba(255,255,255,0.6);
+  resize:        vertical;
+  outline:       none;
+  transition:    border-color 0.2s;
+  line-height:   1.6;
+}
+
+.rvFormTextarea:focus { border-color: #333; }
+.rvFormTextarea::placeholder { color: rgba(255,255,255,0.15); }
+
+.rvFormCharCount {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.58rem;
+  color:       rgba(255,255,255,0.15);
+  text-align:  right;
+  margin-top:  -0.5rem;
+}
+
+.rvFormSubmit {
+  padding:     0.7rem 1.25rem;
+  background:  #22c55e;
+  color:       #000;
+  font-family: 'Syne', sans-serif;
+  font-size:   0.82rem;
+  font-weight: 800;
+  border:      none;
+  border-radius: 12px;
+  cursor:      pointer;
+  transition:  all 0.2s;
+}
+
+.rvFormSubmit:hover:not(:disabled) { background: #16a34a; }
+.rvFormSubmit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.rvFormMsg {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.65rem;
+  margin:      0;
+}
+
+.rvFormMsgOk  { color: #22c55e; }
+.rvFormMsgErr { color: #ef4444; }
+
+/* ── Stars ── */
+.rvStars {
+  display:     flex;
+  align-items: center;
+  gap:         2px;
+}
+
+.rvStarsInteractive .rvStar { cursor: pointer; }
+
+.rvStar {
+  transition: transform 0.15s;
+}
+
+.rvStarsInteractive .rvStar:hover { transform: scale(1.2); }
+
+/* ── Filter row ── */
+.rvFilterRow {
+  display:   flex;
+  gap:       0.5rem;
+  flex-wrap: wrap;
+}
+
+.rvFilterBtn {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.64rem;
+  color:          rgba(255,255,255,0.28);
+  background:     #0f0f0f;
+  border:         1px solid #1e1e1e;
+  border-radius:  999px;
+  padding:        0.35rem 0.85rem;
+  cursor:         pointer;
+  transition:     all 0.2s;
+}
+
+.rvFilterBtn:hover     { border-color: #2e2e2e; color: rgba(255,255,255,0.5); }
+.rvFilterBtnActive     { color: #fff; background: #161616; border-color: #333; }
+
+/* ── Review list ── */
+.rvList {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.85rem;
+}
+
+.rvCard {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  16px;
+  padding:        1.25rem 1.5rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.75rem;
+  transition:     border-color 0.2s;
+}
+
+.rvCard:hover { border-color: #242424; }
+
+.rvCardTop {
+  display:     flex;
+  align-items: center;
+  gap:         0.85rem;
+}
+
+.rvCardAvatar {
+  width:           34px;
+  height:          34px;
+  border-radius:   50%;
+  background:      #1a1a1a;
+  border:          1px solid #2a2a2a;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.7rem;
+  font-weight:     400;
+  color:           rgba(255,255,255,0.4);
+  flex-shrink:     0;
+}
+
+.rvCardInfo { flex: 1; min-width: 0; }
+
+.rvCardName {
+  font-size:   0.85rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.7);
+  margin:      0 0 0.15rem;
+}
+
+.rvCardMeta {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.2);
+  margin:      0;
+}
+
+.rvCardComment {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.38);
+  line-height: 1.7;
+  margin:      0;
+  padding-left: 2.7rem;
+}
+
+/* ── States ── */
+.rvLoading {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.2);
+  text-align:  center;
+  padding:     3rem 0;
+}
+
+.rvEmpty {
+  text-align: center;
+  padding:    3rem 0;
+}
+
+.rvEmptyText {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.2);
+  margin:      0;
+}

@@ -1,0 +1,397 @@
+/* checkout.css — Checkout page UI */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ── Page shell ── */
+.checkoutPage {
+  min-height:      100vh;
+  background:      #080808;
+  font-family:     'Syne', sans-serif;
+  padding:         7rem 1.5rem 6rem;
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: center;
+}
+
+/* ── Two-column wrap ── */
+.checkoutWrap {
+  width:     100%;
+  max-width: 860px;
+  display:   grid;
+  grid-template-columns: 1fr 1fr;
+  gap:       2rem;
+  align-items: start;
+}
+
+/* ── Shared eyebrow ── */
+.checkoutEyebrow {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin:         0 0 1.25rem;
+}
+
+/* ════════════════════
+   LEFT — Product summary
+   ════════════════════ */
+.checkoutLeft {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  20px;
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+}
+
+/* Product block */
+.checkoutProduct {
+  display:   flex;
+  gap:       1rem;
+  align-items: flex-start;
+}
+
+.checkoutProductIcon {
+  font-size:     1.6rem;
+  flex-shrink:   0;
+  width:         44px;
+  height:        44px;
+  background:    #161616;
+  border:        1px solid #222;
+  border-radius: 12px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+}
+
+.checkoutProductInfo { flex: 1; }
+
+.checkoutProductName {
+  font-size:   1rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.88);
+  margin:      0 0 0.3rem;
+}
+
+.checkoutProductDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.68rem;
+  color:       rgba(255,255,255,0.25);
+  margin:      0 0 0.4rem;
+  line-height: 1.6;
+}
+
+.checkoutProductTimeline {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.65rem;
+  color:       rgba(255,255,255,0.2);
+  margin:      0;
+}
+
+/* Price breakdown */
+.checkoutBreakdown {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.6rem;
+  background:     #0a0a0a;
+  border:         1px solid #181818;
+  border-radius:  14px;
+  padding:        1.2rem 1.25rem;
+}
+
+.checkoutBreakdownRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.72rem;
+  color:           rgba(255,255,255,0.35);
+}
+
+.checkoutBreakdownDivider {
+  height:     1px;
+  background: #1a1a1a;
+  margin:     0.2rem 0;
+}
+
+.checkoutBreakdownPct {
+  color:       rgba(255,255,255,0.18);
+  font-size:   0.62rem;
+}
+
+.checkoutBreakdownDown {
+  color: #22c55e;
+}
+
+.checkoutBreakdownDownAmt {
+  font-weight: 700;
+  font-size:   0.82rem;
+}
+
+.checkoutBreakdownRem {
+  color: rgba(255,255,255,0.2);
+}
+
+/* Terms */
+.checkoutTerms {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.4rem;
+}
+
+.checkoutTerms p {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  color:          rgba(255,255,255,0.22);
+  margin:         0;
+  letter-spacing: 0.02em;
+}
+
+/* ════════════════════
+   RIGHT — Payment
+   ════════════════════ */
+.checkoutRight {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  20px;
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.25rem;
+}
+
+.checkoutPayNote {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.7;
+  margin:      -0.5rem 0 0;
+}
+
+.checkoutPayNote strong {
+  color: rgba(255,255,255,0.6);
+}
+
+/* ── Method selector ── */
+.checkoutMethods {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.6rem;
+}
+
+.checkoutMethod {
+  display:       flex;
+  align-items:   center;
+  gap:           0.9rem;
+  background:    #111;
+  border:        1px solid #1e1e1e;
+  border-radius: 14px;
+  padding:       0.9rem 1rem;
+  cursor:        pointer;
+  transition:    all 0.2s;
+  text-align:    left;
+  width:         100%;
+}
+
+.checkoutMethod:hover { border-color: #2e2e2e; background: #131313; }
+
+.checkoutMethodActive {
+  border-color: rgba(34,197,94,0.35) !important;
+  background:   rgba(34,197,94,0.04) !important;
+}
+
+.checkoutMethodIcon {
+  width:           36px;
+  height:          36px;
+  border-radius:   10px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       1rem;
+  font-weight:     800;
+  flex-shrink:     0;
+}
+
+.checkoutMethodGcash { background: rgba(0,163,255,0.15); color: #00a3ff; }
+.checkoutMethodCard  { background: rgba(255,255,255,0.06); }
+.checkoutMethodBank  { background: rgba(255,255,255,0.06); }
+
+.checkoutMethodInfo { flex: 1; }
+
+.checkoutMethodName {
+  font-size:   0.82rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.75);
+  margin:      0 0 0.15rem;
+}
+
+.checkoutMethodDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.22);
+  margin:      0;
+}
+
+.checkoutMethodRadio {
+  width:         16px;
+  height:        16px;
+  border-radius: 50%;
+  border:        2px solid #2e2e2e;
+  flex-shrink:   0;
+  transition:    all 0.2s;
+}
+
+.checkoutMethodRadioActive {
+  border-color:    #22c55e;
+  background:      #22c55e;
+  box-shadow:      0 0 0 3px rgba(34,197,94,0.15);
+}
+
+/* ── Due row ── */
+.checkoutDueRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  background:      #111;
+  border:          1px solid #1e1e1e;
+  border-radius:   12px;
+  padding:         0.9rem 1.1rem;
+}
+
+.checkoutDueLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.68rem;
+  color:          rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.checkoutDueAmount {
+  font-size:      1.15rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+}
+
+/* ── CTA button ── */
+.checkoutPlaceBtn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.5rem;
+  width:           100%;
+  padding:         0.9rem 1.5rem;
+  background:      #22c55e;
+  color:           #000;
+  font-family:     'Syne', sans-serif;
+  font-size:       0.9rem;
+  font-weight:     800;
+  border:          none;
+  border-radius:   14px;
+  cursor:          pointer;
+  transition:      all 0.2s;
+  letter-spacing:  -0.01em;
+}
+
+.checkoutPlaceBtn:hover:not(:disabled) {
+  background:  #16a34a;
+  transform:   translate3d(0, -1px, 0);
+  box-shadow:  0 6px 24px rgba(34,197,94,0.25);
+}
+
+.checkoutPlaceBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.checkoutPlaceBtnLoading { opacity: 0.7; }
+
+.checkoutBtnSpinner {
+  display:       inline-block;
+  width:         14px;
+  height:        14px;
+  border:        2px solid rgba(0,0,0,0.25);
+  border-top:    2px solid #000;
+  border-radius: 50%;
+  animation:     checkoutSpin 0.7s linear infinite;
+}
+
+@keyframes checkoutSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Disclaimer ── */
+.checkoutDisclaimer {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.12);
+  text-align:  center;
+  line-height: 1.7;
+  margin:      0;
+}
+
+/* ════════════════════
+   SUCCESS STATE
+   ════════════════════ */
+.checkoutSuccess {
+  width:           100%;
+  max-width:       440px;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  text-align:      center;
+  gap:             1.2rem;
+  background:      #0e0e0e;
+  border:          1px solid rgba(34,197,94,0.18);
+  border-radius:   24px;
+  padding:         3rem 2.5rem;
+}
+
+.checkoutSuccessIcon {
+  width:           56px;
+  height:          56px;
+  background:      #22c55e;
+  color:           #000;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       1.4rem;
+  font-weight:     800;
+  box-shadow:      0 0 0 8px rgba(34,197,94,0.1);
+}
+
+.checkoutSuccessTitle {
+  font-size:      1.6rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.03em;
+  margin:         0;
+}
+
+.checkoutSuccessDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.35);
+  line-height: 1.8;
+  margin:      0;
+}
+
+.checkoutSuccessDesc strong { color: rgba(255,255,255,0.6); }
+
+.checkoutSuccessBtn {
+  display:        inline-block;
+  padding:        0.7rem 1.5rem;
+  background:     #22c55e;
+  color:          #000;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.82rem;
+  font-weight:    800;
+  border-radius:  12px;
+  text-decoration: none;
+  transition:     all 0.2s;
+}
+
+.checkoutSuccessBtn:hover {
+  background: #16a34a;
+  transform:  translate3d(0, -1px, 0);
+}
