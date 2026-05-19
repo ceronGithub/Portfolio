@@ -1,7 +1,6 @@
 // ArchitectureBuySection — Interior / Exterior buying section.
-// Same pattern as AssetBuySection but for architecture asset types.
-// Bundle pricing + owned state baked in from the start.
-// Asset list blank for now — IDs and srcs TBD.
+// Preview cards removed. Selected asset video plays as section background.
+// Browse → Select → video fills the left bg of the section.
 
 "use client";
 
@@ -70,7 +69,7 @@ export default function ArchitectureBuySection({
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
   const [selectedAsset, setSelectedAsset] = useState<ArchAssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
-  const videoCardRef = useRef<HTMLVideoElement>(null);
+  const bgVideoRef = useRef<HTMLVideoElement>(null);
 
   const filteredAssets = ALL_ARCH_ASSETS.filter(a => a.category === browseTab);
   const cartItems      = ALL_ARCH_ASSETS.filter(a => cartIds.has(a.id));
@@ -88,13 +87,13 @@ export default function ArchitectureBuySection({
     });
   }, [ownedAssetIds]);
 
+  // ── Play selected asset video as bg when modal closes ───────────────────
   useEffect(() => {
-    if (!browseOpen && selectedAsset && videoCardRef.current) {
-      const video = videoCardRef.current;
-      video.load();
-      video.play().catch(() => {});
-    }
-  }, [browseOpen, selectedAsset]);
+    const video = bgVideoRef.current;
+    if (!video || !selectedAsset) return;
+    video.load();
+    video.play().catch(() => {});
+  }, [selectedAsset]);
 
   function handleSelectAsset(asset: ArchAssetItem) {
     setSelectedAsset(asset);
@@ -108,9 +107,18 @@ export default function ArchitectureBuySection({
     <>
       <section className="archBuySection">
 
-        {/* Left background — blank for now */}
+        {/* Left background — selected asset video or dark placeholder */}
         <div className="archBuyBgLeft">
-          <div className="archBuyBgPlaceholder" />
+          {selectedAsset ? (
+            <video
+              ref={bgVideoRef}
+              src={selectedAsset.videoSrc}
+              className="archBuyBgVideo"
+              autoPlay muted loop playsInline
+            />
+          ) : (
+            <div className="archBuyBgPlaceholder" />
+          )}
           <div className="archBuyBgFade" />
         </div>
 
@@ -162,30 +170,6 @@ export default function ArchitectureBuySection({
             </div>
           )}
 
-          {/* Two preview cards */}
-          <div className="archBuyCards">
-            <div className="archBuyCard">
-              <div className="archBuyCardInner">
-                <span className="archBuyCardIcon">🏠</span>
-                <p className="archBuyCardLabel">Architecture render here</p>
-              </div>
-            </div>
-            <div className="archBuyCard">
-              {selectedAsset ? (
-                <video
-                  ref={videoCardRef}
-                  src={selectedAsset.videoSrc}
-                  className="archBuyCardVideo"
-                  autoPlay muted loop playsInline
-                />
-              ) : (
-                <div className="archBuyCardInner">
-                  <span className="archBuyCardIcon">🎬</span>
-                  <p className="archBuyCardLabel">Preview animation here</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </section>
 
