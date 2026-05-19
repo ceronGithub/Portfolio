@@ -20,7 +20,6 @@ const TAGLINES = [
 export default function ArchitectureAssetsIntro() {
   const sectionRef  = useRef<HTMLDivElement>(null);
   const videoRef    = useRef<HTMLVideoElement>(null);
-  const rafRef      = useRef<number | null>(null);
   const [progress, setProgress] = useState(0);
 
   // ── Scroll → video.currentTime ─────────────────────────────────────────
@@ -32,7 +31,7 @@ export default function ArchitectureAssetsIntro() {
     video.muted       = true;
     video.playsInline = true;
 
-    function scrub() {
+    function onScroll() {
       const el = sectionRef.current;
       if (!el || !video) return;
       const top        = el.getBoundingClientRect().top;
@@ -45,17 +44,9 @@ export default function ArchitectureAssetsIntro() {
       setProgress(p);
     }
 
-    function onScroll() {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(scrub);
-    }
-
     window.addEventListener("scroll", onScroll, { passive: true });
-    scrub();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
@@ -85,11 +76,11 @@ export default function ArchitectureAssetsIntro() {
         {/* ── 3-line slogan ── */}
         <div className="archAssetsSlogan">
           {TAGLINES.map((line, i) => {
-            const start = (i / TAGLINES.length) * 0.75;
-            const raw   = (progress - start) / (1 / TAGLINES.length);
-            const vis   = Math.max(0, Math.min(1, raw * 2.5));
-            const ty    = Math.max(0, (1 - raw) * 40);
-            const blur  = Math.max(0, (1 - vis) * 12);
+            const threshold  = (i / TAGLINES.length) * 0.82;
+            const raw        = (progress - threshold) / (1 / TAGLINES.length);
+            const vis        = Math.max(0, Math.min(1, raw * 2.2));
+            const ty         = Math.max(0, (1 - raw) * 36);
+            const blur       = Math.max(0, (1 - vis) * 10);
             return (
               <p
                 key={i}

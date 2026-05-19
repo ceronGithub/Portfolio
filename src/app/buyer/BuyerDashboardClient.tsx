@@ -3,7 +3,7 @@
 // down to AssetBuySection.
 // Renders the floating wishlist button and WishlistPanel drawer.
 // All data (items, ownedIds) comes from the Server Component via props.
-// Architecture Studio sections removed — not live yet.
+// Architecture Studio sections included below AssetCompareTool.
 
 "use client";
 
@@ -17,6 +17,9 @@ import AIAssetsIntro             from "./ai-weapon-character/AIAssetsIntro";
 import NewAssetSection           from "./ai-weapon-character/NewAssetSection";
 import AssetBuySection           from "./ai-weapon-character/AssetBuySection";
 import AssetCompareTool          from "./ai-assets/AssetCompareTool";
+import ArchitectureAssetsIntro   from "./architecture-assets/ArchitectureAssetsIntro";
+import NewArchitectureSection    from "./architecture-assets/NewArchitectureSection";
+import ArchitectureBuySection    from "./architecture-assets/ArchitectureBuySection";
 import ReviewSection             from "./reviews/ReviewSection";
 import CustomRequestBuilder      from "./custom-request/CustomRequestBuilder";
 import "./wishlist/wishlist-panel.css";
@@ -171,6 +174,14 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       />
 
       <AssetCompareTool />
+
+      {/* Architecture Studio */}
+      <ArchitectureAssetsIntro />
+      <NewArchitectureSection />
+      <ArchitectureBuySection
+        wishlistIds={wishlistIds}
+        onAddToWishlist={toggleWishlist}
+      />
 
       <ReviewSection
         ownedProductIds={ownedAssetIds}
