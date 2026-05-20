@@ -745,6 +745,8 @@
   padding: 7rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   overflow: hidden;
+  position: relative;
+  z-index: 51;
 }
 
 .vAiSectionInner {
@@ -1454,6 +1456,8 @@
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.07);
+  position: relative;
+  z-index: 51; /* sits above archFixed overlay (z-index: 50) */
 }
 
 .vMagLeft {

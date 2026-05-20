@@ -7,7 +7,7 @@ import "./visitor.css";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
-import ArchitectureSection from "./ArchitectureSection";
+import { ArchitectureIntroSection, ArchitectureVideosSection } from "./architecture";
 import ModelingSection from "./ModelingSection";
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
@@ -181,161 +181,9 @@ const carouselVideos = [
   { id: "1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i", label: "Character" },
 ];
 
-/* ── Section 1: Interior — all 7 videos from Drive folder ───────────── */
-const interiorCards = [
-  {
-    id: "int-1",
-    title: "Cinematic Interior I",
-    category: "AI Interior Film",
-    desc: "Natural light cascading through expansive windows. Materiality and atmosphere in perfect balance.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "16IlbksfqFgAsIUlIbSnfG1k0miktYC0d",
-  },
-  {
-    id: "int-2",
-    title: "Cinematic Interior II",
-    category: "AI Interior Film",
-    desc: "Luxury interiors at the precise moment ambient light becomes art.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ",
-  },
-  {
-    id: "int-3",
-    title: "Cinematic Interior III",
-    category: "AI Interior Film",
-    desc: "Warm tonal depth and spatial geometry rendered with photorealistic precision.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce",
-  },
-  {
-    id: "int-4",
-    title: "Cinematic Interior IV",
-    category: "AI Interior Film",
-    desc: "Quiet luxury — minimal forms, rich textures, and the stillness of a perfectly composed space.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl",
-  },
-  {
-    id: "int-5",
-    title: "Cinematic Interior V",
-    category: "AI Interior Film",
-    desc: "Cinematic sweep through a residence where every surface has been considered and refined.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu",
-  },
-  {
-    id: "int-6",
-    title: "Cinematic Interior VI",
-    category: "AI Interior Film",
-    desc: "Golden-hour interior light filtered through architecture — a study in atmosphere and calm.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW",
-  },
-  {
-    id: "int-7",
-    title: "Cinematic Interior VII",
-    category: "AI Interior Film",
-    desc: "Minimalist elegance — open plan, curated objects, and the precise quality of evening light.",
-    accent: "#7dc9a0",
-    gradient: "linear-gradient(135deg, #0d1a12 0%, #122018 40%, #0d0c0b 100%)",
-    videoFileId: "1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG",
-  },
-];
 
-/* ── Section 2: Exterior — all 7 videos from Drive folder ───────────── */
-const exteriorCards = [
-  {
-    id: "ext-1",
-    title: "Drone Reveal",
-    category: "AI Exterior Design",
-    desc: "Sweeping drone perspectives over architectural structures — scale, presence, and open sky.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "1QKCGiJCNzSbpkVsQPN073ws6WbZMwrZC",
-  },
-  {
-    id: "ext-2",
-    title: "Landscape Study",
-    category: "AI Exterior Design",
-    desc: "Ground-level compositions where structure meets terrain. Architecture as part of the natural world.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "1hIAB7FrCEnn8cfrGSCplccHkZ4Gonnxu",
-  },
-  {
-    id: "ext-3",
-    title: "Architectural Vision",
-    category: "AI Exterior Design",
-    desc: "AI-rendered facades with precision materiality — glass, concrete, and light in dialogue.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "1MJR8A38OCNRDxb_jRheBdRgexnAOugZf",
-  },
-  {
-    id: "ext-4",
-    title: "Project 01",
-    category: "AI Exterior Design",
-    desc: "A residential exterior study — clean lines, natural surroundings, and cinematic framing.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "1kp23x5YBnWovDamPDT2FS00d1ID9SB0k",
-  },
-  {
-    id: "ext-5",
-    title: "Project 02",
-    category: "AI Exterior Design",
-    desc: "Urban density and open space — a visual exploration of how buildings inhabit their environment.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T",
-  },
-  {
-    id: "ext-6",
-    title: "Project 03",
-    category: "AI Exterior Design",
-    desc: "Late afternoon light across textured surfaces — the exterior moment just before dusk.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ",
-  },
-  {
-    id: "ext-7",
-    title: "Project 04",
-    category: "AI Exterior Design",
-    desc: "Cinematic walkthrough of an architectural exterior — form, texture, and spatial rhythm.",
-    accent: "#8fc99a",
-    gradient: "linear-gradient(135deg, #0d1a10 0%, #142018 40%, #0d0c0b 100%)",
-    videoFileId: "1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT",
-  },
-];
 
-/* ── Interior video IDs (confirmed from Drive folder 1TWaOJivk0HuAfGZY9qcYZL6agqHNibtr) */
-const interiorCarousel = [
-  "16IlbksfqFgAsIUlIbSnfG1k0miktYC0d",
-  "1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ",
-  "1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce",
-  "1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl",
-  "1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu",
-  "1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW",
-  "1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG",
-];
 
-/* ── Exterior video IDs (confirmed from Drive folder 1qsx8USrcKU37ljmD2WoABr2uyYCsri0_) */
-const exteriorCarousel = [
-  "1QKCGiJCNzSbpkVsQPN073ws6WbZMwrZC",
-  "1hIAB7FrCEnn8cfrGSCplccHkZ4Gonnxu",
-  "1MJR8A38OCNRDxb_jRheBdRgexnAOugZf",
-  "1kp23x5YBnWovDamPDT2FS00d1ID9SB0k",
-  "10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T",
-  "1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ",
-  "1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT",
-];
 
 
 /* ─── Reveal wrapper ────────────────────────────────────────────────── */
@@ -2795,38 +2643,10 @@ export default function VisitorPage() {
 
       {/* ═══════════════════════════════════════════════════════════════
           STANDALONE SECTION 1 — ARCHITECTURE
-          Full-width sticky scroll-jacking: chairs + table → videos
+          Scroll-jacked intro → Interior + Exterior video sections
       ═══════════════════════════════════════════════════════════════ */}
-      {/* ── Architecture intro — standalone, no children ── */}
-      <ArchitectureSection />
-
-      {/* ── Architecture videos — rendered directly after intro, no wrapper ── */}
-      <MagazineSection
-        label="AI Interior Film"
-        labelAccent="#7dc9a0"
-        title="8 Interior."
-        titleAccent="#7dc9a0"
-        italicLine="Yours forever."
-        desc="Warm light, material depth, and spatial atmosphere — AI-generated at full resolution. Purchase once, download anytime from your dashboard."
-        accent="#7dc9a0"
-        gradient="linear-gradient(135deg, #0d1a12 0%, #122018 60%, #0d0c0b 100%)"
-        cards={interiorCards}
-        ctaLabel="Get Interior Access"
-        delay={0}
-      />
-      <MagazineSection
-        label="AI Exterior Design"
-        labelAccent="#8fc99a"
-        title="6 Exterior."
-        titleAccent="#8fc99a"
-        italicLine="Yours forever."
-        desc="Drone sweeps, architectural facades, and atmospheric landscapes — cinematic AI films at full resolution. One purchase, lifetime access."
-        accent="#8fc99a"
-        gradient="linear-gradient(135deg, #0d1a10 0%, #142018 60%, #0d0c0b 100%)"
-        cards={exteriorCards}
-        ctaLabel="Get Exterior Access"
-        delay={0.05}
-      />
+      <ArchitectureIntroSection />
+      <ArchitectureVideosSection />
 
       {/* ── Divider ── */}
       <div className="vAiSectionDivider">

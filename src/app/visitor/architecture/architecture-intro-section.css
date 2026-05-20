@@ -1,0 +1,137 @@
+/* architecture-intro-section.css
+   Fixed-overlay scroll-jack pattern.
+   Sentinel div holds scroll budget. Fixed panel covers viewport while active.
+   Next section (ArchitectureVideosSection) must have z-index >= 51 to render
+   above this overlay during the exit fade.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+/* ── Sentinel ─────────────────────────────────────────────────────────── */
+.archIntroSentinel {
+  position:   relative;
+  width:      100%;
+  background: #0d0c0b; /* matches page background — no seam */
+  /* height is set inline: SCROLL_BUDGET_VH * 100vh */
+}
+
+/* ── Fixed overlay ────────────────────────────────────────────────────── */
+.archIntroFixed {
+  position:       fixed;
+  inset:          0;
+  z-index:        50;
+  background:     #000;
+  visibility:     hidden;
+  opacity:        0;
+  pointer-events: none;
+  transition:     opacity 0.2s ease, visibility 0s 0.2s;
+}
+
+.archIntroFixedActive {
+  visibility:     visible;
+  opacity:        1;
+  pointer-events: auto;
+  transition:     opacity 0.2s ease, visibility 0s 0s;
+}
+
+/* Overlay is fully hidden once done — JS already drove opacity to 0 */
+.archIntroFixedDone {
+  visibility:     hidden;
+  pointer-events: none;
+  transition:     none;
+}
+
+/* ── Fullscreen scrubbed video ────────────────────────────────────────── */
+.archIntroVideoBg {
+  position:        absolute;
+  inset:           0;
+  width:           100%;
+  height:          100%;
+  object-fit:      cover;
+  object-position: center;
+  z-index:         1;
+  display:         block;
+  will-change:     transform;
+  transform:       translateZ(0);
+}
+
+/* ── Dark scrim ───────────────────────────────────────────────────────── */
+.archIntroScrim {
+  position:       absolute;
+  inset:          0;
+  z-index:        2;
+  pointer-events: none;
+  background:     rgba(0, 0, 0, 0.32);
+}
+
+/* ── Top ticker ───────────────────────────────────────────────────────── */
+.archIntroTickerWrap {
+  position:        absolute;
+  top:             2.5rem;
+  left:            0;
+  right:           0;
+  z-index:         5;
+  display:         flex;
+  justify-content: center;
+  pointer-events:  none;
+}
+
+.archIntroTicker {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    400;
+  color:          rgba(201, 163, 110, 0.55);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin:         0;
+}
+
+/* ── 3-line slogan ────────────────────────────────────────────────────── */
+.archIntroSlogan {
+  position:        absolute;
+  inset:           0;
+  z-index:         3;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.05rem;
+  text-align:      center;
+  padding:         0 8%;
+  pointer-events:  none;
+}
+
+.archIntroLine {
+  font-family:    'Cormorant Garamond', Georgia, serif;
+  font-size:      clamp(2.4rem, 5.5vw, 4.8rem);
+  font-weight:    300;
+  font-style:     italic;
+  color:          #fff;
+  line-height:    1.2;
+  margin:         0;
+  opacity:        0;
+  will-change:    transform, opacity, filter;
+  text-shadow:    0 2px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Bottom gradient ──────────────────────────────────────────────────── */
+.archIntroBottomGrad {
+  position:       absolute;
+  bottom:         0;
+  left:           0;
+  right:          0;
+  height:         20%;
+  z-index:        4;
+  pointer-events: none;
+  background:     linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0)    0%,
+    rgba(0, 0, 0, 0.6)  60%,
+    rgba(0, 0, 0, 0.97) 100%
+  );
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .archIntroLine { font-size: clamp(1.6rem, 6.5vw, 2.4rem); }
+  .archIntroTickerWrap { top: 1.5rem; }
+}
