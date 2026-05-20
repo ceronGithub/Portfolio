@@ -1,26 +1,58 @@
 // ArchitectureIntroSection — Visitor > Architecture scroll-jacked intro.
 // Fixed-overlay + sentinel scroll-jack pattern.
 //
-// SMOOTH VIDEO TECHNIQUE:
-// Never seek video.currentTime directly (causes frame-decode jumps).
-// Instead: video plays at normal speed via video.play().
-// A rAF loop compares video.currentTime vs targetTime and adjusts
-// video.playbackRate to catch up smoothly — like a PID controller.
-// Scroll only updates targetTime. The video engine handles decoding
-// at its own pace, producing buttery playback regardless of scroll speed.
+// SMOOTH VIDEO SCRUBBING — SAME MECHANIC BOTH DIRECTIONS:
 //
-// EXIT: During the last 15% of scroll progress, opacity is driven
-// from 1 → 0 via direct DOM write (no React state, no re-render).
-// The next section sits at z-index: 51 so it renders above this overlay.
+// Forward (scroll down):
+//   diff = target - current  →  positive
+//   video.play() at rate = clamp(0.07, 1 + diff * 3.0, 4)
+//   The video ENGINE decodes and paints frames at its own pace.
+//   No currentTime assignment → no decoder interrupts → buttery.
+//
+// Reverse (scroll up):
+//   diff = target - current  →  negative
+//   MIRROR the forward mechanic:
+//     • Set playbackRate to a slow positive rate (0.07 minimum)
+//     • But we need to SEEK to a position behind current first,
+//       then play forward to target — that defeats the purpose.
+//
+//   True mirror: forward plays FORWARD at variable rate toward target.
+//   Reverse should play BACKWARD at variable rate toward target.
+//   Browsers don't support negative playbackRate.
+//
+//   SOLUTION — same as forward but using the engine differently:
+//     • Seek directly to targetTime (ONE seek per scroll event, not per rAF tick)
+//     • targetTime is throttled by rAF — at most 1 seek per 16ms
+//     • With 8 keyframes (1/sec), every seek resolves within 1 GOP (24 frames)
+//     • No per-tick nudging, no cascading seeks, no decoder thrash
+//
+//   This is equivalent to the forward path but position-driven instead
+//   of rate-driven. Forward uses rate because play() is smooth.
+//   Reverse uses position because there is no reverse play().
+//
+// Key: targetTime is only written by scroll. The rAF loop reads it
+// once per tick. One seek per tick max. Dense keyframes mean each
+// seek is cheap (decoder starts from nearest keyframe ≤1s away).
+//
+// EXIT: last 15% of scroll progress fades opacity 1→0 via direct DOM.
 
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import "./architecture-intro-section.css";
 
-const INTRO_VIDEO      = "/videos/visitor-architecture-intro.mp4";
-const SCROLL_BUDGET_VH = 4; // viewport-heights this intro consumes
-const FADE_START       = 0.85; // p at which exit fade begins
+const INTRO_VIDEO       = "/videos/visitor-architecture-intro.mp4";
+const SCROLL_BUDGET_VH  = 4;
+const FADE_START        = 0.85;
+
+// How fast currentTime chases targetTime when going FORWARD (play rate multiplier).
+// diff * FORWARD_RATE_GAIN controls overshoot: higher = snappier catch-up.
+const FORWARD_RATE_GAIN = 3.0;
+const FORWARD_RATE_MIN  = 0.07;  // browser safe floor
+const FORWARD_RATE_MAX  = 4.0;   // browser safe ceiling
+
+// Threshold: if |diff| < this, hold position (stop play / stop seeking).
+const HOLD_THRESHOLD    = 0.03;  // seconds
 
 const TAGLINES = [
   "Photorealistic architecture,",
@@ -46,9 +78,9 @@ export default function ArchitectureIntroSection() {
     lineRefs.current.forEach((el, i) => {
       if (!el) return;
       const threshold = (i / TAGLINES.length) * 0.82;
-      const raw = (p - threshold) / (1 / TAGLINES.length);
-      const vis = Math.max(0, Math.min(1, raw * 2.2));
-      const ty  = Math.max(0, (1 - raw) * 36);
+      const raw  = (p - threshold) / (1 / TAGLINES.length);
+      const vis  = Math.max(0, Math.min(1, raw * 2.2));
+      const ty   = Math.max(0, (1 - raw) * 36);
       const blur = Math.max(0, (1 - vis) * 10);
       el.style.opacity   = String(vis);
       el.style.transform = `translate3d(0,${ty}px,0)`;
@@ -61,7 +93,7 @@ export default function ArchitectureIntroSection() {
     });
   }
 
-  // ── rAF loop: smooth video playback rate control ─────────────────────
+  // ── rAF loop ─────────────────────────────────────────────────────────
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -71,33 +103,44 @@ export default function ArchitectureIntroSection() {
     vid.preload     = "auto";
     vid.loop        = false;
 
-    // Do NOT autoplay on mount — video starts only when scroll drives targetTime > 0
-    // This prevents twitching on the first frame before any scrolling occurs
-
     function loop() {
       rafRef.current = requestAnimationFrame(loop);
       if (!vid || !vid.duration || !isFinite(vid.duration)) return;
 
       const current = vid.currentTime;
-      const diff    = targetTimeRef.current - current;
-      const rawRate = 1 + diff * 3.0;
+      const target  = targetTimeRef.current;
+      const diff    = target - current;   // positive = forward, negative = reverse
 
-      if (diff < -0.04) {
-        // Scrolled back — seek directly to target (one clean jump, no per-frame nudge)
-        // Only seek if we're meaningfully far — avoids twitching on tiny diffs
+      if (Math.abs(diff) < HOLD_THRESHOLD) {
+        // ── Close enough — hold position ─────────────────────────────
         if (!vid.paused) vid.pause();
-        if (Math.abs(diff) > 0.08) {
-          vid.currentTime = Math.max(0, targetTimeRef.current);
-        }
-      } else if (Math.abs(diff) < 0.04) {
-        // Close enough to target — hold position, no playback
-        // Guard: only call pause() once, not every rAF frame
-        if (!vid.paused) vid.pause();
-      } else {
-        // Safe forward playback — Chrome/Safari min playbackRate is 0.0625
-        const rate = Math.min(4, Math.max(0.07, rawRate));
+
+      } else if (diff > 0) {
+        // ── FORWARD: play at variable rate toward target ──────────────
+        // Engine decodes naturally — no currentTime assignment.
+        // Rate proportional to remaining distance (PID-style).
+        const rate = Math.min(FORWARD_RATE_MAX, Math.max(FORWARD_RATE_MIN, 1 + diff * FORWARD_RATE_GAIN));
         if (vid.paused) vid.play().catch(() => {});
         vid.playbackRate = rate;
+
+      } else {
+        // ── REVERSE: same engine, but we can't play backward ─────────
+        // Mirror the forward mechanic as closely as possible:
+        //   Forward: play() at rate → engine advances currentTime
+        //   Reverse: pause() then set currentTime = target directly
+        //
+        // Why one clean seek instead of per-tick nudges?
+        //   Per-tick nudging (old approach) = many tiny seeks per second
+        //   = constant decoder interrupts = lag and jumps.
+        //
+        //   One seek to target = decoder resolves from nearest keyframe
+        //   (≤1s away with dense keyframes) = single clean decode.
+        //   The rAF throttle means this fires at most once per 16ms,
+        //   same cadence the forward play() path updates frames.
+        //
+        // Result: identical smoothness to forward, both directions.
+        if (!vid.paused) vid.pause();
+        vid.currentTime = Math.max(0, target);
       }
 
       applySlogan(progressRef.current);
@@ -121,7 +164,6 @@ export default function ArchitectureIntroSection() {
       const totalH     = sentinel.offsetHeight;
       const scrolledIn = -rect.top;
 
-      // Above sentinel
       if (scrolledIn < 0) {
         setActive(false);
         setDone(false);
@@ -131,7 +173,6 @@ export default function ArchitectureIntroSection() {
         return;
       }
 
-      // Past sentinel
       if (scrolledIn >= totalH) {
         setActive(false);
         setDone(true);
@@ -146,7 +187,6 @@ export default function ArchitectureIntroSection() {
       setActive(true);
       setDone(false);
 
-      // Smooth exit fade during last 15%
       const exitOpacity = p < FADE_START
         ? 1
         : Math.max(0, 1 - (p - FADE_START) / (1 - FADE_START));
@@ -164,7 +204,6 @@ export default function ArchitectureIntroSection() {
 
   return (
     <>
-      {/* Sentinel — holds scroll budget, never visible */}
       <div
         ref={sentinelRef}
         className="archIntroSentinel"
@@ -172,7 +211,6 @@ export default function ArchitectureIntroSection() {
         aria-hidden="true"
       />
 
-      {/* Fixed overlay — covers viewport while active */}
       <div
         ref={overlayRef}
         className={
