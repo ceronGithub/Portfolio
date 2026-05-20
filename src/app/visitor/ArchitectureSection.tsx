@@ -1,191 +1,116 @@
 // ArchitectureSection — Visitor > AI Visual Systems > Section 1.
-// Sticky scroll-jacking reveal:
-//   Phase 0→0.25 : chair-right slides in from right, chair-left from left
-//   Phase 0.25→0.55 : table rises from bottom center, slogan text fades in with parallax
-//   Phase 0.55→0.75 : slogan info lines (steps 01/02/03) fade in sequentially
-//   Phase 0.75→1.0 : entire sticky fades out → videos section scrolls into view
-// After the sticky section, the MagazineSection videos render normally.
+// Scroll-linked video playback + slogan only.
+// Mirrors buyer/ArchitectureAssetsIntro exactly:
+//   scroll drives video.currentTime (Apple-style scrubbing)
+//   3-line slogan reveals one by one as scroll progresses
+//   clean bottom gradient blends into next section
 
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./architecture-section.css";
 
-// ── Info lines shown in the slogan center block ──────────────────────────────
-// These are the registration/access steps — replaces generic CTA text
-const ARCHITECTURE_STEPS = [
-  { num: "01", title: "Create a free account", desc: "Register with your email. 30 seconds." },
-  { num: "02", title: "Purchase the collection", desc: "One-time payment. No subscription. Lifetime access." },
-  { num: "03", title: "Download forever", desc: "Instant access. Re-download anytime from your dashboard." },
+const INTRO_VIDEO = "/videos/visitor-architecture-intro.mp4";
+
+const TAGLINES = [
+  "Photorealistic architecture,",
+  "interior and exterior —",
+  "ready for your next project.",
 ];
 
 interface ArchitectureSectionProps {
-  children: React.ReactNode; // The MagazineSection videos passed as children
+  children: React.ReactNode;
 }
 
 export default function ArchitectureSection({ children }: ArchitectureSectionProps) {
-  const sectionRef   = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const videoRef   = useRef<HTMLVideoElement>(null);
   const [progress, setProgress] = useState(0);
 
-  // ── Scroll progress: 0 at sticky top, 1 when sticky section is fully scrolled ──
+  // ── Scroll → video.currentTime ──────────────────────────────────
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.preload     = "auto";
+    video.muted       = true;
+    video.playsInline = true;
+
     function onScroll() {
       const el = sectionRef.current;
-      if (!el) return;
-      const rect       = el.getBoundingClientRect();
+      if (!el || !video) return;
+      const top        = el.getBoundingClientRect().top;
       const scrollable = el.scrollHeight - window.innerHeight;
       if (scrollable <= 0) return;
-      const raw = Math.max(0, Math.min(1, -rect.top / scrollable));
-      setProgress(raw);
+      const p = Math.max(0, Math.min(1, -top / scrollable));
+      if (video.duration && isFinite(video.duration)) {
+        video.currentTime = p * video.duration;
+      }
+      setProgress(p);
     }
+
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ── Derived animation values ─────────────────────────────────────────────
-
-  // Chairs slide in from edges (progress 0 → 0.30)
-  const chairProgress   = Math.min(1, progress / 0.30);
-  const chairRightX     = (1 - chairProgress) * 140;   // starts at +140px right
-  const chairLeftX      = -(1 - chairProgress) * 140;  // starts at -140px left
-  const chairOpacity    = chairProgress;
-
-  // Table rises from bottom (progress 0.20 → 0.50)
-  const tableProgress   = Math.max(0, Math.min(1, (progress - 0.20) / 0.30));
-  const tableY          = (1 - tableProgress) * 120;
-  const tableOpacity    = tableProgress;
-
-  // Slogan headline (progress 0.25 → 0.52)
-  const sloganProgress  = Math.max(0, Math.min(1, (progress - 0.25) / 0.27));
-  const sloganY         = (1 - sloganProgress) * 40;
-  const sloganOpacity   = sloganProgress;
-
-  // Info steps stagger (progress 0.48 → 0.78), each step offset by 0.08
-  const stepsBase       = 0.48;
-  const stepOpacity     = (i: number) =>
-    Math.max(0, Math.min(1, (progress - stepsBase - i * 0.08) / 0.14));
-  const stepY           = (i: number) =>
-    (1 - Math.max(0, Math.min(1, (progress - stepsBase - i * 0.08) / 0.14))) * 24;
-
-  // Whole sticky fades out at end (progress 0.82 → 1.0)
-  const stickyOpacity   = progress > 0.82
-    ? Math.max(0, 1 - (progress - 0.82) / 0.18)
-    : 1;
-
   return (
-    <div ref={sectionRef} className="archSection">
+    <section ref={sectionRef} className="archSection">
+      <div className="archSticky">
 
-      {/* ── Sticky cinematic reveal ───────────────────────────────────── */}
-      <div className="archSticky" style={{ opacity: stickyOpacity }}>
+        {/* ── Video — fullscreen, scroll-scrubbed ── */}
+        <video
+          ref={videoRef}
+          src={INTRO_VIDEO}
+          className="archVideoBg"
+          muted
+          playsInline
+          preload="auto"
+        />
 
-        {/* Dark ambient bg */}
-        <div className="archBg" />
+        {/* ── Dark scrim — text legibility ── */}
+        <div className="archScrim" />
 
-        {/* ── Chair right ── */}
-        <div
-          className="archChairRight"
-          style={{
-            transform:  `translate3d(${chairRightX}px, 0, 0)`,
-            opacity:    chairOpacity,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/arch-chair-right.png" alt="Chair" className="archChairImg" />
+        {/* ── Top ticker ── */}
+        <div className="archTickerWrap">
+          <p className="archTicker">
+            AI-ASSET ON EXTERIOR &amp; INTERIOR DESIGN
+          </p>
         </div>
 
-        {/* ── Chair left ── */}
-        <div
-          className="archChairLeft"
-          style={{
-            transform:  `translate3d(${chairLeftX}px, 0, 0)`,
-            opacity:    chairOpacity,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/arch-chair-left.png" alt="Chair" className="archChairImg archChairImgFlip" />
-        </div>
-
-        {/* ── Center column: table + slogan + steps ── */}
-        <div className="archCenter">
-
-          {/* Table rises from bottom */}
-          <div
-            className="archTable"
-            style={{
-              transform: `translate3d(0, ${tableY}px, 0)`,
-              opacity:   tableOpacity,
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/arch-table-center.png" alt="Table" className="archTableImg" />
-          </div>
-
-          {/* Slogan above the table */}
-          <div
-            className="archSlogan"
-            style={{
-              transform: `translate3d(0, ${sloganY}px, 0)`,
-              opacity:   sloganOpacity,
-            }}
-          >
-            <p className="archSloganEyebrow">AI Interior & Exterior</p>
-            <h2 className="archSloganTitle">
-              Spaces that live<br />
-              <em className="archSloganItalic">in your imagination.</em>
-            </h2>
-          </div>
-
-          {/* Steps — staggered fade in */}
-          <div className="archSteps">
-            {ARCHITECTURE_STEPS.map((step, i) => (
-              <div
-                key={step.num}
-                className="archStep"
+        {/* ── 3-line slogan ── */}
+        <div className="archSlogan">
+          {TAGLINES.map((line, i) => {
+            const threshold = (i / TAGLINES.length) * 0.82;
+            const raw       = (progress - threshold) / (1 / TAGLINES.length);
+            const vis       = Math.max(0, Math.min(1, raw * 2.2));
+            const ty        = Math.max(0, (1 - raw) * 36);
+            const blur      = Math.max(0, (1 - vis) * 10);
+            return (
+              <p
+                key={i}
+                className="archLine"
                 style={{
-                  opacity:   stepOpacity(i),
-                  transform: `translate3d(0, ${stepY(i)}px, 0)`,
+                  opacity:   vis,
+                  transform: `translate3d(0, ${ty}px, 0)`,
+                  filter:    `blur(${blur}px)`,
                 }}
               >
-                <span className="archStepNum">{step.num}</span>
-                <div>
-                  <strong className="archStepTitle">{step.title}</strong>
-                  <p className="archStepDesc">{step.desc}</p>
-                </div>
-              </div>
-            ))}
-
-            {/* CTA — appears with last step */}
-            <div
-              className="archStepCta"
-              style={{
-                opacity:   stepOpacity(2),
-                transform: `translate3d(0, ${stepY(2)}px, 0)`,
-              }}
-            >
-              <a href="/register" className="archCtaBtn">
-                Get Architecture Access
-                <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-                  <path d="M1 12L12 1M12 1H6M12 1v6" stroke="#0d0c0b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-            </div>
-          </div>
-
+                {line}
+              </p>
+            );
+          })}
         </div>
 
-        {/* Progress bar at bottom */}
-        <div className="archProgressBar">
-          <div className="archProgressFill" style={{ width: `${progress * 100}%` }} />
-        </div>
+        {/* ── Bottom gradient — fades into next section ── */}
+        <div className="archBottomGrad" />
 
       </div>
 
-      {/* ── Videos section — renders after sticky scroll completes ── */}
+      {/* ── Videos section below sticky ── */}
       <div className="archVideos">
         {children}
       </div>
-
-    </div>
+    </section>
   );
 }
