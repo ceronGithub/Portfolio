@@ -9,6 +9,7 @@
 //   reverseVid = original played backwards, all-keyframe encode (-g 1).
 //   Mirror position: revTarget = revDur - forwardTarget.
 //   Direction determined by scroll velocity (deltaY), NOT per-tick target delta.
+//   This prevents the fwd/rev flip that causes jumpiness on slow scroll.
 //   One clean seek on direction change, then pure playbackRate from there.
 //
 // EXIT: last 15% of scroll progress fades overlay opacity 1→0 via DOM.
@@ -89,6 +90,7 @@ export default function ArchitectureAssetsIntro() {
       v.loop        = false;
     });
 
+    // Initial state — fwd visible, rev hidden
     fwd.style.opacity = "1";
     rev.style.opacity = "0";
 
@@ -103,15 +105,15 @@ export default function ArchitectureAssetsIntro() {
       const target = targetTimeRef.current;
       const p      = progressRef.current;
 
-      // Direction determined by scroll velocity — not per-tick delta
-      const vel    = velocityRef.current;
+      // Direction determined by scroll velocity, not per-tick delta
+      const vel = velocityRef.current;
       const newDir: "fwd" | "rev" = vel > 0.001
         ? "fwd"
         : vel < -0.001
           ? "rev"
           : directionRef.current;
 
-      // One clean seek on direction change, then pure playbackRate
+      // Direction change — one clean seek, then pure playbackRate
       if (newDir !== directionRef.current) {
         directionRef.current = newDir;
         if (newDir === "fwd") {
@@ -141,9 +143,10 @@ export default function ArchitectureAssetsIntro() {
         }
         fwd.style.opacity = "1";
         rev.style.opacity = "0";
+
       } else {
-        const revTarget     = Math.max(0.05, Math.min(revDur, revDur - target));
-        const diff          = revTarget - rev.currentTime;
+        const revTarget = Math.max(0.05, Math.min(revDur, revDur - target));
+        const diff      = revTarget - rev.currentTime;
         if (Math.abs(diff) < HOLD_THRESHOLD || rev.currentTime <= 0.05) {
           if (!rev.paused) rev.pause();
         } else {
@@ -169,7 +172,7 @@ export default function ArchitectureAssetsIntro() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Wheel handler — velocity for direction detection ──────────────────
+  // ── Wheel handler — captures velocity for direction detection ─────────
   useEffect(() => {
     let decayTimer: ReturnType<typeof setTimeout> | null = null;
 
