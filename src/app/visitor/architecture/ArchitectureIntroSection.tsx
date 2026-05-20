@@ -71,8 +71,8 @@ export default function ArchitectureIntroSection() {
     vid.preload     = "auto";
     vid.loop        = false;
 
-    const playPromise = vid.play();
-    if (playPromise) playPromise.catch(() => {});
+    // Do NOT autoplay on mount — video starts only when scroll drives targetTime > 0
+    // This prevents twitching on the first frame before any scrolling occurs
 
     function loop() {
       rafRef.current = requestAnimationFrame(loop);
@@ -82,15 +82,19 @@ export default function ArchitectureIntroSection() {
       const diff    = targetTimeRef.current - current;
       const rawRate = 1 + diff * 3.0;
 
-      if (diff < -0.05) {
-        // Scrolled back — nudge backwards without large seeks
+      if (diff < -0.04) {
+        // Scrolled back — seek directly to target (one clean jump, no per-frame nudge)
+        // Only seek if we're meaningfully far — avoids twitching on tiny diffs
         if (!vid.paused) vid.pause();
-        vid.currentTime = Math.max(0, current - 0.04);
-      } else if (rawRate < 0.07) {
-        // At target — hold position
+        if (Math.abs(diff) > 0.08) {
+          vid.currentTime = Math.max(0, targetTimeRef.current);
+        }
+      } else if (Math.abs(diff) < 0.04) {
+        // Close enough to target — hold position, no playback
+        // Guard: only call pause() once, not every rAF frame
         if (!vid.paused) vid.pause();
       } else {
-        // Safe playback range — Chrome/Safari min is 0.0625
+        // Safe forward playback — Chrome/Safari min playbackRate is 0.0625
         const rate = Math.min(4, Math.max(0.07, rawRate));
         if (vid.paused) vid.play().catch(() => {});
         vid.playbackRate = rate;
