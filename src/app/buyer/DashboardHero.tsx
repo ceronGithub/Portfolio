@@ -67,7 +67,7 @@ function pickBatch(exclude: string[] = []): string[] {
 interface Props { userName: string; }
 
 export default function DashboardHero({ userName }: Props) {
-  const [videos,  setVideos]  = useState<string[]>(() => pickBatch());
+  const [videos,  setVideos]  = useState<string[]>([]); // empty on SSR — no hydration mismatch
   const [phase,   setPhase]   = useState<"welcome" | "fadeOut" | "subtitle">("welcome");
   const [muted,   setMuted]   = useState(true);
 
@@ -78,6 +78,12 @@ export default function DashboardHero({ userName }: Props) {
   // Keep latest videos in a ref so the onEnded closure sees current value
   const videosRef   = useRef<string[]>(videos);
   videosRef.current = videos;
+
+  // ── Pick initial batch on client only — avoids SSR/client mismatch ──
+  useEffect(() => {
+    setVideos(pickBatch());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Phase animation on mount ────────────────────────────────────────
   useEffect(() => {

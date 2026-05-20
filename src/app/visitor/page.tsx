@@ -2649,11 +2649,13 @@ export default function VisitorPage() {
       <ArchitectureVideosSection />
 
       {/* ── Divider ── */}
+      {/*
       <div className="vAiSectionDivider">
         <div className="vAiSectionDividerLine" />
         <span className="vAiSectionDividerLabel">3D Modeling</span>
         <div className="vAiSectionDividerLine" />
       </div>
+      */}
 
       {/* ═══════════════════════════════════════════════════════════════
           STANDALONE SECTION 2 — MODELING
