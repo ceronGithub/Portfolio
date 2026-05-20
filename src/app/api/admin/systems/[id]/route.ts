@@ -1,41 +1,33 @@
-// PATCH /api/admin/systems/[id] — update System fields.
-// DELETE /api/admin/systems/[id] — delete a System.
+// PATCH /api/admin/systems/[id]
+// Admin-only. Updates basePrice (and optionally isActive) on a System.
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
-type Params = { params: { id: string } };
-
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "ADMIN")
+  if (!session || (session.user as any)?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json();
-  const allowed = ["title", "basePrice", "accent", "description", "timeline", "deploy", "isActive"];
-  const data: Record<string, unknown> = {};
-  for (const key of allowed) {
-    if (key in body) data[key] = body[key];
+  const data: { basePrice?: number; isActive?: boolean } = {};
+
+  if (typeof body.basePrice === "number" && body.basePrice >= 0) {
+    data.basePrice = Math.round(body.basePrice); // always store as integer PHP
+  }
+  if (typeof body.isActive === "boolean") {
+    data.isActive = body.isActive;
   }
 
-  try {
-    const system = await prisma.system.update({ where: { id: params.id }, data });
-    return NextResponse.json({ system });
-  } catch {
-    return NextResponse.json({ error: "System not found" }, { status: 404 });
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
-}
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "ADMIN")
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  try {
-    await prisma.system.delete({ where: { id: params.id } });
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "System not found" }, { status: 404 });
-  }
+  const system = await prisma.system.update({ where: { id: params.id }, data });
+  return NextResponse.json({ system });
 }

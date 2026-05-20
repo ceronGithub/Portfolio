@@ -1,12 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 /* ================================================
    products.css — Admin Products & Systems page styles.
    Product table, system accordion cards, addon grid.
    ================================================ */
 
 .adminProductsPage {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 2.5rem;
 }
 
@@ -17,7 +14,7 @@
 }
 
 /* ── Section ──────────────────────────────────── */
-.adminProductsSection { display: flex; flex-direction: column; gap: 0; }
+.adminProductsSection {}
 
 .adminProductsSectionTitle {
   font-size: 0.85rem;
@@ -257,144 +254,86 @@
   text-align: center;
 }
 
-.adminProductsPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-
-.adminOrdersPage * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-
-/* ── T2: Scrollable addons ────────────────────── */
-.adminAddonsScrollWrap {
-  max-height: 260px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
-  border-radius: 8px;
-}
-.adminAddonsScrollWrap::-webkit-scrollbar { width: 4px; }
-.adminAddonsScrollWrap::-webkit-scrollbar-track { background: transparent; }
-.adminAddonsScrollWrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-/* ── T3: Section header with controls ─────────── */
-.prdSectionHeader {
+/* ── System price editor ──────────────────────── */
+.sysPriceDisplay {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.prdSectionControls {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-/* T3: Search bar */
-.prdSearchWrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--sidebar-bg, #141414);
-  border: 1px solid var(--sidebar-border, #252525);
-  border-radius: 8px;
-  padding: 0.4rem 0.75rem;
-  color: var(--sidebar-text, #666);
-}
-
-.prdSearchInput {
+  gap: 0.4rem;
+  background: none;
   border: none;
-  background: transparent;
-  font-size: 0.82rem;
-  color: var(--content-color, #e8e4de);
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  width: 180px;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 7px;
+  transition: background 0.15s;
+  font-family: inherit;
 }
-.prdSearchInput::placeholder { color: var(--sidebar-text, #555); }
+.sysPriceDisplay:hover { background: var(--nav-active-bg, #f0ede8); }
 
-.prdSearchClear {
-  background: none; border: none;
-  font-size: 0.7rem; color: var(--sidebar-text, #666);
-  cursor: pointer; padding: 0;
+.sysPriceEditIcon {
+  font-size: 0.75rem;
+  color: var(--sidebar-text, #aaa);
+  opacity: 0;
+  transition: opacity 0.15s;
 }
-.prdSearchClear:hover { color: var(--content-color, #e8e4de); }
+.sysPriceDisplay:hover .sysPriceEditIcon { opacity: 1; }
 
-/* T3: Asset table grid (7 cols) */
-.adminProductsTableHeaderAsset,
-.adminProductsTableRowAsset {
-  grid-template-columns: 2fr 1fr 2.5fr 1fr 1fr 1.2fr 1.2fr !important;
-}
-
-/* T3: Category badge */
-.prdCatBadge {
-  display: inline-flex;
-  padding: 0.18rem 0.55rem;
-  border-radius: 6px;
-  font-size: 0.65rem;
+.sysPriceSavedTag {
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: rgba(255,255,255,0.06);
-  color: var(--content-color, #e8e4de);
-  border: 1px solid var(--sidebar-border, #252525);
-  font-family: 'Inter', sans-serif;
+  color: #38a169;
 }
 
-/* T4: Category filter dropdown */
-.prdCatFilterWrap {
-  position: relative;
-}
-
-.prdCatFilterBtn {
+.sysPriceEditor {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  background: var(--sidebar-bg, #141414);
-  border: 1px solid var(--sidebar-border, #252525);
-  border-radius: 8px;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.78rem;
+}
+
+.sysPriceCurrency {
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--content-color, #e8e4de);
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  white-space: nowrap;
-  transition: border-color 0.15s;
-}
-.prdCatFilterBtn:hover { border-color: rgba(255,255,255,0.15); }
-
-.prdCatDropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  background: #1e1e1e;
-  border: 1px solid #2a2a2a;
-  border-radius: 10px;
-  padding: 0.3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  z-index: 50;
-  min-width: 160px;
+  color: var(--content-color, #1a1a1a);
 }
 
-.prdCatOption {
-  display: flex;
-  align-items: center;
-  padding: 0.4rem 0.75rem;
+.sysPriceInput {
+  width: 90px;
+  padding: 0.28rem 0.5rem;
   border-radius: 7px;
-  font-size: 0.78rem;
-  font-weight: 500;
+  border: 1.5px solid #ccc;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--content-color, #1a1a1a);
+  background: var(--sidebar-bg, #fff);
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  /* hide number arrows */
+  -moz-appearance: textfield;
+}
+.sysPriceInput::-webkit-outer-spin-button,
+.sysPriceInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.sysPriceSave {
+  font-size: 0.75rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 6px;
   border: none;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.sysPriceSave:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sysPriceCancel {
+  font-size: 0.75rem;
+  padding: 0.28rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid var(--sidebar-border, #ddd);
   background: transparent;
   color: var(--sidebar-text, #888);
+  font-family: inherit;
   cursor: pointer;
-  text-align: left;
-  font-family: 'Inter', sans-serif;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.15s;
 }
-.prdCatOption:hover { background: rgba(255,255,255,0.05); color: var(--content-color, #e8e4de); }
-.prdCatOptionActive { background: rgba(255,255,255,0.08); color: var(--content-color, #e8e4de); font-weight: 700; }
+.sysPriceCancel:hover { background: var(--nav-active-bg, #f0ede8); }

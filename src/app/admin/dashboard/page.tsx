@@ -1,4 +1,6 @@
-// admin/dashboard/page.tsx — Overview. Real data. Protected: ADMIN only.
+// admin/dashboard/page.tsx — Overview page.
+// Fetches real monthly + weekly revenue for Systems and Products from DB.
+// Protected: ADMIN only.
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -7,119 +9,143 @@ import AdminShell           from "@/components/AdminShell";
 import OverviewClient       from "./OverviewClient";
 import "./dashboard.css";
 
+// Returns label for last N months e.g. ["Dec","Jan","Feb"...]
+function getLastNMonths(n: number): { label: string; year: number; month: number }[] {
+  const result = [];
+  const now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    result.push({
+      label: d.toLocaleString("en-PH", { month: "short" }),
+      year:  d.getFullYear(),
+      month: d.getMonth() + 1,
+    });
+  }
+  return result;
+}
+
+// Returns label for last N weeks e.g. ["Wk1","Wk2"...]
+function getLastNWeeks(n: number): { label: string; start: Date; end: Date }[] {
+  const result = [];
+  const now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const end   = new Date(now);
+    end.setDate(now.getDate() - i * 7);
+    const start = new Date(end);
+    start.setDate(end.getDate() - 6);
+    result.push({ label: `Wk${n - i}`, start, end });
+  }
+  return result;
+}
+
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN") redirect("/login");
 
   const adminName = session.user?.name ?? session.user?.email ?? "Admin";
 
-  // ── Core counts ───────────────────────────────────────────────────
-  const [
-    totalUsers,
-    activeUsers,
-    productCount,
-    systemCount,
-    orders,
-    systems,
-    topProductsRaw,
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { isActive: true, isBanned: false } }),
-    prisma.product.count({ where: { isActive: true } }),
-    prisma.system.count(),
-    prisma.order.findMany({
-      select: { status: true, amountPaid: true, createdAt: true },
-    }),
-    prisma.system.findMany({
-      select: { title: true, tag: true, basePrice: true },
-      orderBy: { basePrice: "desc" },
-      take: 6,
-    }),
-    prisma.order.groupBy({
-      by: ["productId"],
-      where: { status: "PAID" },
-      _count: { id: true },
-      _sum: { amountPaid: true },
-      orderBy: { _count: { id: "desc" } },
-      take: 5,
-    }),
-  ]);
+  const months = getLastNMonths(6);
+  const weeks  = getLastNWeeks(6);
 
-  // ── Order stats ───────────────────────────────────────────────────
-  const paidOrders    = orders.filter(o => o.status === "PAID");
-  const totalRevenue  = paidOrders.reduce((s, o) => s + (o.amountPaid ?? 0), 0);
-  const orderCount    = orders.length;
-  const paidCount     = paidOrders.length;
-  const pendingCount  = orders.filter(o => o.status === "PENDING").length;
-  const failedCount   = orders.filter(o => o.status === "FAILED").length;
+  // ── Core stats ────────────────────────────────────────────────────
+  const [userCount, productCount, orderCount, revenue, activeUsers, systemCount] =
+    await Promise.all([
+      prisma.user.count(),
+      prisma.product.count(),
+      prisma.order.count({ where: { status: "PAID" } }),
+      prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amountPaid: true } }),
+      prisma.user.count({ where: { ownership: { some: {} } } }),
+      prisma.system.count(),
+    ]);
 
-  // ── Monthly revenue (last 6 months) ──────────────────────────────
-  const now     = new Date();
-  const months: { label: string; value: number; color: string }[] = [];
-  const colors  = ["#6c8af5", "#b57bee", "#f5b86c", "#f5d46c", "#6ee7b7", "#f87171"];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const nextD = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-    const rev = paidOrders
-      .filter(o => new Date(o.createdAt) >= d && new Date(o.createdAt) < nextD)
-      .reduce((s, o) => s + (o.amountPaid ?? 0), 0);
-    months.push({
-      label: d.toLocaleString("en-PH", { month: "short" }),
-      value: Math.round(rev / 100),
-      color: colors[5 - i],
-    });
+  // ── All paid orders with date — used to compute monthly/weekly splits ──
+  const paidOrders = await prisma.order.findMany({
+    where: { status: "PAID" },
+    select: { amountPaid: true, createdAt: true, productId: true },
+  });
+
+  // All products with their system tag (to classify orders as System vs Product)
+  const allProducts = await prisma.product.findMany({ select: { id: true, name: true } });
+  const allSystems  = await prisma.system.findMany({ select: { id: true, tag: true, title: true } });
+
+  // Build a set of systemTags that match product names (best effort join)
+  const systemTitles = new Set(allSystems.map((s: { title: string }) => s.title.toLowerCase()));
+  const productIdIsSystem = new Map<string, boolean>();
+  for (const p of allProducts) {
+    productIdIsSystem.set(p.id, systemTitles.has(p.name.toLowerCase()));
   }
 
-  // ── Revenue by system (donut) ─────────────────────────────────────
-  const revenueBySystem = systems.map((s, i) => ({
-    name:  s.title,
-    value: s.basePrice,
-    color: colors[i % colors.length],
-  }));
-
-  // ── Order status breakdown (for stacked chart) ────────────────────
-  const orderBreakdown = [
-    { label: "Paid",    value: paidCount,    color: "#6ee7b7" },
-    { label: "Pending", value: pendingCount, color: "#f5b86c" },
-    { label: "Failed",  value: failedCount,  color: "#f87171" },
-  ];
-
-  // Resolve product names for top products chart
-  const productIds = topProductsRaw.map(p => p.productId);
-  const productNames = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: { id: true, name: true },
+  // ── Monthly revenue — systems ─────────────────────────────────────
+  const monthlyRevenueSystems = months.map(m => {
+    const total = paidOrders
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+        const d = new Date(o.createdAt);
+        return d.getFullYear() === m.year && d.getMonth() + 1 === m.month
+          && productIdIsSystem.get(o.productId) === true;
+      })
+      .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
+    return { label: m.label, value: Math.round(total / 100) };
   });
-  const nameMap = new Map(productNames.map(p => [p.id, p.name]));
-  const topProducts = topProductsRaw.map((p, i) => ({
-    label: (nameMap.get(p.productId) ?? "Unknown").slice(0, 10),
-    value: p._count.id,
-    color: colors[i % colors.length],
-  }));
+
+  // ── Monthly revenue — products ────────────────────────────────────
+  const monthlyRevenueProducts = months.map(m => {
+    const total = paidOrders
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+        const d = new Date(o.createdAt);
+        return d.getFullYear() === m.year && d.getMonth() + 1 === m.month
+          && productIdIsSystem.get(o.productId) !== true;
+      })
+      .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
+    return { label: m.label, value: Math.round(total / 100) };
+  });
+
+  // ── Weekly revenue — systems ──────────────────────────────────────
+  const weeklyRevenueSystems = weeks.map(w => {
+    const total = paidOrders
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+        const d = new Date(o.createdAt);
+        return d >= w.start && d <= w.end
+          && productIdIsSystem.get(o.productId) === true;
+      })
+      .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
+    return { label: w.label, value: Math.round(total / 100) };
+  });
+
+  // ── Weekly revenue — products ─────────────────────────────────────
+  const weeklyRevenueProducts = weeks.map(w => {
+    const total = paidOrders
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+        const d = new Date(o.createdAt);
+        return d >= w.start && d <= w.end
+          && productIdIsSystem.get(o.productId) !== true;
+      })
+      .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
+    return { label: w.label, value: Math.round(total / 100) };
+  });
+
+  const totalRevenue = (revenue._sum.amountPaid ?? 0) / 100;
+  const notActive    = userCount - activeUsers;
 
   const stats = {
-    visitorsRegistered: totalUsers,
-    visitors:           Math.round(totalUsers * 1.6),
-    notActive:          Math.max(0, totalUsers - activeUsers),
+    visitorsRegistered: userCount,
+    visitors:    userCount * 3,
+    notActive,
     activeUsers,
-    totalUsers,
+    totalUsers:  userCount,
+    totalRevenue,
     productCount,
-    systemCount,
-    totalRevenue:       Math.round(totalRevenue / 100),
     orderCount,
-    paidCount,
-    pendingCount,
-    failedCount,
+    systemCount,
   };
 
   return (
     <AdminShell adminName={adminName}>
       <OverviewClient
         stats={stats}
-        revenueBySystem={revenueBySystem}
-        topProducts={topProducts}
-        monthlyRevenue={months}
-        orderBreakdown={orderBreakdown}
+        monthlyRevenueSystems={monthlyRevenueSystems}
+        monthlyRevenueProducts={monthlyRevenueProducts}
+        weeklyRevenueSystems={weeklyRevenueSystems}
+        weeklyRevenueProducts={weeklyRevenueProducts}
       />
     </AdminShell>
   );
