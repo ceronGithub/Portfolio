@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
 import { ArchitectureIntroSection, ArchitectureVideosSection } from "./architecture";
-import ModelingSection from "./ModelingSection";
+import { ModelingIntro, ModelingMagazine } from "./modeling";
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
 
@@ -2659,7 +2659,11 @@ export default function VisitorPage() {
           STANDALONE SECTION 2 — MODELING
           Full-width sticky scroll-jacking: orcs → videos
       ═══════════════════════════════════════════════════════════════ */}
-      <ModelingSection>
+      {/* ── Modeling intro — standalone ── */}
+      <ModelingIntro />
+
+      {/* ── Modeling magazine — rendered directly after intro ── */}
+      <ModelingMagazine>
         <MagazineSection
           label="3D Animation"
           labelAccent="#4ade80"
@@ -2728,7 +2732,7 @@ export default function VisitorPage() {
             </div>
           </div>
         </div>
-      </ModelingSection>
+      </ModelingMagazine>
 
       {/* ── Final AI CTA — contained block ── */}
       <section className="vAiCtaSection">
