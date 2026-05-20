@@ -1,5 +1,6 @@
 // ArchitectureAssetsIntro — Buyer > Architecture scroll-jacked intro.
-// Exact mirror of visitor/ArchitectureIntroSection — all mechanisms identical.
+// EXACT mirror of visitor/architecture/ArchitectureIntroSection.
+// Only differences: video paths (buyer-*), CSS prefix (archAssets*), component name.
 //
 // SCROLL DOWN → variable-rate forward play() on forwardVid
 //   playbackRate = clamp(RATE_MIN, 1 + diff×RATE_GAIN, RATE_MAX)
@@ -24,10 +25,10 @@ const REVERSE_VIDEO    = "/videos/buyer-architecture-intro-reverse.mp4";
 const SCROLL_BUDGET_VH = 4;
 const FADE_START       = 0.85;
 
-const RATE_GAIN      = 8.0;
-const RATE_MIN       = 0.0;
-const RATE_MAX       = 16.0;
-const HOLD_THRESHOLD = 0.008;
+const RATE_GAIN      = 3.0;
+const RATE_MIN       = 0.07;
+const RATE_MAX       = 4.0;
+const HOLD_THRESHOLD = 0.03;
 
 // Zoom config
 const SCALE_FWD_START = 1.0;
@@ -50,7 +51,7 @@ export default function ArchitectureAssetsIntro() {
   const progressRef   = useRef(0);
   const targetTimeRef = useRef(0);
   const directionRef  = useRef<"fwd" | "rev">("fwd");
-  const velocityRef   = useRef(0);
+  const velocityRef   = useRef(0);       // scroll deltaY — positive = down, negative = up
   const rafRef        = useRef<number | null>(null);
 
   const [active, setActive] = useState(false);
@@ -102,39 +103,41 @@ export default function ArchitectureAssetsIntro() {
       const revDur = rev.duration;
       if (!fwdDur || !isFinite(fwdDur) || !revDur || !isFinite(revDur)) return;
 
-      const target = targetTimeRef.current;
-      const p      = progressRef.current;
+      const target  = targetTimeRef.current;
+      const p       = progressRef.current;
 
-      // Direction determined by scroll velocity, not per-tick delta
+      // ── Direction determined by scroll velocity, not per-tick delta ──
+      // velocityRef is written by the wheel/scroll handler.
+      // When velocity is near 0 (user stopped), keep current direction.
       const vel = velocityRef.current;
       const newDir: "fwd" | "rev" = vel > 0.001
         ? "fwd"
         : vel < -0.001
           ? "rev"
-          : directionRef.current;
+          : directionRef.current; // hold last direction when stopped
 
-      // Direction change — one clean seek, then pure playbackRate
+      // ── Direction change — one clean seek, then pure playbackRate ────
       if (newDir !== directionRef.current) {
         directionRef.current = newDir;
         if (newDir === "fwd") {
           rev.pause();
           rev.style.opacity = "0";
           fwd.style.opacity = "1";
-          fwd.currentTime   = Math.max(0, Math.min(fwdDur, target));
+          // Snap fwd to current progress position
+          fwd.currentTime = Math.max(0, Math.min(fwdDur, target));
         } else {
           fwd.pause();
           fwd.style.opacity = "0";
           rev.style.opacity = "1";
-          rev.currentTime   = Math.max(0, Math.min(revDur, revDur - target));
+          // Snap rev to mirror position — all-keyframe so instant
+          rev.currentTime = Math.max(0, Math.min(revDur, revDur - target));
         }
       }
 
-      // Drive active video with playbackRate only.
-      // Hard boundary clamp: pause at ends so video never loops.
+      // ── Drive active video with playbackRate only ────────────────────
       if (directionRef.current === "fwd") {
-        const clampedTarget = Math.min(fwdDur - 0.05, target);
-        const diff = clampedTarget - fwd.currentTime;
-        if (Math.abs(diff) < HOLD_THRESHOLD || fwd.currentTime >= fwdDur - 0.05) {
+        const diff = target - fwd.currentTime;
+        if (Math.abs(diff) < HOLD_THRESHOLD) {
           if (!fwd.paused) fwd.pause();
         } else {
           const rate = Math.min(RATE_MAX, Math.max(RATE_MIN, 1 + Math.abs(diff) * RATE_GAIN));
@@ -145,9 +148,10 @@ export default function ArchitectureAssetsIntro() {
         rev.style.opacity = "0";
 
       } else {
-        const revTarget = Math.max(0.05, Math.min(revDur, revDur - target));
+        // reverse — drive revVid toward its mirror target
+        const revTarget = Math.max(0, Math.min(revDur, revDur - target));
         const diff      = revTarget - rev.currentTime;
-        if (Math.abs(diff) < HOLD_THRESHOLD || rev.currentTime <= 0.05) {
+        if (Math.abs(diff) < HOLD_THRESHOLD) {
           if (!rev.paused) rev.pause();
         } else {
           const rate = Math.min(RATE_MAX, Math.max(RATE_MIN, 1 + Math.abs(diff) * RATE_GAIN));
@@ -158,7 +162,7 @@ export default function ArchitectureAssetsIntro() {
         rev.style.opacity = "1";
       }
 
-      // Zoom scale
+      // ── Zoom scale ───────────────────────────────────────────────────
       const fwdScale = SCALE_FWD_START + (SCALE_FWD_END - SCALE_FWD_START) * p;
       const revScale = SCALE_REV_START + (SCALE_REV_END - SCALE_REV_START) * (1 - p);
       fwd.style.transform = `scale(${fwdScale}) translateZ(0)`;
@@ -168,18 +172,23 @@ export default function ArchitectureAssetsIntro() {
     }
 
     rafRef.current = requestAnimationFrame(loop);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Wheel handler — captures velocity for direction detection ─────────
+  // wheel deltaY is reliable and available before scroll fires.
+  // Decays toward 0 on scroll end — direction holds last value when idle.
   useEffect(() => {
     let decayTimer: ReturnType<typeof setTimeout> | null = null;
 
     function onWheel(e: WheelEvent): void {
       velocityRef.current = e.deltaY;
+      // Reset velocity after 120ms of no wheel events
       if (decayTimer) clearTimeout(decayTimer);
-      decayTimer = setTimeout(() => { velocityRef.current = 0; }, 80);
+      decayTimer = setTimeout(() => { velocityRef.current = 0; }, 120);
     }
 
     window.addEventListener("wheel", onWheel, { passive: true });
@@ -250,21 +259,25 @@ export default function ArchitectureAssetsIntro() {
         ref={overlayRef}
         className={
           "archAssetsIntroFixed" +
-          (active ? " archAssetsIntroActive" : "") +
-          (done   ? " archAssetsIntroDone"   : "")
+          (active ? " archAssetsIntroFixedActive" : "") +
+          (done   ? " archAssetsIntroFixedDone"   : "")
         }
       >
         <video
           ref={fwdVideoRef}
           src={FORWARD_VIDEO}
           className="archAssetsVideoBg"
-          muted playsInline preload="auto"
+          muted
+          playsInline
+          preload="auto"
         />
         <video
           ref={revVideoRef}
           src={REVERSE_VIDEO}
           className="archAssetsVideoBg"
-          muted playsInline preload="auto"
+          muted
+          playsInline
+          preload="auto"
         />
         <div className="archAssetsScrim" />
         <div className="archAssetsTickerWrap">

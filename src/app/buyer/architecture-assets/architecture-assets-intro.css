@@ -1,8 +1,9 @@
 /* architecture-assets-intro.css
+   EXACT mirror of visitor/architecture/architecture-intro-section.css
+   Only difference: CSS prefix changed from archIntro* to archAssets*
    Fixed-overlay scroll-jack pattern.
    Sentinel div holds scroll budget. Fixed panel covers viewport while active.
-   Next section (ArchitectureVideosSection) must have z-index >= 51 to render
-   above this overlay during the exit fade.
+   Next section must have z-index >= 51 to render above this overlay.
 */
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Mono:wght@300;400&display=swap");
 
