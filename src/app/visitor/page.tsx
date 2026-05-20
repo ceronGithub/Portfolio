@@ -2797,34 +2797,36 @@ export default function VisitorPage() {
           STANDALONE SECTION 1 — ARCHITECTURE
           Full-width sticky scroll-jacking: chairs + table → videos
       ═══════════════════════════════════════════════════════════════ */}
-      <ArchitectureSection>
-        <MagazineSection
-          label="AI Interior Film"
-          labelAccent="#7dc9a0"
-          title="8 Interior."
-          titleAccent="#7dc9a0"
-          italicLine="Yours forever."
-          desc="Warm light, material depth, and spatial atmosphere — AI-generated at full resolution. Purchase once, download anytime from your dashboard."
-          accent="#7dc9a0"
-          gradient="linear-gradient(135deg, #0d1a12 0%, #122018 60%, #0d0c0b 100%)"
-          cards={interiorCards}
-          ctaLabel="Get Interior Access"
-          delay={0}
-        />
-        <MagazineSection
-          label="AI Exterior Design"
-          labelAccent="#8fc99a"
-          title="6 Exterior."
-          titleAccent="#8fc99a"
-          italicLine="Yours forever."
-          desc="Drone sweeps, architectural facades, and atmospheric landscapes — cinematic AI films at full resolution. One purchase, lifetime access."
-          accent="#8fc99a"
-          gradient="linear-gradient(135deg, #0d1a10 0%, #142018 60%, #0d0c0b 100%)"
-          cards={exteriorCards}
-          ctaLabel="Get Exterior Access"
-          delay={0.05}
-        />
-      </ArchitectureSection>
+      {/* ── Architecture intro — standalone, no children ── */}
+      <ArchitectureSection />
+
+      {/* ── Architecture videos — rendered directly after intro, no wrapper ── */}
+      <MagazineSection
+        label="AI Interior Film"
+        labelAccent="#7dc9a0"
+        title="8 Interior."
+        titleAccent="#7dc9a0"
+        italicLine="Yours forever."
+        desc="Warm light, material depth, and spatial atmosphere — AI-generated at full resolution. Purchase once, download anytime from your dashboard."
+        accent="#7dc9a0"
+        gradient="linear-gradient(135deg, #0d1a12 0%, #122018 60%, #0d0c0b 100%)"
+        cards={interiorCards}
+        ctaLabel="Get Interior Access"
+        delay={0}
+      />
+      <MagazineSection
+        label="AI Exterior Design"
+        labelAccent="#8fc99a"
+        title="6 Exterior."
+        titleAccent="#8fc99a"
+        italicLine="Yours forever."
+        desc="Drone sweeps, architectural facades, and atmospheric landscapes — cinematic AI films at full resolution. One purchase, lifetime access."
+        accent="#8fc99a"
+        gradient="linear-gradient(135deg, #0d1a10 0%, #142018 60%, #0d0c0b 100%)"
+        cards={exteriorCards}
+        ctaLabel="Get Exterior Access"
+        delay={0.05}
+      />
 
       {/* ── Divider ── */}
       <div className="vAiSectionDivider">

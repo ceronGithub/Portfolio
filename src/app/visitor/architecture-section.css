@@ -1,23 +1,42 @@
 /* architecture-section.css
-   Scroll-scrubbed video + slogan only. Mirrors buyer/architecture-assets-intro.css
+   Fixed-overlay scroll-jack pattern.
+   Sentinel div holds scroll space. Fixed panel covers viewport while active.
 */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
 
-/* ── Scroll container ── */
-.archSection {
+/* ── Sentinel — invisible scroll-space holder ── */
+.archSentinel {
   position:   relative;
   width:      100%;
-  height:     500vh;
   background: #000;
+  /* height set inline via JS: SCROLL_BUDGET_VH * 100vh */
 }
 
-/* ── Sticky viewport ── */
-.archSticky {
-  position:   sticky;
-  top:        0;
-  height:     100vh;
-  overflow:   hidden;
+/* ── Fixed overlay — covers full viewport while active ── */
+.archFixed {
+  position:   fixed;
+  inset:      0;
+  z-index:    50;
   background: #000;
+  /* Hidden by default — activated by class */
+  visibility: hidden;
+  opacity:    0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.archFixedActive {
+  visibility:     visible;
+  opacity:        1;
+  pointer-events: auto;
+}
+
+/* Once done, snap hide with no transition (already scrolled past) */
+.archFixedDone {
+  visibility:     hidden;
+  opacity:        0;
+  pointer-events: none;
+  transition:     none;
 }
 
 /* ── Fullscreen scrubbed video ── */
@@ -30,6 +49,8 @@
   object-position: center;
   z-index:         1;
   display:         block;
+  will-change:     transform;
+  transform:       translateZ(0);
 }
 
 /* ── Subtle dark scrim ── */
@@ -86,11 +107,12 @@
   color:          #fff;
   line-height:    1.2;
   margin:         0;
+  opacity:        0;
   will-change:    transform, opacity, filter;
   text-shadow:    0 2px 40px rgba(0, 0, 0, 0.8);
 }
 
-/* ── Bottom gradient — merges into next section ── */
+/* ── Bottom gradient ── */
 .archBottomGrad {
   position:       absolute;
   bottom:         0;
@@ -105,13 +127,6 @@
     rgba(0, 0, 0, 0.6)  60%,
     rgba(0, 0, 0, 0.97) 100%
   );
-}
-
-/* ── Videos block — below sticky ── */
-.archVideos {
-  position:   relative;
-  z-index:    1;
-  background: #080809;
 }
 
 /* ── Mobile ── */
