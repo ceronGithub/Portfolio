@@ -1,79 +1,92 @@
 // DashboardHero — client component.
 // 3 videos play simultaneously as full-viewport columns.
-// Sources: Supabase bucket — exterior, weapon, character (interior skipped — filenames have spaces).
-// Audio: muted by default (browser autoplay policy). User clicks unmute button to enable audio.
+// MECHANIC:
+//   - All 3 start together on mount.
+//   - When ALL 3 finish, pick the next batch of 3 (all different, none from previous batch).
+//   - Each column always shows a unique video — no duplicates across columns.
+// Sources: Google Drive via proxy API route.
 
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import "./dashboard.css";
 
-const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+// Proxy through our API route — avoids Drive's redirect/confirmation wall
+const GD = (id: string) => `/api/drive-video?id=${id}`;
 
-// Only use folders with clean filenames — no spaces/parens issues
 const ALL_VIDEOS = [
   // exterior
-  `${SB}/exterior/Drone_shot_revealing_landscape_202605061517.mp4`,
-  `${SB}/exterior/Drone_shot_revealing_landscape_202605061518.mp4`,
-  `${SB}/exterior/project-01.mp4`,
-  `${SB}/exterior/project-02.mp4`,
-  `${SB}/exterior/project-03.mp4`,
-  `${SB}/exterior/project-04.mp4`,
-  `${SB}/exterior/project-05.mp4`,
+  GD("1QKCGiJCNzSbpkVsQPN073ws6WbZMwrZC"), // Drone shot 1
+  GD("1hIAB7FrCEnn8cfrGSCplccHkZ4Gonnxu"), // Drone shot 2
+  GD("1kp23x5YBnWovDamPDT2FS00d1ID9SB0k"), // project-01
+  GD("10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T"), // project-02
+  GD("1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ"), // project-03
+  GD("1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT"), // project-04
   // interior
-  `${SB}/interior/interior-01.mp4`,
-  `${SB}/interior/interior-02.mp4`,
-  `${SB}/interior/interior-03.mp4`,
-  `${SB}/interior/interior-04.mp4`,
-  `${SB}/interior/interior-05.mp4`,
-  `${SB}/interior/interior-06.mp4`,
-  `${SB}/interior/interior-07.mp4`,
+  GD("16IlbksfqFgAsIUlIbSnfG1k0miktYC0d"), // interior-01
+  GD("1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ"), // interior-02
+  GD("1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce"), // interior-03
+  GD("1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl"), // interior-04
+  GD("1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu"), // interior-05
+  GD("1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW"), // interior-06
+  GD("1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG"), // interior-07
   // weapon
-  `${SB}/weapon/axe-01-animation.mp4`,
-  `${SB}/weapon/axe-02-animation.mp4`,
-  `${SB}/weapon/axe-03-animation.mp4`,
-  `${SB}/weapon/axe-04-animation.mp4`,
-  `${SB}/weapon/axe-05-animation.mp4`,
-  `${SB}/weapon/axe-07-animation.mp4`,
+  GD("1NrTbKznn-3pcIC9q-BqBa2lUfMUsGKa8"), // axe-01
+  GD("1db1EOrzdG2phPiaJ8DJV9Tz1-bfYwB67"), // axe-02
+  GD("1ZPhiN56sAU9EQIlrrTPY3OSDBhijtHld"), // axe-03
+  GD("1jjU-r5EawMDjzhbJueiadCMjkcCZrHtr"), // axe-04
+  GD("1vl3KhBI_UQIugyIXeBTduabrOh0eZSU5"), // axe-05
+  GD("1DcmVwUgfOzvl8wzJJOq-YP7pR_8ZXZ4u"), // axe-06
+  GD("1k9AhDcIY-Em7Wyl5fd2i79DomElK1DnM"), // axe-07
+  GD("1tqcYpL3wqMpomBiXOo_N6yDwspdEgmWu"), // axe-08
   // character
-  `${SB}/character/orc-01-animation.mp4`,
-  `${SB}/character/orc-02-animation.mp4`,
-  `${SB}/character/orc-03-animation.mp4`,
-  `${SB}/character/orc-04-animation.mp4`,
-  `${SB}/character/orc-05-animation.mp4`,
-  `${SB}/character/orc-06-animation.mp4`,
-  `${SB}/character/orc-07-animation.mp4`,
-  `${SB}/character/orc-08-animation.mp4`,
-  `${SB}/character/orc-09-animation.mp4`,
-  `${SB}/character/orc-11-animation.mp4`,
+  GD("1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP"), // orc-01
+  GD("1SaHl7fGvD2uoy34clB1p2UWT-knWENwl"), // orc-02
+  GD("1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i"), // orc-03
+  GD("1cx2sETIft3K7R8NnNPumoLet1pW5It0a"), // orc-04
+  GD("1-n33tw86ViaKB6xzM0UuCrgF45JVc63-"), // orc-05
+  GD("1XVymFPXK8aQa-Ud7DwpkaQ6g3BrGiLjH"), // orc-06
+  GD("16-RCaA3WjQjMf1GT0Ad2JrjAhR-U_FyH"), // orc-07
+  GD("1Wjgt2RcRkUrbxEMnLQWWdiUdQ3OHwpx3"), // orc-08
+  GD("1JB-kYyq0XMrPe0pgrh5L2S-nGmK-wvXE"), // orc-09
+  GD("1q3rW69QWjYEK5T53rRTpTFlR7X9ZERRe"), // orc-10
+  GD("1CTk71XmBB9yNz9Osbfd-YHg9mrsgmZkf"), // orc-11
+  GD("1ZPSoWhJc0ukVny9sCKp0-ytzTsz0aL50"), // orc-12
+  GD("1W1eHcST6_noKH3VCygvpKz-JFZkCF6Su"), // orc-13
 ];
 
-function pickRandom3(): string[] {
-  return [...ALL_VIDEOS].sort(() => Math.random() - 0.5).slice(0, 3);
-}
-
-function pickNext(current: string): string {
-  const pool = ALL_VIDEOS.filter(v => v !== current);
-  return pool[Math.floor(Math.random() * pool.length)];
+// Pick 3 unique random videos, excluding any in the `exclude` set
+function pickBatch(exclude: string[] = []): string[] {
+  const pool = ALL_VIDEOS.filter(v => !exclude.includes(v));
+  // Shuffle pool
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  // Take first 3 — guaranteed unique since we slice from a shuffled unique array
+  return shuffled.slice(0, 3);
 }
 
 interface Props { userName: string; }
 
 export default function DashboardHero({ userName }: Props) {
-  const [videos, setVideos] = useState<string[] | null>(null);
-  const [phase,  setPhase]  = useState<"welcome" | "fadeOut" | "subtitle">("welcome");
-  const [muted,  setMuted]  = useState(true);
-  const videoRefs  = useRef<(HTMLVideoElement | null)[]>([]);
-  const sectionRef = useRef<HTMLElement>(null);
+  const [videos,  setVideos]  = useState<string[]>(() => pickBatch());
+  const [phase,   setPhase]   = useState<"welcome" | "fadeOut" | "subtitle">("welcome");
+  const [muted,   setMuted]   = useState(true);
 
+  const videoRefs   = useRef<(HTMLVideoElement | null)[]>([]);
+  const sectionRef  = useRef<HTMLElement>(null);
+  // Track how many of the 3 have finished in the current batch
+  const endedRef    = useRef<Set<number>>(new Set());
+  // Keep latest videos in a ref so the onEnded closure sees current value
+  const videosRef   = useRef<string[]>(videos);
+  videosRef.current = videos;
+
+  // ── Phase animation on mount ────────────────────────────────────────
   useEffect(() => {
-    setVideos(pickRandom3());
     const t1 = setTimeout(() => setPhase("fadeOut"),  2000);
     const t2 = setTimeout(() => setPhase("subtitle"), 2700);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
-  // Pause all hero videos when section scrolls out of viewport
+  // ── Pause/resume on scroll out of viewport ──────────────────────────
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -81,11 +94,7 @@ export default function DashboardHero({ userName }: Props) {
       ([entry]) => {
         videoRefs.current.forEach(v => {
           if (!v) return;
-          if (entry.isIntersecting) {
-            v.play().catch(() => {});
-          } else {
-            v.pause();
-          }
+          entry.isIntersecting ? v.play().catch(() => {}) : v.pause();
         });
       },
       { threshold: 0.1 }
@@ -94,19 +103,22 @@ export default function DashboardHero({ userName }: Props) {
     return () => observer.disconnect();
   }, []);
 
+  // ── Called when a column's video ends ───────────────────────────────
+  function handleEnded(index: number) {
+    endedRef.current.add(index);
+    // Only advance when ALL 3 have finished
+    if (endedRef.current.size < 3) return;
+    // Reset counter for next batch
+    endedRef.current = new Set();
+    // Pick next batch — exclude current 3 so no repeats
+    const nextBatch = pickBatch(videosRef.current);
+    setVideos(nextBatch);
+  }
+
   function toggleMute() {
     const next = !muted;
     setMuted(next);
     videoRefs.current.forEach(v => { if (v) v.muted = next; });
-  }
-
-  function handleEnded(index: number, currentSrc: string) {
-    setVideos(prev => {
-      if (!prev) return prev;
-      const updated = [...prev];
-      updated[index] = pickNext(currentSrc);
-      return updated;
-    });
   }
 
   return (
@@ -114,18 +126,18 @@ export default function DashboardHero({ userName }: Props) {
 
       {/* ── 3-column video background ── */}
       <div className="heroBg">
-        {(videos ?? []).map((src, i) => (
+        {videos.map((src, i) => (
           <div key={i} className="heroBgCol">
             <video
-              key={src}
+              key={src}              // key change forces video element remount on new src
               ref={el => { videoRefs.current[i] = el; }}
               src={src}
               autoPlay
               muted
               playsInline
-              preload="metadata"
+              preload="auto"
               className="heroBgVideo"
-              onEnded={() => handleEnded(i, src)}
+              onEnded={() => handleEnded(i)}
             />
           </div>
         ))}
@@ -134,10 +146,11 @@ export default function DashboardHero({ userName }: Props) {
 
       {/* ── Centered text ── */}
       <div className="heroContent">
-        <span className={["heroWelcome",
-          phase === "welcome"  ? "heroVisible"  : "",
-          phase === "fadeOut"  ? "heroFadeOut"  : "",
-          phase === "subtitle" ? "heroGone"     : "",
+        <span className={[
+          "heroWelcome",
+          phase === "welcome"  ? "heroVisible" : "",
+          phase === "fadeOut"  ? "heroFadeOut" : "",
+          phase === "subtitle" ? "heroGone"    : "",
         ].join(" ")}>Welcome</span>
 
         <div className={["heroSub", phase === "subtitle" ? "heroSubVisible" : ""].join(" ")}>
@@ -148,16 +161,14 @@ export default function DashboardHero({ userName }: Props) {
         </div>
       </div>
 
-      {/* ── Sound toggle — bottom right ── */}
+      {/* ── Sound toggle ── */}
       <button className="heroSoundBtn" onClick={toggleMute} title={muted ? "Unmute" : "Mute"}>
         {muted ? (
-          // Muted icon
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
           </svg>
         ) : (
-          // Unmuted icon
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
