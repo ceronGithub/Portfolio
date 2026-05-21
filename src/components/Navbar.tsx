@@ -191,7 +191,7 @@ export default function Navbar() {
   // Buyer on /buyer pages: Dash + Systems + Profile + Sign Out
   const buyerItems: NavItem[] = [
     { label: "Dash",     href: "/buyer",        icon: <IconDashboard /> },
-    { label: "Systems",  href: "/buyer", icon: <IconSystems />, isHash: true, hashId: "buyerSystems" },
+    { label: "Systems",  href: "/buyer", icon: <IconSystems />, isHash: true, hashId: "systems" },
     { label: "Profile",  href: "/buyer/profile", icon: <IconAbout /> },
     { label: "Sign Out", href: "#",             icon: <IconSignOut />, signOut: true },
   ];
@@ -402,7 +402,13 @@ export default function Navbar() {
 
   /* ── Click handler ──────────────────────────────────────────────── */
   function handleClick(item: NavItem, index: number) {
-    if (item.signOut) { signOut({ callbackUrl: "/login" }); return; }
+    if (item.signOut) {
+      // Force a hard redirect after sign-out clears the JWT cookie.
+      // redirect: true tells next-auth to do a full page navigation
+      // to callbackUrl — bypassing any client-side router caching.
+      signOut({ callbackUrl: "/login", redirect: true });
+      return;
+    }
     if (item.toggleTheme) { toggleAdminTheme(); return; }
 
     // Lock bubble to clicked item immediately — before any scroll happens
