@@ -1,306 +1,309 @@
-/* ================================================
+/* =====================================================
    dashboard.css — Admin Overview. Dark theme.
-   Two scroll-snap panels. Sticky stat cards.
-   Parallax on charts area only (not cards).
-   ================================================ */
+   Single-scroll page. KPI strip + 2x2 chart grid.
+   Layered translucency. GPU-accelerated animations.
+   ===================================================== */
 
-/* ── Scroll container ─────────────────────────── */
-.overviewContainer {
-  height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  background: #12121f;
-}
-
-/* ── Panel base ───────────────────────────────── */
-.overviewPanel {
-  height: 100vh;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+/* ── Page wrapper ─────────────────────────────────── */
+.ovPage {
+  min-height: 100vh;
+  background: #09090b;
+  padding: 2.5rem 2.75rem 5rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  padding: 0 2.5rem;
-}
-
-.overviewPanel1 {
-  background: radial-gradient(ellipse at 20% 50%, rgba(108,138,245,0.07) 0%, transparent 60%), #12121f;
-}
-
-.overviewPanel2 {
-  background: radial-gradient(ellipse at 80% 50%, rgba(181,123,238,0.07) 0%, transparent 60%), #12121f;
-}
-
-/* ── Panel inner — flex row: charts | cards ───── */
-.overviewPanelInner {
-  display: flex;
-  align-items: flex-start;       /* key: allow sticky to work */
-  gap: 2rem;
-  width: 100%;
-  max-width: 1200px;
+  gap: 2.25rem;
+  max-width: 1320px;
   margin: 0 auto;
-  /* full height so sticky has room */
-  height: 100vh;
-  padding: 2.5rem 0;
   box-sizing: border-box;
 }
 
-/* ── Charts area (left — takes remaining width) ── */
-.overviewChartsArea {
-  flex: 1;
+/* ── Page header ──────────────────────────────────── */
+.ovPageHeader {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-/* ── Charts row ───────────────────────────────── */
-.overviewChartsRow {
-  display: flex;
-  gap: 2.5rem;
   align-items: flex-end;
-  width: 100%;
-}
-
-/* ── Chart card ───────────────────────────────── */
-.overviewChartCard {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
-.overviewChartTitle {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.45);
-  text-align: center;
-  font-weight: 500;
-  line-height: 1.5;
-  max-width: 200px;
+/* Eyebrow — smallest type size */
+.ovPageEyebrow {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  margin-bottom: 0.3rem;
 }
 
-/* ── Donut ────────────────────────────────────── */
-.overviewDonutWrap {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  justify-content: center;
-  width: 100%;
-}
-
-.overviewDonutSvg {
-  width: 180px;
-  height: 180px;
-  flex-shrink: 0;
-}
-
-.overviewDonutLabels {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.overviewDonutLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.65);
-}
-
-.overviewDonutDot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.overviewDonutName { flex: 1; color: rgba(255,255,255,0.55); min-width: 60px; }
-.overviewDonutPct  { font-weight: 700; color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
-
-/* ── Bar chart ────────────────────────────────── */
-.overviewBarWrap {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.overviewBarSvg {
-  width: 100%;
-  max-width: 320px;
-  height: auto;
-  overflow: visible;
-}
-
-/* ── Stacked bar ──────────────────────────────── */
-.overviewStackedWrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.overviewStackedLegend {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.overviewStackedLegendItem {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.5);
-}
-
-.overviewStackedLegendDot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.overviewStackedSvg {
-  width: 100%;
-  max-width: 260px;
-  height: auto;
-  overflow: visible;
-}
-
-.overviewStackedTitle {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  text-align: center;
-  font-weight: 500;
-}
-
-/* ── Stat cards column — STICKY ───────────────── */
-.overviewStatsColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  width: 210px;
-  flex-shrink: 0;
-  /* STICKY: stays in view while charts scroll */
-  position: sticky;
-  top: 2rem;
-  align-self: flex-start;
-}
-
-/* ── Stat card ────────────────────────────────── */
-.overviewStatCard {
-  background: rgba(255,255,255,0.055);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 0.8rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  backdrop-filter: blur(8px);
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.overviewStatCard:hover {
-  background: rgba(255,255,255,0.085);
-  border-color: rgba(255,255,255,0.13);
-}
-
-.overviewStatValue {
-  font-size: 1.4rem;
+/* Page title — largest type size */
+.ovPageTitle {
+  font-size: 2rem;
   font-weight: 800;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0;
+}
+
+/* Date string — medium muted */
+.ovPageDate {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.28);
+  margin: 0;
+  flex-shrink: 0;
+  padding-bottom: 0.25rem;
+}
+
+/* ── KPI strip — 6 cards in a row ────────────────── */
+.ovKpiStrip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.85rem;
+}
+
+/* ── KPI card ─────────────────────────────────────── */
+.ovKpiCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 1rem 1.1rem 1rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s ease, border-color 0.2s ease,
+              transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: default;
+  will-change: transform;
+}
+
+.ovKpiCard:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translate3d(0, -2px, 0);
+}
+
+/* Left accent bar — color-coded per metric */
+.ovKpiAccentBar {
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+}
+
+/* KPI value — prominent number */
+.ovKpiValue {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
   letter-spacing: -0.04em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.overviewStatLabel {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.42);
+/* KPI label — small descriptor */
+.ovKpiLabel {
+  font-size: 0.67rem;
+  color: rgba(255, 255, 255, 0.36);
   font-weight: 500;
   line-height: 1.3;
 }
 
-/* ── Scroll hint ──────────────────────────────── */
-.overviewScrollHint {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
+/* ── Divider ──────────────────────────────────────── */
+.ovDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 -0.5rem;
+}
+
+/* ── Chart section — eyebrow + title + 2-col grid ── */
+.ovChartSection {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  color: rgba(255,255,255,0.22);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  animation: overviewBounce 2s ease-in-out infinite;
-  pointer-events: none;
+  gap: 1.1rem;
 }
 
-@keyframes overviewBounce {
-  0%,100% { transform: translateX(-50%) translateY(0);   opacity: 0.35; }
-  50%      { transform: translateX(-50%) translateY(7px); opacity: 0.75; }
-}
-
-/* ── Responsive ───────────────────────────────── */
-@media (max-width: 900px) {
-  .overviewPanelInner {
-    flex-direction: column;
-    height: auto;
-    padding: 2rem 0;
-    align-items: center;
-  }
-
-  .overviewStatsColumn {
-    position: static;
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .overviewStatCard { flex: 1; min-width: 120px; }
-
-  .overviewChartsRow { flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
-  .overviewChartCard { min-width: 220px; }
-
-  .overviewPanel {
-    height: auto;
-    min-height: 100vh;
-    padding: 2rem 1.5rem;
-  }
-}
-
-/* ── Bar chart card (new) ─────────────────────── */
-.ovBarCard {
-  flex: 1;
+.ovChartSectionHeader {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
+  gap: 0.25rem;
 }
 
-.ovBarTitle {
-  font-size: 0.82rem;
+/* Section eyebrow */
+.ovChartSectionEyebrow {
+  font-size: 0.63rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.55);
-  text-align: center;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* Section title — mid-level type size */
+.ovChartSectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+/* 2-column chart grid */
+.ovChartGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Chart card ───────────────────────────────────── */
+.ovChartCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 1.35rem 1.35rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+
+.ovChartCard:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.11);
+}
+
+/* Chart card top row: title block + color dot */
+.ovChartCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Chart card title — medium type */
+.ovChartCardTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
   letter-spacing: -0.01em;
+}
+
+/* Chart card subtitle — smallest in card */
+.ovChartCardSub {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0.18rem 0 0;
+  font-weight: 500;
+}
+
+/* Color indicator dot — top right of card */
+.ovChartColorDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+  opacity: 0.8;
+}
+
+/* SVG wrapper */
+.ovChartSvgWrap {
+  width: 100%;
+  overflow: hidden;
 }
 
 .ovBarSvg {
   width: 100%;
   height: auto;
   overflow: visible;
+  display: block;
 }
 
-.ovBarEmpty {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.2);
-  text-align: center;
-  padding: 2rem 0;
+/* Empty state */
+.ovChartEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 2.75rem 0;
+}
+
+.ovChartEmptyText {
+  font-size: 0.73rem;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Legend ───────────────────────────────────────── */
+.ovLegend {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding-top: 0.25rem;
+}
+
+.ovLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.ovLegendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Entrance animation — reveal on viewport entry ── */
+/* Base state: invisible, shifted down */
+.ovReveal {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+/* IntersectionObserver adds this class on viewport entry */
+.ovReveal.ovVisible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 1100px) {
+  .ovKpiStrip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .ovPage {
+    padding: 1.5rem 1.25rem 5rem;
+    gap: 1.75rem;
+  }
+
+  .ovKpiStrip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ovChartGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ovPageTitle {
+    font-size: 1.5rem;
+  }
+
+  .ovPageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
