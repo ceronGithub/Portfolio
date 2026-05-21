@@ -27,6 +27,31 @@ interface Particle {
   depth: number;
 }
 
+// Flying ash / ember particle
+interface EmberParticle {
+  x: number; y: number;
+  vx: number; vy: number;
+  wobble: number; wobbleSpeed: number;
+  size: number;
+  life: number; maxLife: number;
+  hue: number; // orange-red range
+}
+
+function spawnEmber(w: number, h: number): EmberParticle {
+  return {
+    x:           Math.random() * w,
+    y:           h + 8,
+    vx:          (Math.random() - 0.5) * 0.5,
+    vy:          -(Math.random() * 1.8 + 0.6),
+    wobble:      0,
+    wobbleSpeed: 0.04 + Math.random() * 0.06,
+    size:        Math.random() * 2.2 + 0.5,
+    life:        0,
+    maxLife:     Math.round(Math.random() * 160 + 100),
+    hue:         Math.random() * 30 + 10,   // 10–40: orange-red
+  };
+}
+
 function spawnParticle(w: number, h: number): Particle {
   const depth = Math.random();
   const speed = 0.08 + depth * 0.55;
@@ -48,10 +73,13 @@ function spawnParticle(w: number, h: number): Particle {
 export default function AIAssetsIntro() {
   const sectionRef  = useRef<HTMLDivElement>(null);
   const canvasRef   = useRef<HTMLCanvasElement>(null);
+  const emberCanvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef      = useRef<number>(0);
+  const emberRafRef = useRef<number>(0);
   const particles   = useRef<Particle[]>([]);
-  const progressRef = useRef<number>(0);      // raw value — no re-render on scroll
-  const scrollRafRef = useRef<number>(0);     // throttle scroll updates via rAF
+  const embers      = useRef<EmberParticle[]>([]);
+  const progressRef = useRef<number>(0);
+  const scrollRafRef = useRef<number>(0);
   const [progress,  setProgress]  = useState(0);
 
   // ── Scroll progress — throttled via rAF to avoid layout thrash ───
@@ -180,6 +208,79 @@ export default function AIAssetsIntro() {
     };
   }, []);
 
+  // ── Ember / flying ash canvas ────────────────────────────────────
+  useEffect(() => {
+    const canvas = emberCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    function resize() {
+      canvas!.width  = canvas!.offsetWidth;
+      canvas!.height = canvas!.offsetHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Pre-seed embers scattered at random heights
+    for (let i = 0; i < 30; i++) {
+      const e = spawnEmber(canvas.width, canvas.height);
+      e.life = Math.random() * e.maxLife;
+      e.y    = Math.random() * canvas.height;
+      embers.current.push(e);
+    }
+
+    function drawEmbers() {
+      const w = canvas!.width;
+      const h = canvas!.height;
+      ctx!.clearRect(0, 0, w, h);
+
+      // Spawn new embers
+      if (embers.current.length < 55 && Math.random() < 0.6)
+        embers.current.push(spawnEmber(w, h));
+
+      embers.current = embers.current.filter(e => e.life < e.maxLife);
+
+      for (const e of embers.current) {
+        e.life      += 1;
+        e.wobble    += e.wobbleSpeed;
+        e.x         += e.vx + Math.sin(e.wobble) * 0.5;
+        e.y         += e.vy;
+
+        const lr    = e.life / e.maxLife;
+        // Fade in quickly, hold, fade out at the end
+        const alpha = Math.min(1, lr * 8) * (1 - Math.max(0, (lr - 0.75) / 0.25)) * 0.85;
+
+        if (alpha <= 0.005) continue;
+
+        // Core glow — warm orange-red
+        const grad = ctx!.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * 3);
+        grad.addColorStop(0,   `hsla(${e.hue}, 100%, 88%, ${alpha})`);
+        grad.addColorStop(0.3, `hsla(${e.hue}, 100%, 55%, ${alpha * 0.7})`);
+        grad.addColorStop(0.7, `hsla(${e.hue},  80%, 30%, ${alpha * 0.3})`);
+        grad.addColorStop(1,   `hsla(${e.hue},  60%, 10%, 0)`);
+
+        ctx!.beginPath();
+        ctx!.arc(e.x, e.y, e.size * 3, 0, Math.PI * 2);
+        ctx!.fillStyle = grad;
+        ctx!.fill();
+
+        // Bright core dot
+        ctx!.beginPath();
+        ctx!.arc(e.x, e.y, e.size * 0.55, 0, Math.PI * 2);
+        ctx!.fillStyle = `hsla(50, 100%, 95%, ${alpha * 0.9})`;
+        ctx!.fill();
+      }
+
+      emberRafRef.current = requestAnimationFrame(drawEmbers);
+    }
+    emberRafRef.current = requestAnimationFrame(drawEmbers);
+    return () => {
+      cancelAnimationFrame(emberRafRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
   // ── Derived values ───────────────────────────────────────────────
   const vignettePulse = 0.5 + Math.sin(progress * Math.PI * 2.5) * 0.25;
   const orcSlide      = Math.max(0, 1 - progress / 0.18);
@@ -189,6 +290,9 @@ export default function AIAssetsIntro() {
   return (
     <section ref={sectionRef} className="aiAssetsIntroSection">
       <div className="aiAssetsSticky">
+
+        {/* ── Ember / flying ash particles ── */}
+        <canvas ref={emberCanvasRef} className="aiAssetsEmberCanvas" />
 
         {/* ── Dust particles ── */}
         <canvas ref={canvasRef} className="aiAssetsDustCanvas" />

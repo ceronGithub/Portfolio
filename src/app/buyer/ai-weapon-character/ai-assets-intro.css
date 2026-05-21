@@ -96,6 +96,17 @@
   pointer-events: none;
 }
 
+/* Flying ash / ember canvas — sits just below dust layer */
+.aiAssetsEmberCanvas {
+  position:       absolute;
+  inset:          0;
+  width:          100%;
+  height:         100%;
+  z-index:        9;
+  pointer-events: none;
+  will-change:    transform;
+}
+
 /* LAYER 5 — Fog SVG removed (caused visible horizontal line) */
 
 /* LAYER 6 — Color grade (z: 14) */

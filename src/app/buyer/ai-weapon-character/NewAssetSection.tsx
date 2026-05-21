@@ -18,7 +18,7 @@ const LATEST = {
   subtitle:    "New Character. Available now",
   videoSrc:    `${SB}/character/orc-11-animation.mp4`,
   price:       "₱5,500",
-  isLive:      true,          // false = show "Coming Soon" badge
+  isLive:      false,         // false = show "Coming Soon" badge
   releaseNote: "Full rig · 4K textures · OBJ + FBX included",
 };
 // ──────────────────────────────────────────────────────────────────────────
@@ -161,7 +161,17 @@ export default function NewAssetSection() {
         </div>
 
         <div className="newAssetCards">
-          {/* Card — 3D OBJ placeholder */}
+          {/* Card 1 — Animation preview */}
+          <div className="newAssetCard newAssetCardVideo">
+            <video
+              src={LATEST.videoSrc}
+              autoPlay muted loop playsInline
+              className="newAssetCardVideoEl"
+            />
+            <div className="newAssetCardVideoLabel">Animation Preview</div>
+          </div>
+
+          {/* Card 2 — 3D OBJ placeholder */}
           <div className="newAssetCard">
             <div className="newAssetCardInner">
               <span className="newAssetCardIcon">📦</span>
