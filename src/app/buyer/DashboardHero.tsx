@@ -67,9 +67,11 @@ function pickBatch(exclude: string[] = []): string[] {
 interface Props { userName: string; }
 
 export default function DashboardHero({ userName }: Props) {
-  const [videos,  setVideos]  = useState<string[]>([]); // empty on SSR — no hydration mismatch
-  const [phase,   setPhase]   = useState<"welcome" | "fadeOut" | "subtitle">("welcome");
-  const [muted,   setMuted]   = useState(true);
+  const [videos,   setVideos]   = useState<string[]>([]); // empty on SSR — no hydration mismatch
+  const [phase,    setPhase]    = useState<"welcome" | "fadeOut" | "subtitle">("welcome");
+  const [muted,    setMuted]    = useState(true);
+  // Track which columns are still buffering (loading = true until canplay fires)
+  const [loading,  setLoading]  = useState<boolean[]>([true, true, true]);
 
   const videoRefs   = useRef<(HTMLVideoElement | null)[]>([]);
   const sectionRef  = useRef<HTMLElement>(null);
@@ -114,10 +116,10 @@ export default function DashboardHero({ userName }: Props) {
     endedRef.current.add(index);
     // Only advance when ALL 3 have finished
     if (endedRef.current.size < 3) return;
-    // Reset counter for next batch
+    // Reset loading flags for all 3 new columns
     endedRef.current = new Set();
-    // Pick next batch — exclude current 3 so no repeats
     const nextBatch = pickBatch(videosRef.current);
+    setLoading([true, true, true]);
     setVideos(nextBatch);
   }
 
@@ -134,8 +136,10 @@ export default function DashboardHero({ userName }: Props) {
       <div className="heroBg">
         {videos.map((src, i) => (
           <div key={i} className="heroBgCol">
+            {/* Loading shimmer — visible while video is buffering */}
+            {loading[i] && <div className="heroBgColLoading" />}
             <video
-              key={src}              // key change forces video element remount on new src
+              key={src}
               ref={el => { videoRefs.current[i] = el; }}
               src={src}
               autoPlay
@@ -143,6 +147,8 @@ export default function DashboardHero({ userName }: Props) {
               playsInline
               preload="auto"
               className="heroBgVideo"
+              onCanPlay={() => setLoading(prev => { const n = [...prev]; n[i] = false; return n; })}
+              onWaiting={() => setLoading(prev => { const n = [...prev]; n[i] = true;  return n; })}
               onEnded={() => handleEnded(i)}
             />
           </div>

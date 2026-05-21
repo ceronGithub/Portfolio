@@ -73,12 +73,14 @@ function CompareSlot({
   ownedAssetIds: Set<string>;
   onChange:      (asset: CompareAsset | null) => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef     = useRef<HTMLVideoElement>(null);
+  const [videoLoading, setVideoLoading] = useState(false);
 
   // Reload and play whenever selection changes
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !selected) return;
+    setVideoLoading(true);
     el.load();
     el.play().catch(() => {});
   }, [selected?.id]);
@@ -130,16 +132,27 @@ function CompareSlot({
       {/* Video preview — key forces remount when selection changes */}
       <div className="compareVideoWrap">
         {selected ? (
-          <video
-            ref={videoRef}
-            key={selected.id}
-            src={selected.videoSrc}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="compareVideo"
-          />
+          <>
+            {videoLoading && (
+              <div className="compareVideoLoading">
+                <span className="compareVideoLoadingDot" />
+                <span className="compareVideoLoadingDot" />
+                <span className="compareVideoLoadingDot" />
+              </div>
+            )}
+            <video
+              ref={videoRef}
+              key={selected.id}
+              src={selected.videoSrc}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className={`compareVideo ${videoLoading ? "compareVideoHidden" : ""}`}
+              onCanPlay={() => setVideoLoading(false)}
+              onWaiting={() => setVideoLoading(true)}
+            />
+          </>
         ) : (
           <div className="compareVideoPlaceholder">
             <span className="compareVideoPlaceholderIcon">▶</span>
