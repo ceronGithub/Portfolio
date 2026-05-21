@@ -59,6 +59,7 @@ export default async function BuyerPage() {
     description:  s.description ?? "",
     basePrice:    s.basePrice,
     timeline:     s.timeline ?? "",
+    features:     s.features ?? [],
     demoVideoUrl: demoVideos[s.tag] ?? null,
     bgVideoUrl:   bgVideos[s.tag]   ?? null,
     owned:        ownedSet.has(s.id),

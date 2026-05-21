@@ -16,6 +16,7 @@ interface AddonItem {
 interface SystemItem {
   id: string; name: string; tag: string; accent: string;
   description: string; basePrice: number; timeline: string;
+  features: string[];
   demoVideoUrl: string | null; bgVideoUrl: string | null; owned: boolean; addons: AddonItem[];
 }
 interface Props {
@@ -240,12 +241,12 @@ function SystemCard({
           )}
 
           {/* Features */}
-          {item.addons.length > 0 && (
+          {item.features.length > 0 && (
             <ul className="vSysCardFeatures">
-              {item.addons.slice(0, 5).map((a) => (
-                <li key={a.id} className="vSysCardFeatureItem">
+              {item.features.map((f, i) => (
+                <li key={i} className="vSysCardFeatureItem">
                   <span className="vSysCardFeatureDot" style={{ background: item.accent }} />
-                  {a.label}
+                  {f}
                 </li>
               ))}
             </ul>
