@@ -26,11 +26,14 @@ interface OverviewClientProps {
 }
 
 // ── Color tokens ───────────────────────────────────────────────────────────
+// COLOR_SYSTEMS / COLOR_PRODUCTS are always vibrant — theme-independent.
+// COLOR_GRID / COLOR_LABEL / COLOR_VALUE reference SVG fill strings;
+// these are resolved at render time via CSS vars injected on the SVG element.
 const COLOR_SYSTEMS  = "#6c8af5";
 const COLOR_PRODUCTS = "#f5b86c";
-const COLOR_GRID     = "rgba(255,255,255,0.06)";
-const COLOR_LABEL    = "rgba(255,255,255,0.32)";
-const COLOR_VALUE    = "rgba(255,255,255,0.72)";
+const COLOR_GRID     = "var(--ov-grid)";
+const COLOR_LABEL    = "var(--ov-label)";
+const COLOR_VALUE    = "var(--ov-value)";
 
 // ── formatPeso — compact peso string (e.g. 12500 → "₱12.5k") ──────────────
 function formatPeso(value: number): string {

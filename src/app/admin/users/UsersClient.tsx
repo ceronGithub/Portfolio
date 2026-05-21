@@ -3,12 +3,29 @@
 // Card 2: Active users — search, ban/deactivate/delete actions.
 // Card 3: Non-active/banned — activate/delete actions.
 // Card 4: Action logs — 4 tabs: Ban / Delete / Deactivate / Activate.
+// IntersectionObserver entrance animations on all cards.
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+
+// ── useReveal — IntersectionObserver entrance animation ───────────────
+// Adds "umVisible" class when the element enters the viewport.
+function useReveal() {
+  const elementRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = elementRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) el.classList.add("umVisible"); },
+      { threshold: 0.08 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return elementRef;
+}
 
 // ── Types ─────────────────────────────────────────────────────────────
-
 interface Ownership { productId: string; product: { name: string }; }
 
 interface User {
@@ -112,8 +129,9 @@ function ConfirmPopover({ message, danger, withReason, onConfirm, onCancel }: {
 // ── Card 1 — All Users ────────────────────────────────────────────────
 
 function AllUsersCard({ users }: { users: User[] }) {
+  const revealRef = useReveal();
   return (
-    <div className="umCard">
+    <div className="umCard" ref={revealRef}>
       <div className="umCardHeader">
         <h2 className="umCardTitle">All Registered Users</h2>
         <span className="umCardBadge">{users.length}</span>
@@ -123,7 +141,15 @@ function AllUsersCard({ users }: { users: User[] }) {
           <span>Name</span><span>Email</span><span>Role</span>
           <span>Status</span><span>Joined</span><span>Owned</span>
         </div>
-        {users.length === 0 && <p className="umEmpty">No users yet.</p>}
+        {users.length === 0 && (
+          <div className="umEmpty">
+            <svg className="umEmptyIcon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <p className="umEmptyTitle">No users yet</p>
+            <p className="umEmptyHint">Registered accounts will appear here.</p>
+          </div>
+        )}
         {users.map(u => (
           <div key={u.id} className="umTableRow umGrid--all">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
@@ -151,16 +177,17 @@ function AllUsersCard({ users }: { users: User[] }) {
 function ActiveUsersCard({ users, onAction, pendingId }: {
   users: User[]; onAction: (id: string, action: ActionType, reason?: string) => void; pendingId: string | null;
 }) {
+  const revealRef = useReveal();
   const [search, setSearch] = useState("");
   const [confirmState, setConfirmState] = useState<{ userId: string; action: ActionType } | null>(null);
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return users.filter(u => (u.name ?? "").toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+    const query = search.toLowerCase();
+    return users.filter(u => (u.name ?? "").toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
   }, [users, search]);
 
   return (
-    <div className="umCard">
+    <div className="umCard" ref={revealRef}>
       <div className="umCardHeader">
         <h2 className="umCardTitle">Active Users</h2>
         <span className="umCardBadge umCardBadge--active">{users.length}</span>
@@ -177,7 +204,15 @@ function ActiveUsersCard({ users, onAction, pendingId }: {
         <div className="umTableHead umGrid--active">
           <span>Name</span><span>Email</span><span>Joined</span><span>Owned</span><span>Actions</span>
         </div>
-        {filtered.length === 0 && <p className="umEmpty">{search ? "No users match." : "No active users."}</p>}
+        {filtered.length === 0 && (
+          <div className="umEmpty">
+            <svg className="umEmptyIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p className="umEmptyTitle">{search ? "No users match" : "No active users"}</p>
+            <p className="umEmptyHint">{search ? "Try a different search term." : "Active accounts will appear here."}</p>
+          </div>
+        )}
         {filtered.map(u => (
           <div key={u.id} className="umTableRow umGrid--active">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
@@ -221,10 +256,11 @@ function ActiveUsersCard({ users, onAction, pendingId }: {
 function NonActiveUsersCard({ users, onAction, pendingId }: {
   users: User[]; onAction: (id: string, action: ActionType, reason?: string) => void; pendingId: string | null;
 }) {
+  const revealRef = useReveal();
   const [confirmState, setConfirmState] = useState<{ userId: string; action: ActionType } | null>(null);
 
   return (
-    <div className="umCard">
+    <div className="umCard" ref={revealRef}>
       <div className="umCardHeader">
         <h2 className="umCardTitle">Non-active &amp; Banned Users</h2>
         <span className="umCardBadge umCardBadge--inactive">{users.length}</span>
@@ -233,7 +269,15 @@ function NonActiveUsersCard({ users, onAction, pendingId }: {
         <div className="umTableHead umGrid--inactive">
           <span>Name</span><span>Email</span><span>Status</span><span>Joined</span><span>Actions</span>
         </div>
-        {users.length === 0 && <p className="umEmpty">No non-active or banned users.</p>}
+        {users.length === 0 && (
+          <div className="umEmpty">
+            <svg className="umEmptyIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+            </svg>
+            <p className="umEmptyTitle">All clear</p>
+            <p className="umEmptyHint">No non-active or banned accounts.</p>
+          </div>
+        )}
         {users.map(u => (
           <div key={u.id} className="umTableRow umGrid--inactive">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
@@ -274,6 +318,7 @@ const LOG_TABS: { label: string; value: LogTab; color: string }[] = [
 ];
 
 function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
+  const revealRef = useReveal();
   const [activeTab, setActiveTab] = useState<LogTab>("BAN");
 
   const filtered = logs.filter(l => l.action === activeTab);
@@ -286,7 +331,7 @@ function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
   };
 
   return (
-    <div className="umCard">
+    <div className="umCard" ref={revealRef}>
       <div className="umCardHeader">
         <h2 className="umCardTitle">Action Logs</h2>
         <span className="umCardBadge">{logs.length} total</span>
@@ -314,7 +359,13 @@ function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
           <span>By Admin</span><span>Reason</span><span>Date &amp; Time</span>
         </div>
         {filtered.length === 0 && (
-          <p className="umEmpty">No {activeTab.toLowerCase()} actions recorded yet.</p>
+          <div className="umEmpty">
+            <svg className="umEmptyIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/>
+            </svg>
+            <p className="umEmptyTitle">No {activeTab.toLowerCase()} actions yet</p>
+            <p className="umEmptyHint">Entries will appear here once recorded.</p>
+          </div>
         )}
         {filtered.map(log => (
           <div key={log.id} className="umTableRow umGrid--log">
@@ -347,6 +398,7 @@ export default function UsersClient({ initialUsers, initialLogs }: Props) {
   const [logs, setLogs]         = useState<ActionLog[]>(initialLogs);
   const [pendingId, setPending] = useState<string | null>(null);
   const [toast, setToast]       = useState<{ msg: string; type: "ok"|"err" } | null>(null);
+  const headerRef               = useReveal();
 
   const activeUsers    = users.filter(u => u.isActive && !u.isBanned);
   const nonActiveUsers = users.filter(u => !u.isActive || u.isBanned);
@@ -410,12 +462,28 @@ export default function UsersClient({ initialUsers, initialLogs }: Props) {
   }
 
   return (
-    <div className="umRoot">
+    <div className="adminUsersPage">
+      {/* ── Page header ──────────────────────────────── */}
+      <div className="umPageHeader" ref={headerRef}>
+        <div>
+          <span className="umPageEyebrow">Admin</span>
+          <h1 className="umPageTitle">Users</h1>
+          <p className="umPageSubtitle">
+            Manage registered accounts, permissions, and access logs.
+          </p>
+        </div>
+        <p style={{ fontSize: "0.75rem", color: "var(--sidebar-text)", margin: 0, paddingBottom: "0.25rem" }}>
+          {new Date().toLocaleDateString("en-PH", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+        </p>
+      </div>
+
       {toast && <div className={`umToast umToast--${toast.type}`}>{toast.msg}</div>}
-      <AllUsersCard    users={users} />
-      <ActiveUsersCard    users={activeUsers}    onAction={handleAction} pendingId={pendingId} />
-      <NonActiveUsersCard users={nonActiveUsers} onAction={handleAction} pendingId={pendingId} />
-      <ActionLogsCard  logs={logs} />
+      <div className="umRoot">
+        <AllUsersCard    users={users} />
+        <ActiveUsersCard    users={activeUsers}    onAction={handleAction} pendingId={pendingId} />
+        <NonActiveUsersCard users={nonActiveUsers} onAction={handleAction} pendingId={pendingId} />
+        <ActionLogsCard  logs={logs} />
+      </div>
     </div>
   );
 }

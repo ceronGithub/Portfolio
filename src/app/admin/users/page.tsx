@@ -37,17 +37,7 @@ export default async function AdminUsersPage() {
 
   return (
     <AdminShell adminName={adminName}>
-      <div className="adminUsersPage">
-        <div className="adminPageHeader">
-          <div>
-            <h1 className="adminPageTitle">User Management</h1>
-            <p className="adminPageSubtitle">
-              {users.length} total &middot; {activeCount} active &middot; {nonActiveCount} non-active
-            </p>
-          </div>
-        </div>
-        <UsersClient initialUsers={users} initialLogs={logs} />
-      </div>
+      <UsersClient initialUsers={users} initialLogs={logs} />
     </AdminShell>
   );
 }
