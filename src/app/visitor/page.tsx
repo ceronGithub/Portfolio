@@ -2547,25 +2547,25 @@ export default function VisitorPage() {
             {[
               {
                 label: "Basic",
-                price: "₱3,000",
+                price: "₱4,500",
                 period: "/month",
                 color: "#7dc9a0",
-                includes: ["Bug fixing", "Minor revisions", "Email support", "Monthly health check"],
+                includes: ["Bug fixing & minor revisions", "Email support (48hr response)", "Monthly system health check", "Uptime monitoring"],
               },
               {
                 label: "Priority Support",
-                price: "₱5,000",
+                price: "₱8,500",
                 period: "/month",
                 color: "#7eb8d4",
-                includes: ["Everything in Basic", "Priority response (24hrs)", "Security patches", "Performance monitoring"],
+                includes: ["Everything in Basic", "Priority response (24hrs)", "Security patches & updates", "Performance monitoring", "Database backups"],
                 highlight: false,
               },
               {
                 label: "Full Maintenance",
-                price: "₱8,000–₱15,000",
+                price: "₱15,000",
                 period: "/month",
                 color: "#c4b5fd",
-                includes: ["Everything in Priority", "Server monitoring & backups", "Security updates", "Minor feature updates", "Monthly report"],
+                includes: ["Everything in Priority", "Server monitoring & auto-backups", "Minor feature updates (up to 8hrs/month)", "Monthly performance report", "Dedicated support channel"],
                 highlight: true,
               },
             ].map((tier, i) => (

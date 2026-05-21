@@ -210,36 +210,38 @@ function ConfidenceSection() {
 /* ─── Maintenance & Support ──────────────────────────────────────────── */
 const SUPPORT_TIERS = [
   {
-    name: "Included",
-    duration: "14 days post-delivery",
-    accent: "#22c55e",
+    name: "Basic",
+    duration: "₱4,500 / month",
+    accent: "#7dc9a0",
     perks: [
-      "Bug fixes from our side",
-      "Deployment assistance",
-      "Minor configuration adjustments",
-      "Direct messaging support",
+      "Bug fixing & minor revisions",
+      "Email support (48hr response)",
+      "Monthly system health check",
+      "Uptime monitoring",
     ],
   },
   {
-    name: "Retainer",
-    duration: "Monthly — custom rate",
-    accent: "#66e3ff",
+    name: "Priority Support",
+    duration: "₱8,500 / month",
+    accent: "#7eb8d4",
     perks: [
-      "Priority bug resolution",
-      "Feature additions & updates",
-      "Database management",
+      "Everything in Basic",
+      "Priority response (24hrs)",
+      "Security patches & updates",
+      "Performance monitoring",
+      "Database backups",
+    ],
+  },
+  {
+    name: "Full Maintenance",
+    duration: "₱15,000 / month",
+    accent: "#c4b5fd",
+    perks: [
+      "Everything in Priority",
+      "Server monitoring & auto-backups",
+      "Minor feature updates (up to 8hrs/month)",
+      "Monthly performance report",
       "Dedicated support channel",
-    ],
-  },
-  {
-    name: "One-Time Fix",
-    duration: "Per issue",
-    accent: "#c9935e",
-    perks: [
-      "Scoped to a specific problem",
-      "Quoted before work begins",
-      "No retainer commitment needed",
-      "Turnaround within agreed timeline",
     ],
   },
 ];

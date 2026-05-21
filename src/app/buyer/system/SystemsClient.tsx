@@ -1,11 +1,13 @@
 // SystemsClient — Ultra-premium dark carousel card design.
 // Animated conic border, DM Mono labels, Instrument Serif price,
 // shine sweep Buy Now, staggered feature list, browser preview mockup.
+// DemoModal includes full inline checkout panel (payment method + place order).
 
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import "./systems.css";
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
@@ -36,10 +38,121 @@ function groupBy<T>(arr: T[], key: keyof T): Record<string, T[]> {
   }, {} as Record<string, T[]>);
 }
 
+/* ─── Inline Checkout Panel — shown inside DemoModal after clicking Checkout ── */
+type PaymentMethod = "gcash" | "card" | "bank";
+
+function InlineCheckout({
+  item, totalPrice, selectedAddons, onBack, onClose,
+}: {
+  item: SystemItem;
+  totalPrice: number;
+  selectedAddons: { label: string; price: number }[];
+  onBack: () => void;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const [method,  setMethod]  = useState<PaymentMethod>("gcash");
+  const [placing, setPlacing] = useState(false);
+  const [placed,  setPlaced]  = useState(false);
+
+  const downpayment = Math.round(totalPrice * 0.30);
+  const remainder   = totalPrice - downpayment;
+
+  // ── Submit order — redirects to existing checkout page ───────────────────
+  // Passes total (base + selected addons) as a query param so CheckoutClient
+  // renders the correct price breakdown without a separate DB call.
+  function handlePlaceOrder() {
+    if (placing || placed) return;
+    setPlacing(true);
+    const params = new URLSearchParams({
+      method,
+      total: String(totalPrice),
+    });
+    router.push(`/checkout/${item.id}?${params.toString()}`);
+  }
+
+  return (
+    <div className="demoCheckoutPanel">
+      {/* Back link */}
+      <button className="demoCheckoutBack" onClick={onBack}>
+        ← Back to configure
+      </button>
+
+      <p className="demoModalSectionLabel" style={{ marginBottom: "1rem" }}>Order Summary</p>
+
+      {/* Price breakdown */}
+      <div className="demoCheckoutBreakdown">
+        <div className="demoCheckoutRow">
+          <span>Base price</span>
+          <span>{fmt(item.basePrice)}</span>
+        </div>
+        {selectedAddons.map(a => (
+          <div key={a.label} className="demoCheckoutRow demoCheckoutRowAddon">
+            <span>+ {a.label}</span>
+            <span style={{ color: "#22c55e" }}>+{fmt(a.price)}</span>
+          </div>
+        ))}
+        <div className="demoCheckoutDivider" />
+        <div className="demoCheckoutRow demoCheckoutRowTotal">
+          <span>Total</span>
+          <span style={{ color: item.accent }}>{fmt(totalPrice)}</span>
+        </div>
+        <div className="demoCheckoutRow demoCheckoutRowDown">
+          <span>Downpayment <span className="demoCheckoutPct">(30%)</span></span>
+          <span style={{ color: "#22c55e" }}>{fmt(downpayment)}</span>
+        </div>
+        <div className="demoCheckoutRow demoCheckoutRowRem">
+          <span>Remainder <span className="demoCheckoutPct">(on delivery)</span></span>
+          <span>{fmt(remainder)}</span>
+        </div>
+      </div>
+
+      {/* Payment method */}
+      <p className="demoModalSectionLabel" style={{ margin: "1.25rem 0 0.65rem" }}>Payment Method</p>
+      <div className="demoCheckoutMethods">
+        {(["gcash", "card", "bank"] as PaymentMethod[]).map(m => {
+          const labels: Record<PaymentMethod, { icon: string; name: string; desc: string }> = {
+            gcash: { icon: "G", name: "GCash",              desc: "Instant · 0% fee" },
+            card:  { icon: "💳", name: "Credit / Debit",    desc: "Visa, Mastercard · 2.5% fee" },
+            bank:  { icon: "🏦", name: "Bank Transfer",     desc: "BPI / BDO · 1–2 days" },
+          };
+          const info = labels[m];
+          return (
+            <button
+              key={m}
+              className={"demoCheckoutMethod" + (method === m ? " demoCheckoutMethodActive" : "")}
+              onClick={() => setMethod(m)}
+            >
+              <span className="demoCheckoutMethodIcon">{info.icon}</span>
+              <span className="demoCheckoutMethodName">{info.name}</span>
+              <span className="demoCheckoutMethodDesc">{info.desc}</span>
+              <span className={"demoCheckoutRadio" + (method === m ? " demoCheckoutRadioActive" : "")} />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* CTA */}
+      <button
+        className={"demoCheckoutSubmit" + (placing ? " demoCheckoutSubmitLoading" : "")}
+        onClick={handlePlaceOrder}
+        disabled={placing}
+      >
+        {placing ? "Redirecting…" : `Proceed to Payment — ${fmt(downpayment)}`}
+      </button>
+
+      <p className="demoCheckoutDisclaimer">
+        By proceeding you agree to the 30/70 payment terms. Remainder is due on delivery.
+      </p>
+    </div>
+  );
+}
+
 /* ─── Demo Modal ─────────────────────────────────────────────────────── */
 function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void }) {
   const grouped = groupBy(item.addons, "category");
-  const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
+  const [selectedAddons,  setSelectedAddons]  = useState<Record<string, boolean>>({});
+  const [showingCheckout, setShowingCheckout] = useState(false);
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -78,107 +191,126 @@ function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void })
           </div>
           <button className="demoModalClose" onClick={onClose}>✕</button>
         </div>
-        <div className="demoModalBody">
-          <div className="demoModalLeft">
-            <p className="demoModalSectionLabel">Walkthrough Video</p>
-            <div className="demoModalVideoWrap">
-              {item.demoVideoUrl ? (
-                <video src={item.demoVideoUrl} controls autoPlay className="demoModalVideo" />
-              ) : (
-                <div className="demoModalPlaceholder">
-                  <span className="demoModalPlaceholderIcon">🎬</span>
-                  <p className="demoModalPlaceholderText">Demo coming soon</p>
-                  <p className="demoModalPlaceholderSub">Video available once the system is delivered.</p>
-                </div>
-              )}
-            </div>
 
-            {/* Live price + delivery — updates as addons are toggled */}
-            <div className="demoModalMeta">
-              {item.timeline && (
+        {/* ── Checkout panel replaces body when user clicks Checkout ── */}
+        {showingCheckout ? (
+          <div className="demoModalBodySingle">
+            <InlineCheckout
+              item={item}
+              totalPrice={totalPrice}
+              selectedAddons={selectedList.map(a => ({ label: a.label, price: a.price }))}
+              onBack={() => setShowingCheckout(false)}
+              onClose={onClose}
+            />
+          </div>
+        ) : (
+          <div className="demoModalBody">
+            <div className="demoModalLeft">
+              <p className="demoModalSectionLabel">Walkthrough Video</p>
+              <div className="demoModalVideoWrap">
+                {item.demoVideoUrl ? (
+                  <video src={item.demoVideoUrl} controls autoPlay className="demoModalVideo" />
+                ) : (
+                  <div className="demoModalPlaceholder">
+                    <span className="demoModalPlaceholderIcon">🎬</span>
+                    <p className="demoModalPlaceholderText">Demo coming soon</p>
+                    <p className="demoModalPlaceholderSub">Video available once the system is delivered.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Live price + delivery */}
+              <div className="demoModalMeta">
+                {item.timeline && (
+                  <div className="demoModalMetaItem">
+                    <span className="demoModalMetaLabel">Est. Delivery</span>
+                    <span className="demoModalMetaValue" style={{ color: item.accent }}>
+                      {deliveryEstimate}
+                      {addonWeeksExtra > 0 && (
+                        <span className="demoModalMetaExtra"> (+{addonWeeksExtra}w)</span>
+                      )}
+                    </span>
+                  </div>
+                )}
                 <div className="demoModalMetaItem">
-                  <span className="demoModalMetaLabel">Est. Delivery</span>
+                  <span className="demoModalMetaLabel">Total Price</span>
                   <span className="demoModalMetaValue" style={{ color: item.accent }}>
-                    {deliveryEstimate}
-                    {addonWeeksExtra > 0 && (
-                      <span className="demoModalMetaExtra"> (+{addonWeeksExtra}w)</span>
+                    {fmt(totalPrice)}
+                    {addonsTotal > 0 && (
+                      <span className="demoModalMetaExtra"> +{fmt(addonsTotal)}</span>
                     )}
                   </span>
                 </div>
-              )}
-              <div className="demoModalMetaItem">
-                <span className="demoModalMetaLabel">Total Price</span>
-                <span className="demoModalMetaValue" style={{ color: item.accent }}>
-                  {fmt(totalPrice)}
-                  {addonsTotal > 0 && (
-                    <span className="demoModalMetaExtra"> +{fmt(addonsTotal)}</span>
-                  )}
-                </span>
               </div>
+
+              {/* Selected addons summary */}
+              {selectedList.length > 0 && (
+                <div className="demoModalSelectedSummary">
+                  <p className="demoModalSectionLabel" style={{ marginBottom: "0.5rem" }}>Selected Add-ons</p>
+                  {selectedList.map(a => (
+                    <div key={a.id} className="demoModalSelectedItem">
+                      <span>{a.label}</span>
+                      <span style={{ color: item.accent }}>+{fmt(a.price)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Selected addons summary */}
-            {selectedList.length > 0 && (
-              <div className="demoModalSelectedSummary">
-                <p className="demoModalSectionLabel" style={{ marginBottom: "0.5rem" }}>Selected Add-ons</p>
-                {selectedList.map(a => (
-                  <div key={a.id} className="demoModalSelectedItem">
-                    <span>{a.label}</span>
-                    <span style={{ color: item.accent }}>+{fmt(a.price)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="demoModalRight">
-            <p className="demoModalSectionLabel">Available Add-ons — click to select</p>
-            {item.addons.length === 0 ? (
-              <p className="demoModalNoAddons">No add-ons available yet.</p>
-            ) : (
-              <div className="demoModalAddons">
-                {Object.entries(grouped).map(([cat, addons]) => (
-                  <div key={cat} className="demoModalAddonGroup">
-                    <p className="demoModalAddonCat" style={{ color: item.accent }}>{cat}</p>
-                    {addons.map(a => {
-                      const isOn = !!selectedAddons[a.id];
-                      return (
-                        <button
-                          key={a.id}
-                          className={"demoModalAddonRow demoModalAddonRowBtn" + (isOn ? " demoModalAddonRowOn" : "")}
-                          style={isOn ? { borderColor: item.accent + "55", background: item.accent + "0e" } : {}}
-                          onClick={() => toggleAddon(a.id)}
-                        >
-                          <div className="demoModalAddonCheck" style={isOn ? { background: "#22c55e", borderColor: "#22c55e" } : {}}>
-                            {isOn && (
-                              <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
-                                <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            )}
-                          </div>
-                          <div className="demoModalAddonInfo">
-                            <span className="demoModalAddonLabel">{a.label}</span>
-                            {a.desc && <span className="demoModalAddonDesc">{a.desc}</span>}
-                          </div>
-                          <span className="demoModalAddonPrice" style={{ color: isOn ? "#22c55e" : item.accent }}>+{fmt(a.price)}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="demoModalCta">
-              {item.owned ? (
-                <span className="demoModalOwned">✓ You own this system</span>
+            <div className="demoModalRight">
+              <p className="demoModalSectionLabel">Available Add-ons — click to select</p>
+              {item.addons.length === 0 ? (
+                <p className="demoModalNoAddons">No add-ons available yet.</p>
               ) : (
-                <Link href={`/checkout/${item.id}`} className="demoModalBuyBtn">
-                  Buy Now — {fmt(totalPrice)}
-                </Link>
+                <div className="demoModalAddons">
+                  {Object.entries(grouped).map(([cat, addons]) => (
+                    <div key={cat} className="demoModalAddonGroup">
+                      <p className="demoModalAddonCat" style={{ color: item.accent }}>{cat}</p>
+                      {addons.map(a => {
+                        const isOn = !!selectedAddons[a.id];
+                        return (
+                          <button
+                            key={a.id}
+                            className={"demoModalAddonRow demoModalAddonRowBtn" + (isOn ? " demoModalAddonRowOn" : "")}
+                            style={isOn ? { borderColor: item.accent + "55", background: item.accent + "0e" } : {}}
+                            onClick={() => toggleAddon(a.id)}
+                          >
+                            <div className="demoModalAddonCheck" style={isOn ? { background: "#22c55e", borderColor: "#22c55e" } : {}}>
+                              {isOn && (
+                                <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+                                  <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </div>
+                            <div className="demoModalAddonInfo">
+                              <span className="demoModalAddonLabel">{a.label}</span>
+                              {a.desc && <span className="demoModalAddonDesc">{a.desc}</span>}
+                            </div>
+                            <span className="demoModalAddonPrice" style={{ color: isOn ? "#22c55e" : item.accent }}>+{fmt(a.price)}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
               )}
+
+              {/* CTA — Checkout button */}
+              <div className="demoModalCta">
+                {item.owned ? (
+                  <span className="demoModalOwned">✓ You own this system</span>
+                ) : (
+                  <button
+                    className="demoModalBuyBtn"
+                    onClick={() => setShowingCheckout(true)}
+                  >
+                    Checkout — {fmt(totalPrice)}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
