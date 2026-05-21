@@ -4,7 +4,7 @@
 .archBuySection {
   position:    relative;
   width:       100%;
-  min-height:  100vh;
+  min-height:  150vh;
   background:  #000;
   overflow:    hidden;
   display:     flex;
@@ -109,18 +109,18 @@
 .archBrowseBtn {
   padding:        0.65rem 1.75rem;
   border-radius:  999px;
-  background:     #151e10;
-  color:          #5fa84c;
+  background:     #4a2e18;
+  color:          #c9935e;
   font-family:    'Syne', sans-serif;
   font-size:      0.78rem;
   font-weight:    700;
   letter-spacing: 0.06em;
-  border:         1px solid rgba(95,168,76,0.2);
+  border:         1px solid rgba(201,147,94,0.25);
   cursor:         pointer;
   transition:     opacity 0.2s, background 0.2s;
 }
 
-.archBrowseBtn:hover { background: #1d2e18; opacity: 0.9; }
+.archBrowseBtn:hover { background: #5a3a20; opacity: 0.9; }
 
 /* Bundle bar */
 .archBundleBar {

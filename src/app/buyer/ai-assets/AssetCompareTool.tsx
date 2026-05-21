@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import "./asset-compare-tool.css";
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
@@ -55,15 +55,12 @@ function CompareSlot({
   opposite: CompareAsset | null;
   onChange: (asset: CompareAsset | null) => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Reload video when selection changes
-  useEffect(() => {
-    if (videoRef.current && selected) {
-      videoRef.current.load();
-      videoRef.current.play().catch(() => {});
-    }
-  }, [selected?.id]);
+  // Callback ref — fires whenever the video element mounts or src changes
+  const videoCallbackRef = useCallback((el: HTMLVideoElement | null) => {
+    if (!el) return;
+    el.load();
+    el.play().catch(() => {});
+  }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isSameAsOpposite = selected && opposite && selected.id === opposite.id;
 
@@ -114,7 +111,8 @@ function CompareSlot({
       <div className="compareVideoWrap">
         {selected ? (
           <video
-            ref={videoRef}
+            ref={videoCallbackRef}
+            key={selected.id}
             src={selected.videoSrc}
             autoPlay
             muted

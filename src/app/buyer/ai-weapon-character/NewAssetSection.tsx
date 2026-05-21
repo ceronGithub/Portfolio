@@ -160,25 +160,8 @@ export default function NewAssetSection() {
           )}
         </div>
 
-        {/* Asset name + price + release note */}
-        <div className="newAssetMeta">
-          <p className="newAssetMetaName">{LATEST.title}</p>
-          <p className="newAssetMetaPrice">{LATEST.price}</p>
-          <p className="newAssetMetaNote">{LATEST.releaseNote}</p>
-        </div>
-
         <div className="newAssetCards">
-          {/* Card 1 — Live MP4 preview */}
-          <div className="newAssetCard newAssetCardVideo">
-            <video
-              src={LATEST.videoSrc}
-              autoPlay muted loop playsInline
-              className="newAssetCardVideoEl"
-            />
-            <div className="newAssetCardVideoLabel">Animation Preview</div>
-          </div>
-
-          {/* Card 2 — 3D OBJ placeholder */}
+          {/* Card — 3D OBJ placeholder */}
           <div className="newAssetCard">
             <div className="newAssetCardInner">
               <span className="newAssetCardIcon">📦</span>
