@@ -59,6 +59,74 @@ function useReveal() {
   return elementRef;
 }
 
+// ── Analytics helpers ─────────────────────────────────────────────────────
+function computeChartAnalytics(data: RevenuePoint[]): {
+  total: number; average: number; peakValue: number; peakLabel: string; growth: number | null;
+} {
+  if (data.length === 0) return { total: 0, average: 0, peakValue: 0, peakLabel: "—", growth: null };
+  const total   = data.reduce((s, d) => s + d.value, 0);
+  const average = Math.round(total / data.length);
+  const peak    = data.reduce((best, d) => d.value > best.value ? d : best, data[0]);
+  let growth: number | null = null;
+  if (data.length >= 2) {
+    const last = data[data.length - 1].value;
+    const prev = data[data.length - 2].value;
+    if (prev > 0)       growth = Math.round(((last - prev) / prev) * 100);
+    else if (last > 0)  growth = 100;
+    else                growth = 0;
+  }
+  return { total, average, peakValue: peak.value, peakLabel: peak.label, growth };
+}
+
+function formatPesoCompact(v: number): string {
+  if (v >= 1_000_000) return `₱${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000)     return `₱${(v / 1_000).toFixed(1)}k`;
+  return `₱${v.toLocaleString("en-PH")}`;
+}
+
+// ── AnalyticsBar — summary strip shown above the SVG chart ────────────────
+function AnalyticsBar({ data, color }: { data: RevenuePoint[]; color: string }) {
+  const { total, average, peakValue, peakLabel, growth } = computeChartAnalytics(data);
+  const hasData = total > 0;
+
+  return (
+    <div className="ovAnalyticsBar">
+      <div className="ovAnalyticsStat">
+        <span className="ovAnalyticsLabel">Total</span>
+        <span className="ovAnalyticsValue" style={{ color: hasData ? color : undefined }}>
+          {hasData ? formatPesoCompact(total) : "—"}
+        </span>
+      </div>
+      <div className="ovAnalyticsDivider" />
+      <div className="ovAnalyticsStat">
+        <span className="ovAnalyticsLabel">Average</span>
+        <span className="ovAnalyticsValue">{hasData ? formatPesoCompact(average) : "—"}</span>
+      </div>
+      <div className="ovAnalyticsDivider" />
+      <div className="ovAnalyticsStat">
+        <span className="ovAnalyticsLabel">Peak</span>
+        <span className="ovAnalyticsValue">
+          {hasData ? `${formatPesoCompact(peakValue)} (${peakLabel})` : "—"}
+        </span>
+      </div>
+      {growth !== null && (
+        <>
+          <div className="ovAnalyticsDivider" />
+          <div className="ovAnalyticsStat">
+            <span className="ovAnalyticsLabel">vs last period</span>
+            <span
+              className="ovAnalyticsValue"
+              style={{ color: growth >= 0 ? "#68d391" : "#fc8181" }}
+            >
+              {growth >= 0 ? "▲" : "▼"} {Math.abs(growth)}%
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── BarChart ───────────────────────────────────────────────────────────────
 // SVG bar chart. Shows Y-grid, value labels above bars, X labels below.
 // Ghost track behind each bar for depth. Top glow cap on filled bars.
@@ -92,6 +160,9 @@ function BarChart({
         </div>
         <div className="ovChartColorDot" style={{ background: color }} />
       </div>
+
+      {/* Analytics summary strip */}
+      <AnalyticsBar data={data} color={color} />
 
       {/* Chart body */}
       {!hasData ? (

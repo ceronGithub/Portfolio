@@ -1,69 +1,172 @@
-/* ================================================
-   products.css — Admin Products & Systems page styles.
-   Product table, system accordion cards, addon grid.
-   ================================================ */
+/* =====================================================
+   products.css — Admin Products & Systems. Theme-aware
+   via AdminShell CSS vars. Protocol v23 Rule 17.
+   ===================================================== */
 
-.adminProductsPage {
-  padding: 2.5rem;
-}
-
-.adminProductsContent {
+/* ── Page wrapper ─────────────────────────────────── */
+.apPage {
+  padding: 2.5rem 2.75rem 5rem;
+  background: var(--main-bg);
+  min-height: 100vh;
+  box-sizing: border-box;
+  max-width: 1320px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
-/* ── Section ──────────────────────────────────── */
-.adminProductsSection {}
+/* ── Entrance animation base ──────────────────────── */
+.apReveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 0.42s cubic-bezier(0.22,1,0.36,1),
+              transform 0.42s cubic-bezier(0.22,1,0.36,1);
+  will-change: transform, opacity;
+}
+.apReveal.apVisible { opacity: 1; transform: translate3d(0,0,0); }
 
-.adminProductsSectionTitle {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--sidebar-text, #888);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+/* ── Page header ──────────────────────────────────── */
+.apPageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
-/* ── Products Table ───────────────────────────── */
-.adminProductsTableWrap {
-  background: var(--sidebar-bg, #fff);
-  border: 1px solid var(--sidebar-border, #e8e4de);
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.adminProductsTableHeader {
-  display: grid;
-  grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr;
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--sidebar-border, #e8e4de);
-  background: var(--nav-active-bg, #f5f4f1);
-}
-
-.adminProductsTableHeader span {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--sidebar-text, #aaa);
+.apPageEyebrow {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  color: var(--sidebar-text);
+  margin-bottom: 0.3rem;
 }
 
-.adminProductsTableRow {
-  display: grid;
-  grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr;
-  padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid var(--sidebar-border, #f0ede8);
+.apPageTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--content-color);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0;
+}
+
+.apPageSubtitle {
+  font-size: 0.78rem;
+  color: var(--sidebar-text);
+  margin: 0.4rem 0 0;
+  font-weight: 400;
+}
+
+.apPageDate {
+  font-size: 0.75rem;
+  color: var(--sidebar-text);
+  margin: 0;
+  flex-shrink: 0;
+  padding-bottom: 0.2rem;
+}
+
+/* ── Section header ───────────────────────────────── */
+.apSectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+}
+
+.apSectionEyebrow {
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--sidebar-text);
+}
+
+.apSectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--content-color);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+/* ── Card ─────────────────────────────────────────── */
+.apCard {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+/* ── Card header ──────────────────────────────────── */
+.apCardHeader {
+  display: flex;
   align-items: center;
-  transition: background 0.15s;
+  gap: 0.75rem;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  background: var(--nav-active-bg);
 }
 
-.adminProductsTableRow:last-child { border-bottom: none; }
-.adminProductsTableRow:hover { background: var(--nav-active-bg, #f5f4f1); }
+.apCardTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--content-color);
+  letter-spacing: -0.01em;
+  flex: 1;
+  margin: 0;
+}
 
-.adminProductsCell {
-  font-size: 0.85rem;
-  color: var(--content-color, #1a1a1a);
+.apCardBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: var(--sidebar-border);
+  color: var(--sidebar-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Table ────────────────────────────────────────── */
+.apTable { display: flex; flex-direction: column; }
+
+.apTableHead {
+  display: grid;
+  padding: 0.55rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  background: var(--nav-active-bg);
+}
+
+.apTableHead span {
+  font-size: 0.63rem;
+  font-weight: 700;
+  color: var(--sidebar-text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.apTableRow {
+  display: grid;
+  padding: 0.9rem 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.apTableRow:last-child { border-bottom: none; }
+.apTableRow:hover      { background: var(--nav-active-bg); }
+
+/* ── Grid columns ─────────────────────────────────── */
+.apGrid--products { grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr; }
+
+/* ── Cells ────────────────────────────────────────── */
+.apCell {
+  font-size: 0.83rem;
+  color: var(--content-color);
   font-weight: 500;
   padding-right: 0.75rem;
   overflow: hidden;
@@ -71,191 +174,270 @@
   white-space: nowrap;
 }
 
-.adminProductsCellName  { font-weight: 600; }
-.adminProductsCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
-.adminProductsCellMono  { font-variant-numeric: tabular-nums; font-weight: 600; }
+.apCellName  { font-weight: 600; }
+.apCellMuted { color: var(--sidebar-text); font-weight: 400; font-size: 0.8rem; }
+.apCellMono  { font-variant-numeric: tabular-nums; font-weight: 700; }
+.apNone      { color: var(--sidebar-text); font-style: normal; font-weight: 400; }
 
-/* ── Active badge ─────────────────────────────── */
-.adminActiveBadge {
+/* ── Badges ───────────────────────────────────────── */
+.apBadge {
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.63rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.adminActiveBadgeOn  { background: rgba(56, 161, 105, 0.12); color: #2f855a; }
-.adminActiveBadgeOff { background: rgba(229, 62, 62, 0.1);   color: #c53030; }
+.apBadgeActive   { background: rgba(56,161,105,0.14); color: #68d391; }
+.apBadgeInactive { background: rgba(229,62,62,0.1);   color: #fc8181; }
 
-/* ── Toggle button ────────────────────────────── */
-.adminToggleBtn {
-  font-size: 0.78rem;
-  padding: 0.35rem 0.85rem;
+/* ── Action buttons ───────────────────────────────── */
+.apActionBtn {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 7px;
   border: 1px solid transparent;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  transition: background 0.18s ease, opacity 0.15s ease;
   white-space: nowrap;
 }
 
-.adminToggleBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.apActionBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.adminToggleBtnDeactivate {
-  background: rgba(229, 62, 62, 0.08);
-  color: #c53030;
-  border-color: rgba(229, 62, 62, 0.2);
+.apActionBtnDeactivate {
+  background: rgba(229,62,62,0.08);
+  color: #fc8181;
+  border-color: rgba(229,62,62,0.22);
 }
-.adminToggleBtnDeactivate:hover:not(:disabled) {
-  background: rgba(229, 62, 62, 0.15);
-}
+.apActionBtnDeactivate:hover:not(:disabled) { background: rgba(229,62,62,0.18); }
 
-.adminToggleBtnActivate {
-  background: rgba(56, 161, 105, 0.1);
-  color: #2f855a;
-  border-color: rgba(56, 161, 105, 0.25);
+.apActionBtnActivate {
+  background: rgba(56,161,105,0.1);
+  color: #68d391;
+  border-color: rgba(56,161,105,0.22);
 }
-.adminToggleBtnActivate:hover:not(:disabled) {
-  background: rgba(56, 161, 105, 0.18);
-}
+.apActionBtnActivate:hover:not(:disabled) { background: rgba(56,161,105,0.2); }
 
-/* ── Systems list ─────────────────────────────── */
-.adminSystemsList {
+/* ── Empty state ──────────────────────────────────── */
+.apEmpty {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  padding: 2.5rem 1.4rem;
+  text-align: center;
+  color: var(--sidebar-text);
 }
 
-/* ── System accordion card ────────────────────── */
-.adminSystemCard {
-  background: var(--sidebar-bg, #fff);
-  border: 1px solid var(--sidebar-border, #e8e4de);
-  border-radius: 12px;
+.apEmptySmall { padding: 1.5rem 1rem; }
+
+.apEmptyTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--content-color);
+  margin: 0;
+}
+
+.apEmptyHint {
+  font-size: 0.75rem;
+  color: var(--sidebar-text);
+  margin: 0;
+}
+
+/* ── Systems list ─────────────────────────────────── */
+.apSystemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ── System accordion card ────────────────────────── */
+.apSystemCard {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 14px;
   overflow: hidden;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.adminSystemCardHeader {
+/* ── System header row ────────────────────────────── */
+.apSystemHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
   cursor: pointer;
   user-select: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
+  gap: 1rem;
 }
 
-.adminSystemCardHeader:hover {
-  background: var(--nav-active-bg, #f5f4f1);
-}
+.apSystemHeader:hover { background: var(--nav-active-bg); }
 
-.adminSystemCardHeaderLeft {
+.apSystemHeaderLeft {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.adminSystemTag {
-  font-size: 0.7rem;
+.apSystemTag {
+  font-size: 0.67rem;
   font-weight: 700;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   border: 1px solid;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  flex-shrink: 0;
 }
 
-.adminSystemTitle {
+.apSystemTitle {
   font-size: 0.92rem;
   font-weight: 600;
-  color: var(--content-color, #1a1a1a);
+  color: var(--content-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.adminSystemCardHeaderRight {
+.apSystemHeaderRight {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.1rem;
+  flex-shrink: 0;
 }
 
-.adminSystemBasePrice {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--content-color, #1a1a1a);
-  font-variant-numeric: tabular-nums;
+.apSystemAddonCount {
+  font-size: 0.76rem;
+  color: var(--sidebar-text);
+  white-space: nowrap;
 }
 
-.adminSystemAddonCount {
-  font-size: 0.78rem;
-  color: var(--sidebar-text, #888);
+/* ── Expand chevron ───────────────────────────────── */
+.apExpandIcon {
+  color: var(--sidebar-text);
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
+  flex-shrink: 0;
+}
+.apExpandIconOpen { transform: rotate(180deg); }
+
+/* ── System body (expanded) ───────────────────────── */
+.apSystemBody {
+  border-top: 1px solid var(--sidebar-border);
+  padding: 1.25rem 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
 }
 
-.adminSystemExpandIcon {
-  font-size: 0.65rem;
-  color: var(--sidebar-text, #aaa);
-}
-
-/* ── Expanded add-ons area ────────────────────── */
-.adminSystemAddons {
-  border-top: 1px solid var(--sidebar-border, #f0ede8);
-  padding: 1.25rem;
-}
-
-.adminSystemDesc {
-  font-size: 0.83rem;
-  color: var(--sidebar-text, #888);
-  margin-bottom: 1rem;
+.apSystemDesc {
+  font-size: 0.82rem;
+  color: var(--sidebar-text);
   line-height: 1.6;
+  margin: 0;
 }
 
-.adminAddonsGrid {
+/* ── Addon group ──────────────────────────────────── */
+.apAddonGroup {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
-.adminAddonRow {
-  display: grid;
-  grid-template-columns: 1.2fr 3fr 1fr;
-  align-items: center;
-  padding: 0.45rem 0.75rem;
-  border-radius: 8px;
-  background: var(--nav-active-bg, #f5f4f1);
-}
-
-.adminAddonCategory {
-  font-size: 0.7rem;
+.apAddonGroupLabel {
+  font-size: 0.63rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--sidebar-text, #888);
+  letter-spacing: 0.1em;
+  color: var(--sidebar-text);
+  margin: 0 0 0.15rem;
 }
 
-.adminAddonLabel {
+.apAddonList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ── Addon row ────────────────────────────────────── */
+.apAddonRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.85rem;
+  border-radius: 9px;
+  background: var(--nav-active-bg);
+  border: 1px solid var(--sidebar-border);
+  gap: 0.75rem;
+  transition: background 0.15s ease;
+}
+
+.apAddonRow:hover { background: var(--sidebar-border); }
+
+.apAddonLabel {
   font-size: 0.83rem;
-  color: var(--content-color, #1a1a1a);
+  color: var(--content-color);
   font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.adminAddonPrice {
-  font-size: 0.83rem;
+/* ── Addon price editor ───────────────────────────── */
+.apAddonPriceDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--nav-active-bg);
+  border: 1px solid var(--sidebar-border);
+  cursor: pointer;
+  padding: 0.3rem 0.65rem;
+  border-radius: 7px;
+  font-family: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+  min-width: 90px;
+  justify-content: flex-end;
+}
+
+.apAddonPriceDisplay:hover {
+  background: var(--sidebar-border);
+  border-color: var(--content-color);
+}
+
+.apAddonPriceValue {
+  font-size: 0.82rem;
   font-weight: 700;
   color: #c9a96e;
   font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
-.adminEmptyNote {
-  font-size: 0.83rem;
-  color: var(--sidebar-text, #aaa);
-  padding: 1rem;
-  text-align: center;
+.apAddonPriceEditor {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
 }
 
-/* ── System price editor ──────────────────────── */
-.sysPriceDisplay {
+/* Always show pencil hint on addon price button */
+.apPriceEditHintVisible {
+  font-size: 0.7rem;
+  color: var(--sidebar-text);
+  opacity: 0.6;
+}
+.apAddonPriceDisplay:hover .apPriceEditHintVisible { opacity: 1; color: var(--content-color); }
+
+/* ── Base price editor (system level) ─────────────── */
+.apPriceDisplay {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -264,76 +446,222 @@
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 7px;
-  transition: background 0.15s;
   font-family: inherit;
+  transition: background 0.15s ease;
 }
-.sysPriceDisplay:hover { background: var(--nav-active-bg, #f0ede8); }
+.apPriceDisplay:hover { background: var(--nav-active-bg); }
 
-.sysPriceEditIcon {
-  font-size: 0.75rem;
-  color: var(--sidebar-text, #aaa);
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.sysPriceDisplay:hover .sysPriceEditIcon { opacity: 1; }
-
-.sysPriceSavedTag {
-  font-size: 0.7rem;
+.apSystemBasePrice {
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #38a169;
+  color: var(--content-color);
+  font-variant-numeric: tabular-nums;
 }
 
-.sysPriceEditor {
+.apPriceEditHint {
+  font-size: 0.75rem;
+  color: var(--sidebar-text);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.apPriceDisplay:hover .apPriceEditHint { opacity: 1; }
+
+.apPriceSavedTag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #68d391;
+}
+
+.apPriceEditor {
   display: flex;
   align-items: center;
   gap: 0.35rem;
 }
 
-.sysPriceCurrency {
+.apPriceCurrency {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--content-color, #1a1a1a);
+  color: var(--content-color);
 }
 
-.sysPriceInput {
+.apPriceInput {
   width: 90px;
   padding: 0.28rem 0.5rem;
   border-radius: 7px;
-  border: 1.5px solid #ccc;
-  font-size: 0.85rem;
+  border: 1.5px solid var(--sidebar-border);
+  font-size: 0.83rem;
   font-family: inherit;
   font-weight: 600;
-  color: var(--content-color, #1a1a1a);
-  background: var(--sidebar-bg, #fff);
+  color: var(--content-color);
+  background: var(--sidebar-bg);
   outline: none;
   font-variant-numeric: tabular-nums;
-  /* hide number arrows */
   -moz-appearance: textfield;
+  transition: border-color 0.15s ease;
 }
-.sysPriceInput::-webkit-outer-spin-button,
-.sysPriceInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.apPriceInput::-webkit-outer-spin-button,
+.apPriceInput::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-.sysPriceSave {
-  font-size: 0.75rem;
+.apPriceInputSmall { width: 78px; font-size: 0.78rem; }
+
+.apPriceSaveBtn {
+  font-size: 0.73rem;
   padding: 0.28rem 0.65rem;
   border-radius: 6px;
   border: none;
   font-family: inherit;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
 }
-.sysPriceSave:disabled { opacity: 0.4; cursor: not-allowed; }
+.apPriceSaveBtn:disabled    { opacity: 0.4; cursor: not-allowed; }
+.apPriceSaveBtnSmall        { font-size: 0.68rem; padding: 0.22rem 0.5rem; }
 
-.sysPriceCancel {
-  font-size: 0.75rem;
+.apPriceCancelBtn {
+  font-size: 0.73rem;
   padding: 0.28rem 0.45rem;
   border-radius: 6px;
-  border: 1px solid var(--sidebar-border, #ddd);
+  border: 1px solid var(--sidebar-border);
   background: transparent;
-  color: var(--sidebar-text, #888);
+  color: var(--sidebar-text);
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.sysPriceCancel:hover { background: var(--nav-active-bg, #f0ede8); }
+.apPriceCancelBtn:hover { background: var(--nav-active-bg); color: var(--content-color); }
+
+/* ── Add addon ────────────────────────────────────── */
+.apAddAddonWrap { padding-top: 0.5rem; border-top: 1px solid var(--sidebar-border); }
+
+.apAddAddonBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  border: 1.5px dashed;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  opacity: 0.7;
+}
+.apAddAddonBtn:hover { opacity: 1; background: var(--nav-active-bg); }
+
+.apAddAddonForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--nav-active-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+}
+
+.apAddAddonFormTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--content-color);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.apAddAddonFormFields {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr;
+  gap: 0.5rem;
+}
+
+.apAddAddonInput {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  background: var(--sidebar-bg);
+  color: var(--content-color);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.apAddAddonInput::placeholder { color: var(--sidebar-text); }
+.apAddAddonInput:focus         { border-color: var(--content-color); }
+
+.apAddAddonInputPrice {
+  -moz-appearance: textfield;
+}
+.apAddAddonInputPrice::-webkit-outer-spin-button,
+.apAddAddonInputPrice::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.apAddAddonError {
+  font-size: 0.75rem;
+  color: #fc8181;
+  margin: 0;
+}
+
+.apAddAddonFormActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ── Analytics bar ────────────────────────────────── */
+.apAnalyticsBar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.75rem 1.35rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  background: var(--nav-active-bg);
+  flex-wrap: wrap;
+}
+
+.apAnalyticsStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0 1.1rem;
+}
+
+.apAnalyticsStat:first-child { padding-left: 0; }
+
+.apAnalyticsLabel {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sidebar-text);
+}
+
+.apAnalyticsValue {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--content-color);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.apAnalyticsGrowth { font-size: 0.85rem; }
+
+.apAnalyticsDivider {
+  width: 1px;
+  height: 28px;
+  background: var(--sidebar-border);
+  flex-shrink: 0;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 1100px) {
+  .apGrid--products { grid-template-columns: 1.5fr 2fr 1fr 1fr 1.5fr; }
+}
+
+@media (max-width: 760px) {
+  .apPage       { padding: 1.5rem 1.25rem 5rem; gap: 1.25rem; }
+  .apPageTitle  { font-size: 1.5rem; }
+  .apPageHeader { flex-direction: column; align-items: flex-start; margin-bottom: 0; }
+  .apGrid--products { grid-template-columns: 1fr 1fr; }
+  .apAddAddonFormFields { grid-template-columns: 1fr; }
+  .apAnalyticsBar { gap: 0.5rem; }
+}

@@ -319,3 +319,46 @@
   --ov-label: rgba(255,255,255,0.32);
   --ov-value: rgba(255,255,255,0.72);
 }
+
+/* ── Analytics bar — inside each chart card ──────── */
+.ovAnalyticsBar {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 1.35rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  background: var(--nav-active-bg);
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.ovAnalyticsStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0 0.95rem;
+}
+
+.ovAnalyticsStat:first-child { padding-left: 0; }
+
+.ovAnalyticsLabel {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sidebar-text);
+}
+
+.ovAnalyticsValue {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--content-color);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.ovAnalyticsDivider {
+  width: 1px;
+  height: 26px;
+  background: var(--sidebar-border);
+  flex-shrink: 0;
+}

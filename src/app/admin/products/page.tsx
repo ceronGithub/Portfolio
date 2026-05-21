@@ -27,20 +27,7 @@ export default async function AdminProductsPage() {
 
   return (
     <AdminShell adminName={adminName}>
-      <div className="adminProductsPage">
-
-        <div className="adminPageHeader">
-          <div>
-            <h1 className="adminPageTitle">Products & Systems</h1>
-            <p className="adminPageSubtitle">
-              {products.length} product{products.length !== 1 ? "s" : ""} &middot; {systems.length} system{systems.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-
-        <ProductsClient products={products} systems={systems} />
-
-      </div>
+      <ProductsClient products={products} systems={systems} />
     </AdminShell>
   );
 }
