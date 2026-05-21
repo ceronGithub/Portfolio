@@ -1,9 +1,9 @@
 "use client";
-// WishlistPanel.tsx — Slide-out wishlist drawer for buyer dashboard.
-// Shows wishlisted systems and assets with price, Add all to cart, and Buy now CTA.
+// WishlistPanel.tsx — Slide-out wishlist drawer.
+// Add to cart: fires onAddAllToCart callback (wired to AssetBuySection/ArchBuySection).
+// Buy now: opens a compact inline confirm modal — no page navigation.
 
-import { useEffect }  from "react";
-import Link           from "next/link";
+import { useEffect, useState } from "react";
 import "./wishlist-panel.css";
 
 interface WishlistEntry {
@@ -24,6 +24,59 @@ interface Props {
   onAddAllToCart?: (ids: string[]) => void;
 }
 
+// ── Buy Now Modal — shown inline instead of navigating away ──────────────
+function BuyNowModal({
+  entry,
+  onClose,
+}: {
+  entry: WishlistEntry;
+  onClose: () => void;
+}) {
+  return (
+    <div className="wlBuyModalOverlay" onClick={onClose}>
+      <div className="wlBuyModal" onClick={e => e.stopPropagation()}>
+        <div className="wlBuyModalHeader">
+          <div>
+            <p className="wlBuyModalCategory">{entry.category}</p>
+            <h3 className="wlBuyModalName">{entry.name}</h3>
+          </div>
+          <button className="wlBuyModalClose" onClick={onClose} aria-label="Close">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
+            </svg>
+          </button>
+        </div>
+
+        <div className="wlBuyModalBody">
+          <div className="wlBuyModalPriceRow">
+            <span className="wlBuyModalPriceLabel">Price</span>
+            <span className="wlBuyModalPrice" style={{ color: entry.accent }}>{entry.price}</span>
+          </div>
+          <div className="wlBuyModalPriceRow">
+            <span className="wlBuyModalPriceLabel">Access</span>
+            <span className="wlBuyModalPriceVal">Lifetime · OBJ + FBX</span>
+          </div>
+          <div className="wlBuyModalPriceRow">
+            <span className="wlBuyModalPriceLabel">Delivery</span>
+            <span className="wlBuyModalPriceVal">Instant download after payment</span>
+          </div>
+        </div>
+
+        <div className="wlBuyModalFooter">
+          <button className="wlBuyModalCancel" onClick={onClose}>Cancel</button>
+          <a
+            href={entry.checkoutHref}
+            className="wlBuyModalConfirm"
+            style={{ background: entry.accent }}
+          >
+            Confirm Purchase →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function WishlistPanel({
   isOpen,
   onClose,
@@ -32,13 +85,18 @@ export default function WishlistPanel({
   onClearAll,
   onAddAllToCart,
 }: Props) {
+  const [buyEntry, setBuyEntry] = useState<WishlistEntry | null>(null);
 
-  // Close on Escape key
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        if (buyEntry) setBuyEntry(null);
+        else onClose();
+      }
+    }
     if (isOpen) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, buyEntry]);
 
   return (
     <>
@@ -89,14 +147,27 @@ export default function WishlistPanel({
                     <p className="wishlistItemPrice" style={{ color: entry.accent }}>{entry.price}</p>
                   </div>
                   <div className="wishlistItemActions">
-                    <Link
-                      href={entry.checkoutHref}
+                    {/* Add to cart — fires callback, does NOT navigate */}
+                    {onAddAllToCart && (
+                      <button
+                        className="wishlistCartBtn"
+                        title="Add to cart"
+                        onClick={() => onAddAllToCart([entry.id])}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                      </button>
+                    )}
+                    {/* Buy now — opens inline modal */}
+                    <button
                       className="wishlistBuyBtn"
-                      style={{ background: entry.accent }}
-                      onClick={onClose}
+                      style={{ background: entry.accent, color: "#000" }}
+                      onClick={() => setBuyEntry(entry)}
                     >
                       Buy
-                    </Link>
+                    </button>
                     <button
                       className="wishlistRemoveBtn"
                       onClick={() => onRemove(entry.id)}
@@ -126,13 +197,13 @@ export default function WishlistPanel({
                   Add all to cart
                 </button>
               )}
-              <Link
-                href={entries[0]?.checkoutHref ?? "#"}
+              {/* Buy now (first item) — opens modal, not new page */}
+              <button
                 className="wishlistBuyNowBtn"
-                onClick={onClose}
+                onClick={() => entries[0] && setBuyEntry(entries[0])}
               >
                 Buy now →
-              </Link>
+              </button>
             </div>
             <div className="wishlistFooterMeta">
               <p className="wishlistFooterNote">{entries.length} item{entries.length !== 1 ? "s" : ""} saved</p>
@@ -141,6 +212,11 @@ export default function WishlistPanel({
           </div>
         )}
       </aside>
+
+      {/* Buy Now modal — rendered outside the drawer so it overlays everything */}
+      {buyEntry && (
+        <BuyNowModal entry={buyEntry} onClose={() => setBuyEntry(null)} />
+      )}
     </>
   );
 }

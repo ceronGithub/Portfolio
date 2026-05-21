@@ -391,3 +391,341 @@
   line-height: 1.7;
   margin: 0;
 }
+
+/* ════════════════════════════════════════════════════
+   SPRINT TRACK  (mirrors visitor .vSprint*)
+════════════════════════════════════════════════════ */
+.sysInfoSprintTrack {
+  position:       relative;
+  display:        flex;
+  flex-direction: column;
+  gap:            0;
+}
+
+.sysInfoSprintLine {
+  position:   absolute;
+  left:       27px;
+  top:        44px;
+  bottom:     44px;
+  width:      1px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  pointer-events: none;
+}
+
+.sysInfoSprintStep {
+  display:     grid;
+  grid-template-columns: 56px 52px 1fr;
+  gap:         0 1.5rem;
+  padding:     2rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  align-items: start;
+}
+
+.sysInfoSprintStep:last-child { border-bottom: none; }
+
+.sysInfoSprintNum {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    700;
+  color:          rgba(255,255,255,0.18);
+  letter-spacing: 0.12em;
+  padding-top:    0.35rem;
+}
+
+.sysInfoSprintIcon {
+  width:           44px;
+  height:          44px;
+  border-radius:   12px;
+  background:      rgba(255,255,255,0.03);
+  border:          1px solid rgba(255,255,255,0.07);
+  color:           rgba(255,255,255,0.22);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-shrink:     0;
+}
+
+.sysInfoSprintIconActive {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.25);
+  color: #22c55e;
+}
+
+.sysInfoSprintBody { padding-top: 0.1rem; }
+
+.sysInfoSprintTitle {
+  font-family:    'Syne', sans-serif;
+  font-size:      1.05rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  margin:         0 0 0.5rem;
+}
+
+.sysInfoSprintStep:not(.sysInfoSprintStepActive) .sysInfoSprintTitle {
+  color: rgba(255,255,255,0.6);
+}
+
+.sysInfoSprintDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.75;
+  margin:      0 0 0.85rem;
+  max-width:   540px;
+}
+
+.sysInfoSprintList {
+  list-style: none;
+  padding:    0;
+  margin:     0;
+  display:    flex;
+  flex-wrap:  wrap;
+  gap:        0.35rem 1.5rem;
+}
+
+.sysInfoSprintList li {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.62rem;
+  color:        rgba(255,255,255,0.25);
+  padding-left: 0.75rem;
+  position:     relative;
+}
+
+.sysInfoSprintList li::before {
+  content:    "—";
+  position:   absolute;
+  left:       0;
+  color:      rgba(255,255,255,0.12);
+}
+
+@media (max-width: 640px) {
+  .sysInfoSprintStep { grid-template-columns: 40px 40px 1fr; gap: 0 0.75rem; }
+  .sysInfoSprintLine { left: 19px; }
+}
+
+/* ════════════════════════════════════════════════════
+   BADGE CARDS  (mirrors visitor .vBadge*)
+════════════════════════════════════════════════════ */
+.sysInfoBadgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) { .sysInfoBadgeGrid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .sysInfoBadgeGrid { grid-template-columns: 1fr; } }
+
+.sysInfoBadgeCard {
+  position:   relative;
+  overflow:   hidden;
+  background: rgba(255,255,255,0.03);
+  border:     0.5px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding:    1.75rem;
+  display:    flex;
+  flex-direction: column;
+  gap:        0.85rem;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s;
+}
+
+.sysInfoBadgeCard:hover {
+  border-color: rgba(255,255,255,0.14);
+  background:   rgba(255,255,255,0.045);
+  transform:    translateY(-4px);
+}
+
+.sysInfoBadgeGlow {
+  position:      absolute;
+  top:           -50px;
+  left:          -50px;
+  width:         180px;
+  height:        180px;
+  background:    var(--acc, #7dc9a0);
+  border-radius: 50%;
+  filter:        blur(64px);
+  opacity:       0.08;
+  pointer-events: none;
+  transition:    opacity 0.4s;
+}
+
+.sysInfoBadgeCard:hover .sysInfoBadgeGlow { opacity: 0.16; }
+
+.sysInfoBadgeTop {
+  display:     flex;
+  align-items: center;
+  justify-content: space-between;
+  gap:         0.75rem;
+}
+
+.sysInfoBadgeIcon {
+  width:           50px;
+  height:          50px;
+  border-radius:   14px;
+  border:          0.5px solid;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-shrink:     0;
+}
+
+.sysInfoBadgeTag {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  padding:        0.22rem 0.65rem;
+  border-radius:  999px;
+  border:         0.5px solid;
+  white-space:    nowrap;
+}
+
+.sysInfoBadgeTitle {
+  font-family:    'Syne', sans-serif;
+  font-size:      1rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.015em;
+  line-height:    1.25;
+}
+
+.sysInfoBadgeDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.68rem;
+  color:       rgba(255,255,255,0.32);
+  line-height: 1.8;
+}
+
+/* ════════════════════════════════════════════════════
+   TIER CARDS  (mirrors visitor .vMaintenanceTier*)
+════════════════════════════════════════════════════ */
+.sysInfoTierGrid {
+  display:     grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:         1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) { .sysInfoTierGrid { grid-template-columns: 1fr; } }
+
+.sysInfoTierCard {
+  background:    rgba(255,255,255,0.02);
+  border:        0.5px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding:       2rem;
+  display:       flex;
+  flex-direction: column;
+  gap:           1.5rem;
+  transition:    border-color 0.25s, background 0.25s;
+}
+
+.sysInfoTierCard:hover {
+  border-color: rgba(255,255,255,0.14);
+  background:   rgba(255,255,255,0.04);
+}
+
+.sysInfoTierCardHighlight {
+  border-color: rgba(196,181,253,0.3);
+  background:   rgba(255,255,255,0.04);
+  position:     relative;
+  transform:    translateY(-8px);
+  box-shadow:   0 12px 48px rgba(0,0,0,0.4);
+}
+
+.sysInfoTierCardHighlight::before {
+  content:          "Most Popular";
+  position:         absolute;
+  top:              -12px;
+  left:             50%;
+  transform:        translateX(-50%);
+  font-family:      'DM Mono', monospace;
+  font-size:        0.6rem;
+  font-weight:      700;
+  letter-spacing:   0.1em;
+  text-transform:   uppercase;
+  background:       var(--mt-color, #c4b5fd);
+  color:            #000;
+  padding:          3px 12px;
+  border-radius:    99px;
+}
+
+.sysInfoTierHeader { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.sysInfoTierLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  font-weight:    700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sysInfoTierPrice { display: flex; align-items: baseline; gap: 0.3rem; }
+
+.sysInfoTierAmount {
+  font-family:    'Syne', sans-serif;
+  font-size:      1.6rem;
+  font-weight:    900;
+  color:          #fff;
+  letter-spacing: -0.03em;
+  line-height:    1;
+}
+
+.sysInfoTierPeriod {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.75rem;
+  color:       rgba(255,255,255,0.3);
+}
+
+.sysInfoTierPerks {
+  list-style: none;
+  padding:    0;
+  margin:     0;
+  display:    flex;
+  flex-direction: column;
+  gap:        0.6rem;
+  flex:       1;
+}
+
+.sysInfoTierPerk {
+  display:     flex;
+  align-items: center;
+  gap:         0.6rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.5);
+  line-height: 1.4;
+}
+
+.sysInfoTierBtn {
+  display:      block;
+  text-align:   center;
+  padding:      0.65rem 1.25rem;
+  border-radius: 10px;
+  border:       1px solid;
+  font-family:  'DM Mono', monospace;
+  font-size:    0.75rem;
+  font-weight:  700;
+  cursor:       pointer;
+  transition:   opacity 0.2s, transform 0.15s;
+  background:   transparent;
+}
+
+.sysInfoTierBtn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.sysInfoTierNote {
+  display:         flex;
+  align-items:     flex-start;
+  gap:             0.75rem;
+  background:      rgba(245,158,11,0.07);
+  border:          1px solid rgba(245,158,11,0.25);
+  border-radius:   12px;
+  padding:         1rem 1.25rem;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.72rem;
+  color:           rgba(255,255,255,0.5);
+  line-height:     1.65;
+  margin-top:      0.5rem;
+}
+
+.sysInfoTierNote strong { color: #fbbf24; }

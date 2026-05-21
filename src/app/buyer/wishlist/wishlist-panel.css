@@ -324,3 +324,170 @@
   color:       rgba(255,255,255,0.15);
   margin:      0;
 }
+/* ── Cart button — add to cart per item ── */
+.wishlistCartBtn {
+  width:           30px;
+  height:          30px;
+  border-radius:   8px;
+  background:      rgba(255,255,255,0.04);
+  border:          1px solid rgba(255,255,255,0.08);
+  color:           rgba(255,255,255,0.3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  transition:      all 0.15s;
+  flex-shrink:     0;
+}
+
+.wishlistCartBtn:hover {
+  background:  rgba(255,255,255,0.08);
+  color:       rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* ── Buy Now modal overlay ── */
+.wlBuyModalOverlay {
+  position:         fixed;
+  inset:            0;
+  background:       rgba(0,0,0,0.72);
+  backdrop-filter:  blur(6px);
+  z-index:          9999;
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  padding:          1.5rem;
+}
+
+.wlBuyModal {
+  background:    #0d0d0d;
+  border:        1px solid #1e1e1e;
+  border-radius: 20px;
+  width:         100%;
+  max-width:     440px;
+  display:       flex;
+  flex-direction: column;
+  overflow:      hidden;
+}
+
+.wlBuyModalHeader {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+  padding:         1.5rem 1.5rem 1rem;
+  border-bottom:   1px solid #161616;
+}
+
+.wlBuyModalCategory {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.57rem;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin:         0 0 0.3rem;
+}
+
+.wlBuyModalName {
+  font-family:    'Syne', sans-serif;
+  font-size:      1.05rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  margin:         0;
+}
+
+.wlBuyModalClose {
+  width:           28px;
+  height:          28px;
+  border-radius:   8px;
+  background:      rgba(255,255,255,0.04);
+  border:          1px solid rgba(255,255,255,0.07);
+  color:           rgba(255,255,255,0.3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  flex-shrink:     0;
+  transition:      all 0.15s;
+}
+
+.wlBuyModalClose:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+
+.wlBuyModalBody {
+  padding:        1rem 1.5rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0;
+}
+
+.wlBuyModalPriceRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  padding:         0.65rem 0;
+  border-bottom:   1px solid #131313;
+}
+
+.wlBuyModalPriceRow:last-child { border-bottom: none; }
+
+.wlBuyModalPriceLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  color:          rgba(255,255,255,0.18);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.wlBuyModalPrice {
+  font-family:    'Syne', sans-serif;
+  font-size:      1.2rem;
+  font-weight:    800;
+  letter-spacing: -0.02em;
+}
+
+.wlBuyModalPriceVal {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.66rem;
+  color:       rgba(255,255,255,0.4);
+}
+
+.wlBuyModalFooter {
+  display:         flex;
+  align-items:     center;
+  justify-content: flex-end;
+  gap:             0.75rem;
+  padding:         1rem 1.5rem 1.5rem;
+  border-top:      1px solid #161616;
+}
+
+.wlBuyModalCancel {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.64rem;
+  color:        rgba(255,255,255,0.2);
+  background:   transparent;
+  border:       1px solid #1e1e1e;
+  border-radius: 999px;
+  padding:      0.45rem 1rem;
+  cursor:       pointer;
+  transition:   all 0.15s;
+}
+
+.wlBuyModalCancel:hover { border-color: #2e2e2e; color: rgba(255,255,255,0.4); }
+
+.wlBuyModalConfirm {
+  font-family:    'Syne', sans-serif;
+  font-size:      0.8rem;
+  font-weight:    800;
+  color:          #000;
+  border:         none;
+  border-radius:  999px;
+  padding:        0.55rem 1.5rem;
+  cursor:         pointer;
+  text-decoration: none;
+  display:        inline-block;
+  transition:     opacity 0.15s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.wlBuyModalConfirm:hover { opacity: 0.88; transform: translateY(-1px); }

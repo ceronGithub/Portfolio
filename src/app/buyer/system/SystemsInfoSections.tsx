@@ -36,6 +36,40 @@ const BUILD_STEPS = [
   },
 ];
 
+const SPRINT_STEPS = [
+  {
+    num: "01", title: "Discovery Call (VC)",
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M5.5 20a8.38 8.38 0 0 1 13 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    desc: "We start with a video call — no forms, no guesswork. You walk us through your business, pain points, and what you need the system to do.",
+    bullets: ["Understand your business workflow", "Identify pain points & bottlenecks", "Record all feature requirements", "Define scope and priorities"],
+  },
+  {
+    num: "02", title: "Feature Recording & Backlog",
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 5a2 2 0 002 2h2a2 2 0 002-2m-6 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    desc: "Every feature discussed is documented into a structured backlog — broken down into user stories, modules, and sprint tasks. Nothing gets lost.",
+    bullets: ["All features logged as user stories", "Modules broken into sprint tasks", "Priority ranking per feature", "Effort estimation per task"],
+  },
+  {
+    num: "03", title: "Full Project Roadmap",
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    desc: "We build a complete project roadmap — sprint by sprint, milestone by milestone. You see exactly what gets built and when before a single line of code is written.",
+    bullets: ["Sprint-by-sprint delivery plan", "Milestone & deadline mapping", "Database & system architecture", "UI/UX wireframe overview"],
+  },
+  {
+    num: "04", title: "Client Approval",
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    desc: "The full roadmap is sent to you for review. You approve every feature, every sprint, every milestone. We don't start building until you sign off.",
+    bullets: ["Roadmap sent via email & VC", "Client reviews all features", "Revisions handled before coding", "Formal sign-off required"],
+  },
+  {
+    num: "05", title: "Sprint Execution & Delivery",
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    desc: "Once approved, we execute — sprint by sprint, with regular progress updates. Each sprint delivers a working slice. You see real progress every week.",
+    bullets: ["Agile sprint cycles (1–2 weeks)", "Weekly progress updates", "Testing per sprint before next", "Final UAT & deployment"],
+    active: true,
+  },
+];
+
 function HowWeBuildSection() {
   return (
     <section className="sysInfoSection sysInfoSectionBuild">
@@ -43,14 +77,22 @@ function HowWeBuildSection() {
         <p className="sysInfoLabel">Process</p>
         <h2 className="sysInfoTitle">How We Build</h2>
         <p className="sysInfoSub">
-          Every system is built from scratch — no drag-and-drop builders, no recycled code. Here is exactly how we work.
+          Every system follows a structured agile process — from your first call to final approval before a single line of code is written.
         </p>
-        <div className="sysInfoBuildGrid">
-          {BUILD_STEPS.map((step) => (
-            <div key={step.number} className="sysInfoBuildCard">
-              <span className="sysInfoBuildNum">{step.number}</span>
-              <h3 className="sysInfoBuildTitle">{step.title}</h3>
-              <p className="sysInfoBuildBody">{step.body}</p>
+
+        <div className="sysInfoSprintTrack">
+          <div className="sysInfoSprintLine" />
+          {SPRINT_STEPS.map((step) => (
+            <div key={step.num} className={`sysInfoSprintStep${step.active ? " sysInfoSprintStepActive" : ""}`}>
+              <div className="sysInfoSprintNum">{step.num}</div>
+              <div className={`sysInfoSprintIcon${step.active ? " sysInfoSprintIconActive" : ""}`}>{step.icon}</div>
+              <div className="sysInfoSprintBody">
+                <h3 className="sysInfoSprintTitle">{step.title}</h3>
+                <p className="sysInfoSprintDesc">{step.desc}</p>
+                <ul className="sysInfoSprintList">
+                  {step.bullets.map(b => <li key={b}>{b}</li>)}
+                </ul>
+              </div>
             </div>
           ))}
         </div>
@@ -177,11 +219,49 @@ function CostSection() {
 }
 
 /* ─── Built with Confidence ──────────────────────────────────────────── */
-const COMMITMENTS = [
-  { stat: "30 / 70", label: "Payment Structure", note: "Only 30% upfront. The remaining 70% is due on final delivery." },
-  { stat: "100%",    label: "Source Code Ownership", note: "You get everything — repository, database schema, documentation." },
-  { stat: "Live",    label: "Demo Before You Pay", note: "You can interact with a working demo before committing to purchase." },
-  { stat: "Direct",  label: "Builder Communication", note: "You talk directly to the person building your system — no account managers." },
+const BADGE_ITEMS = [
+  {
+    accent: "#7dc9a0",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    title: "1 Month Free Support",
+    desc: "After delivery, we stay. Bug fixes, questions, and minor tweaks — all covered free for 30 days. No ticket system. Direct access.",
+    tag: "Post-delivery",
+  },
+  {
+    accent: "#7eb8d4",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    title: "Source Code Included",
+    desc: "You own 100% of the codebase. Full repository access, no lock-in, no licensing fees. Take it anywhere, modify anything.",
+    tag: "Full ownership",
+  },
+  {
+    accent: "#c4b5fd",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    title: "Lifetime Access",
+    desc: "Your dashboard, your assets, your system — forever. No subscriptions, no renewals, no expiry. One payment, infinite access.",
+    tag: "No subscriptions",
+  },
+  {
+    accent: "#fcd34d",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    title: "Fixed Price. No Surprises.",
+    desc: "We quote before we build. Scope, timeline, and price are locked in writing before a single line of code is written.",
+    tag: "Transparent billing",
+  },
+  {
+    accent: "#86efac",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    title: "Direct Communication",
+    desc: "You talk directly to the person building your system. No account managers, no middlemen. Weekly updates, direct messaging.",
+    tag: "Dedicated contact",
+  },
+  {
+    accent: "#f9a8d4",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    title: "30 / 70 Payment Structure",
+    desc: "Only 30% upfront. The remaining 70% is due on final delivery — after you've seen and approved the complete working system.",
+    tag: "Low risk entry",
+  },
 ];
 
 function ConfidenceSection() {
@@ -191,14 +271,32 @@ function ConfidenceSection() {
         <p className="sysInfoLabel">Our Commitment</p>
         <h2 className="sysInfoTitle">Built with confidence.<br />Backed by commitment.</h2>
         <p className="sysInfoSub">
-          Every system we deliver comes with guarantees built into the process — not just in the contract.
+          Every system we deliver comes with these guarantees built into the process — not just in the contract.
         </p>
-        <div className="sysInfoConfidenceGrid">
-          {COMMITMENTS.map((item) => (
-            <div key={item.label} className="sysInfoConfidenceCard">
-              <span className="sysInfoConfidenceStat">{item.stat}</span>
-              <h3 className="sysInfoConfidenceLabel">{item.label}</h3>
-              <p className="sysInfoConfidenceNote">{item.note}</p>
+        <div className="sysInfoBadgeGrid">
+          {BADGE_ITEMS.map(item => (
+            <div
+              key={item.title}
+              className="sysInfoBadgeCard"
+              style={{ "--acc": item.accent } as React.CSSProperties}
+            >
+              <div className="sysInfoBadgeGlow" />
+              <div className="sysInfoBadgeTop">
+                <div
+                  className="sysInfoBadgeIcon"
+                  style={{ color: item.accent, borderColor: item.accent + "33", background: item.accent + "12" }}
+                >
+                  {item.icon}
+                </div>
+                <span
+                  className="sysInfoBadgeTag"
+                  style={{ color: item.accent, borderColor: item.accent + "33", background: item.accent + "10" }}
+                >
+                  {item.tag}
+                </span>
+              </div>
+              <h3 className="sysInfoBadgeTitle">{item.title}</h3>
+              <p className="sysInfoBadgeDesc">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -253,25 +351,57 @@ function SupportSection() {
         <p className="sysInfoLabel">After Delivery</p>
         <h2 className="sysInfoTitle">Maintenance &amp; Support</h2>
         <p className="sysInfoSub">
-          Delivery is not the end. Here is what happens after your system goes live.
+          Delivery is not the end. Keep your system running at peak performance after launch.
         </p>
-        <div className="sysInfoSupportGrid">
-          {SUPPORT_TIERS.map((tier) => (
-            <div key={tier.name} className="sysInfoSupportCard" style={{ "--tierAccent": tier.accent } as React.CSSProperties}>
-              <div className="sysInfoSupportCardTop">
-                <h3 className="sysInfoSupportName" style={{ color: tier.accent }}>{tier.name}</h3>
-                <span className="sysInfoSupportDuration">{tier.duration}</span>
+
+        <div className="sysInfoTierGrid">
+          {SUPPORT_TIERS.map((tier, i) => (
+            <div
+              key={tier.name}
+              className={`sysInfoTierCard${i === 2 ? " sysInfoTierCardHighlight" : ""}`}
+              style={{ "--mt-color": tier.accent } as React.CSSProperties}
+            >
+              <div className="sysInfoTierHeader">
+                <span className="sysInfoTierLabel" style={{ color: tier.accent }}>{tier.name}</span>
+                <div className="sysInfoTierPrice">
+                  <span className="sysInfoTierAmount">{tier.duration.split(" /")[0]}</span>
+                  <span className="sysInfoTierPeriod">/month</span>
+                </div>
               </div>
-              <ul className="sysInfoSupportPerks">
-                {tier.perks.map((perk) => (
-                  <li key={perk} className="sysInfoSupportPerk">
-                    <span className="sysInfoSupportPerkDot" style={{ background: tier.accent }} />
+              <ul className="sysInfoTierPerks">
+                {tier.perks.map(perk => (
+                  <li key={perk} className="sysInfoTierPerk">
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M1 7l3.5 3.5L12 2" stroke={tier.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                     {perk}
                   </li>
                 ))}
               </ul>
+              <button
+                className="sysInfoTierBtn"
+                style={{
+                  background:  i === 2 ? tier.accent : "transparent",
+                  borderColor: tier.accent,
+                  color:       i === 2 ? "#000" : tier.accent,
+                }}
+              >
+                Get Started
+              </button>
             </div>
           ))}
+        </div>
+
+        <div className="sysInfoTierNote">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="12" y1="9" x2="12" y2="13" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round"/>
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round"/>
+          </svg>
+          <span>
+            Maintenance does <strong>not</strong> include major new features.{" "}
+            <strong>New features are scoped and quoted separately as a new project.</strong>
+          </span>
         </div>
       </div>
     </section>
