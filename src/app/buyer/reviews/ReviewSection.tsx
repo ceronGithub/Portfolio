@@ -180,8 +180,10 @@ export default function ReviewSection({ ownedProductIds }: Props) {
 
         {/* Header */}
         <div className="rvHeader">
-          <p className="rvEyebrow">Community</p>
-          <h2 className="rvTitle">Reviews & Ratings</h2>
+          <div className="rvHeaderLeft">
+            <p className="rvEyebrow">Community</p>
+            <h2 className="rvTitle">Reviews & Ratings</h2>
+          </div>
           <p className="rvSub">Honest feedback from verified buyers.</p>
         </div>
 

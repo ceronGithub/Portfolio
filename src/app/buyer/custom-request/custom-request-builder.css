@@ -1,26 +1,33 @@
-/* custom-request-builder.css — Multi-step custom request form */
+/* custom-request-builder.css */
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
 /* ── Section ── */
 .crbSection {
-  width:          100%;
-  background:     #000;
-  padding:        6rem 4% 6rem;
-  border-top:     1px solid #111;
-  display:        flex;
-  justify-content: center;
+  width:      100%;
+  background: #000;
+  padding:    6rem 4% 7rem;
+  border-top: 1px solid #111;
 }
 
 .crbInner {
   width:          100%;
-  max-width:      560px;
+  max-width:      1200px;
+  margin:         0 auto;
   display:        flex;
   flex-direction: column;
-  gap:            2rem;
+  gap:            3rem;
 }
 
-/* ── Header ── */
-.crbHeader { text-align: center; }
+/* ── Header — horizontal, matches other sections ── */
+.crbHeader {
+  display:         flex;
+  align-items:     baseline;
+  justify-content: space-between;
+  gap:             2rem;
+  flex-wrap:       wrap;
+}
+
+.crbHeaderLeft { display: flex; flex-direction: column; gap: 0.35rem; }
 
 .crbEyebrow {
   font-family:    'DM Mono', monospace;
@@ -28,15 +35,17 @@
   color:          rgba(255,255,255,0.2);
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  margin:         0 0 0.5rem;
+  margin:         0;
 }
 
 .crbTitle {
-  font-size:      clamp(1.5rem, 3vw, 2.2rem);
+  font-family:    'Syne', sans-serif;
+  font-size:      clamp(2rem, 4vw, 3.2rem);
   font-weight:    800;
   color:          #fff;
-  letter-spacing: -0.03em;
-  margin:         0 0 0.35rem;
+  letter-spacing: -0.04em;
+  margin:         0;
+  line-height:    1.05;
 }
 
 .crbSub {
@@ -44,29 +53,84 @@
   font-size:   0.68rem;
   color:       rgba(255,255,255,0.22);
   margin:      0;
+  max-width:   280px;
+  line-height: 1.7;
+  text-align:  right;
 }
 
-/* ── Card ── */
-.crbCard {
-  background:     #0e0e0e;
-  border:         1px solid #1a1a1a;
-  border-radius:  24px;
-  padding:        2rem;
+/* ── Layout — sidebar progress + main content ── */
+.crbLayout {
+  display:     grid;
+  grid-template-columns: 240px 1fr;
+  gap:         3rem;
+  align-items: start;
+}
+
+/* ── Sidebar ── */
+.crbSidebar {
+  position:       sticky;
+  top:            2rem;
   display:        flex;
   flex-direction: column;
-  gap:            1.75rem;
+  gap:            0;
+  border-left:    1px solid #1a1a1a;
+  padding-left:   1.5rem;
 }
 
-/* ── Step indicator ── */
+.crbSidebarStep {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.2rem;
+  padding:        0.85rem 0;
+  border-bottom:  1px solid #111;
+  cursor:         default;
+}
+
+.crbSidebarStep:last-child { border-bottom: none; }
+
+.crbSidebarNum {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.55rem;
+  color:          rgba(255,255,255,0.12);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.crbSidebarLabel {
+  font-family: 'Syne', sans-serif;
+  font-size:   0.8rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.15);
+  transition:  color 0.2s;
+}
+
+.crbSidebarStepDone   .crbSidebarLabel { color: rgba(34,197,94,0.5); }
+.crbSidebarStepDone   .crbSidebarNum   { color: rgba(34,197,94,0.3); }
+.crbSidebarStepActive .crbSidebarLabel { color: rgba(255,255,255,0.8); }
+.crbSidebarStepActive .crbSidebarNum   { color: rgba(255,255,255,0.3); }
+
+/* ── Main card ── */
+.crbCard {
+  background:     #080808;
+  border:         1px solid #161616;
+  border-radius:  24px;
+  padding:        2.5rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            2rem;
+  min-height:     420px;
+}
+
+/* ── Step indicator bar (mobile) ── */
 .crbStepRow {
-  display:         flex;
+  display:         none;
   gap:             0.4rem;
   justify-content: center;
 }
 
 .crbStepDot {
   width:         28px;
-  height:        4px;
+  height:        3px;
   border-radius: 999px;
   transition:    background 0.3s;
 }
@@ -79,102 +143,125 @@
 .crbStep {
   display:        flex;
   flex-direction: column;
-  gap:            1.25rem;
+  gap:            1.5rem;
+  flex:           1;
 }
 
 .crbStepTitle {
-  font-size:   1rem;
-  font-weight: 700;
-  color:       rgba(255,255,255,0.8);
-  margin:      0;
+  font-family:    'Syne', sans-serif;
+  font-size:      1.15rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  margin:         0;
 }
 
-/* ── Type grid ── */
+/* ── Type grid — 4 columns, no emoji ── */
 .crbTypeGrid {
   display:               grid;
-  grid-template-columns: 1fr 1fr;
-  gap:                   0.65rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap:                   0.75rem;
 }
 
 .crbTypeBtn {
   display:        flex;
   flex-direction: column;
-  align-items:    center;
-  gap:            0.35rem;
-  padding:        1.2rem 0.75rem;
-  background:     #111;
-  border:         1px solid #1e1e1e;
+  align-items:    flex-start;
+  gap:            0.9rem;
+  padding:        1.4rem 1.25rem;
+  background:     #0d0d0d;
+  border:         1px solid #1a1a1a;
   border-radius:  16px;
   cursor:         pointer;
-  transition:     all 0.2s;
-  text-align:     center;
+  transition:     border-color 0.2s, background 0.2s;
+  text-align:     left;
 }
 
-.crbTypeBtn:hover      { border-color: #2e2e2e; background: #131313; }
-.crbTypeBtnActive      { border-color: rgba(34,197,94,0.35) !important; background: rgba(34,197,94,0.04) !important; }
+.crbTypeBtn:hover   { border-color: #282828; background: #0f0f0f; }
+.crbTypeBtnActive   {
+  border-color: rgba(34,197,94,0.3) !important;
+  background:   rgba(34,197,94,0.03) !important;
+}
 
-.crbTypeBtnIcon  { font-size: 1.5rem; }
+/* Icon — monochrome SVG line art, no emoji */
+.crbTypeBtnIcon {
+  width:   36px;
+  height:  36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color:   rgba(255,255,255,0.18);
+  transition: color 0.2s;
+}
+
+.crbTypeBtnActive .crbTypeBtnIcon { color: rgba(34,197,94,0.6); }
 
 .crbTypeBtnLabel {
-  font-size:   0.82rem;
+  font-family: 'Syne', sans-serif;
+  font-size:   0.85rem;
   font-weight: 700;
-  color:       rgba(255,255,255,0.65);
+  color:       rgba(255,255,255,0.5);
+  transition:  color 0.2s;
 }
+
+.crbTypeBtnActive .crbTypeBtnLabel { color: rgba(255,255,255,0.85); }
 
 .crbTypeBtnBase {
   font-family: 'DM Mono', monospace;
   font-size:   0.6rem;
-  color:       rgba(255,255,255,0.2);
+  color:       rgba(255,255,255,0.15);
 }
 
 /* ── Fields ── */
 .crbField {
   display:        flex;
   flex-direction: column;
-  gap:            0.5rem;
+  gap:            0.55rem;
 }
 
 .crbLabel {
   font-family:    'DM Mono', monospace;
-  font-size:      0.62rem;
-  color:          rgba(255,255,255,0.25);
+  font-size:      0.6rem;
+  color:          rgba(255,255,255,0.22);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
 }
 
 .crbLabelNote {
-  color:          rgba(255,255,255,0.15);
+  color:          rgba(255,255,255,0.12);
   text-transform: none;
   letter-spacing: 0;
 }
 
 .crbTextarea,
 .crbInput {
-  background:    #111;
-  border:        1px solid #222;
+  background:    #0d0d0d;
+  border:        1px solid #1e1e1e;
   border-radius: 12px;
-  padding:       0.65rem 0.9rem;
+  padding:       0.8rem 1rem;
   font-family:   'DM Mono', monospace;
   font-size:     0.72rem;
-  color:         rgba(255,255,255,0.6);
+  color:         rgba(255,255,255,0.65);
   outline:       none;
   transition:    border-color 0.2s;
-  line-height:   1.6;
+  line-height:   1.65;
   resize:        vertical;
+  width:         100%;
+  box-sizing:    border-box;
 }
 
 .crbTextarea:focus,
-.crbInput:focus { border-color: #333; }
+.crbInput:focus { border-color: #2e2e2e; }
 
 .crbTextarea::placeholder,
-.crbInput::placeholder { color: rgba(255,255,255,0.14); }
+.crbInput::placeholder { color: rgba(255,255,255,0.12); }
 
 .crbCharCount {
   font-family: 'DM Mono', monospace;
   font-size:   0.57rem;
-  color:       rgba(255,255,255,0.14);
+  color:       rgba(255,255,255,0.12);
   text-align:  right;
-  margin-top:  -0.25rem;
+  margin-top:  -0.2rem;
 }
 
 /* Counter */
@@ -185,28 +272,31 @@
 }
 
 .crbCounterBtn {
-  width:           32px;
-  height:          32px;
-  border-radius:   8px;
-  background:      #161616;
-  border:          1px solid #252525;
-  color:           rgba(255,255,255,0.5);
-  font-size:       1rem;
+  width:           36px;
+  height:          36px;
+  border-radius:   10px;
+  background:      #111;
+  border:          1px solid #222;
+  color:           rgba(255,255,255,0.35);
+  font-size:       1.1rem;
   cursor:          pointer;
   display:         flex;
   align-items:     center;
   justify-content: center;
   transition:      all 0.15s;
+  font-family:     'DM Mono', monospace;
 }
 
-.crbCounterBtn:hover { border-color: #333; color: #fff; }
+.crbCounterBtn:hover { border-color: #333; color: rgba(255,255,255,0.75); }
 
 .crbCounterVal {
-  font-size:   1.1rem;
+  font-family: 'Syne', sans-serif;
+  font-size:   1.4rem;
   font-weight: 800;
   color:       #fff;
-  min-width:   24px;
+  min-width:   32px;
   text-align:  center;
+  letter-spacing: -0.02em;
 }
 
 /* Poly row */
@@ -219,76 +309,84 @@
 .crbPolyBtn {
   font-family:    'DM Mono', monospace;
   font-size:      0.64rem;
-  padding:        0.4rem 0.85rem;
-  background:     #111;
+  padding:        0.45rem 1rem;
+  background:     #0d0d0d;
   border:         1px solid #1e1e1e;
   border-radius:  999px;
-  color:          rgba(255,255,255,0.3);
+  color:          rgba(255,255,255,0.28);
   cursor:         pointer;
   transition:     all 0.2s;
 }
 
 .crbPolyBtn:hover  { border-color: #2e2e2e; color: rgba(255,255,255,0.55); }
-.crbPolyBtnActive  { border-color: rgba(34,197,94,0.35); color: #22c55e; background: rgba(34,197,94,0.05); }
+.crbPolyBtnActive  { border-color: rgba(34,197,94,0.3); color: #22c55e; background: rgba(34,197,94,0.04); }
 
-/* ── Speed grid ── */
+/* ── Speed grid — horizontal rows, not a list ── */
 .crbSpeedGrid {
-  display:        flex;
-  flex-direction: column;
-  gap:            0.65rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:     0.75rem;
 }
 
 .crbSpeedBtn {
-  display:     grid;
-  grid-template-columns: 28px 1fr auto;
-  grid-template-rows:    auto auto;
-  align-items: center;
-  gap:         0 0.75rem;
-  padding:     1rem 1.1rem;
-  background:  #111;
-  border:      1px solid #1e1e1e;
-  border-radius: 14px;
-  cursor:      pointer;
-  transition:  all 0.2s;
-  text-align:  left;
-  width:       100%;
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-start;
+  gap:            0.35rem;
+  padding:        1.25rem;
+  background:     #0d0d0d;
+  border:         1px solid #1a1a1a;
+  border-radius:  16px;
+  cursor:         pointer;
+  transition:     border-color 0.2s, background 0.2s;
+  text-align:     left;
+  width:          100%;
 }
 
-.crbSpeedBtn:hover    { border-color: #2e2e2e; background: #131313; }
-.crbSpeedBtnActive    { border-color: rgba(34,197,94,0.35) !important; background: rgba(34,197,94,0.04) !important; }
+.crbSpeedBtn:hover  { border-color: #282828; background: #0f0f0f; }
+.crbSpeedBtnActive  {
+  border-color: rgba(34,197,94,0.3) !important;
+  background:   rgba(34,197,94,0.03) !important;
+}
 
-.crbSpeedBtnIcon      { font-size: 1.1rem; grid-row: 1 / 3; }
+.crbSpeedBtnIcon {
+  font-size: 1.1rem;
+  color:     rgba(255,255,255,0.2);
+  transition: color 0.2s;
+}
+
+.crbSpeedBtnActive .crbSpeedBtnIcon { color: rgba(34,197,94,0.6); }
 
 .crbSpeedBtnLabel {
-  font-size:   0.85rem;
-  font-weight: 700;
-  color:       rgba(255,255,255,0.7);
-  grid-column: 2;
+  font-family: 'Syne', sans-serif;
+  font-size:   0.88rem;
+  font-weight: 800;
+  color:       rgba(255,255,255,0.6);
+  letter-spacing: -0.01em;
+  transition:  color 0.2s;
 }
+
+.crbSpeedBtnActive .crbSpeedBtnLabel { color: rgba(255,255,255,0.9); }
 
 .crbSpeedBtnDelivery {
   font-family: 'DM Mono', monospace;
-  font-size:   0.62rem;
-  color:       rgba(255,255,255,0.22);
-  grid-column: 2;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.2);
 }
 
 .crbSpeedBtnPrice {
-  font-size:      0.9rem;
+  font-family:    'Syne', sans-serif;
+  font-size:      1.1rem;
   font-weight:    800;
   color:          #fff;
-  grid-column:    3;
-  grid-row:       1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  margin-top:     0.35rem;
 }
 
 .crbSpeedBtnSurcharge {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.58rem;
-  color:          rgba(245,158,11,0.6);
-  grid-column:    3;
-  grid-row:       2;
-  text-align:     right;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.57rem;
+  color:       rgba(245,158,11,0.5);
 }
 
 /* ── Nav buttons ── */
@@ -297,45 +395,47 @@
   justify-content: space-between;
   align-items:     center;
   gap:             1rem;
-  margin-top:      0.25rem;
+  padding-top:     0.5rem;
+  border-top:      1px solid #141414;
+  margin-top:      auto;
 }
 
 .crbBackBtn {
   font-family:    'DM Mono', monospace;
-  font-size:      0.68rem;
-  color:          rgba(255,255,255,0.25);
+  font-size:      0.66rem;
+  color:          rgba(255,255,255,0.2);
   background:     transparent;
-  border:         1px solid #222;
+  border:         1px solid #1e1e1e;
   border-radius:  999px;
-  padding:        0.4rem 1rem;
+  padding:        0.45rem 1.1rem;
   cursor:         pointer;
   transition:     all 0.2s;
 }
 
-.crbBackBtn:hover { border-color: #333; color: rgba(255,255,255,0.5); }
+.crbBackBtn:hover { border-color: #2e2e2e; color: rgba(255,255,255,0.45); }
 
 .crbNextBtn {
-  padding:     0.6rem 1.4rem;
-  background:  #22c55e;
-  color:       #000;
-  font-family: 'Syne', sans-serif;
-  font-size:   0.82rem;
-  font-weight: 800;
-  border:      none;
-  border-radius: 999px;
-  cursor:      pointer;
-  transition:  all 0.2s;
+  padding:        0.6rem 2rem;
+  background:     #22c55e;
+  color:          #000;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.82rem;
+  font-weight:    800;
+  border:         none;
+  border-radius:  999px;
+  cursor:         pointer;
+  transition:     all 0.2s;
+  letter-spacing: 0.02em;
 }
 
 .crbNextBtn:hover:not(:disabled) { background: #16a34a; }
-.crbNextBtnDisabled { opacity: 0.35; cursor: not-allowed; }
+.crbNextBtnDisabled { opacity: 0.3; cursor: not-allowed; }
 
-/* ── Summary ── */
+/* ── Summary table ── */
 .crbSummary {
   display:        flex;
   flex-direction: column;
   gap:            0;
-  background:     #0a0a0a;
   border:         1px solid #181818;
   border-radius:  14px;
   overflow:       hidden;
@@ -345,110 +445,161 @@
   display:         flex;
   justify-content: space-between;
   align-items:     flex-start;
-  gap:             1rem;
-  padding:         0.7rem 1rem;
-  border-bottom:   1px solid #141414;
-  font-family:     'DM Mono', monospace;
-  font-size:       0.68rem;
+  gap:             2rem;
+  padding:         0.8rem 1.1rem;
+  border-bottom:   1px solid #131313;
 }
 
-.crbSummaryRow:last-child { border-bottom: none; }
-.crbSummaryRow:nth-child(odd) { background: #0d0d0d; }
+.crbSummaryRow:last-child  { border-bottom: none; }
+.crbSummaryRow:nth-child(even) { background: #0a0a0a; }
 
-.crbSummaryRow > span:first-child { color: rgba(255,255,255,0.2); flex-shrink: 0; }
-.crbSummaryRow > span:last-child  { color: rgba(255,255,255,0.55); text-align: right; }
+.crbSummaryRow > span:first-child {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.18);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 
-.crbSummaryDesc { font-size: 0.65rem; line-height: 1.6; max-width: 260px; }
-.crbSummaryRef  { font-size: 0.62rem; word-break: break-all; max-width: 240px; }
+.crbSummaryRow > span:last-child {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.68rem;
+  color:       rgba(255,255,255,0.5);
+  text-align:  right;
+}
+
+.crbSummaryDesc { font-size: 0.65rem; line-height: 1.65; max-width: 360px; }
+.crbSummaryRef  { font-size: 0.62rem; word-break: break-all; max-width: 340px; }
 
 .crbSummaryDivider { height: 1px; background: #1e1e1e; }
 
-.crbSummaryTotal > span:first-child { color: rgba(255,255,255,0.4) !important; }
-.crbSummaryTotal > span:last-child  { color: #22c55e !important; font-size: 0.88rem; font-weight: 700; }
+.crbSummaryTotal > span:first-child { color: rgba(255,255,255,0.35) !important; }
+.crbSummaryTotal > span:last-child  {
+  font-family:    'Syne', sans-serif !important;
+  font-size:      1.1rem !important;
+  font-weight:    800 !important;
+  color:          #22c55e !important;
+  letter-spacing: -0.02em;
+}
 
 /* ── Submit button ── */
 .crbSubmitBtn {
-  padding:     0.65rem 1.5rem;
-  background:  #22c55e;
-  color:       #000;
-  font-family: 'Syne', sans-serif;
-  font-size:   0.85rem;
-  font-weight: 800;
-  border:      none;
-  border-radius: 999px;
-  cursor:      pointer;
-  transition:  all 0.2s;
+  padding:        0.65rem 2rem;
+  background:     #22c55e;
+  color:          #000;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.85rem;
+  font-weight:    800;
+  border:         none;
+  border-radius:  999px;
+  cursor:         pointer;
+  transition:     all 0.2s;
+  letter-spacing: 0.02em;
 }
 
 .crbSubmitBtn:hover:not(:disabled) { background: #16a34a; }
-.crbSubmitBtn:disabled             { opacity: 0.55; cursor: not-allowed; }
-.crbSubmitBtnLoading               { opacity: 0.7; }
+.crbSubmitBtn:disabled             { opacity: 0.45; cursor: not-allowed; }
+.crbSubmitBtnLoading               { opacity: 0.65; }
 
 .crbSubmitErr {
   font-family: 'DM Mono', monospace;
-  font-size:   0.65rem;
+  font-size:   0.64rem;
   color:       #ef4444;
   margin:      0;
 }
 
 /* ── Success state ── */
 .crbSuccess {
-  width:           100%;
-  max-width:       480px;
+  max-width:       560px;
+  margin:          0 auto;
   display:         flex;
   flex-direction:  column;
-  align-items:     center;
-  gap:             1.1rem;
-  background:      #0e0e0e;
-  border:          1px solid rgba(34,197,94,0.15);
+  align-items:     flex-start;
+  gap:             1.25rem;
+  background:      #080808;
+  border:          1px solid rgba(34,197,94,0.12);
   border-radius:   24px;
-  padding:         2.5rem 2rem;
-  text-align:      center;
+  padding:         3rem;
 }
 
 .crbSuccessIcon {
-  width:           48px;
-  height:          48px;
-  background:      #22c55e;
-  color:           #000;
-  border-radius:   50%;
+  width:           44px;
+  height:          44px;
+  background:      rgba(34,197,94,0.1);
+  border:          1px solid rgba(34,197,94,0.2);
+  color:           #22c55e;
+  border-radius:   12px;
   display:         flex;
   align-items:     center;
   justify-content: center;
-  font-size:       1.2rem;
+  font-size:       1.1rem;
   font-weight:     800;
-  box-shadow:      0 0 0 8px rgba(34,197,94,0.08);
 }
 
 .crbSuccessTitle {
-  font-size:      1.4rem;
+  font-family:    'Syne', sans-serif;
+  font-size:      1.8rem;
   font-weight:    800;
   color:          #fff;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   margin:         0;
+  line-height:    1.1;
 }
 
 .crbSuccessDesc {
   font-family: 'DM Mono', monospace;
   font-size:   0.7rem;
-  color:       rgba(255,255,255,0.3);
-  line-height: 1.8;
+  color:       rgba(255,255,255,0.28);
+  line-height: 1.85;
   margin:      0;
 }
 
-.crbSuccessDesc strong { color: rgba(255,255,255,0.55); }
+.crbSuccessDesc strong { color: rgba(255,255,255,0.5); }
 
 .crbSuccessReset {
   font-family:    'DM Mono', monospace;
-  font-size:      0.65rem;
-  color:          rgba(255,255,255,0.25);
+  font-size:      0.64rem;
+  color:          rgba(255,255,255,0.22);
   background:     transparent;
-  border:         1px solid #222;
+  border:         1px solid #1e1e1e;
   border-radius:  999px;
-  padding:        0.4rem 1rem;
+  padding:        0.45rem 1.1rem;
   cursor:         pointer;
   transition:     all 0.2s;
-  margin-top:     0.25rem;
+  margin-top:     0.5rem;
 }
 
-.crbSuccessReset:hover { border-color: #333; color: rgba(255,255,255,0.5); }
+.crbSuccessReset:hover { border-color: #2e2e2e; color: rgba(255,255,255,0.45); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .crbLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .crbSidebar {
+    position:  static;
+    flex-direction: row;
+    border-left: none;
+    border-top: 1px solid #1a1a1a;
+    padding-left: 0;
+    padding-top: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .crbSidebarStep {
+    padding:      0.5rem 1rem 0.5rem 0;
+    border-bottom: none;
+    border-right:  1px solid #111;
+    margin-right:  1rem;
+  }
+
+  .crbStepRow   { display: flex; }
+  .crbTypeGrid  { grid-template-columns: 1fr 1fr; }
+  .crbSpeedGrid { grid-template-columns: 1fr; }
+
+  .crbHeader { flex-direction: column; gap: 0.5rem; }
+  .crbSub    { text-align: left; max-width: 100%; }
+}
