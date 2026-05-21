@@ -1,7 +1,11 @@
 // AIAssetsIntro — client component.
 // Cinematic effects: vignette pulse, dust particles,
 // chromatic aberration + scroll-driven orc zoom, slide-in, text blur-to-sharp,
-// letter spacing expand, scanlines, color grade shift.
+// letter spacing expand. Optimized for performance:
+// — scroll handler throttled via requestAnimationFrame
+// — particle array sorted only on depth-bucket change, not every frame
+// — SVG feTurbulence animate removed (was causing GPU jank on scroll)
+// — CSS-only bottom fog (no SVG filter on scroll path)
 
 "use client";
 
@@ -20,26 +24,24 @@ interface Particle {
   vx: number; vy: number;
   size: number; opacity: number;
   life: number; maxLife: number;
-  depth: number;   // 0.0 far → 1.0 near
-  blur:  number;   // pre-computed CSS blur equivalent (drawn as soft glow)
+  depth: number;
 }
 
 function spawnParticle(w: number, h: number): Particle {
-  const depth = Math.random();                    // 0=far, 1=near
-  const speed = 0.08 + depth * 0.55;             // near particles move faster
-  const size  = 0.3  + depth * 2.8;              // near particles larger
-  const life  = Math.round(280 - depth * 110);   // near particles shorter lived
+  const depth = Math.random();
+  const speed = 0.08 + depth * 0.55;
+  const size  = 0.3  + depth * 2.8;
+  const life  = Math.round(280 - depth * 110);
   return {
     x:       Math.random() * w,
     y:       h + 10,
     vx:      (Math.random() - 0.5) * (0.15 + depth * 0.4),
     vy:      -(speed * (Math.random() * 0.4 + 0.8)),
     size,
-    opacity: 0.06 + (1 - depth) * 0.18 + depth * 0.06, // far = slightly more visible
+    opacity: 0.06 + (1 - depth) * 0.18 + depth * 0.06,
     life:    0,
     maxLife: life + Math.round(Math.random() * 120),
     depth,
-    blur:    (1 - depth) * 1.8,  // far particles slightly blurred
   };
 }
 
@@ -48,21 +50,37 @@ export default function AIAssetsIntro() {
   const canvasRef   = useRef<HTMLCanvasElement>(null);
   const rafRef      = useRef<number>(0);
   const particles   = useRef<Particle[]>([]);
+  const progressRef = useRef<number>(0);      // raw value — no re-render on scroll
+  const scrollRafRef = useRef<number>(0);     // throttle scroll updates via rAF
   const [progress,  setProgress]  = useState(0);
 
-  // ── Scroll progress ──────────────────────────────────────────────
+  // ── Scroll progress — throttled via rAF to avoid layout thrash ───
   useEffect(() => {
-    function onScroll() {
+    function readScroll() {
       const el = sectionRef.current;
       if (!el) return;
       const top        = el.getBoundingClientRect().top;
       const scrollable = el.scrollHeight - window.innerHeight;
       if (scrollable <= 0) return;
-      setProgress(Math.max(0, Math.min(1, -top / scrollable)));
+      const next = Math.max(0, Math.min(1, -top / scrollable));
+      // Only commit a React state update when the value meaningfully changed
+      if (Math.abs(next - progressRef.current) > 0.0015) {
+        progressRef.current = next;
+        setProgress(next);
+      }
     }
+
+    function onScroll() {
+      cancelAnimationFrame(scrollRafRef.current);
+      scrollRafRef.current = requestAnimationFrame(readScroll);
+    }
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    readScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(scrollRafRef.current);
+    };
   }, []);
 
   // ── Dust particle canvas ─────────────────────────────────────────
@@ -79,25 +97,38 @@ export default function AIAssetsIntro() {
     resize();
     window.addEventListener("resize", resize);
 
-    for (let i = 0; i < 55; i++) {
+    // Pre-populate with staggered life so particles don't all spawn at once
+    for (let i = 0; i < 45; i++) {
       const p = spawnParticle(canvas.width, canvas.height);
       p.y    = Math.random() * canvas.height;
       p.life = Math.random() * p.maxLife;
       particles.current.push(p);
     }
 
+    // Sort particles by depth once on init — depth is fixed per particle lifetime
+    // so we only need to re-sort when the array changes (splice/push), not every frame.
+    // We handle this by sorting after filter + push, not inside draw().
+    particles.current.sort((a, b) => a.depth - b.depth);
+
     function draw() {
       const w = canvas!.width;
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      // Spawn new particles — more frequent for richer field
-      if (particles.current.length < 90 && Math.random() < 0.55)
+      // Spawn new particles at reduced rate (was 0.55 — now 0.35 for less CPU)
+      let needsSort = false;
+      if (particles.current.length < 70 && Math.random() < 0.35) {
         particles.current.push(spawnParticle(w, h));
-      particles.current = particles.current.filter(p => p.life < p.maxLife);
+        needsSort = true;
+      }
 
-      // Sort by depth so far particles render first (painter's algorithm)
-      particles.current.sort((a, b) => a.depth - b.depth);
+      // Filter dead particles
+      const prevLength = particles.current.length;
+      particles.current = particles.current.filter(p => p.life < p.maxLife);
+      if (particles.current.length !== prevLength) needsSort = true;
+
+      // Only sort when array structure changed (not every frame)
+      if (needsSort) particles.current.sort((a, b) => a.depth - b.depth);
 
       for (const p of particles.current) {
         p.life += 1;
@@ -111,10 +142,8 @@ export default function AIAssetsIntro() {
 
         if (alpha <= 0.002) continue;
 
-        // Near particles (depth > 0.65): draw as soft radial glow
-        // Far particles (depth < 0.35): draw as sharp tiny dot
         if (p.depth > 0.65) {
-          // Soft bokeh glow for near-field particles
+          // Near-field: soft bokeh glow
           const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2.2);
           grad.addColorStop(0,   `rgba(230,220,200,${alpha})`);
           grad.addColorStop(0.4, `rgba(215,205,185,${alpha * 0.55})`);
@@ -134,7 +163,7 @@ export default function AIAssetsIntro() {
           ctx!.fillStyle = grad;
           ctx!.fill();
         } else {
-          // Far-field: tiny sharp crisp dot
+          // Far-field: tiny crisp dot
           ctx!.beginPath();
           ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           ctx!.fillStyle = `rgba(200,192,178,${alpha * 0.7})`;
@@ -145,34 +174,27 @@ export default function AIAssetsIntro() {
       rafRef.current = requestAnimationFrame(draw);
     }
     rafRef.current = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize); };
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("resize", resize);
+    };
   }, []);
 
   // ── Derived values ───────────────────────────────────────────────
-  // Vignette pulse — oscillates twice through scroll
-  const vignettePulse  = 0.5 + Math.sin(progress * Math.PI * 2.5) * 0.25;
-
-  // Orcs: slide in from edges on first 20% of scroll, then zoom slowly
-  const orcSlide       = Math.max(0, 1 - progress / 0.18);
-  const orcScale       = 1 + progress * 0.08;
-
-
-
-  // Chromatic aberration on text: strongest at 0.1 progress, fades
-  const caStr          = Math.max(0, Math.sin(progress * Math.PI) * 2.5);
+  const vignettePulse = 0.5 + Math.sin(progress * Math.PI * 2.5) * 0.25;
+  const orcSlide      = Math.max(0, 1 - progress / 0.18);
+  const orcScale      = 1 + progress * 0.08;
+  const caStr         = Math.max(0, Math.sin(progress * Math.PI) * 2.5);
 
   return (
     <section ref={sectionRef} className="aiAssetsIntroSection">
       <div className="aiAssetsSticky">
 
-{/* ── Dust particles ── */}
+        {/* ── Dust particles ── */}
         <canvas ref={canvasRef} className="aiAssetsDustCanvas" />
 
         {/* ── Vignette pulse ── */}
-        <div
-          className="aiAssetsVignette"
-          style={{ opacity: vignettePulse }}
-        />
+        <div className="aiAssetsVignette" style={{ opacity: vignettePulse }} />
 
         {/* ── Blue orc — left ── */}
         <div
@@ -206,12 +228,12 @@ export default function AIAssetsIntro() {
 
           <div className="aiAssetsLines">
             {TAGLINES.map((line, i) => {
-              const threshold  = (i / TAGLINES.length) * 0.82;
-              const raw        = (progress - threshold) / (1 / TAGLINES.length);
-              const vis        = Math.max(0, Math.min(1, raw * 2.2));
-              const ty         = Math.max(0, (1 - raw) * 36);
-              const blur       = Math.max(0, (1 - vis) * 10);
-              const spacing    = 0.02 + vis * 0.025; // letter-spacing expands
+              const threshold = (i / TAGLINES.length) * 0.82;
+              const raw       = (progress - threshold) / (1 / TAGLINES.length);
+              const vis       = Math.max(0, Math.min(1, raw * 2.2));
+              const ty        = Math.max(0, (1 - raw) * 36);
+              const blur      = Math.max(0, (1 - vis) * 10);
+              const spacing   = 0.02 + vis * 0.025;
 
               return (
                 <p
@@ -222,7 +244,6 @@ export default function AIAssetsIntro() {
                     transform:     `translate3d(0,${ty}px,0)`,
                     filter:        `blur(${blur}px)`,
                     letterSpacing: `${spacing}em`,
-                    // Chromatic aberration via text-shadow RGB split
                     textShadow: vis > 0.05
                       ? `${-caStr * 0.6}px 0 0 rgba(255,0,60,${0.35 * vis}),
                          ${caStr * 0.6}px 0 0 rgba(0,200,255,${0.35 * vis}),
@@ -244,64 +265,8 @@ export default function AIAssetsIntro() {
           </p>
         </div>
 
-        {/* Task 5 — Bottom fog layer: animated turbulence sweeps upward */}
-        <div className="aiAssetsBottomFog" aria-hidden="true">
-          <svg
-            className="aiAssetsBottomFogSvg"
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <filter id="aiBottomFogFilter" x="-10%" y="-50%" width="120%" height="200%">
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.012 0.006"
-                  numOctaves="5"
-                  seed="7"
-                  result="noise"
-                >
-                  <animate
-                    attributeName="baseFrequency"
-                    values="0.012 0.006;0.018 0.009;0.012 0.006"
-                    dur="14s"
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="seed"
-                    values="7;12;7"
-                    dur="22s"
-                    repeatCount="indefinite"
-                  />
-                </feTurbulence>
-                <feColorMatrix
-                  type="matrix"
-                  values="0 0 0 0 0.03
-                          0 0 0 0 0.03
-                          0 0 0 0 0.05
-                          0 0 0 0.72 0"
-                  in="noise"
-                  result="fog"
-                />
-                <feGaussianBlur stdDeviation="6" in="fog" result="softFog" />
-                <feComposite in="softFog" in2="SourceGraphic" operator="over" />
-              </filter>
-              <linearGradient id="aiBottomFogGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#000" stopOpacity="0" />
-                <stop offset="45%"  stopColor="#000" stopOpacity="0.55" />
-                <stop offset="100%" stopColor="#000" stopOpacity="0.95" />
-              </linearGradient>
-            </defs>
-            {/* Noise fog layer */}
-            <rect
-              width="100%" height="100%"
-              fill="transparent"
-              filter="url(#aiBottomFogFilter)"
-              opacity="0.85"
-            />
-            {/* Gradient fade to black at bottom edge */}
-            <rect width="100%" height="100%" fill="url(#aiBottomFogGrad)" />
-          </svg>
-        </div>
+        {/* ── Bottom fog — CSS-only, no SVG filter on scroll path ── */}
+        <div className="aiAssetsBottomFog" aria-hidden="true" />
 
       </div>
     </section>
