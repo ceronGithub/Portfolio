@@ -285,19 +285,18 @@ function SystemCard({
               className="vSystemBtn vSystemBtnGhost"
               onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}
             >
-              Preview Demo
+              Configure
             </button>
             {item.owned ? (
               <span className="vSystemBtn vSystemBtnOwned">✓ Owned</span>
             ) : (
-              <Link
-                href={`/checkout/${item.id}`}
+              <button
                 className="vSystemBtn vSystemBtnGreen"
                 style={{ background: item.accent }}
-                onClick={e => e.stopPropagation()}
+                onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}
               >
                 Buy Now →
-              </Link>
+              </button>
             )}
           </div>
         </div>

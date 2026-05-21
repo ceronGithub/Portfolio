@@ -1,0 +1,393 @@
+/* systems-info.css — Styles for the six buyer informational sections.
+   Sections: How We Build, Compare Options, Cost Drivers, Confidence,
+   Maintenance & Support, FAQ.
+   Design language: dark (#080809), Syne headings, DM Mono labels, subtle borders. */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ════════════════════════════════════════════════════
+   SHARED SECTION BASE
+════════════════════════════════════════════════════ */
+.sysInfoSection {
+  width: 100%;
+  background: #080809;
+  font-family: 'Syne', sans-serif;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 6rem 0;
+}
+
+.sysInfoInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Mono label above title */
+.sysInfoLabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+  margin: 0 0 0.75rem;
+}
+
+/* Section heading */
+.sysInfoTitle {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  color: #f0ede8;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+/* Section sub copy */
+.sysInfoSub {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.65;
+  max-width: 560px;
+  margin: 0 0 3.5rem;
+}
+
+/* ════════════════════════════════════════════════════
+   HOW WE BUILD
+════════════════════════════════════════════════════ */
+.sysInfoBuildGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.sysInfoBuildCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.75rem;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+.sysInfoBuildCard:hover {
+  background: rgba(255,255,255,0.035);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.sysInfoBuildNum {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.18);
+  margin-bottom: 0.9rem;
+}
+
+.sysInfoBuildTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f0ede8;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.65rem;
+}
+
+.sysInfoBuildBody {
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ════════════════════════════════════════════════════
+   COMPARE OPTIONS
+════════════════════════════════════════════════════ */
+.sysInfoCmpWrap {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.sysInfoCmpTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+}
+
+.sysInfoCmpThFeature,
+.sysInfoCmpTh {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.015);
+}
+
+.sysInfoCmpTh { text-align: center; }
+
+/* Highlight "Us" column header */
+.sysInfoCmpThUs { color: #22c55e; }
+
+.sysInfoCmpRow {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+
+.sysInfoCmpRow:last-child { border-bottom: none; }
+.sysInfoCmpRow:hover { background: rgba(255,255,255,0.02); }
+
+.sysInfoCmpFeature {
+  padding: 0.9rem 1.25rem;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.sysInfoCmpCell {
+  padding: 0.9rem 1.25rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* "Us" column cells — subtle green tint */
+.sysInfoCmpCellUs { background: rgba(34,197,94,0.03); }
+
+.sysInfoCmpYes    { color: #22c55e; font-size: 1rem; }
+.sysInfoCmpNo     { color: rgba(255,255,255,0.18); font-size: 1rem; }
+.sysInfoCmpMaybe  { color: #c9935e; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; }
+.sysInfoCmpPartial {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.06em;
+}
+
+/* ════════════════════════════════════════════════════
+   COST DRIVERS
+════════════════════════════════════════════════════ */
+.sysInfoCostGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.sysInfoCostCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  transition: border-color 0.2s;
+}
+
+.sysInfoCostCard:hover { border-color: rgba(255,255,255,0.1); }
+
+.sysInfoCostIcon { font-size: 1.5rem; }
+
+.sysInfoCostTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f0ede8;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.sysInfoCostBody {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ════════════════════════════════════════════════════
+   BUILT WITH CONFIDENCE
+════════════════════════════════════════════════════ */
+.sysInfoSectionConfidence {
+  background: linear-gradient(160deg, #0a0c0f 0%, #080809 60%);
+}
+
+.sysInfoConfidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.sysInfoConfidenceCard {
+  padding: 2rem 1.75rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+.sysInfoConfidenceCard:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.sysInfoConfidenceStat {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #66e3ff;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.4rem;
+}
+
+.sysInfoConfidenceLabel {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f0ede8;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.sysInfoConfidenceNote {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.32);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ════════════════════════════════════════════════════
+   MAINTENANCE & SUPPORT
+════════════════════════════════════════════════════ */
+.sysInfoSupportGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.sysInfoSupportCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: border-color 0.25s;
+}
+
+/* Top border accent uses CSS custom property set inline */
+.sysInfoSupportCard {
+  border-top: 2px solid var(--tierAccent, rgba(255,255,255,0.1));
+}
+
+.sysInfoSupportCard:hover { border-color: var(--tierAccent, rgba(255,255,255,0.15)); }
+
+.sysInfoSupportCardTop {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sysInfoSupportName {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.sysInfoSupportDuration {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+}
+
+.sysInfoSupportPerks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.sysInfoSupportPerk {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.sysInfoSupportPerkDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════
+   FAQ
+════════════════════════════════════════════════════ */
+.sysInfoFaqList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.sysInfoFaqItem {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.2s;
+}
+
+.sysInfoFaqItem:last-child { border-bottom: none; }
+
+.sysInfoFaqItemOpen { background: rgba(255,255,255,0.02); }
+
+.sysInfoFaqQuestion {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.sysInfoFaqQuestion:hover { color: #f0ede8; }
+
+.sysInfoFaqItemOpen .sysInfoFaqQuestion { color: #f0ede8; }
+
+.sysInfoFaqChevron {
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.22);
+  transition: transform 0.25s;
+}
+
+.sysInfoFaqChevronOpen { transform: rotate(180deg); }
+
+.sysInfoFaqAnswer {
+  padding: 0 1.5rem 1.25rem;
+}
+
+.sysInfoFaqAnswer p {
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.7;
+  margin: 0;
+}

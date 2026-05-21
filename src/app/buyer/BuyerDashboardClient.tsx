@@ -11,6 +11,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useWishlist }           from "./wishlist/useWishlist";
 import WishlistPanel             from "./wishlist/WishlistPanel";
 import SystemsClient             from "./system/SystemsClient";
+import SystemsInfoSections       from "./system/SystemsInfoSections";
 import AISection                 from "./ai/AISection";
 import InquirySection            from "./inquiries/InquirySection";
 import AIAssetsIntro             from "./ai-weapon-character/AIAssetsIntro";
@@ -34,6 +35,7 @@ interface AddonItem {
 interface SystemItem {
   id: string; name: string; tag: string; accent: string;
   description: string; basePrice: number; timeline: string;
+  features: string[];
   demoVideoUrl: string | null; bgVideoUrl: string | null;
   owned: boolean; addons: AddonItem[];
 }
@@ -162,6 +164,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         wishlistIds={wishlistIds}
         onToggleWishlist={toggleWishlist}
       />
+      <SystemsInfoSections />
       <AISection />
 
       {/* Character & Weapon Studio */}
