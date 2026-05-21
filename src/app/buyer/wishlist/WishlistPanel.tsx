@@ -1,29 +1,27 @@
-// WishlistPanel.tsx — Slide-out wishlist drawer for buyer dashboard.
-// Shows wishlisted systems and assets with price and direct Buy Now link.
-// Triggered by wishlist icon in the header/navbar area.
-// Receives wishlistIds + all items + toggle function from parent.
-
 "use client";
+// WishlistPanel.tsx — Slide-out wishlist drawer for buyer dashboard.
+// Shows wishlisted systems and assets with price, Add all to cart, and Buy now CTA.
 
-import { useEffect } from "react";
-import Link from "next/link";
+import { useEffect }  from "react";
+import Link           from "next/link";
 import "./wishlist-panel.css";
 
 interface WishlistEntry {
-  id:       string;
-  name:     string;
-  category: string;       // e.g. "System", "Character", "Weapon", "Exterior", "Interior"
-  price:    string;       // formatted string e.g. "₱33,000"
-  accent:   string;       // hex color
+  id:           string;
+  name:         string;
+  category:     string;
+  price:        string;
+  accent:       string;
   checkoutHref: string;
 }
 
 interface Props {
-  isOpen:       boolean;
-  onClose:      () => void;
-  entries:      WishlistEntry[];
-  onRemove:     (id: string) => void;
-  onClearAll:   () => void;
+  isOpen:          boolean;
+  onClose:         () => void;
+  entries:         WishlistEntry[];
+  onRemove:        (id: string) => void;
+  onClearAll:      () => void;
+  onAddAllToCart?: (ids: string[]) => void;
 }
 
 export default function WishlistPanel({
@@ -32,13 +30,12 @@ export default function WishlistPanel({
   entries,
   onRemove,
   onClearAll,
+  onAddAllToCart,
 }: Props) {
 
   // Close on Escape key
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     if (isOpen) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
@@ -79,24 +76,17 @@ export default function WishlistPanel({
             <div className="wishlistEmpty">
               <span className="wishlistEmptyIcon">♡</span>
               <p className="wishlistEmptyTitle">Nothing saved yet</p>
-              <p className="wishlistEmptySub">
-                Hit the ♡ on any system or asset to save it here.
-              </p>
+              <p className="wishlistEmptySub">Hit the ♡ on any system or asset to save it here.</p>
             </div>
           ) : (
             <div className="wishlistItemList">
               {entries.map(entry => (
                 <div key={entry.id} className="wishlistItem">
-                  <div
-                    className="wishlistItemAccent"
-                    style={{ background: entry.accent }}
-                  />
+                  <div className="wishlistItemAccent" style={{ background: entry.accent }} />
                   <div className="wishlistItemInfo">
                     <span className="wishlistItemCategory">{entry.category}</span>
                     <p className="wishlistItemName">{entry.name}</p>
-                    <p className="wishlistItemPrice" style={{ color: entry.accent }}>
-                      {entry.price}
-                    </p>
+                    <p className="wishlistItemPrice" style={{ color: entry.accent }}>{entry.price}</p>
                   </div>
                   <div className="wishlistItemActions">
                     <Link
@@ -127,12 +117,27 @@ export default function WishlistPanel({
         {/* Footer */}
         {entries.length > 0 && (
           <div className="wishlistDrawerFooter">
-            <button className="wishlistClearBtn" onClick={onClearAll}>
-              Clear all
-            </button>
-            <p className="wishlistFooterNote">
-              {entries.length} item{entries.length !== 1 ? "s" : ""} saved
-            </p>
+            <div className="wishlistFooterActions">
+              {onAddAllToCart && (
+                <button
+                  className="wishlistAddAllBtn"
+                  onClick={() => { onAddAllToCart(entries.map(e => e.id)); onClose(); }}
+                >
+                  Add all to cart
+                </button>
+              )}
+              <Link
+                href={entries[0]?.checkoutHref ?? "#"}
+                className="wishlistBuyNowBtn"
+                onClick={onClose}
+              >
+                Buy now →
+              </Link>
+            </div>
+            <div className="wishlistFooterMeta">
+              <p className="wishlistFooterNote">{entries.length} item{entries.length !== 1 ? "s" : ""} saved</p>
+              <button className="wishlistClearBtn" onClick={onClearAll}>Clear all</button>
+            </div>
           </div>
         )}
       </aside>

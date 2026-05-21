@@ -889,3 +889,52 @@
   text-align:    center;
   margin-top:    auto;
 }
+
+/* ── Task 2: Price range filter ── */
+.assetModalPriceFilter {
+  display:     flex;
+  align-items: center;
+  gap:         0.35rem;
+  flex-shrink: 0;
+}
+
+.assetModalPriceFilterLabel {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.3);
+}
+
+.assetModalPriceInput {
+  width:         70px;
+  background:    rgba(255,255,255,0.05);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding:       0.35rem 0.5rem;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.6rem;
+  color:         rgba(255,255,255,0.7);
+  outline:       none;
+  transition:    border-color 0.18s;
+  -moz-appearance: textfield;
+}
+.assetModalPriceInput::-webkit-outer-spin-button,
+.assetModalPriceInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.assetModalPriceInput:focus { border-color: rgba(34,197,94,0.4); }
+.assetModalPriceInput::placeholder { color: rgba(255,255,255,0.2); }
+
+.assetModalPriceFilterSep {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.2);
+}
+
+.assetModalPriceClear {
+  background:  none;
+  border:      none;
+  color:       rgba(255,255,255,0.25);
+  font-size:   0.6rem;
+  cursor:      pointer;
+  padding:     2px 4px;
+  transition:  color 0.18s;
+}
+.assetModalPriceClear:hover { color: rgba(255,255,255,0.6); }

@@ -1,8 +1,7 @@
+"use client";
 // useWishlist.ts — Custom hook for buyer wishlist state.
 // Persists wishlisted asset/system IDs to localStorage under key "buyerWishlist".
-// Returns the set of wishlisted IDs, a toggle function, and a clear function.
-
-"use client";
+// Returns wishlistIds, toggle, clear, and hydrated (true once localStorage is read).
 
 import { useState, useEffect, useCallback } from "react";
 
@@ -29,31 +28,28 @@ function saveToStorage(ids: Set<string>): void {
 
 export function useWishlist() {
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
+  // hydrated = true once localStorage has been read on the client
+  const [hydrated, setHydrated] = useState(false);
 
   // Hydrate from localStorage on mount (client only)
   useEffect(() => {
     setWishlistIds(loadFromStorage());
+    setHydrated(true);
   }, []);
 
-  // Toggle an id in/out of the wishlist
   const toggleWishlist = useCallback((id: string) => {
     setWishlistIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       saveToStorage(next);
       return next;
     });
   }, []);
 
-  // Clear the entire wishlist
   const clearWishlist = useCallback(() => {
     setWishlistIds(new Set());
     saveToStorage(new Set());
   }, []);
 
-  return { wishlistIds, toggleWishlist, clearWishlist };
+  return { wishlistIds, toggleWishlist, clearWishlist, hydrated };
 }

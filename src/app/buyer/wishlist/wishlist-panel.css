@@ -248,33 +248,79 @@
 
 /* ── Footer ── */
 .wishlistDrawerFooter {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.75rem;
+  padding:        1rem 1.5rem 1.5rem;
+  border-top:     1px solid #151515;
+  flex-shrink:    0;
+}
+
+/* Action buttons row */
+.wishlistFooterActions {
+  display: flex;
+  gap:     0.6rem;
+}
+
+.wishlistAddAllBtn {
+  flex:          1;
+  background:    rgba(255,255,255,0.06);
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding:       0.6rem 0.8rem;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.62rem;
+  color:         rgba(255,255,255,0.65);
+  cursor:        pointer;
+  transition:    background 0.18s, color 0.18s;
+  letter-spacing: 0.04em;
+}
+.wishlistAddAllBtn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.wishlistBuyNowBtn {
+  flex:            1;
+  background:      #22c55e;
+  border:          none;
+  border-radius:   8px;
+  padding:         0.6rem 0.8rem;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.62rem;
+  font-weight:     600;
+  color:           #000;
+  cursor:          pointer;
+  text-decoration: none;
+  text-align:      center;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      background 0.18s;
+  letter-spacing:  0.04em;
+}
+.wishlistBuyNowBtn:hover { background: #16a34a; }
+
+/* Meta row: count + clear */
+.wishlistFooterMeta {
   display:         flex;
   align-items:     center;
   justify-content: space-between;
-  padding:         1rem 1.5rem 1.5rem;
-  border-top:      1px solid #151515;
-  flex-shrink:     0;
 }
 
 .wishlistClearBtn {
   font-family:    'DM Mono', monospace;
-  font-size:      0.65rem;
-  font-weight:    400;
-  color:          #444;
+  font-size:      0.6rem;
+  color:          #333;
   background:     transparent;
-  border:         1px solid #222;
-  padding:        0.35rem 0.9rem;
-  border-radius:  999px;
+  border:         none;
+  padding:        0;
   cursor:         pointer;
-  letter-spacing: 0.06em;
-  transition:     border-color 0.2s, color 0.2s;
+  letter-spacing: 0.04em;
+  transition:     color 0.2s;
 }
-
-.wishlistClearBtn:hover { border-color: #e55; color: #e55; }
+.wishlistClearBtn:hover { color: #e55; }
 
 .wishlistFooterNote {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.62rem;
-  color:          rgba(255,255,255,0.15);
-  margin:         0;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.58rem;
+  color:       rgba(255,255,255,0.15);
+  margin:      0;
 }

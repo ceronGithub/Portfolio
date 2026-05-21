@@ -1,0 +1,137 @@
+/* recently-viewed.css — Horizontal scroll row for recently previewed assets */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@400;600;700&display=swap');
+
+.rvSection {
+  max-width:  1100px;
+  margin:     0 auto;
+  padding:    2.5rem 2rem 0;
+}
+
+/* ── Header ── */
+.rvHeader {
+  display:         flex;
+  align-items:     flex-end;
+  justify-content: space-between;
+  margin-bottom:   1.1rem;
+}
+
+.rvEyebrow {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.55rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin:         0 0 0.3rem;
+}
+
+.rvTitle {
+  font-family: 'Syne', sans-serif;
+  font-size:   1.1rem;
+  font-weight: 600;
+  color:       rgba(255,255,255,0.8);
+  margin:      0;
+  line-height: 1.1;
+}
+
+.rvClearBtn {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.57rem;
+  color:          rgba(255,255,255,0.2);
+  background:     none;
+  border:         none;
+  cursor:         pointer;
+  letter-spacing: 0.06em;
+  padding:        0;
+  transition:     color 0.18s;
+  margin-bottom:  0.1rem;
+}
+.rvClearBtn:hover { color: #e55; }
+
+/* ── Horizontal scroll ── */
+.rvScrollWrap {
+  overflow-x:  auto;
+  overflow-y:  visible;
+  padding-bottom: 0.5rem;
+  /* hide scrollbar */
+  scrollbar-width: none;
+}
+.rvScrollWrap::-webkit-scrollbar { display: none; }
+
+.rvScroll {
+  display:   flex;
+  gap:       0.75rem;
+  width:     max-content;
+}
+
+/* ── Card ── */
+.rvCard {
+  width:          175px;
+  flex-shrink:    0;
+  background:     rgba(255,255,255,0.03);
+  border:         1px solid rgba(255,255,255,0.06);
+  border-radius:  10px;
+  padding:        1rem 1rem 0.85rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.3rem;
+  transition:     border-color 0.18s, background 0.18s;
+}
+
+.rvCard:hover {
+  background:   rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.rvCardTop {
+  margin-bottom: 0.1rem;
+}
+
+.rvCardCategory {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.54rem;
+  font-weight:    400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rvCardLabel {
+  font-family:   'Syne', sans-serif;
+  font-size:     0.8rem;
+  font-weight:   600;
+  color:         #fff;
+  margin:        0;
+  line-height:   1.25;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.rvCardPrice {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.65rem;
+  font-weight: 300;
+  color:       rgba(255,255,255,0.45);
+  margin:      0;
+}
+
+.rvCardViewBtn {
+  margin-top:    0.5rem;
+  width:         100%;
+  background:    rgba(255,255,255,0.05);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding:       0.35rem 0;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.58rem;
+  color:         rgba(255,255,255,0.45);
+  cursor:        pointer;
+  letter-spacing: 0.06em;
+  transition:    background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.rvCardViewBtn:hover {
+  background:   rgba(255,255,255,0.1);
+  color:        #fff;
+  border-color: rgba(255,255,255,0.18);
+}

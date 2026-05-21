@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useWishlist }           from "./wishlist/useWishlist";
 import WishlistPanel             from "./wishlist/WishlistPanel";
 import SystemsClient             from "./system/SystemsClient";
@@ -17,6 +17,8 @@ import InquirySection            from "./inquiries/InquirySection";
 import AIAssetsIntro             from "./ai-weapon-character/AIAssetsIntro";
 import NewAssetSection           from "./ai-weapon-character/NewAssetSection";
 import AssetBuySection           from "./ai-weapon-character/AssetBuySection";
+import RecentlyViewedRow         from "./ai-weapon-character/RecentlyViewedRow";
+import { useRecentlyViewed }     from "./ai-weapon-character/useRecentlyViewed";
 import AssetCompareTool          from "./ai-assets/AssetCompareTool";
 import ArchitectureAssetsIntro   from "./architecture-assets/ArchitectureAssetsIntro";
 import NewArchitectureSection    from "./architecture-assets/NewArchitectureSection";
@@ -112,14 +114,25 @@ function buildWishlistEntries(
 }
 
 export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts }: Props) {
-  const { wishlistIds, toggleWishlist, clearWishlist } = useWishlist();
+  const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
   const [wishlistOpen, setWishlistOpen] = useState(false);
 
   const ownedSet = useMemo(() => new Set(ownedAssetIds), [ownedAssetIds]);
 
+  // Task 3: Add all wishlisted assets to AssetBuySection cart via a ref callback
+  const addAllToCartRef = useRef<((ids: string[]) => void) | null>(null);
+
+  const handleAddAllToCart = useCallback((ids: string[]) => {
+    addAllToCartRef.current?.(ids);
+  }, []);
+
   const handleRemoveFromWishlist = useCallback((id: string) => {
     toggleWishlist(id);
   }, [toggleWishlist]);
+
+  const { recentItems, trackView, clearRecent } = useRecentlyViewed();
+  // browseOpenId — when set, AssetBuySection opens the browse modal and highlights this asset
+  const [browseOpenId, setBrowseOpenId] = useState<string | null>(null);
 
   const wishlistEntries = useMemo(
     () => buildWishlistEntries(wishlistIds, items),
@@ -143,8 +156,8 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
 
-        {/* Count badge */}
-        {wishlistIds.size > 0 && (
+        {/* Count badge — only shown after localStorage hydration to avoid flash */}
+        {hydrated && wishlistIds.size > 0 && (
           <span className="buyerWishlistFloatCount">{wishlistIds.size}</span>
         )}
       </button>
@@ -156,6 +169,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         entries={wishlistEntries}
         onRemove={handleRemoveFromWishlist}
         onClearAll={clearWishlist}
+        onAddAllToCart={handleAddAllToCart}
       />
 
       {/* ── Dashboard Sections ── */}
@@ -170,10 +184,19 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       {/* Character & Weapon Studio */}
       <AIAssetsIntro />
       <NewAssetSection />
+      {/* ── Recently Viewed ── */}
+      <RecentlyViewedRow
+        items={recentItems}
+        onView={id => setBrowseOpenId(id)}
+        onClearAll={clearRecent}
+      />
+
       <AssetBuySection
         ownedAssetIds={ownedSet}
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}
+        onRegisterAddToCart={fn => { addAllToCartRef.current = fn; }}
+        onTrackView={trackView}
       />
 
       <AssetCompareTool ownedAssetIds={ownedSet} />

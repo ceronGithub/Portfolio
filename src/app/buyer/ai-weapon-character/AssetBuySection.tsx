@@ -24,9 +24,13 @@ interface AssetItem {
 }
 
 interface Props {
-  ownedAssetIds?: Set<string>;
-  onAddToWishlist?: (id: string) => void;
-  wishlistIds?: Set<string>;
+  ownedAssetIds?:       Set<string>;
+  onAddToWishlist?:     (id: string) => void;
+  wishlistIds?:         Set<string>;
+  // Task 3: register a callback so parent can add items to this cart externally
+  onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
+  // Task 4: track which assets the buyer previews
+  onTrackView?:         (item: { id: string; label: string; category: string; price: number }) => void;
 }
 
 // Characters + Weapons — Google Drive proxy URLs.
@@ -66,13 +70,31 @@ export default function AssetBuySection({
   ownedAssetIds = new Set(),
   onAddToWishlist,
   wishlistIds = new Set(),
+  onRegisterAddToCart,
+  onTrackView,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Character" | "Weapon">("Character");
   const [browseSearch,  setBrowseSearch]  = useState("");
   const [browseSort,    setBrowseSort]    = useState<"default" | "price-asc" | "price-desc" | "name">("default");
+  // Task 2: price range filter — null means no limit
+  const [priceMin,      setPriceMin]      = useState<number | null>(null);
+  const [priceMax,      setPriceMax]      = useState<number | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+
+  // Task 3: expose addToCartMany so WishlistPanel "Add all to cart" can populate this cart
+  useEffect(() => {
+    onRegisterAddToCart?.((ids: string[]) => {
+      setCartIds(prev => {
+        const next = new Set(prev);
+        ids.forEach(id => {
+          if (!ownedAssetIds.has(id)) next.add(id);
+        });
+        return next;
+      });
+    });
+  }, [onRegisterAddToCart, ownedAssetIds]);
   // Quick View modal — shown before buyer commits to checkout
   const [previewAsset,  setPreviewAsset]  = useState<AssetItem | null>(null);
   const videoCardRef = useRef<HTMLVideoElement>(null);
@@ -172,11 +194,14 @@ export default function AssetBuySection({
     let list = ALL_ASSETS.filter(a => a.category === browseTab);
     if (browseSearch.trim())
       list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
+    // Task 2: price range filter
+    if (priceMin !== null) list = list.filter(a => a.price >= priceMin);
+    if (priceMax !== null) list = list.filter(a => a.price <= priceMax);
     if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (browseSort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
     if (browseSort === "name")       list = [...list].sort((a, b) => a.label.localeCompare(b.label));
     return list;
-  }, [browseTab, browseSearch, browseSort]);
+  }, [browseTab, browseSearch, browseSort, priceMin, priceMax]);
   const cartItems      = ALL_ASSETS.filter(a => cartIds.has(a.id));
   const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
   const discountRate   = getBundleDiscount(cartItems.length);
@@ -345,6 +370,35 @@ export default function AssetBuySection({
                 <option value="price-desc">Price: High → Low</option>
                 <option value="name">Name A–Z</option>
               </select>
+
+              {/* Task 2 — Price range filter */}
+              <div className="assetModalPriceFilter">
+                <span className="assetModalPriceFilterLabel">₱</span>
+                <input
+                  className="assetModalPriceInput"
+                  type="number"
+                  placeholder="Min"
+                  min={0}
+                  value={priceMin ?? ""}
+                  onChange={e => setPriceMin(e.target.value ? Number(e.target.value) : null)}
+                />
+                <span className="assetModalPriceFilterSep">–</span>
+                <input
+                  className="assetModalPriceInput"
+                  type="number"
+                  placeholder="Max"
+                  min={0}
+                  value={priceMax ?? ""}
+                  onChange={e => setPriceMax(e.target.value ? Number(e.target.value) : null)}
+                />
+                {(priceMin !== null || priceMax !== null) && (
+                  <button
+                    className="assetModalPriceClear"
+                    onClick={() => { setPriceMin(null); setPriceMax(null); }}
+                    title="Clear price filter"
+                  >✕</button>
+                )}
+              </div>
             </div>
 
             <div className="assetModalList">
@@ -388,7 +442,11 @@ export default function AssetBuySection({
                           {/* Quick View — fullscreen preview before buying */}
                           <button
                             className="assetModalQuickViewBtn"
-                            onClick={e => { e.stopPropagation(); setPreviewAsset(asset); }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setPreviewAsset(asset);
+                              onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.price });
+                            }}
                             aria-label="Quick view"
                           >
                             Quick View
