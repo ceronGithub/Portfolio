@@ -124,6 +124,17 @@ function IconMoon({ size = 22 }: { size?: number }) {
   );
 }
 
+// Download tray icon — used in buyer navbar for /buyer/downloads
+function IconDownload({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
 /* ── Types ──────────────────────────────────────────────────────────── */
 
 type NavItem = {
@@ -188,12 +199,13 @@ export default function Navbar() {
 
   /* ── Nav items — context-aware ──────────────────────────────────── */
 
-  // Buyer on /buyer pages: Dash + Systems + Profile + Sign Out
+  // Buyer on /buyer pages: Dash + Systems + Downloads + Profile + Sign Out
   const buyerItems: NavItem[] = [
-    { label: "Dash",     href: "/buyer",        icon: <IconDashboard /> },
-    { label: "Systems",  href: "/buyer", icon: <IconSystems />, isHash: true, hashId: "systems" },
-    { label: "Profile",  href: "/buyer/profile", icon: <IconAbout /> },
-    { label: "Sign Out", href: "#",             icon: <IconSignOut />, signOut: true },
+    { label: "Dash",      href: "/buyer",            icon: <IconDashboard /> },
+    { label: "Systems",   href: "/buyer", icon: <IconSystems />, isHash: true, hashId: "systems" },
+    { label: "Downloads", href: "/buyer/downloads",  icon: <IconDownload /> },
+    { label: "Profile",   href: "/buyer/profile",    icon: <IconAbout /> },
+    { label: "Sign Out",  href: "#",                 icon: <IconSignOut />, signOut: true },
   ];
 
   // Admin on /admin pages: Overview, Users, Products, Orders, Theme toggle, Sign Out
@@ -328,11 +340,18 @@ export default function Navbar() {
     // Exact pathname match (non-hash pages like /dashboard)
     const exact = items.findIndex((it) => !it.isHash && !it.signOut && it.href === pathname);
     if (exact !== -1) return exact;
-    // Prefix match
-    const prefix = items.findIndex(
-      (it) => !it.isHash && !it.signOut && it.href !== "/" && pathname.startsWith(it.href),
-    );
-    if (prefix !== -1) return prefix;
+    // Longest-prefix match — prevents /buyer from swallowing /buyer/downloads
+    let bestPrefixIdx = -1;
+    let bestPrefixLen = 0;
+    items.forEach((it, idx) => {
+      if (!it.isHash && !it.signOut && it.href !== "/" && pathname.startsWith(it.href)) {
+        if (it.href.length > bestPrefixLen) {
+          bestPrefixLen = it.href.length;
+          bestPrefixIdx = idx;
+        }
+      }
+    });
+    if (bestPrefixIdx !== -1) return bestPrefixIdx;
     // Home default on visitor page
     if (isOnVisitor) return 0;
     return -1;

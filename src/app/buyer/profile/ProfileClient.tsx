@@ -84,8 +84,9 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
     .reduce((s, o) => s + o.amount, 0);
   const memberYear = new Date(user.memberSince).getFullYear();
 
+  // activeOrders — include PENDING so tracker is visible from order placement, not just after payment
   const activeOrders = orders.filter(o =>
-    o.status === "PAID" || o.status === "IN_DEVELOPMENT" || o.status === "IN_TESTING"
+    o.status === "PENDING" || o.status === "PAID" || o.status === "IN_DEVELOPMENT" || o.status === "IN_TESTING" || o.status === "DELIVERED"
   );
 
   async function saveName() {

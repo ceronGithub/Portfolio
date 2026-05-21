@@ -73,6 +73,8 @@ export default function AssetBuySection({
   const [browseSort,    setBrowseSort]    = useState<"default" | "price-asc" | "price-desc" | "name">("default");
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+  // Quick View modal — shown before buyer commits to checkout
+  const [previewAsset,  setPreviewAsset]  = useState<AssetItem | null>(null);
   const videoCardRef = useRef<HTMLVideoElement>(null);
   const fogCanvasRef = useRef<HTMLCanvasElement>(null);
   const fogRafRef    = useRef<number>(0);
@@ -383,6 +385,14 @@ export default function AssetBuySection({
                               {isWishlisted ? "♥" : "♡"}
                             </button>
                           )}
+                          {/* Quick View — fullscreen preview before buying */}
+                          <button
+                            className="assetModalQuickViewBtn"
+                            onClick={e => { e.stopPropagation(); setPreviewAsset(asset); }}
+                            aria-label="Quick view"
+                          >
+                            Quick View
+                          </button>
                           <button
                             className={"assetModalSelectBtn" + (isInCart ? " assetModalSelectBtnActive" : "")}
                             onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
@@ -417,6 +427,84 @@ export default function AssetBuySection({
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Asset Quick View — fullscreen preview modal ── */}
+      {previewAsset && (
+        <div className="assetQuickViewOverlay" onClick={() => setPreviewAsset(null)}>
+          <div className="assetQuickViewModal" onClick={e => e.stopPropagation()}>
+
+            {/* Close */}
+            <button className="assetQuickViewClose" onClick={() => setPreviewAsset(null)}>✕</button>
+
+            {/* Full video */}
+            <div className="assetQuickViewVideoWrap">
+              <video
+                key={previewAsset.id}
+                src={previewAsset.videoSrc}
+                autoPlay muted loop playsInline
+                className="assetQuickViewVideo"
+              />
+              <div className="assetQuickViewVideoLabel">Animation Preview</div>
+            </div>
+
+            {/* Info panel */}
+            <div className="assetQuickViewInfo">
+              <p className="assetQuickViewCategory">{previewAsset.category}</p>
+              <h2 className="assetQuickViewTitle">{previewAsset.label}</h2>
+              <p className="assetQuickViewPrice">{fmt(previewAsset.price)}</p>
+
+              {/* Stats */}
+              <div className="assetQuickViewStats">
+                <div className="assetQuickViewStat">
+                  <span className="assetQuickViewStatLabel">Format</span>
+                  <span className="assetQuickViewStatValue">OBJ / FBX</span>
+                </div>
+                <div className="assetQuickViewStat">
+                  <span className="assetQuickViewStatLabel">Textures</span>
+                  <span className="assetQuickViewStatValue">4K PBR</span>
+                </div>
+                <div className="assetQuickViewStat">
+                  <span className="assetQuickViewStatLabel">Rig</span>
+                  <span className="assetQuickViewStatValue">Full rig included</span>
+                </div>
+                <div className="assetQuickViewStat">
+                  <span className="assetQuickViewStatLabel">Access</span>
+                  <span className="assetQuickViewStatValue">Lifetime</span>
+                </div>
+              </div>
+
+              {/* Texture preview thumbnails */}
+              <div className="assetQuickViewTextures">
+                <p className="assetQuickViewTexturesLabel">Texture Maps</p>
+                <div className="assetQuickViewTextureList">
+                  {["Albedo", "Normal", "Roughness", "Metallic"].map(mapName => (
+                    <div key={mapName} className="assetQuickViewTextureThumb">
+                      <div className="assetQuickViewThumbPlaceholder" />
+                      <span className="assetQuickViewThumbLabel">{mapName}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA */}
+              {ownedAssetIds.has(previewAsset.id) ? (
+                <div className="assetQuickViewOwned">✓ You own this asset</div>
+              ) : (
+                <button
+                  className={"assetQuickViewBuyBtn" + (cartIds.has(previewAsset.id) ? " assetQuickViewBuyBtnAdded" : "")}
+                  onClick={() => {
+                    handleSelectAsset(previewAsset);
+                    setPreviewAsset(null);
+                  }}
+                >
+                  {cartIds.has(previewAsset.id) ? "✓ Added to Bundle" : `Buy — ${fmt(previewAsset.price)}`}
+                </button>
+              )}
+            </div>
+
           </div>
         </div>
       )}
