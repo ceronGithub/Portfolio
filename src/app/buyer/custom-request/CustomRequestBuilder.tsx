@@ -92,34 +92,28 @@ export default function CustomRequestBuilder() {
   async function handleSubmit() {
     setSubmitting(true);
     setSubmitErr("");
-    const payload = {
-      name:    "Custom Request",
-      email:   "",
-      subject: `Custom ${form.assetType} Request`,
-      message: [
-        `Asset Type: ${form.assetType}`,
-        `Description: ${form.description}`,
-        `Animations: ${form.animCount}`,
-        `Poly Budget: ${form.polyBudget}`,
-        `Reference: ${form.reference || "None"}`,
-        `Delivery Speed: ${form.deliverySpeed}`,
-        `Estimated Quote: ${estimate ? fmt(estimate) : "N/A"}`,
-      ].join("\n"),
-    };
     try {
       const res = await fetch("/api/inquiry", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(payload),
+        body:    JSON.stringify({
+          assetType:     form.assetType,
+          description:   form.description,
+          animCount:     form.animCount,
+          polyBudget:    form.polyBudget || null,
+          reference:     form.reference  || null,
+          deliverySpeed: form.deliverySpeed,
+          estimatedQuote: estimate,
+        }),
       });
-      if (res.ok || res.status === 404) {
-        // 404 = route doesn't exist yet, treat as success for now
+      if (res.status === 201 || res.status === 200) {
         setSubmitted(true);
       } else {
-        setSubmitErr("Something went wrong. Try again.");
+        const data = await res.json().catch(() => ({}));
+        setSubmitErr(data.error ?? "Something went wrong. Try again.");
       }
     } catch {
-      setSubmitted(true); // Offline — show success optimistically
+      setSubmitted(true); // Offline — optimistic success
     } finally {
       setSubmitting(false);
     }
