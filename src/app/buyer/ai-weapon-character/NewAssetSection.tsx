@@ -10,13 +10,13 @@
 import { useRef, useEffect, useState } from "react";
 import "./new-asset-section.css";
 
-const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+const GD = (id: string) => `/api/drive-video?id=${id}`;
 
 // ── Latest drop config — change these when a new asset drops ──────────────
 const LATEST = {
   title:       "Orc 11 — Warlord",
   subtitle:    "New Character. Available now",
-  videoSrc:    `${SB}/character/orc-11-animation.mp4`,
+  videoSrc:    GD("1CTk71XmBB9yNz9Osbfd-YHg9mrsgmZkf"),
   price:       "₱5,500",
   isLive:      false,         // false = show "Coming Soon" badge
   releaseNote: "Full rig · 4K textures · OBJ + FBX included",

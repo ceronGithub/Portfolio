@@ -13,7 +13,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import "./asset-buy-section.css";
 
-const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+const GD = (id: string) => `/api/drive-video?id=${id}`;
 
 interface AssetItem {
   id:       string;
@@ -29,19 +29,18 @@ interface Props {
   wishlistIds?: Set<string>;
 }
 
-// 5 characters + 5 weapons — fixed Supabase URLs per folder.
-// Capped at 5 per category to avoid loading 16+ videos simultaneously on page mount.
+// Characters + Weapons — Google Drive proxy URLs.
 const ALL_ASSETS: AssetItem[] = [
-  { id:"orc-01", label:"Orc 01 — Warrior",   category:"Character", videoSrc:`${SB}/character/orc-01-animation.mp4`, price:5500 },
-  { id:"orc-02", label:"Orc 02 — Fighter",   category:"Character", videoSrc:`${SB}/character/orc-02-animation.mp4`, price:5500 },
-  { id:"orc-03", label:"Orc 03 — Red Skin",  category:"Character", videoSrc:`${SB}/character/orc-03-animation.mp4`, price:5500 },
-  { id:"orc-04", label:"Orc 04 — Armored",   category:"Character", videoSrc:`${SB}/character/orc-04-animation.mp4`, price:5500 },
-  { id:"orc-05", label:"Orc 05 — Shaman",    category:"Character", videoSrc:`${SB}/character/orc-05-animation.mp4`, price:5500 },
-  { id:"axe-01", label:"Axe 01 — Battle Axe",category:"Weapon",    videoSrc:`${SB}/weapon/axe-01-animation.mp4`,    price:3500 },
-  { id:"axe-02", label:"Axe 02 — War Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-02-animation.mp4`,    price:3500 },
-  { id:"axe-03", label:"Axe 03 — Runic Axe", category:"Weapon",    videoSrc:`${SB}/weapon/axe-03-animation.mp4`,    price:3500 },
-  { id:"axe-04", label:"Axe 04 — Viking Axe",category:"Weapon",    videoSrc:`${SB}/weapon/axe-04-animation.mp4`,    price:3500 },
-  { id:"axe-05", label:"Axe 05 — Ornate Axe",category:"Weapon",    videoSrc:`${SB}/weapon/axe-05-animation.mp4`,    price:3500 },
+  { id:"orc-01", label:"Orc 01 — Warrior",    category:"Character", videoSrc:GD("1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP"), price:5500 },
+  { id:"orc-02", label:"Orc 02 — Fighter",    category:"Character", videoSrc:GD("1SaHl7fGvD2uoy34clB1p2UWT-knWENwl"), price:5500 },
+  { id:"orc-03", label:"Orc 03 — Red Skin",   category:"Character", videoSrc:GD("1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i"), price:5500 },
+  { id:"orc-04", label:"Orc 04 — Armored",    category:"Character", videoSrc:GD("1cx2sETIft3K7R8NnNPumoLet1pW5It0a"), price:5500 },
+  { id:"orc-05", label:"Orc 05 — Shaman",     category:"Character", videoSrc:GD("1-n33tw86ViaKB6xzM0UuCrgF45JVc63-"), price:5500 },
+  { id:"axe-01", label:"Axe 01 — Battle Axe", category:"Weapon",    videoSrc:GD("1NrTbKznn-3pcIC9q-BqBa2lUfMUsGKa8"), price:3500 },
+  { id:"axe-02", label:"Axe 02 — War Axe",    category:"Weapon",    videoSrc:GD("1db1EOrzdG2phPiaJ8DJV9Tz1-bfYwB67"), price:3500 },
+  { id:"axe-03", label:"Axe 03 — Runic Axe",  category:"Weapon",    videoSrc:GD("1ZPhiN56sAU9EQIlrrTPY3OSDBhijtHld"), price:3500 },
+  { id:"axe-04", label:"Axe 04 — Viking Axe", category:"Weapon",    videoSrc:GD("1jjU-r5EawMDjzhbJueiadCMjkcCZrHtr"), price:3500 },
+  { id:"axe-05", label:"Axe 05 — Ornate Axe", category:"Weapon",    videoSrc:GD("1vl3KhBI_UQIugyIXeBTduabrOh0eZSU5"), price:3500 },
 ];
 
 // Bundle discount tiers: 2 items = 5%, 3–4 = 10%, 5+ = 15%

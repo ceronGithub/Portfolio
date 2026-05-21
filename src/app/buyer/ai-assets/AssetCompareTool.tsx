@@ -1,14 +1,15 @@
 // AssetCompareTool.tsx — Side-by-side asset preview comparison.
 // Two slots: buyer picks any asset from a dropdown for each slot.
-// Both videos autoplay muted. Stat rows below each (category, price, format).
-// "Add to Cart" CTA under each slot routes to checkout.
+// Both videos autoplay muted via Google Drive proxy.
+// Stat rows below each (category, price, format).
+// "Buy" CTA routes to checkout. Owned assets show "Owned" badge.
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./asset-compare-tool.css";
 
-const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+const GD = (id: string) => `/api/drive-video?id=${id}`;
 
 interface CompareAsset {
   id:       string;
@@ -20,53 +21,72 @@ interface CompareAsset {
   polyNote: string;
 }
 
+// ── All assets with Google Drive video sources ─────────────────────────────
 const COMPARE_ASSETS: CompareAsset[] = [
-  { id:"orc-01", label:"Orc 01 — Warrior",     category:"Character", videoSrc:`${SB}/character/orc-01-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~24k tris" },
-  { id:"orc-02", label:"Orc 02 — Fighter",      category:"Character", videoSrc:`${SB}/character/orc-02-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~22k tris" },
-  { id:"orc-03", label:"Orc 03 — Red Skin",     category:"Character", videoSrc:`${SB}/character/orc-03-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~23k tris" },
-  { id:"orc-04", label:"Orc 04 — Armored",      category:"Character", videoSrc:`${SB}/character/orc-04-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~28k tris" },
-  { id:"orc-05", label:"Orc 05 — Shaman",       category:"Character", videoSrc:`${SB}/character/orc-05-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~21k tris" },
-  { id:"orc-06", label:"Orc 06 — Berserker",    category:"Character", videoSrc:`${SB}/character/orc-06-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~25k tris" },
-  { id:"orc-07", label:"Orc 07 — Heavy",        category:"Character", videoSrc:`${SB}/character/orc-07-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~30k tris" },
-  { id:"orc-08", label:"Orc 08 — Scout",        category:"Character", videoSrc:`${SB}/character/orc-08-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~20k tris" },
-  { id:"orc-09", label:"Orc 09 — Elite",        category:"Character", videoSrc:`${SB}/character/orc-09-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~26k tris" },
-  { id:"orc-11", label:"Orc 11 — Warlord",      category:"Character", videoSrc:`${SB}/character/orc-11-animation.mp4`, price:5500, format:"OBJ + FBX", polyNote:"~32k tris" },
-  { id:"axe-01", label:"Axe 01 — Battle Axe",   category:"Weapon",    videoSrc:`${SB}/weapon/axe-01-animation.mp4`,    price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
-  { id:"axe-02", label:"Axe 02 — War Axe",       category:"Weapon",    videoSrc:`${SB}/weapon/axe-02-animation.mp4`,    price:3500, format:"OBJ + FBX", polyNote:"~7k tris"  },
-  { id:"axe-03", label:"Axe 03 — Runic Axe",     category:"Weapon",    videoSrc:`${SB}/weapon/axe-03-animation.mp4`,    price:3500, format:"OBJ + FBX", polyNote:"~9k tris"  },
-  { id:"axe-04", label:"Axe 04 — Viking Axe",    category:"Weapon",    videoSrc:`${SB}/weapon/axe-04-animation.mp4`,    price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
-  { id:"axe-05", label:"Axe 05 — Ornate Axe",    category:"Weapon",    videoSrc:`${SB}/weapon/axe-05-animation.mp4`,    price:3500, format:"OBJ + FBX", polyNote:"~9k tris"  },
-  { id:"axe-07", label:"Axe 07 — Bloodied Axe",  category:"Weapon",    videoSrc:`${SB}/weapon/axe-07-animation.mp4`,    price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
+  // Characters
+  { id:"orc-01", label:"Orc 01 — Warrior",     category:"Character", videoSrc:GD("1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP"), price:5500, format:"OBJ + FBX", polyNote:"~24k tris" },
+  { id:"orc-02", label:"Orc 02 — Fighter",      category:"Character", videoSrc:GD("1SaHl7fGvD2uoy34clB1p2UWT-knWENwl"), price:5500, format:"OBJ + FBX", polyNote:"~22k tris" },
+  { id:"orc-03", label:"Orc 03 — Red Skin",     category:"Character", videoSrc:GD("1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i"), price:5500, format:"OBJ + FBX", polyNote:"~23k tris" },
+  { id:"orc-04", label:"Orc 04 — Armored",      category:"Character", videoSrc:GD("1cx2sETIft3K7R8NnNPumoLet1pW5It0a"), price:5500, format:"OBJ + FBX", polyNote:"~28k tris" },
+  { id:"orc-05", label:"Orc 05 — Shaman",       category:"Character", videoSrc:GD("1-n33tw86ViaKB6xzM0UuCrgF45JVc63-"), price:5500, format:"OBJ + FBX", polyNote:"~21k tris" },
+  { id:"orc-06", label:"Orc 06 — Berserker",    category:"Character", videoSrc:GD("1XVymFPXK8aQa-Ud7DwpkaQ6g3BrGiLjH"), price:5500, format:"OBJ + FBX", polyNote:"~25k tris" },
+  { id:"orc-07", label:"Orc 07 — Heavy",        category:"Character", videoSrc:GD("16-RCaA3WjQjMf1GT0Ad2JrjAhR-U_FyH"), price:5500, format:"OBJ + FBX", polyNote:"~30k tris" },
+  { id:"orc-08", label:"Orc 08 — Scout",        category:"Character", videoSrc:GD("1Wjgt2RcRkUrbxEMnLQWWdiUdQ3OHwpx3"), price:5500, format:"OBJ + FBX", polyNote:"~20k tris" },
+  { id:"orc-09", label:"Orc 09 — Elite",        category:"Character", videoSrc:GD("1JB-kYyq0XMrPe0pgrh5L2S-nGmK-wvXE"), price:5500, format:"OBJ + FBX", polyNote:"~26k tris" },
+  { id:"orc-10", label:"Orc 10 — Destroyer",    category:"Character", videoSrc:GD("1q3rW69QWjYEK5T53rRTpTFlR7X9ZERRe"), price:5500, format:"OBJ + FBX", polyNote:"~29k tris" },
+  { id:"orc-11", label:"Orc 11 — Warlord",      category:"Character", videoSrc:GD("1CTk71XmBB9yNz9Osbfd-YHg9mrsgmZkf"), price:5500, format:"OBJ + FBX", polyNote:"~32k tris" },
+  { id:"orc-12", label:"Orc 12",                category:"Character", videoSrc:GD("1ZPSoWhJc0ukVny9sCKp0-ytzTsz0aL50"), price:5500, format:"OBJ + FBX", polyNote:"~27k tris" },
+  { id:"orc-13", label:"Orc 13",                category:"Character", videoSrc:GD("1W1eHcST6_noKH3VCygvpKz-JFZkCF6Su"), price:5500, format:"OBJ + FBX", polyNote:"~28k tris" },
+  // Weapons
+  { id:"axe-01", label:"Axe 01 — Battle Axe",   category:"Weapon",    videoSrc:GD("1NrTbKznn-3pcIC9q-BqBa2lUfMUsGKa8"), price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
+  { id:"axe-02", label:"Axe 02 — War Axe",       category:"Weapon",    videoSrc:GD("1db1EOrzdG2phPiaJ8DJV9Tz1-bfYwB67"), price:3500, format:"OBJ + FBX", polyNote:"~7k tris"  },
+  { id:"axe-03", label:"Axe 03 — Runic Axe",     category:"Weapon",    videoSrc:GD("1ZPhiN56sAU9EQIlrrTPY3OSDBhijtHld"), price:3500, format:"OBJ + FBX", polyNote:"~9k tris"  },
+  { id:"axe-04", label:"Axe 04 — Viking Axe",    category:"Weapon",    videoSrc:GD("1jjU-r5EawMDjzhbJueiadCMjkcCZrHtr"), price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
+  { id:"axe-05", label:"Axe 05 — Ornate Axe",    category:"Weapon",    videoSrc:GD("1vl3KhBI_UQIugyIXeBTduabrOh0eZSU5"), price:3500, format:"OBJ + FBX", polyNote:"~9k tris"  },
+  { id:"axe-06", label:"Axe 06 — Broad Axe",     category:"Weapon",    videoSrc:GD("1DcmVwUgfOzvl8wzJJOq-YP7pR_8ZXZ4u"), price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
+  { id:"axe-07", label:"Axe 07 — Bloodied Axe",  category:"Weapon",    videoSrc:GD("1k9AhDcIY-Em7Wyl5fd2i79DomElK1DnM"), price:3500, format:"OBJ + FBX", polyNote:"~8k tris"  },
+  { id:"axe-08", label:"Axe 08 — Dark Axe",      category:"Weapon",    videoSrc:GD("1tqcYpL3wqMpomBiXOo_N6yDwspdEgmWu"), price:3500, format:"OBJ + FBX", polyNote:"~9k tris"  },
 ];
 
 function fmt(p: number) {
   return "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
 }
 
-// ── Single comparison slot ────────────────────────────────────────────────
+// ── Props ──────────────────────────────────────────────────────────────────
+export interface AssetCompareToolProps {
+  ownedAssetIds?: Set<string>;
+  wishlistIds?:   Set<string>;
+  onAddToWishlist?: (id: string) => void;
+}
+
+// ── Single comparison slot ─────────────────────────────────────────────────
 function CompareSlot({
   slot,
   selected,
   opposite,
+  ownedAssetIds,
   onChange,
 }: {
-  slot:     "A" | "B";
-  selected: CompareAsset | null;
-  opposite: CompareAsset | null;
-  onChange: (asset: CompareAsset | null) => void;
+  slot:          "A" | "B";
+  selected:      CompareAsset | null;
+  opposite:      CompareAsset | null;
+  ownedAssetIds: Set<string>;
+  onChange:      (asset: CompareAsset | null) => void;
 }) {
-  // Callback ref — fires whenever the video element mounts or src changes
-  const videoCallbackRef = useCallback((el: HTMLVideoElement | null) => {
-    if (!el) return;
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Reload and play whenever selection changes
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !selected) return;
     el.load();
     el.play().catch(() => {});
-  }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected?.id]);
 
+  const isOwned          = selected ? ownedAssetIds.has(selected.id) : false;
   const isSameAsOpposite = selected && opposite && selected.id === opposite.id;
-
-  // Stats comparison helpers
-  const priceHigher = selected && opposite && selected.price > opposite.price;
-  const priceLower  = selected && opposite && selected.price < opposite.price;
+  const priceHigher      = selected && opposite && selected.price > opposite.price;
+  const priceLower       = selected && opposite && selected.price < opposite.price;
 
   return (
     <div className={`compareSlot ${selected ? "compareSlotFilled" : "compareSlotEmpty"}`}>
@@ -107,11 +127,11 @@ function CompareSlot({
         <p className="compareSameWarning">⚠ Same asset selected in both slots</p>
       )}
 
-      {/* Video preview */}
+      {/* Video preview — key forces remount when selection changes */}
       <div className="compareVideoWrap">
         {selected ? (
           <video
-            ref={videoCallbackRef}
+            ref={videoRef}
             key={selected.id}
             src={selected.videoSrc}
             autoPlay
@@ -164,19 +184,25 @@ function CompareSlot({
 
       {/* CTA */}
       {selected && (
-        <a
-          href={`/checkout/${selected.id}`}
-          className="compareAddBtn"
-        >
-          Buy {selected.label.split("—")[0].trim()} — {fmt(selected.price)}
-        </a>
+        isOwned ? (
+          <div className="compareOwnedBadge">✓ Owned</div>
+        ) : (
+          <a
+            href={`/checkout/${selected.id}`}
+            className="compareAddBtn"
+          >
+            Buy {selected.label.split("—")[0].trim()} — {fmt(selected.price)}
+          </a>
+        )
       )}
     </div>
   );
 }
 
 // ── Main export ────────────────────────────────────────────────────────────
-export default function AssetCompareTool() {
+export default function AssetCompareTool({
+  ownedAssetIds = new Set(),
+}: AssetCompareToolProps) {
   const [slotA, setSlotA] = useState<CompareAsset | null>(null);
   const [slotB, setSlotB] = useState<CompareAsset | null>(null);
 
@@ -203,14 +229,14 @@ export default function AssetCompareTool() {
 
       {/* Slots */}
       <div className="compareGrid">
-        <CompareSlot slot="A" selected={slotA} opposite={slotB} onChange={setSlotA} />
+        <CompareSlot slot="A" selected={slotA} opposite={slotB} ownedAssetIds={ownedAssetIds} onChange={setSlotA} />
 
         {/* VS divider */}
         <div className="compareVsDivider">
           <span className="compareVsLabel">VS</span>
         </div>
 
-        <CompareSlot slot="B" selected={slotB} opposite={slotA} onChange={setSlotB} />
+        <CompareSlot slot="B" selected={slotB} opposite={slotA} ownedAssetIds={ownedAssetIds} onChange={setSlotB} />
       </div>
     </section>
   );

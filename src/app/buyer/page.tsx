@@ -28,11 +28,21 @@ export default async function BuyerPage() {
     }),
     prisma.ownership.findMany({
       where:  { userId },
-      select: { productId: true, product: { select: { name: true } } },
+      select: { productId: true },
     }),
   ]);
 
-  const ownedSet = new Set(ownerships.map((o: any) => o.productId));
+  const ownedProductIds = ownerships.map((o: any) => o.productId);
+
+  // Fetch product names separately — safe even if Product table is empty
+  const ownedProductRecords = ownedProductIds.length > 0
+    ? await prisma.product.findMany({
+        where:  { id: { in: ownedProductIds } },
+        select: { id: true, name: true },
+      })
+    : [];
+
+  const ownedSet = new Set(ownedProductIds);
 
   const demoVideos: Record<string, string> = {
     Restaurant: "/videos/restaurant-demo.mp4",
@@ -74,8 +84,8 @@ export default async function BuyerPage() {
   }));
 
   // Pass all owned IDs (system + asset) to the client
-  const ownedAssetIds  = ownerships.map((o: any) => o.productId);
-  const ownedProducts  = ownerships.map((o: any) => ({ id: o.productId, name: o.product.name }));
+  const ownedAssetIds  = ownedProductIds;
+  const ownedProducts  = ownedProductRecords.map((p: any) => ({ id: p.id, name: p.name }));
 
   return (
     <div className="dashboardLanding">

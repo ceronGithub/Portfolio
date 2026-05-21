@@ -176,7 +176,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         onAddToWishlist={toggleWishlist}
       />
 
-      <AssetCompareTool />
+      <AssetCompareTool ownedAssetIds={ownedSet} />
 
       {/* Architecture Studio */}
       <ArchitectureAssetsIntro />
