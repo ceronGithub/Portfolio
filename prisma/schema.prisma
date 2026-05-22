@@ -13,6 +13,13 @@ enum Role {
   BUYER
 }
 
+enum ProductCategory {
+  weapon
+  character
+  interior
+  exterior
+}
+
 enum OrderStatus {
   PENDING          // Inquiry submitted, awaiting downpayment
   PAID             // Downpayment received — development starts
@@ -36,13 +43,19 @@ model User {
   inquiries Inquiry[]
 }
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  price       Int
-  fileKey     String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id                String          @id @default(cuid())
+  name              String
+  description       String?
+  price             Int
+  category          ProductCategory @default(character)
+  previewVideoUrl   String?
+  facePngUrl        String?
+  threeDUrl         String?
+  actionOneUrl      String?
+  actionTwoUrl      String?
+  actionThreeUrl    String?
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
 
   orders    Order[]
   ownership Ownership[]
