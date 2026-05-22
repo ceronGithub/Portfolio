@@ -381,9 +381,12 @@ function SupportSection() {
               <button
                 className="sysInfoTierBtn"
                 style={{
-                  background:  i === 2 ? tier.accent : "transparent",
-                  borderColor: tier.accent,
-                  color:       i === 2 ? "#000" : tier.accent,
+                  background:  i === 2 ? "#c4b5fd" : "#22c55e",
+                  borderColor: i === 2 ? "#c4b5fd" : "#22c55e",
+                  color:       "#000",
+                }}
+                onClick={() => {
+                  document.querySelector(".iqSection")?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
                 Get Started

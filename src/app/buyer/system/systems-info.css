@@ -628,11 +628,11 @@
 }
 
 .sysInfoTierCardHighlight {
-  border-color: rgba(196,181,253,0.3);
+  border-color: rgba(34,197,94,0.45);
   background:   rgba(255,255,255,0.04);
   position:     relative;
   transform:    translateY(-8px);
-  box-shadow:   0 12px 48px rgba(0,0,0,0.4);
+  box-shadow:   0 12px 48px rgba(34,197,94,0.12), 0 12px 48px rgba(0,0,0,0.4);
 }
 
 .sysInfoTierCardHighlight::before {
