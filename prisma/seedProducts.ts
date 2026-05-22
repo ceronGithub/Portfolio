@@ -4,9 +4,10 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Helper: constructs a Google Drive direct view URL from a file ID.
+// Helper: constructs the drive-video proxy URL from a file ID.
+// Stores /api/drive-video?id=... so <video src> can stream directly.
 function gd(id: string) {
-  return `https://drive.google.com/file/d/${id}/view?usp=drivesdk`;
+  return `/api/drive-video?id=${id}`;
 }
 
 const products = [
