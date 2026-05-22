@@ -290,21 +290,42 @@ export default function AssetBuySection({
                 <p className="assetBuyCardLabel">3D obj file here</p>
               </div>
             </div>
-            <div className="assetBuyCard">
-              {selectedAsset ? (
-                <video
-                  ref={videoCardRef}
-                  src={selectedAsset.videoSrc}
-                  className="assetBuyCardVideo"
-                  autoPlay muted loop playsInline
-                />
-              ) : (
+
+            {/* Animation preview — single or multi-item strip */}
+            {cartItems.length === 0 ? (
+              <div className="assetBuyCard">
                 <div className="assetBuyCardInner">
                   <span className="assetBuyCardIcon">🎬</span>
                   <p className="assetBuyCardLabel">Mp4 animation here</p>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : cartItems.length === 1 ? (
+              <div className="assetBuyCard">
+                <video
+                  ref={videoCardRef}
+                  key={cartItems[0].id}
+                  src={cartItems[0].videoSrc}
+                  className="assetBuyCardVideo"
+                  autoPlay muted loop playsInline
+                />
+              </div>
+            ) : (
+              /* Multiple selected — scrollable horizontal strip */
+              <div className="assetBuyCard assetBuyCardMulti">
+                <div className="assetBuyMultiStrip">
+                  {cartItems.map(item => (
+                    <div key={item.id} className="assetBuyMultiCell">
+                      <video
+                        src={item.videoSrc}
+                        className="assetBuyMultiVideo"
+                        autoPlay muted loop playsInline
+                      />
+                      <p className="assetBuyMultiLabel">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

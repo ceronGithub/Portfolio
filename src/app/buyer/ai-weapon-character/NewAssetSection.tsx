@@ -160,7 +160,19 @@ export default function NewAssetSection() {
         </div>
 
         <div className="newAssetCards">
-          {/* Card — 3D OBJ placeholder */}
+          {/* Card 1 — Animation preview — static, no autoplay */}
+          <div className="newAssetCard newAssetCardVideo">
+            <video
+              src={LATEST.videoSrc}
+              muted
+              playsInline
+              preload="metadata"
+              className="newAssetCardVideoEl"
+            />
+            <div className="newAssetCardVideoLabel">Animation Preview</div>
+          </div>
+
+          {/* Card 2 — 3D OBJ placeholder */}
           <div className="newAssetCard">
             <div className="newAssetCardInner">
               <span className="newAssetCardIcon">📦</span>
