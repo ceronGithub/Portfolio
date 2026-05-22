@@ -1,10 +1,12 @@
 // ArchitectureBuySection — Interior / Exterior buying section.
 // Preview cards removed. Selected asset video plays as section background.
 // Browse → Select → video fills the left bg of the section.
+// Tabs are DB-fetched per category (same pattern as AssetBuySection).
+// Browse modal has search, sort, and price range filter controls.
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useToast }  from "../shared/useToast";
 import ToastStack    from "../shared/ToastStack";
 import "./architecture-buy-section.css";
@@ -21,30 +23,9 @@ interface Props {
   ownedAssetIds?: Set<string>;
   onAddToWishlist?: (id: string) => void;
   wishlistIds?: Set<string>;
-  // Pushes selected IDs into the global CartDrawer
   onAddToCart?: (ids: string[]) => void;
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
 }
-
-const GD = (id: string) => `/api/drive-video?id=${id}`;
-
-const ALL_ARCH_ASSETS: ArchAssetItem[] = [
-  // ── Exterior ──
-  { id:"ext-drone-01", label:"Drone Reveal 01",  category:"Exterior", videoSrc:GD("1QKCGiJCNzSbpkVsQPN073ws6WbZMwrZC"), price:8500 },
-  { id:"ext-drone-02", label:"Drone Reveal 02",  category:"Exterior", videoSrc:GD("1hIAB7FrCEnn8cfrGSCplccHkZ4Gonnxu"), price:8500 },
-  { id:"ext-proj-01",  label:"Project 01",        category:"Exterior", videoSrc:GD("1kp23x5YBnWovDamPDT2FS00d1ID9SB0k"), price:8500 },
-  { id:"ext-proj-02",  label:"Project 02",        category:"Exterior", videoSrc:GD("10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T"), price:8500 },
-  { id:"ext-proj-03",  label:"Project 03",        category:"Exterior", videoSrc:GD("1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ"), price:8500 },
-  { id:"ext-proj-04",  label:"Project 04",        category:"Exterior", videoSrc:GD("1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT"), price:8500 },
-  // ── Interior ──
-  { id:"int-01", label:"Interior 01 — Suite",    category:"Interior", videoSrc:GD("16IlbksfqFgAsIUlIbSnfG1k0miktYC0d"), price:7500 },
-  { id:"int-02", label:"Interior 02 — Living",   category:"Interior", videoSrc:GD("1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ"), price:7500 },
-  { id:"int-03", label:"Interior 03 — Kitchen",  category:"Interior", videoSrc:GD("1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce"), price:7500 },
-  { id:"int-04", label:"Interior 04 — Bedroom",  category:"Interior", videoSrc:GD("1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl"), price:7500 },
-  { id:"int-05", label:"Interior 05 — Lobby",    category:"Interior", videoSrc:GD("1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu"), price:7500 },
-  { id:"int-06", label:"Interior 06 — Office",   category:"Interior", videoSrc:GD("1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW"), price:7500 },
-  { id:"int-07", label:"Interior 07 — Luxury",   category:"Interior", videoSrc:GD("1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG"), price:7500 },
-];
 
 function getBundleDiscount(count: number): number {
   if (count >= 5) return 0.15;
@@ -73,6 +54,10 @@ export default function ArchitectureBuySection({
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
+  const [browseSearch,  setBrowseSearch]  = useState("");
+  const [browseSort,    setBrowseSort]    = useState<"default" | "price-asc" | "price-desc" | "name">("default");
+  const [priceMin,      setPriceMin]      = useState<number | null>(null);
+  const [priceMax,      setPriceMax]      = useState<number | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<ArchAssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const [cycleIndex,    setCycleIndex]    = useState(0);
@@ -80,21 +65,68 @@ export default function ArchitectureBuySection({
   const { toasts, showToast, dismissToast } = useToast();
   const bgVideoRef = useRef<HTMLVideoElement>(null);
 
-  const filteredAssets = ALL_ARCH_ASSETS.filter(a => a.category === browseTab);
-  const cartItems      = ALL_ARCH_ASSETS.filter(a => cartIds.has(a.id));
+  // DB-fetched assets per tab — cached after first fetch
+  const [interiorAssets, setInteriorAssets] = useState<ArchAssetItem[]>([]);
+  const [exteriorAssets, setExteriorAssets] = useState<ArchAssetItem[]>([]);
+  const [assetsLoading,  setAssetsLoading]  = useState(false);
+
+  // Fetch from /api/products when modal opens or tab switches
+  useEffect(() => {
+    if (!browseOpen) return;
+    const category     = browseTab === "Interior" ? "interior" : "exterior";
+    const alreadyLoaded = category === "interior" ? interiorAssets.length > 0 : exteriorAssets.length > 0;
+    if (alreadyLoaded) return;
+
+    setAssetsLoading(true);
+    fetch(`/api/products?category=${category}`)
+      .then(r => r.json())
+      .then(data => {
+        const mapped: ArchAssetItem[] = (data.products ?? []).map((p: any) => ({
+          id:       p.id,
+          label:    p.name,
+          category: browseTab,
+          videoSrc: p.previewVideoUrl ?? "",
+          price:    p.price,
+        }));
+        if (category === "interior") setInteriorAssets(mapped);
+        else                         setExteriorAssets(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setAssetsLoading(false));
+  }, [browseOpen, browseTab]);
+
+  // All fetched assets combined — for cart item resolution
+  const allFetchedAssets = useMemo(
+    () => [...interiorAssets, ...exteriorAssets],
+    [interiorAssets, exteriorAssets]
+  );
+
+  // Filtered + sorted list for the active tab
+  const filteredAssets = useMemo(() => {
+    let list = browseTab === "Interior" ? interiorAssets : exteriorAssets;
+    if (browseSearch.trim())
+      list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
+    if (priceMin !== null) list = list.filter(a => a.price >= priceMin);
+    if (priceMax !== null) list = list.filter(a => a.price <= priceMax);
+    if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
+    if (browseSort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
+    if (browseSort === "name")       list = [...list].sort((a, b) => a.label.localeCompare(b.label));
+    return list;
+  }, [browseTab, interiorAssets, exteriorAssets, browseSearch, browseSort, priceMin, priceMax]);
+
+  const cartItems      = allFetchedAssets.filter(a => cartIds.has(a.id));
   const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
   const discountRate   = getBundleDiscount(cartItems.length);
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
 
-  // Step 1 — derive bgSrc from cartIds + cycleIndex
+  // bgSrc: cycle through cart items
   useEffect(() => {
-    const items = ALL_ARCH_ASSETS.filter(a => cartIds.has(a.id));
-    if (items.length === 0) { setBgSrc(""); return; }
-    setBgSrc(items[cycleIndex % items.length].videoSrc);
-  }, [cartIds, cycleIndex]);
+    if (cartItems.length === 0) { setBgSrc(""); return; }
+    setBgSrc(cartItems[cycleIndex % cartItems.length].videoSrc);
+  }, [cartIds, cycleIndex, allFetchedAssets]);
 
-  // Step 2 — play the video whenever bgSrc changes
+  // Play bgVideo whenever bgSrc changes
   useEffect(() => {
     const video = bgVideoRef.current;
     if (!video || !bgSrc) return;
@@ -102,7 +134,7 @@ export default function ArchitectureBuySection({
     video.play().catch(() => {});
   }, [bgSrc]);
 
-  // Register addToCartMany so parent (e.g. WishlistPanel) can populate this cart externally
+  // Register addToCartMany so WishlistPanel can populate this cart externally
   useEffect(() => {
     onRegisterAddToCart?.((ids: string[]) => {
       setCartIds(prev => {
@@ -202,7 +234,7 @@ export default function ArchitectureBuySection({
                   <button
                     key={tab}
                     className={`archModalTab ${browseTab === tab ? "archModalTabActive" : ""}`}
-                    onClick={() => setBrowseTab(tab)}
+                    onClick={() => { setBrowseTab(tab); setBrowseSearch(""); }}
                   >
                     {tab}
                   </button>
@@ -216,64 +248,129 @@ export default function ArchitectureBuySection({
               <button className="archModalClose" onClick={() => setBrowseOpen(false)}>✕</button>
             </div>
 
+            {/* ── Search + Sort + Price filter controls ── */}
+            <div className="archModalControls">
+              <div className="archModalSearchWrap">
+                <input
+                  className="archModalSearch"
+                  type="text"
+                  placeholder="Search assets…"
+                  value={browseSearch}
+                  onChange={e => setBrowseSearch(e.target.value)}
+                />
+                {browseSearch && (
+                  <button className="archModalSearchClear" onClick={() => setBrowseSearch("")}>✕</button>
+                )}
+              </div>
+              <select
+                className="archModalSort"
+                value={browseSort}
+                onChange={e => setBrowseSort(e.target.value as typeof browseSort)}
+              >
+                <option value="default">Default</option>
+                <option value="price-asc">Price: Low → High</option>
+                <option value="price-desc">Price: High → Low</option>
+                <option value="name">Name A–Z</option>
+              </select>
+              <div className="archModalPriceFilter">
+                <span className="archModalPriceFilterLabel">₱</span>
+                <input
+                  className="archModalPriceInput"
+                  type="number"
+                  placeholder="Min"
+                  min={0}
+                  value={priceMin ?? ""}
+                  onChange={e => setPriceMin(e.target.value ? Number(e.target.value) : null)}
+                />
+                <span className="archModalPriceFilterSep">–</span>
+                <input
+                  className="archModalPriceInput"
+                  type="number"
+                  placeholder="Max"
+                  min={0}
+                  value={priceMax ?? ""}
+                  onChange={e => setPriceMax(e.target.value ? Number(e.target.value) : null)}
+                />
+                {(priceMin !== null || priceMax !== null) && (
+                  <button
+                    className="archModalPriceClear"
+                    onClick={() => { setPriceMin(null); setPriceMax(null); }}
+                    title="Clear price filter"
+                  >✕</button>
+                )}
+              </div>
+            </div>
+
             <div className="archModalList">
-              {filteredAssets.length === 0 ? (
+              {/* Loading skeleton */}
+              {assetsLoading && (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="archModalRowSkeleton">
+                    <div className="archModalSkeletonThumb" />
+                    <div className="archModalSkeletonInfo">
+                      <div className="archModalSkeletonLine archModalSkeletonLineLong" />
+                      <div className="archModalSkeletonLine archModalSkeletonLineShort" />
+                    </div>
+                  </div>
+                ))
+              )}
+              {/* Empty state */}
+              {!assetsLoading && filteredAssets.length === 0 && (
                 <div className="archModalEmpty">
                   <span className="archModalEmptyIcon">🏗️</span>
-                  <p className="archModalEmptyText">Assets coming soon</p>
-                  <p className="archModalEmptySub">Interior & Exterior catalog is being built.</p>
+                  <p className="archModalEmptyText">No {browseTab.toLowerCase()} assets found.</p>
+                  <p className="archModalEmptySub">Try adjusting your search or filters.</p>
                 </div>
-              ) : (
-                filteredAssets.map(asset => {
-                  const isOwned      = ownedAssetIds.has(asset.id);
-                  const isInCart     = cartIds.has(asset.id);
-                  const isWishlisted = wishlistIds.has(asset.id);
-                  return (
-                    <div
-                      key={asset.id}
-                      className={[
-                        "archModalRow",
-                        selectedAsset?.id === asset.id ? "archModalRowActive"  : "",
-                        isInCart  ? "archModalRowInCart" : "",
-                        isOwned   ? "archModalRowOwned"  : "",
-                      ].join(" ")}
-                      onClick={() => !isOwned && setSelectedAsset(asset)}
-                    >
-                      <div className="archModalThumb">
-                        <video src={asset.videoSrc} autoPlay muted loop playsInline className="archModalThumbVideo" />
-                      </div>
-                      <div className="archModalRowInfo">
-                        <p className="archModalRowLabel">{asset.label}</p>
-                        <p className="archModalRowCategory">{asset.category}</p>
-                      </div>
-                      <div className="archModalRowRight">
-                        <p className="archModalRowPrice">{fmt(asset.price)}</p>
-                        {isOwned ? (
-                          <span className="archModalOwnedBadge">✓ Owned</span>
-                        ) : (
-                          <div className="archModalRowBtns">
-                            {onAddToWishlist && (
-                              <button
-                                className={"archModalWishlistBtn" + (isWishlisted ? " archModalWishlistBtnActive" : "")}
-                                onClick={e => { e.stopPropagation(); onAddToWishlist(asset.id); }}
-                                aria-label="Save to wishlist"
-                              >
-                                {isWishlisted ? "♥" : "♡"}
-                              </button>
-                            )}
-                            <button
-                              className={"archModalSelectBtn" + (isInCart ? " archModalSelectBtnActive" : "")}
-                              onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
-                            >
-                              {isInCart ? "✓ Added" : "Select"}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
               )}
+              {!assetsLoading && filteredAssets.map(asset => {
+                const isOwned      = ownedAssetIds.has(asset.id);
+                const isInCart     = cartIds.has(asset.id);
+                const isWishlisted = wishlistIds.has(asset.id);
+                return (
+                  <div
+                    key={asset.id}
+                    className={[
+                      "archModalRow",
+                      selectedAsset?.id === asset.id ? "archModalRowActive"  : "",
+                      isInCart  ? "archModalRowInCart" : "",
+                      isOwned   ? "archModalRowOwned"  : "",
+                    ].join(" ")}
+                    onClick={() => !isOwned && setSelectedAsset(asset)}
+                  >
+                    <div className="archModalThumb">
+                      <video src={asset.videoSrc} autoPlay muted loop playsInline preload="none" className="archModalThumbVideo" />
+                    </div>
+                    <div className="archModalRowInfo">
+                      <p className="archModalRowLabel">{asset.label}</p>
+                      <p className="archModalRowCategory">{asset.category}</p>
+                    </div>
+                    <div className="archModalRowRight">
+                      <p className="archModalRowPrice">{fmt(asset.price)}</p>
+                      {isOwned ? (
+                        <span className="archModalOwnedBadge">✓ Owned</span>
+                      ) : (
+                        <div className="archModalRowBtns">
+                          {onAddToWishlist && (
+                            <button
+                              className={"archModalWishlistBtn" + (isWishlisted ? " archModalWishlistBtnActive" : "")}
+                              onClick={e => { e.stopPropagation(); onAddToWishlist(asset.id); }}
+                              aria-label="Save to wishlist"
+                            >
+                              {isWishlisted ? "♥" : "♡"}
+                            </button>
+                          )}
+                          <button
+                            className={"archModalSelectBtn" + (isInCart ? " archModalSelectBtnActive" : "")}
+                            onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
+                          >
+                            {isInCart ? "✓ Added" : "Select"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="archModalFooter">
@@ -287,7 +384,6 @@ export default function ArchitectureBuySection({
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  // Push selected IDs to global CartDrawer
                   onAddToCart?.(cartItems.map(a => a.id));
                   setBrowseOpen(false);
                   showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
