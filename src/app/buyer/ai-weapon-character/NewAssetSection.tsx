@@ -160,16 +160,14 @@ export default function NewAssetSection() {
         </div>
 
         <div className="newAssetCards">
-          {/* Card 1 — Animation preview — static, no autoplay */}
+          {/* Card 1 — Animation preview — static placeholder, no video loaded */}
           <div className="newAssetCard newAssetCardVideo">
-            <video
-              src={LATEST.videoSrc}
-              muted
-              playsInline
-              preload="metadata"
-              className="newAssetCardVideoEl"
-            />
-            <div className="newAssetCardVideoLabel">Animation Preview</div>
+            <div className="newAssetCardVideoStatic">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.2}}>
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <p className="newAssetCardVideoStaticLabel">Animation Preview</p>
+            </div>
           </div>
 
           {/* Card 2 — 3D OBJ placeholder */}

@@ -78,6 +78,7 @@ export default function AssetBuySection({
   const [priceMax,      setPriceMax]      = useState<number | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+  const [cycleIndex,    setCycleIndex]    = useState(0);
   const { toasts, showToast, dismissToast } = useToast();
 
   // Task 3: expose addToCartMany so WishlistPanel "Add all to cart" can populate this cart
@@ -205,6 +206,14 @@ export default function AssetBuySection({
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
 
+  // Reset cycle index when cart composition changes
+  const prevCartKey = useRef("");
+  const cartKey = [...cartIds].sort().join(",");
+  if (cartKey !== prevCartKey.current) {
+    prevCartKey.current = cartKey;
+    if (cycleIndex !== 0) setCycleIndex(0);
+  }
+
   const toggleCart = useCallback((id: string) => {
     if (ownedAssetIds.has(id)) return;
     setCartIds(prev => {
@@ -291,7 +300,7 @@ export default function AssetBuySection({
               </div>
             </div>
 
-            {/* Animation preview — single or multi-item strip */}
+            {/* Animation preview — cycles through all selected items one by one */}
             {cartItems.length === 0 ? (
               <div className="assetBuyCard">
                 <div className="assetBuyCardInner">
@@ -299,31 +308,29 @@ export default function AssetBuySection({
                   <p className="assetBuyCardLabel">Mp4 animation here</p>
                 </div>
               </div>
-            ) : cartItems.length === 1 ? (
+            ) : (
               <div className="assetBuyCard">
                 <video
                   ref={videoCardRef}
-                  key={cartItems[0].id}
-                  src={cartItems[0].videoSrc}
+                  key={cartItems[cycleIndex % cartItems.length]?.id}
+                  src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
                   className="assetBuyCardVideo"
-                  autoPlay muted loop playsInline
+                  autoPlay muted playsInline
+                  onEnded={() => setCycleIndex(prev => prev + 1)}
                 />
-              </div>
-            ) : (
-              /* Multiple selected — scrollable horizontal strip */
-              <div className="assetBuyCard assetBuyCardMulti">
-                <div className="assetBuyMultiStrip">
-                  {cartItems.map(item => (
-                    <div key={item.id} className="assetBuyMultiCell">
-                      <video
-                        src={item.videoSrc}
-                        className="assetBuyMultiVideo"
-                        autoPlay muted loop playsInline
-                      />
-                      <p className="assetBuyMultiLabel">{item.label}</p>
-                    </div>
-                  ))}
-                </div>
+                {cartItems.length > 1 && (
+                  <div className="assetBuyCycleLabel">
+                    {cartItems[cycleIndex % cartItems.length]?.label}
+                    <span className="assetBuyCycleDots">
+                      {cartItems.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`assetBuyCycleDot ${i === cycleIndex % cartItems.length ? "assetBuyCycleDotActive" : ""}`}
+                        />
+                      ))}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>

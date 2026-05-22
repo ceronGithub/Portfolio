@@ -216,6 +216,26 @@
   display:    block;
 }
 
+.newAssetCardVideoStatic {
+  position:        absolute; inset: 0;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.6rem;
+  color:           rgba(255,255,255,0.3);
+}
+
+.newAssetCardVideoStaticLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin:         0;
+}
+
 .newAssetCardVideoLabel {
   position:       absolute;
   bottom:         0.75rem;
