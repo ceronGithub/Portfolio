@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./systems-info.css";
 
 /* ─── How We Build ───────────────────────────────────────────────────── */
@@ -499,16 +499,82 @@ function FaqSection() {
 }
 
 /* ─── Composite Export ───────────────────────────────────────────────── */
-// Renders all six informational sections in order below the systems carousel.
+// Renders all six informational sections below the systems carousel.
+// Parallax: each sysInfoInner translates on scroll at 0.12x speed.
+// Entrance: opacity 0→1 + translateY 28px→0 triggered by IntersectionObserver.
 export default function SystemsInfoSections() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+
+    const inners = Array.from(
+      wrap.querySelectorAll<HTMLElement>(".sysInfoInner")
+    );
+    const sections = Array.from(
+      wrap.querySelectorAll<HTMLElement>(".sysInfoSection")
+    );
+
+    // ── Entrance animation via IntersectionObserver ──────────────────────
+    inners.forEach(el => {
+      el.style.opacity    = "0";
+      el.style.transform  = "translateY(28px)";
+      el.style.transition = "opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1)";
+      el.style.willChange = "transform, opacity";
+    });
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            el.style.opacity   = "1";
+            el.style.transform = "translateY(0)";
+            observer.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    inners.forEach(el => observer.observe(el));
+
+    // ── Parallax on scroll — background layers move at 0.12x ────────────
+    function onScroll() {
+      const scrollY = window.scrollY;
+      sections.forEach(section => {
+        const rect      = section.getBoundingClientRect();
+        const inView    = rect.bottom > 0 && rect.top < window.innerHeight;
+        if (!inView) return;
+        const inner     = section.querySelector<HTMLElement>(".sysInfoInner");
+        if (!inner) return;
+        // Only apply parallax offset after entrance animation resolves
+        const sectionTop   = scrollY + rect.top;
+        const relativeScroll = scrollY - sectionTop + window.innerHeight * 0.5;
+        const offset         = relativeScroll * 0.12;
+        // Clamp so content never flies too far
+        const clamped = Math.max(-40, Math.min(40, offset));
+        inner.style.transform = `translateY(${clamped}px)`;
+      });
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
   return (
-    <>
+    <div ref={wrapRef}>
       <HowWeBuildSection />
       <CompareSection />
       <CostSection />
       <ConfidenceSection />
       <SupportSection />
       <FaqSection />
-    </>
+    </div>
   );
 }
