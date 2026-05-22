@@ -7,8 +7,7 @@
 
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import "./new-asset-section.css";
+import { useRef, useEffect, useState } from "react";import "./new-asset-section.css";
 
 const GD = (id: string) => `/api/drive-video?id=${id}`;
 
@@ -48,8 +47,6 @@ export default function NewAssetSection() {
   const fireRafRef    = useRef<number>(0);
   const fireParticles = useRef<FireParticle[]>([]);
   const [parallaxY, setParallaxY] = useState(0);
-  // Ref for the preview video — play/pause driven by IntersectionObserver only
-  const previewVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const canvas = fireCanvasRef.current;
@@ -130,24 +127,6 @@ export default function NewAssetSection() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Play preview video only when section is in viewport — no autoPlay on page load
-  useEffect(() => {
-    const video = previewVideoRef.current;
-    if (!video) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      },
-      { threshold: 0.25 }
-    );
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section ref={sectionRef} className="newAssetSection">
 
@@ -181,18 +160,7 @@ export default function NewAssetSection() {
         </div>
 
         <div className="newAssetCards">
-          {/* Card 1 — Animation preview */}
-          <div className="newAssetCard newAssetCardVideo">
-            <video
-              ref={previewVideoRef}
-              src={LATEST.videoSrc}
-              muted loop playsInline
-              className="newAssetCardVideoEl"
-            />
-            <div className="newAssetCardVideoLabel">Animation Preview</div>
-          </div>
-
-          {/* Card 2 — 3D OBJ placeholder */}
+          {/* Card — 3D OBJ placeholder */}
           <div className="newAssetCard">
             <div className="newAssetCardInner">
               <span className="newAssetCardIcon">📦</span>

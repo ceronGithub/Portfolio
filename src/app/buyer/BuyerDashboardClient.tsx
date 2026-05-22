@@ -256,6 +256,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         ownedAssetIds={ownedSet}
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}
+        onAddToCart={addToCart}
         onRegisterAddToCart={fn => { addAllToCartRef.current = fn; }}
         onTrackView={trackView}
       />
@@ -268,6 +269,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       <ArchitectureBuySection
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}
+        onAddToCart={addToCart}
         onRegisterAddToCart={fn => { addAllToCartArchRef.current = fn; }}
       />
 

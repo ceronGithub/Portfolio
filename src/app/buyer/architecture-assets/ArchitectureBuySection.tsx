@@ -21,7 +21,8 @@ interface Props {
   ownedAssetIds?: Set<string>;
   onAddToWishlist?: (id: string) => void;
   wishlistIds?: Set<string>;
-  // Registrar so parent can push items into this cart externally
+  // Pushes selected IDs into the global CartDrawer
+  onAddToCart?: (ids: string[]) => void;
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
 }
 
@@ -68,6 +69,7 @@ export default function ArchitectureBuySection({
   ownedAssetIds = new Set(),
   onAddToWishlist,
   wishlistIds = new Set(),
+  onAddToCart,
   onRegisterAddToCart,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
@@ -277,6 +279,8 @@ export default function ArchitectureBuySection({
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
+                  // Push selected IDs to global CartDrawer
+                  onAddToCart?.(cartItems.map(a => a.id));
                   setBrowseOpen(false);
                   showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
                 }}

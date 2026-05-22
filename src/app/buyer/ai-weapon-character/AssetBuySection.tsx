@@ -23,9 +23,9 @@ interface Props {
   ownedAssetIds?:       Set<string>;
   onAddToWishlist?:     (id: string) => void;
   wishlistIds?:         Set<string>;
-  // Task 3: register a callback so parent can add items to this cart externally
+  // Pushes selected IDs into the global CartDrawer
+  onAddToCart?:         (ids: string[]) => void;
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
-  // Task 4: track which assets the buyer previews
   onTrackView?:         (item: { id: string; label: string; category: string; price: number }) => void;
 }
 
@@ -66,6 +66,7 @@ export default function AssetBuySection({
   ownedAssetIds = new Set(),
   onAddToWishlist,
   wishlistIds = new Set(),
+  onAddToCart,
   onRegisterAddToCart,
   onTrackView,
 }: Props) {
@@ -461,7 +462,8 @@ export default function AssetBuySection({
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
-
+                  // Push selected IDs to global CartDrawer
+                  onAddToCart?.(cartItems.map(a => a.id));
                   setBrowseOpen(false);
                   showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
                 }}
@@ -556,4 +558,4 @@ export default function AssetBuySection({
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </>
   );
-} 
+}
