@@ -26,25 +26,24 @@ interface Props {
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
 }
 
-const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
+const GD = (id: string) => `/api/drive-video?id=${id}`;
 
 const ALL_ARCH_ASSETS: ArchAssetItem[] = [
   // ── Exterior ──
-  { id:"ext-drone-01", label:"Drone Reveal 01",  category:"Exterior", videoSrc:`${SB}/exterior/Drone_shot_revealing_landscape_202605061517.mp4`, price:8500 },
-  { id:"ext-drone-02", label:"Drone Reveal 02",  category:"Exterior", videoSrc:`${SB}/exterior/Drone_shot_revealing_landscape_202605061518.mp4`, price:8500 },
-  { id:"ext-proj-01",  label:"Project 01",        category:"Exterior", videoSrc:`${SB}/exterior/project-01.mp4`, price:8500 },
-  { id:"ext-proj-02",  label:"Project 02",        category:"Exterior", videoSrc:`${SB}/exterior/project-02.mp4`, price:8500 },
-  { id:"ext-proj-03",  label:"Project 03",        category:"Exterior", videoSrc:`${SB}/exterior/project-03.mp4`, price:8500 },
-  { id:"ext-proj-04",  label:"Project 04",        category:"Exterior", videoSrc:`${SB}/exterior/project-04.mp4`, price:8500 },
-  { id:"ext-proj-05",  label:"Project 05",        category:"Exterior", videoSrc:`${SB}/exterior/project-05.mp4`, price:8500 },
+  { id:"ext-drone-01", label:"Drone Reveal 01",  category:"Exterior", videoSrc:GD("1QKCGiJCNzSbpkVsQPN073ws6WbZMwrZC"), price:8500 },
+  { id:"ext-drone-02", label:"Drone Reveal 02",  category:"Exterior", videoSrc:GD("1hIAB7FrCEnn8cfrGSCplccHkZ4Gonnxu"), price:8500 },
+  { id:"ext-proj-01",  label:"Project 01",        category:"Exterior", videoSrc:GD("1kp23x5YBnWovDamPDT2FS00d1ID9SB0k"), price:8500 },
+  { id:"ext-proj-02",  label:"Project 02",        category:"Exterior", videoSrc:GD("10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T"), price:8500 },
+  { id:"ext-proj-03",  label:"Project 03",        category:"Exterior", videoSrc:GD("1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ"), price:8500 },
+  { id:"ext-proj-04",  label:"Project 04",        category:"Exterior", videoSrc:GD("1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT"), price:8500 },
   // ── Interior ──
-  { id:"int-01", label:"Interior 01 — Suite",    category:"Interior", videoSrc:`${SB}/interior/interior-01.mp4`, price:7500 },
-  { id:"int-02", label:"Interior 02 — Living",   category:"Interior", videoSrc:`${SB}/interior/interior-02.mp4`, price:7500 },
-  { id:"int-03", label:"Interior 03 — Kitchen",  category:"Interior", videoSrc:`${SB}/interior/interior-03.mp4`, price:7500 },
-  { id:"int-04", label:"Interior 04 — Bedroom",  category:"Interior", videoSrc:`${SB}/interior/interior-04.mp4`, price:7500 },
-  { id:"int-05", label:"Interior 05 — Lobby",    category:"Interior", videoSrc:`${SB}/interior/interior-05.mp4`, price:7500 },
-  { id:"int-06", label:"Interior 06 — Office",   category:"Interior", videoSrc:`${SB}/interior/interior-06.mp4`, price:7500 },
-  { id:"int-07", label:"Interior 07 — Luxury",   category:"Interior", videoSrc:`${SB}/interior/interior-07.mp4`, price:7500 },
+  { id:"int-01", label:"Interior 01 — Suite",    category:"Interior", videoSrc:GD("16IlbksfqFgAsIUlIbSnfG1k0miktYC0d"), price:7500 },
+  { id:"int-02", label:"Interior 02 — Living",   category:"Interior", videoSrc:GD("1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ"), price:7500 },
+  { id:"int-03", label:"Interior 03 — Kitchen",  category:"Interior", videoSrc:GD("1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce"), price:7500 },
+  { id:"int-04", label:"Interior 04 — Bedroom",  category:"Interior", videoSrc:GD("1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl"), price:7500 },
+  { id:"int-05", label:"Interior 05 — Lobby",    category:"Interior", videoSrc:GD("1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu"), price:7500 },
+  { id:"int-06", label:"Interior 06 — Office",   category:"Interior", videoSrc:GD("1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW"), price:7500 },
+  { id:"int-07", label:"Interior 07 — Luxury",   category:"Interior", videoSrc:GD("1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG"), price:7500 },
 ];
 
 function getBundleDiscount(count: number): number {
@@ -88,22 +87,19 @@ export default function ArchitectureBuySection({
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
 
-  // Sync bgSrc + play whenever cycleIndex or cartItems changes
+  // Step 1 — derive bgSrc from cartIds + cycleIndex
   useEffect(() => {
-    const item = cartItems[cycleIndex % (cartItems.length || 1)];
-    if (!item) { setBgSrc(""); return; }
-    setBgSrc(item.videoSrc);
-  // cartItems length/ids as stable dep
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cycleIndex, cartIds]);
+    const items = ALL_ARCH_ASSETS.filter(a => cartIds.has(a.id));
+    if (items.length === 0) { setBgSrc(""); return; }
+    setBgSrc(items[cycleIndex % items.length].videoSrc);
+  }, [cartIds, cycleIndex]);
 
-  // Play bg video whenever bgSrc changes
+  // Step 2 — play the video whenever bgSrc changes
   useEffect(() => {
     const video = bgVideoRef.current;
     if (!video || !bgSrc) return;
     video.load();
-    const p = video.play();
-    if (p) p.catch(() => {});
+    video.play().catch(() => {});
   }, [bgSrc]);
 
   // Register addToCartMany so parent (e.g. WishlistPanel) can populate this cart externally
@@ -131,9 +127,7 @@ export default function ArchitectureBuySection({
 
   function handleSelectAsset(asset: ArchAssetItem) {
     setSelectedAsset(asset);
-    if (!ownedAssetIds.has(asset.id)) {
-      setCartIds(prev => new Set([...prev, asset.id]));
-    }
+    toggleCart(asset.id);
   }
 
   return (
@@ -269,7 +263,7 @@ export default function ArchitectureBuySection({
                             )}
                             <button
                               className={"archModalSelectBtn" + (isInCart ? " archModalSelectBtnActive" : "")}
-                              onClick={e => { e.stopPropagation(); toggleCart(asset.id); }}
+                              onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
                             >
                               {isInCart ? "✓ Added" : "Select"}
                             </button>
