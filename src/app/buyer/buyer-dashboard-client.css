@@ -48,3 +48,48 @@
   pointer-events:  none;
   letter-spacing:  0;
 }
+/* ── Floating cart button — fixed bottom-right, above wishlist ── */
+.buyerCartFloatBtn {
+  position:        fixed;
+  bottom:          5.5rem;
+  right:           2rem;
+  z-index:         350;
+  width:           52px;
+  height:          52px;
+  border-radius:   50%;
+  background:      #111;
+  border:          1px solid #2a2a2a;
+  color:           #888;
+  cursor:          pointer;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      background 0.22s, color 0.22s, border-color 0.22s, transform 0.18s;
+  box-shadow:      0 4px 24px rgba(0,0,0,0.55);
+}
+
+.buyerCartFloatBtn:hover {
+  background:   #1a1a1a;
+  color:        #22c55e;
+  border-color: rgba(34,197,94,0.35);
+  transform:    translateY(-2px);
+}
+
+.buyerCartFloatCount {
+  position:        absolute;
+  top:             -4px;
+  right:           -4px;
+  width:           20px;
+  height:          20px;
+  border-radius:   50%;
+  background:      #22c55e;
+  color:           #000;
+  font-family:     'Syne', sans-serif;
+  font-size:       0.62rem;
+  font-weight:     800;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  border:          2px solid #0a0a0a;
+  pointer-events:  none;
+}

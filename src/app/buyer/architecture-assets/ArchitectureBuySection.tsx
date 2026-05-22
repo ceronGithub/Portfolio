@@ -19,6 +19,7 @@ interface Props {
   ownedAssetIds?: Set<string>;
   onAddToWishlist?: (id: string) => void;
   wishlistIds?: Set<string>;
+  onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
 }
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
@@ -64,12 +65,25 @@ export default function ArchitectureBuySection({
   ownedAssetIds = new Set(),
   onAddToWishlist,
   wishlistIds = new Set(),
+  onRegisterAddToCart,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
   const [selectedAsset, setSelectedAsset] = useState<ArchAssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const bgVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Register external add-to-cart so WishlistPanel / CartDrawer can populate this cart
+  useEffect(() => {
+    onRegisterAddToCart?.((ids: string[]) => {
+      setCartIds(prev => {
+        const next = new Set(prev);
+        ids.filter(id => ALL_ARCH_ASSETS.some(a => a.id === id))
+           .forEach(id => { if (!ownedAssetIds.has(id)) next.add(id); });
+        return next;
+      });
+    });
+  }, [onRegisterAddToCart, ownedAssetIds]);
 
   const filteredAssets = ALL_ARCH_ASSETS.filter(a => a.category === browseTab);
   const cartItems      = ALL_ARCH_ASSETS.filter(a => cartIds.has(a.id));

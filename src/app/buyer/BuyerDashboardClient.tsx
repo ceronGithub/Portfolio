@@ -9,7 +9,9 @@
 
 import { useState, useCallback, useMemo, useRef } from "react";
 import { useWishlist }           from "./wishlist/useWishlist";
+import { useCart }               from "./cart/useCart";
 import WishlistPanel             from "./wishlist/WishlistPanel";
+import CartDrawer                from "./cart/CartDrawer";
 import SystemsClient             from "./system/SystemsClient";
 import SystemsInfoSections       from "./system/SystemsInfoSections";
 import AISection                 from "./ai/AISection";
@@ -26,6 +28,7 @@ import ArchitectureBuySection    from "./architecture-assets/ArchitectureBuySect
 import ReviewSection             from "./reviews/ReviewSection";
 import CustomRequestBuilder      from "./custom-request/CustomRequestBuilder";
 import "./wishlist/wishlist-panel.css";
+import "./cart/cart-drawer.css";
 import "./buyer-dashboard-client.css";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
@@ -136,23 +139,31 @@ function buildWishlistEntries(
 
 export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts }: Props) {
   const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
+  const { cartIds, addToCart, removeFromCart, clearCart }       = useCart();
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [cartOpen,     setCartOpen]     = useState(false);
 
   const ownedSet = useMemo(() => new Set(ownedAssetIds), [ownedAssetIds]);
 
-  // Task 3: Add all wishlisted assets to AssetBuySection cart via a ref callback
-  const addAllToCartRef = useRef<((ids: string[]) => void) | null>(null);
+  // Refs to register add-to-cart callbacks from each section
+  const addAllToCartRef     = useRef<((ids: string[]) => void) | null>(null);
+  const addAllToCartArchRef = useRef<((ids: string[]) => void) | null>(null);
 
+  // Called by WishlistPanel "Add to cart" — routes to correct section cart by asset ID prefix
   const handleAddAllToCart = useCallback((ids: string[]) => {
-    addAllToCartRef.current?.(ids);
-  }, []);
+    const charWeaponIds = ids.filter(id => id.startsWith("orc-") || id.startsWith("axe-"));
+    const archIds       = ids.filter(id => id.startsWith("int-") || id.startsWith("ext-"));
+    if (charWeaponIds.length > 0) addAllToCartRef.current?.(charWeaponIds);
+    if (archIds.length > 0)       addAllToCartArchRef.current?.(archIds);
+    // Also add to unified cart for CartDrawer display
+    addToCart(ids);
+  }, [addToCart]);
 
   const handleRemoveFromWishlist = useCallback((id: string) => {
     toggleWishlist(id);
   }, [toggleWishlist]);
 
   const { recentItems, trackView, clearRecent } = useRecentlyViewed();
-  // browseOpenId — when set, AssetBuySection opens the browse modal and highlights this asset
   const [browseOpenId, setBrowseOpenId] = useState<string | null>(null);
 
   const wishlistEntries = useMemo(
@@ -160,8 +171,34 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
     [wishlistIds, items]
   );
 
+  // Build cart entries from unified cartIds using ASSET_META
+  const cartEntries = useMemo(() =>
+    [...cartIds].flatMap(id => {
+      const meta = ASSET_META[id];
+      if (!meta) return [];
+      const priceNum = parseInt(meta.price.replace(/[^\d]/g, ""), 10) || 0;
+      return [{ id, name: meta.name, category: meta.category, price: priceNum, priceStr: meta.price, accent: meta.accent }];
+    }),
+  [cartIds]);
+
   return (
     <>
+      {/* ── Floating Cart Button ── */}
+      <button
+        className="buyerCartFloatBtn"
+        onClick={() => setCartOpen(true)}
+        aria-label="Open cart"
+        title="Your cart"
+      >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        {cartIds.size > 0 && (
+          <span className="buyerCartFloatCount">{cartIds.size}</span>
+        )}
+      </button>
+
       {/* ── Floating Wishlist Button ── */}
       <button
         className="buyerWishlistFloatBtn"
@@ -169,19 +206,22 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         aria-label="Open wishlist"
         title="Your wishlist"
       >
-        {/* Heart SVG */}
-        <svg
-          width="18" height="18" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-        >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
-
-        {/* Count badge — only shown after localStorage hydration to avoid flash */}
         {hydrated && wishlistIds.size > 0 && (
           <span className="buyerWishlistFloatCount">{wishlistIds.size}</span>
         )}
       </button>
+
+      {/* ── Cart Drawer ── */}
+      <CartDrawer
+        isOpen={cartOpen}
+        onClose={() => setCartOpen(false)}
+        entries={cartEntries}
+        onRemove={id => { removeFromCart(id); }}
+        onClear={clearCart}
+      />
 
       {/* ── Wishlist Drawer ── */}
       <WishlistPanel
@@ -228,6 +268,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       <ArchitectureBuySection
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}
+        onRegisterAddToCart={fn => { addAllToCartArchRef.current = fn; }}
       />
 
       <ReviewSection
