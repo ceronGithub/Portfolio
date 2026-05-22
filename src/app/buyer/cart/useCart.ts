@@ -3,7 +3,7 @@
 // Holds a Set of asset IDs across all sections (characters, weapons, architecture).
 // Persists to sessionStorage — clears on tab close, no stale cart.
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const SESSION_KEY = "buyerCart";
 
@@ -20,7 +20,14 @@ function saveCart(ids: Set<string>) {
 }
 
 export function useCart() {
-  const [cartIds, setCartIds] = useState<Set<string>>(() => loadCart());
+  // Start with empty set on server; load real data after mount to avoid hydration mismatch
+  const [cartIds,  setCartIds]  = useState<Set<string>>(new Set());
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setCartIds(loadCart());
+    setHydrated(true);
+  }, []);
 
   const addToCart = useCallback((ids: string[]) => {
     setCartIds(prev => {
@@ -45,5 +52,5 @@ export function useCart() {
     saveCart(new Set());
   }, []);
 
-  return { cartIds, addToCart, removeFromCart, clearCart };
+  return { cartIds, addToCart, removeFromCart, clearCart, hydrated };
 }

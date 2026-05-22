@@ -233,3 +233,26 @@
     padding: 0.35rem 0.65rem;
   }
 }
+
+/* ── Bundle Checkout: Tablet (768px) ── */
+@media (max-width: 768px) {
+  .bundleWrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Bundle Checkout: Mobile (375px) ── */
+@media (max-width: 375px) {
+  .bundlePage {
+    padding: 5rem 1rem 4rem;
+  }
+
+  .bundleLeft,
+  .bundleRight {
+    padding: 1.5rem;
+  }
+
+  .bundleDueAmount {
+    font-size: 1rem;
+  }
+}

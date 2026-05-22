@@ -1,10 +1,10 @@
 // BundleCheckoutClient.tsx — Bundle checkout UI.
 // Shows all selected assets, bundle discount breakdown, payment method,
-// and place order CTA. Mirrors the style of CheckoutClient.
+// and place order CTA. Protocol Rule 17 compliant design.
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./bundle-checkout.css";
 
 type PaymentMethod = "gcash" | "card" | "bank";
@@ -37,13 +37,115 @@ function discountLabel(rate: number): string {
   return "";
 }
 
-// ── Category icon map ─────────────────────────────────────────────────────────
-function categoryIcon(category: string): string {
-  if (category === "Character") return "🧟";
-  if (category === "Weapon")    return "⚔️";
-  if (category === "Interior")  return "🏠";
-  if (category === "Exterior")  return "🏗️";
-  return "📦";
+// ── SVG category icons — inline, consistent strokeWidth=1.6 ──────────────────
+// No emoji allowed in UI chrome per Rule 17.3
+function IconCharacter() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  );
+}
+
+function IconWeapon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.5 2.5l7 7-14 14-3-1-1-3 14-14z" />
+      <path d="M2 22l4-4" />
+    </svg>
+  );
+}
+
+function IconInterior() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+      <path d="M9 21V12h6v9" />
+    </svg>
+  );
+}
+
+function IconExterior() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+      <line x1="12" y1="12" x2="12" y2="16" />
+      <line x1="10" y1="14" x2="14" y2="14" />
+    </svg>
+  );
+}
+
+function IconAsset() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="9" height="9" rx="2" />
+      <rect x="13" y="3" width="9" height="9" rx="2" />
+      <rect x="2" y="13" width="9" height="9" rx="2" />
+      <rect x="13" y="13" width="9" height="9" rx="2" />
+    </svg>
+  );
+}
+
+// ── SVG payment icons — inline per Rule 17.3 ─────────────────────────────────
+function IconGcash() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="3" />
+      <path d="M12 10v4M10 12h4" />
+    </svg>
+  );
+}
+
+function IconCard() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <line x1="2" y1="10" x2="22" y2="10" />
+    </svg>
+  );
+}
+
+function IconBank() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M8 10v11M12 10v11M16 10v11M20 10v11" />
+    </svg>
+  );
+}
+
+// ── Map category string to icon component ────────────────────────────────────
+function CategoryIcon({ category }: { category: string }) {
+  if (category === "Character") return <IconCharacter />;
+  if (category === "Weapon")    return <IconWeapon />;
+  if (category === "Interior")  return <IconInterior />;
+  if (category === "Exterior")  return <IconExterior />;
+  return <IconAsset />;
+}
+
+// ── Category accent color — used for icon tint only ──────────────────────────
+function categoryAccent(category: string): string {
+  if (category === "Character") return "var(--accent-green)";
+  if (category === "Weapon")    return "var(--accent-amber)";
+  if (category === "Interior")  return "var(--accent-blue)";
+  if (category === "Exterior")  return "var(--accent-purple)";
+  return "rgba(255,255,255,0.4)";
+}
+
+// ── Entrance animation hook — IntersectionObserver per Rule 17.5 ─────────────
+// Adds .isVisible class when element enters viewport
+function useEntranceAnimation(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) el.classList.add("isVisible"); },
+      { threshold: 0.08 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [ref]);
 }
 
 export default function BundleCheckoutClient({
@@ -57,7 +159,13 @@ export default function BundleCheckoutClient({
   const [placing, setPlacing] = useState(false);
   const [placed,  setPlaced]  = useState(false);
 
-  // ── Simulate place order ──────────────────────────────────────────────────
+  // Entrance animation refs per Rule 17.5
+  const leftRef  = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  useEntranceAnimation(leftRef);
+  useEntranceAnimation(rightRef);
+
+  // ── Simulate place order ────────────────────────────────────────────────
   // Replace with actual POST /api/checkout/bundle when payment gateway is ready
   function handlePlaceOrder() {
     if (placing || placed) return;
@@ -68,13 +176,17 @@ export default function BundleCheckoutClient({
     }, 1800);
   }
 
-  // ── Success state ─────────────────────────────────────────────────────────
+  // ── Success state ───────────────────────────────────────────────────────
   if (placed) {
     return (
       <div className="bundlePage">
         <div className="bundleSuccess">
-          <div className="bundleSuccessIcon">✓</div>
-          <h2 className="bundleSuccessTitle">Order Placed!</h2>
+          <div className="bundleSuccessIcon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <h2 className="bundleSuccessTitle">Order Placed</h2>
           <p className="bundleSuccessDesc">
             Your bundle of <strong>{items.length} asset{items.length > 1 ? "s" : ""}</strong> has been received.
             You'll be contacted shortly with download instructions.
@@ -90,14 +202,19 @@ export default function BundleCheckoutClient({
       <div className="bundleWrap">
 
         {/* ── Left — Order summary ── */}
-        <div className="bundleLeft">
+        <div className="bundleLeft bundleEnter" ref={leftRef}>
           <p className="bundleEyebrow">Bundle Order Summary</p>
 
           {/* Asset list */}
           <div className="bundleItemList">
             {items.map(item => (
               <div key={item.id} className="bundleItemRow">
-                <div className="bundleItemIcon">{categoryIcon(item.category)}</div>
+                <div
+                  className="bundleItemIcon"
+                  style={{ color: categoryAccent(item.category) }}
+                >
+                  <CategoryIcon category={item.category} />
+                </div>
                 <div className="bundleItemInfo">
                   <p className="bundleItemLabel">{item.label}</p>
                   <p className="bundleItemCategory">{item.category}</p>
@@ -136,14 +253,23 @@ export default function BundleCheckoutClient({
 
           {/* Terms */}
           <div className="bundleTerms">
-            <p>✓ One-time payment — no subscriptions</p>
-            <p>✓ Lifetime access to all purchased assets</p>
-            <p>✓ OBJ / FBX files with 4K PBR textures</p>
+            <div className="bundleTermsItem">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              One-time payment — no subscriptions
+            </div>
+            <div className="bundleTermsItem">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Lifetime access to all purchased assets
+            </div>
+            <div className="bundleTermsItem">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              OBJ / FBX files with 4K PBR textures
+            </div>
           </div>
         </div>
 
         {/* ── Right — Payment method + CTA ── */}
-        <div className="bundleRight">
+        <div className="bundleRight bundleEnter bundleEnterDelay" ref={rightRef}>
           <p className="bundleEyebrow">Payment Method</p>
           <p className="bundlePayNote">
             Select your preferred payment channel for the full amount of{" "}
@@ -157,7 +283,7 @@ export default function BundleCheckoutClient({
               className={`bundleMethod ${method === "gcash" ? "bundleMethodActive" : ""}`}
               onClick={() => setMethod("gcash")}
             >
-              <div className="bundleMethodIcon bundleMethodGcash">G</div>
+              <div className="bundleMethodIcon bundleMethodGcash"><IconGcash /></div>
               <div className="bundleMethodInfo">
                 <p className="bundleMethodName">GCash</p>
                 <p className="bundleMethodDesc">Instant · 0% fee</p>
@@ -169,7 +295,7 @@ export default function BundleCheckoutClient({
               className={`bundleMethod ${method === "card" ? "bundleMethodActive" : ""}`}
               onClick={() => setMethod("card")}
             >
-              <div className="bundleMethodIcon bundleMethodCard">💳</div>
+              <div className="bundleMethodIcon bundleMethodCard"><IconCard /></div>
               <div className="bundleMethodInfo">
                 <p className="bundleMethodName">Credit / Debit Card</p>
                 <p className="bundleMethodDesc">Visa, Mastercard · 2.5% fee</p>
@@ -181,7 +307,7 @@ export default function BundleCheckoutClient({
               className={`bundleMethod ${method === "bank" ? "bundleMethodActive" : ""}`}
               onClick={() => setMethod("bank")}
             >
-              <div className="bundleMethodIcon bundleMethodBank">🏦</div>
+              <div className="bundleMethodIcon bundleMethodBank"><IconBank /></div>
               <div className="bundleMethodInfo">
                 <p className="bundleMethodName">Bank Transfer</p>
                 <p className="bundleMethodDesc">BPI / BDO · 1–2 business days</p>
@@ -193,7 +319,7 @@ export default function BundleCheckoutClient({
 
           {/* Total due */}
           <div className="bundleDueRow">
-            <span className="bundleDueLabel">Total due</span>
+            <span className="bundleDueLabel">Total Due</span>
             <span className="bundleDueAmount">{fmt(finalTotal)}</span>
           </div>
 

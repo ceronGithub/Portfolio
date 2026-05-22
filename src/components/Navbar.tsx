@@ -178,7 +178,8 @@ export default function Navbar() {
   const hideOn     = ["/login", "/register"];
   const isAdmin    = (session?.user as any)?.role === "ADMIN";
   const isOnVisitor = pathname === "/" || pathname === "/visitor";
-  const isOnBuyer   = pathname.startsWith("/buyer");
+  // /checkout is a buyer-context route — show buyer navbar links there too
+  const isOnBuyer   = pathname.startsWith("/buyer") || pathname.startsWith("/checkout");
   const isOnAdmin   = pathname.startsWith("/admin");
 
   /* ── Admin theme state — synced with localStorage "adminTheme" ──── */

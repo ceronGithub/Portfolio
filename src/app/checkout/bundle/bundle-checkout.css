@@ -1,50 +1,99 @@
 /* bundle-checkout.css — Bundle checkout page UI.
-   Matches the design system of checkout.css. */
+   Protocol Rule 17 compliant:
+   17.1 Typography hierarchy (Syne + DM Mono, 3+ sizes per section)
+   17.2 Layered translucency surfaces, near-black bg, single accent
+   17.3 SVG inline icons only — zero emoji in UI chrome
+   17.4 Elevated cards with border + layered bg + smooth hover
+   17.5 Entrance animations via IntersectionObserver .isVisible class
+   17.6 Hover states, focus-visible, will-change, responsive
+   17.7 No box-shadow depth, no !important, no flat fills */
+
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ── Design tokens ── */
+:root {
+  --bg-base:       #09090b;
+  --bg-surface:    rgba(255,255,255,0.03);
+  --bg-raised:     rgba(255,255,255,0.055);
+  --bg-elevated:   rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.07);
+  --border-mid:    rgba(255,255,255,0.11);
+  --text-primary:  rgba(255,255,255,0.88);
+  --text-secondary:rgba(255,255,255,0.45);
+  --text-muted:    rgba(255,255,255,0.22);
+  --accent-green:  #22c55e;
+  --accent-amber:  #c9935e;
+  --accent-blue:   #60a5fa;
+  --accent-purple: #a78bfa;
+  --font-display:  'Syne', sans-serif;
+  --font-mono:     'DM Mono', monospace;
+}
 
 /* ── Page shell ── */
 .bundlePage {
   min-height:      100vh;
-  background:      #080808;
-  font-family:     'Syne', sans-serif;
+  background:      var(--bg-base);
+  font-family:     var(--font-display);
   padding:         7rem 1.5rem 6rem;
   display:         flex;
   align-items:     flex-start;
   justify-content: center;
 }
 
-/* ── Two-column wrap ── */
+/* ── Two-column wrap — asymmetric per Rule 17.4 ── */
 .bundleWrap {
   width:                 100%;
-  max-width:             900px;
+  max-width:             940px;
   display:               grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap:                   2rem;
+  grid-template-columns: 1.15fr 1fr;
+  gap:                   1.75rem;
   align-items:           start;
 }
 
-/* ── Shared eyebrow ── */
+/* ── Entrance animation — Rule 17.5 ── */
+/* Cards start invisible and shifted down; .isVisible triggers the reveal */
+.bundleEnter {
+  opacity:    0;
+  transform:  translateY(24px);
+  transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1),
+              transform 0.55s cubic-bezier(0.22,1,0.36,1);
+  will-change: transform, opacity;
+}
+
+.bundleEnterDelay {
+  transition-delay: 0.12s;
+}
+
+.bundleEnter.isVisible {
+  opacity:   1;
+  transform: translateY(0);
+}
+
+/* ── Eyebrow — Rule 17.1: smallest, mono, spaced uppercase, muted ── */
 .bundleEyebrow {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.6rem;
+  font-family:    var(--font-mono);
+  font-size:      0.58rem;
   font-weight:    300;
-  color:          rgba(255,255,255,0.2);
+  color:          var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.3em;
-  margin:         0 0 1.25rem;
+  letter-spacing: 0.32em;
+  margin:         0 0 1.4rem;
 }
 
 /* ════════════════════
    LEFT — Order summary
    ════════════════════ */
+
+/* Card — layered bg + subtle border per Rule 17.2 & 17.4 */
 .bundleLeft {
-  background:     #0e0e0e;
-  border:         1px solid #1a1a1a;
-  border-radius:  20px;
+  background:     var(--bg-surface);
+  border:         1px solid var(--border-subtle);
+  border-radius:  18px;
   padding:        2rem;
   display:        flex;
   flex-direction: column;
   gap:            1.5rem;
+  /* No box-shadow depth — Rule 17.7 */
 }
 
 /* ── Asset item list ── */
@@ -55,66 +104,81 @@
 }
 
 .bundleItemRow {
-  display:     flex;
-  align-items: center;
-  gap:         0.75rem;
-  padding:     0.7rem 0.9rem;
-  background:  #111;
-  border:      1px solid #1a1a1a;
+  display:       flex;
+  align-items:   center;
+  gap:           0.85rem;
+  padding:       0.75rem 1rem;
+  background:    var(--bg-raised);
+  border:        1px solid var(--border-subtle);
   border-radius: 12px;
-  transition:  border-color 0.2s;
+  /* Transition on base state so it animates both in and out — Rule 17.6 */
+  transition:    background 0.2s ease, border-color 0.2s ease;
 }
 
-.bundleItemRow:hover { border-color: #242424; }
+.bundleItemRow:hover {
+  background:    var(--bg-elevated);
+  border-color:  var(--border-mid);
+}
 
+/* SVG icon container — colored per category, no emoji — Rule 17.3 */
 .bundleItemIcon {
   width:           34px;
   height:          34px;
-  background:      #161616;
-  border:          1px solid #222;
+  background:      var(--bg-raised);
+  border:          1px solid var(--border-subtle);
   border-radius:   10px;
   display:         flex;
   align-items:     center;
   justify-content: center;
-  font-size:       0.9rem;
   flex-shrink:     0;
+  transition:      border-color 0.2s ease;
 }
+
+.bundleItemRow:hover .bundleItemIcon { border-color: var(--border-mid); }
 
 .bundleItemInfo { flex: 1; min-width: 0; }
 
+/* Rule 17.1 — Title-level label */
 .bundleItemLabel {
-  font-size:     0.8rem;
+  font-size:     0.82rem;
   font-weight:   700;
-  color:         rgba(255,255,255,0.75);
+  color:         var(--text-primary);
   margin:        0 0 0.15rem;
   white-space:   nowrap;
   overflow:      hidden;
   text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 
+/* Rule 17.1 — Label/tag below title */
 .bundleItemCategory {
-  font-family: 'DM Mono', monospace;
-  font-size:   0.6rem;
-  color:       rgba(255,255,255,0.2);
+  font-family: var(--font-mono);
+  font-size:   0.58rem;
+  font-weight: 300;
+  color:       var(--text-muted);
   margin:      0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
+/* Rule 17.1 — Mono price tag */
 .bundleItemPrice {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.72rem;
-  color:          rgba(255,255,255,0.45);
-  margin:         0;
-  flex-shrink:    0;
+  font-family: var(--font-mono);
+  font-size:   0.72rem;
+  font-weight: 400;
+  color:       var(--text-secondary);
+  margin:      0;
+  flex-shrink: 0;
 }
 
-/* ── Price breakdown ── */
+/* ── Price breakdown — deeper surface layer ── */
 .bundleBreakdown {
   display:        flex;
   flex-direction: column;
-  gap:            0.6rem;
-  background:     #0a0a0a;
-  border:         1px solid #181818;
-  border-radius:  14px;
+  gap:            0.65rem;
+  background:     rgba(255,255,255,0.025);
+  border:         1px solid var(--border-subtle);
+  border-radius:  12px;
   padding:        1.2rem 1.25rem;
 }
 
@@ -122,101 +186,123 @@
   display:         flex;
   justify-content: space-between;
   align-items:     center;
-  font-family:     'DM Mono', monospace;
-  font-size:       0.72rem;
-  color:           rgba(255,255,255,0.35);
+  font-family:     var(--font-mono);
+  font-size:       0.7rem;
+  font-weight:     300;
+  color:           var(--text-muted);
 }
 
 .bundleBreakdownDivider {
   height:     1px;
-  background: #1a1a1a;
-  margin:     0.2rem 0;
+  background: var(--border-subtle);
+  margin:     0.15rem 0;
 }
 
 .bundleBreakdownPct {
-  color:     rgba(255,255,255,0.18);
-  font-size: 0.62rem;
+  color:     var(--text-muted);
+  font-size: 0.6rem;
 }
 
-.bundleBreakdownDiscount { color: #22c55e; }
+/* Accent green for savings — single accent usage per Rule 17.2 */
+.bundleBreakdownDiscount { color: var(--accent-green); }
 
 .bundleBreakdownTotal {
-  color:      rgba(255,255,255,0.5);
-  font-size:  0.78rem;
+  color:     var(--text-secondary);
+  font-size: 0.76rem;
 }
 
+/* Rule 17.1 — Largest text in breakdown block */
 .bundleBreakdownTotalAmt {
-  color:       #fff;
-  font-weight: 800;
-  font-size:   0.92rem;
+  font-family:    var(--font-display);
+  color:          var(--text-primary);
+  font-weight:    800;
+  font-size:      1rem;
+  letter-spacing: -0.02em;
 }
 
-/* ── Terms ── */
+/* ── Terms — SVG check icons, no emoji ── */
 .bundleTerms {
   display:        flex;
   flex-direction: column;
-  gap:            0.4rem;
+  gap:            0.45rem;
 }
 
-.bundleTerms p {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.65rem;
-  color:          rgba(255,255,255,0.22);
-  margin:         0;
-  letter-spacing: 0.02em;
+.bundleTermsItem {
+  display:     flex;
+  align-items: center;
+  gap:         0.55rem;
+  font-family: var(--font-mono);
+  font-size:   0.63rem;
+  font-weight: 300;
+  color:       var(--text-muted);
+  letter-spacing: 0.01em;
 }
+
+.bundleTermsItem svg { color: var(--accent-green); flex-shrink: 0; }
 
 /* ════════════════════
    RIGHT — Payment
    ════════════════════ */
 .bundleRight {
-  background:     #0e0e0e;
-  border:         1px solid #1a1a1a;
-  border-radius:  20px;
+  background:     var(--bg-surface);
+  border:         1px solid var(--border-subtle);
+  border-radius:  18px;
   padding:        2rem;
   display:        flex;
   flex-direction: column;
   gap:            1.25rem;
 }
 
+/* Rule 17.1 — Body text below eyebrow */
 .bundlePayNote {
-  font-family: 'DM Mono', monospace;
-  font-size:   0.7rem;
-  color:       rgba(255,255,255,0.3);
-  line-height: 1.7;
+  font-family: var(--font-mono);
+  font-size:   0.68rem;
+  font-weight: 300;
+  color:       var(--text-muted);
+  line-height: 1.75;
   margin:      -0.5rem 0 0;
 }
 
-.bundlePayNote strong { color: rgba(255,255,255,0.6); }
+.bundlePayNote strong {
+  color:       var(--text-secondary);
+  font-weight: 500;
+}
 
 /* ── Method selector ── */
 .bundleMethods {
   display:        flex;
   flex-direction: column;
-  gap:            0.6rem;
+  gap:            0.55rem;
 }
 
 .bundleMethod {
   display:       flex;
   align-items:   center;
   gap:           0.9rem;
-  background:    #111;
-  border:        1px solid #1e1e1e;
+  background:    var(--bg-raised);
+  border:        1px solid var(--border-subtle);
   border-radius: 14px;
   padding:       0.9rem 1rem;
   cursor:        pointer;
-  transition:    all 0.2s;
+  /* Transition on base state — Rule 17.6 */
+  transition:    background 0.2s ease, border-color 0.2s ease;
   text-align:    left;
   width:         100%;
+  will-change:   transform;
 }
 
-.bundleMethod:hover { border-color: #2e2e2e; background: #131313; }
+.bundleMethod:hover {
+  background:   var(--bg-elevated);
+  border-color: var(--border-mid);
+}
 
+/* Active method — accent border + tinted bg */
 .bundleMethodActive {
-  border-color: rgba(34,197,94,0.35);
+  border-color: rgba(34,197,94,0.3);
   background:   rgba(34,197,94,0.04);
 }
 
+/* SVG icon container per Rule 17.3 */
 .bundleMethodIcon {
   width:           36px;
   height:          36px;
@@ -224,70 +310,78 @@
   display:         flex;
   align-items:     center;
   justify-content: center;
-  font-size:       1rem;
-  font-weight:     800;
   flex-shrink:     0;
+  transition:      background 0.2s ease;
 }
 
-.bundleMethodGcash { background: rgba(0,163,255,0.15); color: #00a3ff; }
-.bundleMethodCard  { background: rgba(255,255,255,0.06); }
-.bundleMethodBank  { background: rgba(255,255,255,0.06); }
+.bundleMethodGcash { background: rgba(0,163,255,0.12); color: #00a3ff; }
+.bundleMethodCard  { background: var(--bg-elevated);  color: var(--text-secondary); }
+.bundleMethodBank  { background: var(--bg-elevated);  color: var(--text-secondary); }
 
 .bundleMethodInfo { flex: 1; }
 
+/* Rule 17.1 — Method name (subtitle level) */
 .bundleMethodName {
-  font-size:   0.82rem;
-  font-weight: 700;
-  color:       rgba(255,255,255,0.75);
-  margin:      0 0 0.15rem;
+  font-family:    var(--font-display);
+  font-size:      0.82rem;
+  font-weight:    700;
+  color:          var(--text-primary);
+  margin:         0 0 0.15rem;
+  letter-spacing: -0.01em;
 }
 
+/* Rule 17.1 — Descriptor below name */
 .bundleMethodDesc {
-  font-family: 'DM Mono', monospace;
-  font-size:   0.62rem;
-  color:       rgba(255,255,255,0.22);
+  font-family: var(--font-mono);
+  font-size:   0.6rem;
+  font-weight: 300;
+  color:       var(--text-muted);
   margin:      0;
 }
 
+/* Radio dot */
 .bundleMethodRadio {
   width:         16px;
   height:        16px;
   border-radius: 50%;
-  border:        2px solid #2e2e2e;
+  border:        1.5px solid rgba(255,255,255,0.15);
   flex-shrink:   0;
-  transition:    all 0.2s;
+  transition:    border-color 0.2s ease, background 0.2s ease;
 }
 
 .bundleMethodRadioActive {
-  border-color: #22c55e;
-  background:   #22c55e;
-  box-shadow:   0 0 0 3px rgba(34,197,94,0.15);
+  border-color: var(--accent-green);
+  background:   var(--accent-green);
 }
 
-/* ── Due row ── */
+/* ── Total due row ── */
 .bundleDueRow {
   display:         flex;
   justify-content: space-between;
   align-items:     center;
-  background:      #111;
-  border:          1px solid #1e1e1e;
+  background:      var(--bg-raised);
+  border:          1px solid var(--border-subtle);
   border-radius:   12px;
   padding:         0.9rem 1.1rem;
 }
 
+/* Rule 17.1 — Label / tag */
 .bundleDueLabel {
-  font-family:    'DM Mono', monospace;
-  font-size:      0.68rem;
-  color:          rgba(255,255,255,0.3);
+  font-family:    var(--font-mono);
+  font-size:      0.62rem;
+  font-weight:    300;
+  color:          var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
 }
 
+/* Rule 17.1 — Largest text in right panel */
 .bundleDueAmount {
-  font-size:      1.15rem;
+  font-family:    var(--font-display);
+  font-size:      1.2rem;
   font-weight:    800;
-  color:          #fff;
-  letter-spacing: -0.02em;
+  color:          var(--text-primary);
+  letter-spacing: -0.03em;
 }
 
 /* ── CTA button ── */
@@ -297,37 +391,43 @@
   justify-content: center;
   gap:             0.5rem;
   width:           100%;
-  padding:         0.9rem 1.5rem;
-  background:      #22c55e;
+  padding:         0.95rem 1.5rem;
+  background:      var(--accent-green);
   color:           #000;
-  font-family:     'Syne', sans-serif;
-  font-size:       0.9rem;
+  font-family:     var(--font-display);
+  font-size:       0.88rem;
   font-weight:     800;
   border:          none;
   border-radius:   14px;
   cursor:          pointer;
-  transition:      all 0.2s;
+  /* Transition on base state — Rule 17.6 */
+  transition:      background 0.2s ease, transform 0.25s cubic-bezier(0.22,1,0.36,1);
   letter-spacing:  -0.01em;
   will-change:     transform;
 }
 
 .bundlePlaceBtn:hover:not(:disabled) {
   background: #16a34a;
-  transform:  translate3d(0, -1px, 0);
-  box-shadow: 0 6px 24px rgba(34,197,94,0.25);
+  transform:  translate3d(0, -2px, 0);
 }
 
-.bundlePlaceBtn:disabled    { opacity: 0.6; cursor: not-allowed; }
+.bundlePlaceBtn:focus-visible {
+  outline:        2px solid var(--accent-green);
+  outline-offset: 3px;
+}
+
+.bundlePlaceBtn:disabled    { opacity: 0.55; cursor: not-allowed; }
 .bundlePlaceBtnLoading      { opacity: 0.7; }
 
 .bundleBtnSpinner {
   display:       inline-block;
   width:         14px;
   height:        14px;
-  border:        2px solid rgba(0,0,0,0.25);
+  border:        2px solid rgba(0,0,0,0.2);
   border-top:    2px solid #000;
   border-radius: 50%;
   animation:     bundleSpin 0.7s linear infinite;
+  will-change:   transform;
 }
 
 @keyframes bundleSpin {
@@ -336,11 +436,12 @@
 
 /* ── Disclaimer ── */
 .bundleDisclaimer {
-  font-family: 'DM Mono', monospace;
-  font-size:   0.6rem;
-  color:       rgba(255,255,255,0.12);
+  font-family: var(--font-mono);
+  font-size:   0.58rem;
+  font-weight: 300;
+  color:       var(--text-muted);
   text-align:  center;
-  line-height: 1.7;
+  line-height: 1.75;
   margin:      0;
 }
 
@@ -354,56 +455,58 @@
   flex-direction:  column;
   align-items:     center;
   text-align:      center;
-  gap:             1.2rem;
-  background:      #0e0e0e;
-  border:          1px solid rgba(34,197,94,0.18);
-  border-radius:   24px;
+  gap:             1.25rem;
+  background:      var(--bg-surface);
+  border:          1px solid rgba(34,197,94,0.15);
+  border-radius:   22px;
   padding:         3rem 2.5rem;
 }
 
 .bundleSuccessIcon {
-  width:           56px;
-  height:          56px;
-  background:      #22c55e;
+  width:           52px;
+  height:          52px;
+  background:      var(--accent-green);
   color:           #000;
   border-radius:   50%;
   display:         flex;
   align-items:     center;
   justify-content: center;
-  font-size:       1.4rem;
-  font-weight:     800;
-  box-shadow:      0 0 0 8px rgba(34,197,94,0.1);
 }
 
+/* Rule 17.1 — Title */
 .bundleSuccessTitle {
+  font-family:    var(--font-display);
   font-size:      1.6rem;
   font-weight:    800;
-  color:          #fff;
+  color:          var(--text-primary);
   letter-spacing: -0.03em;
   margin:         0;
 }
 
+/* Rule 17.1 — Body */
 .bundleSuccessDesc {
-  font-family: 'DM Mono', monospace;
-  font-size:   0.72rem;
-  color:       rgba(255,255,255,0.35);
+  font-family: var(--font-mono);
+  font-size:   0.7rem;
+  font-weight: 300;
+  color:       var(--text-muted);
   line-height: 1.8;
   margin:      0;
 }
 
-.bundleSuccessDesc strong { color: rgba(255,255,255,0.6); }
+.bundleSuccessDesc strong { color: var(--text-secondary); }
 
 .bundleSuccessBtn {
   display:         inline-block;
   padding:         0.7rem 1.5rem;
-  background:      #22c55e;
+  background:      var(--accent-green);
   color:           #000;
-  font-family:     'Syne', sans-serif;
+  font-family:     var(--font-display);
   font-size:       0.82rem;
   font-weight:     800;
   border-radius:   12px;
   text-decoration: none;
-  transition:      all 0.2s;
+  transition:      background 0.2s ease, transform 0.25s cubic-bezier(0.22,1,0.36,1);
+  will-change:     transform;
 }
 
 .bundleSuccessBtn:hover {
@@ -411,13 +514,7 @@
   transform:  translate3d(0, -1px, 0);
 }
 
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  .bundleWrap { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 375px) {
-  .bundlePage   { padding: 5rem 1rem 4rem; }
-  .bundleLeft,
-  .bundleRight  { padding: 1.5rem; }
-}
+/* ════════════════════
+   RESPONSIVE — Rule 17.6
+   (breakpoints live in mediaQueries.css per Rule 9)
+   ════════════════════ */
