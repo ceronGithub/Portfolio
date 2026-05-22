@@ -77,6 +77,7 @@ export default function ArchitectureBuySection({
   const [selectedAsset, setSelectedAsset] = useState<ArchAssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const [cycleIndex,    setCycleIndex]    = useState(0);
+  const [bgSrc,         setBgSrc]         = useState<string>("");
   const { toasts, showToast, dismissToast } = useToast();
   const bgVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -87,13 +88,23 @@ export default function ArchitectureBuySection({
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
 
-  // Reset cycle index when cart composition changes
-  const prevCartKey = useRef("");
-  const cartKey = [...cartIds].sort().join(",");
-  if (cartKey !== prevCartKey.current) {
-    prevCartKey.current = cartKey;
-    if (cycleIndex !== 0) setCycleIndex(0);
-  }
+  // Sync bgSrc + play whenever cycleIndex or cartItems changes
+  useEffect(() => {
+    const item = cartItems[cycleIndex % (cartItems.length || 1)];
+    if (!item) { setBgSrc(""); return; }
+    setBgSrc(item.videoSrc);
+  // cartItems length/ids as stable dep
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cycleIndex, cartIds]);
+
+  // Play bg video whenever bgSrc changes
+  useEffect(() => {
+    const video = bgVideoRef.current;
+    if (!video || !bgSrc) return;
+    video.load();
+    const p = video.play();
+    if (p) p.catch(() => {});
+  }, [bgSrc]);
 
   // Register addToCartMany so parent (e.g. WishlistPanel) can populate this cart externally
   useEffect(() => {
@@ -110,6 +121,7 @@ export default function ArchitectureBuySection({
 
   const toggleCart = useCallback((id: string) => {
     if (ownedAssetIds.has(id)) return;
+    setCycleIndex(0);
     setCartIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -122,7 +134,6 @@ export default function ArchitectureBuySection({
     if (!ownedAssetIds.has(asset.id)) {
       setCartIds(prev => new Set([...prev, asset.id]));
     }
-    setBrowseOpen(false);
   }
 
   return (
@@ -131,13 +142,12 @@ export default function ArchitectureBuySection({
 
         {/* Left background — cycles through all selected asset videos */}
         <div className="archBuyBgLeft">
-          {cartItems.length > 0 ? (
+          {bgSrc ? (
             <video
               ref={bgVideoRef}
-              key={cartItems[cycleIndex % cartItems.length]?.id}
-              src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
+              src={bgSrc}
               className="archBuyBgVideo"
-              autoPlay muted playsInline
+              muted playsInline
               loop={cartItems.length === 1}
               onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
             />
@@ -259,7 +269,7 @@ export default function ArchitectureBuySection({
                             )}
                             <button
                               className={"archModalSelectBtn" + (isInCart ? " archModalSelectBtnActive" : "")}
-                              onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
+                              onClick={e => { e.stopPropagation(); toggleCart(asset.id); }}
                             >
                               {isInCart ? "✓ Added" : "Select"}
                             </button>
