@@ -21,6 +21,8 @@ interface Props {
   ownedAssetIds?: Set<string>;
   onAddToWishlist?: (id: string) => void;
   wishlistIds?: Set<string>;
+  // Registrar so parent can push items into this cart externally
+  onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
 }
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
@@ -66,6 +68,7 @@ export default function ArchitectureBuySection({
   ownedAssetIds = new Set(),
   onAddToWishlist,
   wishlistIds = new Set(),
+  onRegisterAddToCart,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
@@ -80,6 +83,19 @@ export default function ArchitectureBuySection({
   const discountRate   = getBundleDiscount(cartItems.length);
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
+
+  // Register addToCartMany so parent (e.g. WishlistPanel) can populate this cart externally
+  useEffect(() => {
+    onRegisterAddToCart?.((ids: string[]) => {
+      setCartIds(prev => {
+        const next = new Set(prev);
+        ids.forEach(id => {
+          if (!ownedAssetIds.has(id)) next.add(id);
+        });
+        return next;
+      });
+    });
+  }, [onRegisterAddToCart, ownedAssetIds]);
 
   const toggleCart = useCallback((id: string) => {
     if (ownedAssetIds.has(id)) return;
@@ -261,7 +277,6 @@ export default function ArchitectureBuySection({
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  onRegisterAddToCart?.(cartItems.map(a => a.id));
                   setBrowseOpen(false);
                   showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
                 }}

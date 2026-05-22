@@ -461,7 +461,7 @@ export default function AssetBuySection({
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  onRegisterAddToCart?.(cartItems.map(a => a.id));
+
                   setBrowseOpen(false);
                   showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
                 }}
@@ -556,4 +556,4 @@ export default function AssetBuySection({
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </>
   );
-}
+} 
