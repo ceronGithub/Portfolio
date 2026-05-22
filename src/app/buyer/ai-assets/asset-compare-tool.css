@@ -361,3 +361,11 @@
     text-orientation: mixed;
   }
 }
+/* ── Full-section loading state ── */
+.compareLoadingWrap {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.4rem;
+  padding:         4rem 0;
+}
