@@ -261,19 +261,51 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         onAddAllToCart={handleAddAllToCart}
       />
 
-      {/* ── Dashboard Sections ── */}
+      {/* ── Systems ── */}
       <SystemsClient
         items={items}
         wishlistIds={wishlistIds}
         onToggleWishlist={toggleWishlist}
       />
       <SystemsInfoSections />
-      <AISection />
 
-      {/* Character & Weapon Studio */}
+      {/* ── Character & Weapon Studio ── */}
+      <AISection />
       <AIAssetsIntro />
+      <AssetBuySection
+        ownedAssetIds={ownedSet}
+        wishlistIds={wishlistIds}
+        onAddToWishlist={toggleWishlist}
+        onAddToCart={addToCart}
+        onRegisterAddToCart={fn => { addAllToCartRef.current = fn; }}
+        onTrackView={handleTrackView}
+        openToId={browseOpenId}
+        onOpenToIdConsumed={() => setBrowseOpenId(null)}
+      />
       <NewAssetSection />
-      {/* ── Recently Viewed ── */}
+      <AssetCompareTool ownedAssetIds={ownedSet} />
+
+      {/* ── Architecture Studio ── */}
+      <ArchitectureAssetsIntro />
+      <ArchitectureBuySection
+        wishlistIds={wishlistIds}
+        onAddToWishlist={toggleWishlist}
+        onAddToCart={addToCart}
+        onRegisterAddToCart={fn => { addAllToCartArchRef.current = fn; }}
+        onTrackView={handleTrackView}
+      />
+      <NewArchitectureSection />
+
+      {/* ── Reviews ── */}
+      <ReviewSection
+        ownedProductIds={ownedAssetIds}
+        ownedProducts={ownedProducts}
+      />
+
+      {/* ── Contact ── */}
+      <InquirySection />
+      <CustomRequestBuilder />
+
       {/* ── Floating Recently Viewed Button + Popup ── */}
       {recentItems.length > 0 && (
         <>
@@ -317,39 +349,6 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
           )}
         </>
       )}
-
-      <AssetBuySection
-        ownedAssetIds={ownedSet}
-        wishlistIds={wishlistIds}
-        onAddToWishlist={toggleWishlist}
-        onAddToCart={addToCart}
-        onRegisterAddToCart={fn => { addAllToCartRef.current = fn; }}
-        onTrackView={handleTrackView}
-        openToId={browseOpenId}
-        onOpenToIdConsumed={() => setBrowseOpenId(null)}
-      />
-
-      <AssetCompareTool ownedAssetIds={ownedSet} />
-
-      {/* Architecture Studio */}
-      <ArchitectureAssetsIntro />
-      <NewArchitectureSection />
-      <ArchitectureBuySection
-        wishlistIds={wishlistIds}
-        onAddToWishlist={toggleWishlist}
-        onAddToCart={addToCart}
-        onRegisterAddToCart={fn => { addAllToCartArchRef.current = fn; }}
-        onTrackView={handleTrackView}
-      />
-
-      <ReviewSection
-        ownedProductIds={ownedAssetIds}
-        ownedProducts={ownedProducts}
-      />
-
-      <CustomRequestBuilder />
-
-      <InquirySection />
     </>
   );
 }
