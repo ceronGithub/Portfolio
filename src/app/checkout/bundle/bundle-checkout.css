@@ -1,0 +1,423 @@
+/* bundle-checkout.css — Bundle checkout page UI.
+   Matches the design system of checkout.css. */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+/* ── Page shell ── */
+.bundlePage {
+  min-height:      100vh;
+  background:      #080808;
+  font-family:     'Syne', sans-serif;
+  padding:         7rem 1.5rem 6rem;
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: center;
+}
+
+/* ── Two-column wrap ── */
+.bundleWrap {
+  width:                 100%;
+  max-width:             900px;
+  display:               grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap:                   2rem;
+  align-items:           start;
+}
+
+/* ── Shared eyebrow ── */
+.bundleEyebrow {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin:         0 0 1.25rem;
+}
+
+/* ════════════════════
+   LEFT — Order summary
+   ════════════════════ */
+.bundleLeft {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  20px;
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.5rem;
+}
+
+/* ── Asset item list ── */
+.bundleItemList {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.5rem;
+}
+
+.bundleItemRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.75rem;
+  padding:     0.7rem 0.9rem;
+  background:  #111;
+  border:      1px solid #1a1a1a;
+  border-radius: 12px;
+  transition:  border-color 0.2s;
+}
+
+.bundleItemRow:hover { border-color: #242424; }
+
+.bundleItemIcon {
+  width:           34px;
+  height:          34px;
+  background:      #161616;
+  border:          1px solid #222;
+  border-radius:   10px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       0.9rem;
+  flex-shrink:     0;
+}
+
+.bundleItemInfo { flex: 1; min-width: 0; }
+
+.bundleItemLabel {
+  font-size:     0.8rem;
+  font-weight:   700;
+  color:         rgba(255,255,255,0.75);
+  margin:        0 0 0.15rem;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.bundleItemCategory {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.2);
+  margin:      0;
+}
+
+.bundleItemPrice {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.72rem;
+  color:          rgba(255,255,255,0.45);
+  margin:         0;
+  flex-shrink:    0;
+}
+
+/* ── Price breakdown ── */
+.bundleBreakdown {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.6rem;
+  background:     #0a0a0a;
+  border:         1px solid #181818;
+  border-radius:  14px;
+  padding:        1.2rem 1.25rem;
+}
+
+.bundleBreakdownRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.72rem;
+  color:           rgba(255,255,255,0.35);
+}
+
+.bundleBreakdownDivider {
+  height:     1px;
+  background: #1a1a1a;
+  margin:     0.2rem 0;
+}
+
+.bundleBreakdownPct {
+  color:     rgba(255,255,255,0.18);
+  font-size: 0.62rem;
+}
+
+.bundleBreakdownDiscount { color: #22c55e; }
+
+.bundleBreakdownTotal {
+  color:      rgba(255,255,255,0.5);
+  font-size:  0.78rem;
+}
+
+.bundleBreakdownTotalAmt {
+  color:       #fff;
+  font-weight: 800;
+  font-size:   0.92rem;
+}
+
+/* ── Terms ── */
+.bundleTerms {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.4rem;
+}
+
+.bundleTerms p {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.65rem;
+  color:          rgba(255,255,255,0.22);
+  margin:         0;
+  letter-spacing: 0.02em;
+}
+
+/* ════════════════════
+   RIGHT — Payment
+   ════════════════════ */
+.bundleRight {
+  background:     #0e0e0e;
+  border:         1px solid #1a1a1a;
+  border-radius:  20px;
+  padding:        2rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            1.25rem;
+}
+
+.bundlePayNote {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.7;
+  margin:      -0.5rem 0 0;
+}
+
+.bundlePayNote strong { color: rgba(255,255,255,0.6); }
+
+/* ── Method selector ── */
+.bundleMethods {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.6rem;
+}
+
+.bundleMethod {
+  display:       flex;
+  align-items:   center;
+  gap:           0.9rem;
+  background:    #111;
+  border:        1px solid #1e1e1e;
+  border-radius: 14px;
+  padding:       0.9rem 1rem;
+  cursor:        pointer;
+  transition:    all 0.2s;
+  text-align:    left;
+  width:         100%;
+}
+
+.bundleMethod:hover { border-color: #2e2e2e; background: #131313; }
+
+.bundleMethodActive {
+  border-color: rgba(34,197,94,0.35);
+  background:   rgba(34,197,94,0.04);
+}
+
+.bundleMethodIcon {
+  width:           36px;
+  height:          36px;
+  border-radius:   10px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       1rem;
+  font-weight:     800;
+  flex-shrink:     0;
+}
+
+.bundleMethodGcash { background: rgba(0,163,255,0.15); color: #00a3ff; }
+.bundleMethodCard  { background: rgba(255,255,255,0.06); }
+.bundleMethodBank  { background: rgba(255,255,255,0.06); }
+
+.bundleMethodInfo { flex: 1; }
+
+.bundleMethodName {
+  font-size:   0.82rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.75);
+  margin:      0 0 0.15rem;
+}
+
+.bundleMethodDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.22);
+  margin:      0;
+}
+
+.bundleMethodRadio {
+  width:         16px;
+  height:        16px;
+  border-radius: 50%;
+  border:        2px solid #2e2e2e;
+  flex-shrink:   0;
+  transition:    all 0.2s;
+}
+
+.bundleMethodRadioActive {
+  border-color: #22c55e;
+  background:   #22c55e;
+  box-shadow:   0 0 0 3px rgba(34,197,94,0.15);
+}
+
+/* ── Due row ── */
+.bundleDueRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  background:      #111;
+  border:          1px solid #1e1e1e;
+  border-radius:   12px;
+  padding:         0.9rem 1.1rem;
+}
+
+.bundleDueLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.68rem;
+  color:          rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.bundleDueAmount {
+  font-size:      1.15rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+}
+
+/* ── CTA button ── */
+.bundlePlaceBtn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.5rem;
+  width:           100%;
+  padding:         0.9rem 1.5rem;
+  background:      #22c55e;
+  color:           #000;
+  font-family:     'Syne', sans-serif;
+  font-size:       0.9rem;
+  font-weight:     800;
+  border:          none;
+  border-radius:   14px;
+  cursor:          pointer;
+  transition:      all 0.2s;
+  letter-spacing:  -0.01em;
+  will-change:     transform;
+}
+
+.bundlePlaceBtn:hover:not(:disabled) {
+  background: #16a34a;
+  transform:  translate3d(0, -1px, 0);
+  box-shadow: 0 6px 24px rgba(34,197,94,0.25);
+}
+
+.bundlePlaceBtn:disabled    { opacity: 0.6; cursor: not-allowed; }
+.bundlePlaceBtnLoading      { opacity: 0.7; }
+
+.bundleBtnSpinner {
+  display:       inline-block;
+  width:         14px;
+  height:        14px;
+  border:        2px solid rgba(0,0,0,0.25);
+  border-top:    2px solid #000;
+  border-radius: 50%;
+  animation:     bundleSpin 0.7s linear infinite;
+}
+
+@keyframes bundleSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Disclaimer ── */
+.bundleDisclaimer {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.12);
+  text-align:  center;
+  line-height: 1.7;
+  margin:      0;
+}
+
+/* ════════════════════
+   SUCCESS STATE
+   ════════════════════ */
+.bundleSuccess {
+  width:           100%;
+  max-width:       440px;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  text-align:      center;
+  gap:             1.2rem;
+  background:      #0e0e0e;
+  border:          1px solid rgba(34,197,94,0.18);
+  border-radius:   24px;
+  padding:         3rem 2.5rem;
+}
+
+.bundleSuccessIcon {
+  width:           56px;
+  height:          56px;
+  background:      #22c55e;
+  color:           #000;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       1.4rem;
+  font-weight:     800;
+  box-shadow:      0 0 0 8px rgba(34,197,94,0.1);
+}
+
+.bundleSuccessTitle {
+  font-size:      1.6rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.03em;
+  margin:         0;
+}
+
+.bundleSuccessDesc {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.35);
+  line-height: 1.8;
+  margin:      0;
+}
+
+.bundleSuccessDesc strong { color: rgba(255,255,255,0.6); }
+
+.bundleSuccessBtn {
+  display:         inline-block;
+  padding:         0.7rem 1.5rem;
+  background:      #22c55e;
+  color:           #000;
+  font-family:     'Syne', sans-serif;
+  font-size:       0.82rem;
+  font-weight:     800;
+  border-radius:   12px;
+  text-decoration: none;
+  transition:      all 0.2s;
+}
+
+.bundleSuccessBtn:hover {
+  background: #16a34a;
+  transform:  translate3d(0, -1px, 0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .bundleWrap { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 375px) {
+  .bundlePage   { padding: 5rem 1rem 4rem; }
+  .bundleLeft,
+  .bundleRight  { padding: 1.5rem; }
+}

@@ -1,15 +1,17 @@
-/* toast-stack.css — Bottom-left toast notifications. */
+/* toast-stack.css — Center-top toast notifications. */
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
 
 .toastStack {
-  position:       fixed;
-  bottom:         2rem;
-  left:           2rem;
-  z-index:        9000;
-  display:        flex;
-  flex-direction: column;
-  gap:            0.5rem;
-  pointer-events: none;
+  position:        fixed;
+  top:             1.5rem;
+  left:            50%;
+  transform:       translateX(-50%);
+  z-index:         9000;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             0.5rem;
+  pointer-events:  none;
 }
 
 .toastItem {
@@ -27,8 +29,8 @@
 }
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)      scale(1); }
 }
 
 .toastItem--success {
