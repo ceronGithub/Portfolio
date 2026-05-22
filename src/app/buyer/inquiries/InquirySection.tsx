@@ -1,13 +1,20 @@
 // InquirySection.tsx — Get in Touch section for buyer dashboard.
 // Full-width editorial layout — left meta column + right form card.
 // SVG contact icons, no emoji. Syne + DM Mono typography.
+// Email delivery via EmailJS — sends directly from the browser, no backend needed.
 
 "use client";
 
-import { useState } from "react";
+import { useState }  from "react";
+import emailjs       from "@emailjs/browser";
 import "./inquiry-section.css";
 
 type Status = "idle" | "sending" | "sent" | "error";
+
+// ── EmailJS config — keys set in .env.local ──────────────────────────────────
+const EMAILJS_SERVICE_ID  = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID  ?? "";
+const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_INQUIRY_TEMPLATE_ID ?? "";
+const EMAILJS_PUBLIC_KEY  = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY  ?? "";
 
 const CONTACT_ITEMS = [
   {
@@ -18,7 +25,7 @@ const CONTACT_ITEMS = [
       </svg>
     ),
     label: "Email",
-    value: "ceroncalsena@gmail.com",
+    value: "developerceron@gmail.com",
   },
   {
     icon: (
@@ -55,16 +62,18 @@ export default function InquirySection() {
     if (!form.name || !form.email || !form.message) return;
     setStatus("sending");
     try {
-      const res = await fetch("/api/inquiry", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          assetType:     form.subject || "General",
-          description:   `From: ${form.name} <${form.email}>\n\n${form.message}`,
-          deliverySpeed: "Standard",
-        }),
-      });
-      setStatus(res.ok || res.status === 201 ? "sent" : "error");
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          from_name:    form.name,
+          from_email:   form.email,
+          subject:      form.subject || "General Inquiry",
+          message:      form.message,
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+      setStatus("sent");
     } catch {
       setStatus("error");
     }
