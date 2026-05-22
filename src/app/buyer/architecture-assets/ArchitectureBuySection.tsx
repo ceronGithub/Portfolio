@@ -25,6 +25,7 @@ interface Props {
   wishlistIds?: Set<string>;
   onAddToCart?: (ids: string[]) => void;
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
+  onTrackView?: (item: { id: string; label: string; category: string; price: number }) => void;
 }
 
 function getBundleDiscount(count: number): number {
@@ -51,6 +52,7 @@ export default function ArchitectureBuySection({
   wishlistIds = new Set(),
   onAddToCart,
   onRegisterAddToCart,
+  onTrackView,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
@@ -160,6 +162,7 @@ export default function ArchitectureBuySection({
   function handleSelectAsset(asset: ArchAssetItem) {
     setSelectedAsset(asset);
     toggleCart(asset.id);
+    onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.price });
   }
 
   return (
