@@ -117,15 +117,13 @@ export default function AssetBuySection({
       });
     });
   }, [onRegisterAddToCart, ownedAssetIds]);
-  // Open browse modal to a specific asset when openToId is set (from Recently Viewed)
+  // Open browse modal to a specific asset when openToId is set (from Recently Viewed).
+  // Tab is determined by ID prefix (orc-/axe-) since assets may not be loaded yet.
   useEffect(() => {
     if (!openToId) return;
     setBrowseOpen(true);
-    // Determine which tab the asset belongs to by checking fetched arrays
-    const inCharacter = characterAssets.find(a => a.id === openToId);
-    const inWeapon    = weaponAssets.find(a => a.id === openToId);
-    if (inCharacter) setBrowseTab("Character");
-    if (inWeapon)    setBrowseTab("Weapon");
+    if (openToId.startsWith("axe-")) setBrowseTab("Weapon");
+    else                              setBrowseTab("Character");
     onOpenToIdConsumed?.();
   }, [openToId]);
 
@@ -512,21 +510,13 @@ export default function AssetBuySection({
                               {isWishlisted ? "♥" : "♡"}
                             </button>
                           )}
-                          {/* Quick View — fullscreen preview before buying */}
-                          <button
-                            className="assetModalQuickViewBtn"
-                            onClick={e => {
-                              e.stopPropagation();
-                              setPreviewAsset(asset);
-                              onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.price });
-                            }}
-                            aria-label="Quick view"
-                          >
-                            Quick View
-                          </button>
                           <button
                             className={"assetModalSelectBtn" + (isInCart ? " assetModalSelectBtnActive" : "")}
-                            onClick={e => { e.stopPropagation(); handleSelectAsset(asset); }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleSelectAsset(asset);
+                              onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.price });
+                            }}
                           >
                             {isInCart ? "✓ Added" : "Select"}
                           </button>

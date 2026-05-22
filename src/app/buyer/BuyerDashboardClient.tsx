@@ -167,6 +167,12 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
   const [browseOpenId, setBrowseOpenId] = useState<string | null>(null);
   const [recentOpen,   setRecentOpen]   = useState(false);
 
+  // Auto-open the Recently Viewed popup whenever a buyer selects an asset
+  const handleTrackView = useCallback((item: Parameters<typeof trackView>[0]) => {
+    trackView(item);
+    setRecentOpen(true);
+  }, [trackView]);
+
   const wishlistEntries = useMemo(
     () => buildWishlistEntries(wishlistIds, items),
     [wishlistIds, items]
@@ -319,7 +325,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         onAddToWishlist={toggleWishlist}
         onAddToCart={addToCart}
         onRegisterAddToCart={fn => { addAllToCartRef.current = fn; }}
-        onTrackView={trackView}
+        onTrackView={handleTrackView}
         openToId={browseOpenId}
         onOpenToIdConsumed={() => setBrowseOpenId(null)}
       />
