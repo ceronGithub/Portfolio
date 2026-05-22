@@ -30,18 +30,7 @@ interface Props {
 }
 
 // Characters + Weapons — Google Drive proxy URLs.
-const ALL_ASSETS: AssetItem[] = [
-  { id:"orc-01", label:"Orc 01 — Warrior",    category:"Character", videoSrc:GD("1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP"), price:5500 },
-  { id:"orc-02", label:"Orc 02 — Fighter",    category:"Character", videoSrc:GD("1SaHl7fGvD2uoy34clB1p2UWT-knWENwl"), price:5500 },
-  { id:"orc-03", label:"Orc 03 — Red Skin",   category:"Character", videoSrc:GD("1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i"), price:5500 },
-  { id:"orc-04", label:"Orc 04 — Armored",    category:"Character", videoSrc:GD("1cx2sETIft3K7R8NnNPumoLet1pW5It0a"), price:5500 },
-  { id:"orc-05", label:"Orc 05 — Shaman",     category:"Character", videoSrc:GD("1-n33tw86ViaKB6xzM0UuCrgF45JVc63-"), price:5500 },
-  { id:"axe-01", label:"Axe 01 — Battle Axe", category:"Weapon",    videoSrc:GD("1NrTbKznn-3pcIC9q-BqBa2lUfMUsGKa8"), price:3500 },
-  { id:"axe-02", label:"Axe 02 — War Axe",    category:"Weapon",    videoSrc:GD("1db1EOrzdG2phPiaJ8DJV9Tz1-bfYwB67"), price:3500 },
-  { id:"axe-03", label:"Axe 03 — Runic Axe",  category:"Weapon",    videoSrc:GD("1ZPhiN56sAU9EQIlrrTPY3OSDBhijtHld"), price:3500 },
-  { id:"axe-04", label:"Axe 04 — Viking Axe", category:"Weapon",    videoSrc:GD("1jjU-r5EawMDjzhbJueiadCMjkcCZrHtr"), price:3500 },
-  { id:"axe-05", label:"Axe 05 — Ornate Axe", category:"Weapon",    videoSrc:GD("1vl3KhBI_UQIugyIXeBTduabrOh0eZSU5"), price:3500 },
-];
+// Assets are fetched from /api/products?category= per tab — see fetchAssets() below.
 
 // Bundle discount tiers: 2 items = 5%, 3–4 = 10%, 5+ = 15%
 function getBundleDiscount(count: number): number {
@@ -80,6 +69,37 @@ export default function AssetBuySection({
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const [cycleIndex,    setCycleIndex]    = useState(0);
   const { toasts, showToast, dismissToast } = useToast();
+
+  // DB-fetched assets per tab — cached after first fetch per category
+  const [characterAssets, setCharacterAssets] = useState<AssetItem[]>([]);
+  const [weaponAssets,    setWeaponAssets]    = useState<AssetItem[]>([]);
+  const [assetsLoading,   setAssetsLoading]   = useState(false);
+
+  // Fetch assets from DB when browse modal opens or tab switches
+  useEffect(() => {
+    if (!browseOpen) return;
+    const category = browseTab === "Character" ? "character" : "weapon";
+    const alreadyLoaded = category === "character" ? characterAssets.length > 0 : weaponAssets.length > 0;
+    if (alreadyLoaded) return;
+
+    setAssetsLoading(true);
+    fetch(`/api/products?category=${category}`)
+      .then(r => r.json())
+      .then(data => {
+        // Map DB product shape → AssetItem shape
+        const mapped: AssetItem[] = (data.products ?? []).map((p: any) => ({
+          id:       p.id,
+          label:    p.name,
+          category: browseTab,
+          videoSrc: p.previewVideoUrl ?? "",
+          price:    p.price,
+        }));
+        if (category === "character") setCharacterAssets(mapped);
+        else                          setWeaponAssets(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setAssetsLoading(false));
+  }, [browseOpen, browseTab]);
 
   // Task 3: expose addToCartMany so WishlistPanel "Add all to cart" can populate this cart
   useEffect(() => {
@@ -189,18 +209,22 @@ export default function AssetBuySection({
   }, []);
 
   const filteredAssets = useMemo(() => {
-    let list = ALL_ASSETS.filter(a => a.category === browseTab);
+    // Use the correct fetched array per active tab
+    let list = browseTab === "Character" ? characterAssets : weaponAssets;
     if (browseSearch.trim())
       list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
-    // Task 2: price range filter
+    // Price range filter
     if (priceMin !== null) list = list.filter(a => a.price >= priceMin);
     if (priceMax !== null) list = list.filter(a => a.price <= priceMax);
     if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (browseSort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
     if (browseSort === "name")       list = [...list].sort((a, b) => a.label.localeCompare(b.label));
     return list;
-  }, [browseTab, browseSearch, browseSort, priceMin, priceMax]);
-  const cartItems      = ALL_ASSETS.filter(a => cartIds.has(a.id));
+  }, [browseTab, characterAssets, weaponAssets, browseSearch, browseSort, priceMin, priceMax]);
+
+  // Build cart items from both fetched arrays combined
+  const allFetchedAssets = useMemo(() => [...characterAssets, ...weaponAssets], [characterAssets, weaponAssets]);
+  const cartItems      = allFetchedAssets.filter(a => cartIds.has(a.id));
   const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
   const discountRate   = getBundleDiscount(cartItems.length);
   const discountAmount = Math.round(rawTotal * discountRate);
@@ -417,7 +441,25 @@ export default function AssetBuySection({
             </div>
 
             <div className="assetModalList">
-              {filteredAssets.map(asset => {
+              {/* Loading skeleton */}
+              {assetsLoading && (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="assetModalRowSkeleton">
+                    <div className="assetModalSkeletonThumb" />
+                    <div className="assetModalSkeletonInfo">
+                      <div className="assetModalSkeletonLine assetModalSkeletonLineLong" />
+                      <div className="assetModalSkeletonLine assetModalSkeletonLineShort" />
+                    </div>
+                  </div>
+                ))
+              )}
+              {/* Empty state */}
+              {!assetsLoading && filteredAssets.length === 0 && (
+                <div className="assetModalEmpty">
+                  <p>No {browseTab.toLowerCase()} assets found.</p>
+                </div>
+              )}
+              {!assetsLoading && filteredAssets.map(asset => {
                 const isOwned      = ownedAssetIds.has(asset.id);
                 const isInCart     = cartIds.has(asset.id);
                 const isWishlisted = wishlistIds.has(asset.id);
