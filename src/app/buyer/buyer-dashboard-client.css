@@ -93,3 +93,184 @@
   border:          2px solid #0a0a0a;
   pointer-events:  none;
 }
+/* ══════════════════════════════════════
+   Floating Recently Viewed Button
+   Sits above the cart button (bottom: 9rem)
+   ══════════════════════════════════════ */
+
+.buyerRecentFloatBtn {
+  position:        fixed;
+  bottom:          9rem;
+  right:           2rem;
+  z-index:         350;
+  width:           52px;
+  height:          52px;
+  border-radius:   50%;
+  background:      #111;
+  border:          1px solid #2a2a2a;
+  color:           #888;
+  cursor:          pointer;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      background 0.22s, color 0.22s, border-color 0.22s, transform 0.18s;
+  box-shadow:      0 4px 24px rgba(0,0,0,0.55);
+}
+
+.buyerRecentFloatBtn:hover {
+  background:   #1a1a1a;
+  color:        #a78bfa;
+  border-color: rgba(167,139,250,0.35);
+  transform:    translateY(-2px);
+}
+
+.buyerRecentFloatCount {
+  position:       absolute;
+  top:            -4px;
+  right:          -4px;
+  width:          20px;
+  height:         20px;
+  border-radius:  50%;
+  background:     #a78bfa;
+  color:          #000;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.62rem;
+  font-weight:    800;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  border:         2px solid #0a0a0a;
+  pointer-events: none;
+  letter-spacing: 0;
+}
+
+/* ══════════════════════════════════════
+   Recently Viewed Popup Panel
+   Opens above the float button
+   ══════════════════════════════════════ */
+
+.buyerRecentPopup {
+  position:       fixed;
+  bottom:         12rem;
+  right:          2rem;
+  z-index:        400;
+  width:          280px;
+  max-height:     340px;
+  background:     #0d0d0d;
+  border:         1px solid #1e1e1e;
+  border-radius:  16px;
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+  box-shadow:     0 16px 48px rgba(0,0,0,0.7);
+  animation:      recentPopupIn 0.2s cubic-bezier(0.32,0,0.15,1);
+}
+
+@keyframes recentPopupIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+.buyerRecentPopupHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         0.85rem 1rem 0.75rem;
+  border-bottom:   1px solid #1a1a1a;
+  flex-shrink:     0;
+}
+
+.buyerRecentPopupTitle {
+  font-family:    'Syne', sans-serif;
+  font-size:      0.75rem;
+  font-weight:    700;
+  color:          rgba(255,255,255,0.7);
+  letter-spacing: -0.01em;
+}
+
+.buyerRecentPopupClear {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.55rem;
+  color:          rgba(255,255,255,0.2);
+  background:     none;
+  border:         none;
+  cursor:         pointer;
+  letter-spacing: 0.06em;
+  padding:        0;
+  transition:     color 0.15s;
+}
+.buyerRecentPopupClear:hover { color: #e55; }
+
+.buyerRecentPopupList {
+  overflow-y:      auto;
+  flex:            1;
+  padding:         0.5rem;
+  display:         flex;
+  flex-direction:  column;
+  gap:             0.35rem;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+.buyerRecentPopupList::-webkit-scrollbar       { width: 3px; }
+.buyerRecentPopupList::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+.buyerRecentPopupItem {
+  display:       flex;
+  align-items:   center;
+  gap:           0.6rem;
+  padding:       0.55rem 0.65rem;
+  border-radius: 10px;
+  border:        1px solid #1a1a1a;
+  background:    #111;
+  transition:    border-color 0.15s, background 0.15s;
+}
+.buyerRecentPopupItem:hover { border-color: #2a2a2a; background: #141414; }
+
+.buyerRecentPopupItemInfo { flex: 1; min-width: 0; }
+
+.buyerRecentPopupItemCat {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.52rem;
+  color:          #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display:        block;
+  margin-bottom:  0.15rem;
+}
+
+.buyerRecentPopupItemLabel {
+  font-family:   'Syne', sans-serif;
+  font-size:     0.75rem;
+  font-weight:   700;
+  color:         rgba(255,255,255,0.82);
+  margin:        0 0 0.1rem;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.buyerRecentPopupItemPrice {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.3);
+  margin:      0;
+}
+
+.buyerRecentPopupViewBtn {
+  flex-shrink:    0;
+  padding:        0.3rem 0.65rem;
+  border-radius:  6px;
+  background:     rgba(167,139,250,0.08);
+  border:         1px solid rgba(167,139,250,0.2);
+  color:          #a78bfa;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  letter-spacing: 0.04em;
+  cursor:         pointer;
+  transition:     background 0.15s, border-color 0.15s;
+  white-space:    nowrap;
+}
+.buyerRecentPopupViewBtn:hover {
+  background:   rgba(167,139,250,0.16);
+  border-color: rgba(167,139,250,0.4);
+}

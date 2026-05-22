@@ -23,10 +23,12 @@ interface Props {
   ownedAssetIds?:       Set<string>;
   onAddToWishlist?:     (id: string) => void;
   wishlistIds?:         Set<string>;
-  // Pushes selected IDs into the global CartDrawer
   onAddToCart?:         (ids: string[]) => void;
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
   onTrackView?:         (item: { id: string; label: string; category: string; price: number }) => void;
+  // Opens browse modal directly to a specific asset ID (from Recently Viewed)
+  openToId?:            string | null;
+  onOpenToIdConsumed?:  () => void;
 }
 
 // Characters + Weapons — Google Drive proxy URLs.
@@ -58,6 +60,8 @@ export default function AssetBuySection({
   onAddToCart,
   onRegisterAddToCart,
   onTrackView,
+  openToId,
+  onOpenToIdConsumed,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Character" | "Weapon">("Character");
@@ -113,6 +117,18 @@ export default function AssetBuySection({
       });
     });
   }, [onRegisterAddToCart, ownedAssetIds]);
+  // Open browse modal to a specific asset when openToId is set (from Recently Viewed)
+  useEffect(() => {
+    if (!openToId) return;
+    setBrowseOpen(true);
+    // Determine which tab the asset belongs to by checking fetched arrays
+    const inCharacter = characterAssets.find(a => a.id === openToId);
+    const inWeapon    = weaponAssets.find(a => a.id === openToId);
+    if (inCharacter) setBrowseTab("Character");
+    if (inWeapon)    setBrowseTab("Weapon");
+    onOpenToIdConsumed?.();
+  }, [openToId]);
+
   // Quick View modal — shown before buyer commits to checkout
   const [previewAsset,  setPreviewAsset]  = useState<AssetItem | null>(null);
   const videoCardRef = useRef<HTMLVideoElement>(null);

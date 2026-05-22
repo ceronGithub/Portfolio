@@ -165,6 +165,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
 
   const { recentItems, trackView, clearRecent } = useRecentlyViewed();
   const [browseOpenId, setBrowseOpenId] = useState<string | null>(null);
+  const [recentOpen,   setRecentOpen]   = useState(false);
 
   const wishlistEntries = useMemo(
     () => buildWishlistEntries(wishlistIds, items),
@@ -268,11 +269,49 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       <AIAssetsIntro />
       <NewAssetSection />
       {/* ── Recently Viewed ── */}
-      <RecentlyViewedRow
-        items={recentItems}
-        onView={id => setBrowseOpenId(id)}
-        onClearAll={clearRecent}
-      />
+      {/* ── Floating Recently Viewed Button + Popup ── */}
+      {recentItems.length > 0 && (
+        <>
+          <button
+            className="buyerRecentFloatBtn"
+            onClick={() => setRecentOpen(prev => !prev)}
+            aria-label="Recently viewed"
+            title="Recently Viewed"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span className="buyerRecentFloatCount">{recentItems.length}</span>
+          </button>
+
+          {recentOpen && (
+            <div className="buyerRecentPopup">
+              <div className="buyerRecentPopupHeader">
+                <span className="buyerRecentPopupTitle">Recently Viewed</span>
+                <button className="buyerRecentPopupClear" onClick={() => { clearRecent(); setRecentOpen(false); }}>Clear</button>
+              </div>
+              <div className="buyerRecentPopupList">
+                {recentItems.map(item => (
+                  <div key={item.id} className="buyerRecentPopupItem">
+                    <div className="buyerRecentPopupItemInfo">
+                      <span className="buyerRecentPopupItemCat">{item.category}</span>
+                      <p className="buyerRecentPopupItemLabel">{item.label}</p>
+                      <p className="buyerRecentPopupItemPrice">{"₱" + item.price.toLocaleString("en-PH")}</p>
+                    </div>
+                    <button
+                      className="buyerRecentPopupViewBtn"
+                      onClick={() => { setBrowseOpenId(item.id); setRecentOpen(false); }}
+                    >
+                      View
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <AssetBuySection
         ownedAssetIds={ownedSet}
@@ -281,6 +320,8 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         onAddToCart={addToCart}
         onRegisterAddToCart={fn => { addAllToCartRef.current = fn; }}
         onTrackView={trackView}
+        openToId={browseOpenId}
+        onOpenToIdConsumed={() => setBrowseOpenId(null)}
       />
 
       <AssetCompareTool ownedAssetIds={ownedSet} />
