@@ -302,21 +302,22 @@ export default function AssetBuySection({
 
             {/* Animation preview — cycles through all selected items one by one */}
             {cartItems.length === 0 ? (
-              <div className="assetBuyCard">
+              <div className="assetBuyCard assetBuyCardVideoWrap">
                 <div className="assetBuyCardInner">
                   <span className="assetBuyCardIcon">🎬</span>
                   <p className="assetBuyCardLabel">Mp4 animation here</p>
                 </div>
               </div>
             ) : (
-              <div className="assetBuyCard">
+              <div className="assetBuyCard assetBuyCardVideoWrap">
                 <video
                   ref={videoCardRef}
                   key={cartItems[cycleIndex % cartItems.length]?.id}
                   src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
                   className="assetBuyCardVideo"
                   autoPlay muted playsInline
-                  onEnded={() => setCycleIndex(prev => prev + 1)}
+                  loop={cartItems.length === 1}
+                  onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
                 />
                 {cartItems.length > 1 && (
                   <div className="assetBuyCycleLabel">

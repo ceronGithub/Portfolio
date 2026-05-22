@@ -76,6 +76,7 @@ export default function ArchitectureBuySection({
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
   const [selectedAsset, setSelectedAsset] = useState<ArchAssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+  const [cycleIndex,    setCycleIndex]    = useState(0);
   const { toasts, showToast, dismissToast } = useToast();
   const bgVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -85,6 +86,14 @@ export default function ArchitectureBuySection({
   const discountRate   = getBundleDiscount(cartItems.length);
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
+
+  // Reset cycle index when cart composition changes
+  const prevCartKey = useRef("");
+  const cartKey = [...cartIds].sort().join(",");
+  if (cartKey !== prevCartKey.current) {
+    prevCartKey.current = cartKey;
+    if (cycleIndex !== 0) setCycleIndex(0);
+  }
 
   // Register addToCartMany so parent (e.g. WishlistPanel) can populate this cart externally
   useEffect(() => {
@@ -108,14 +117,6 @@ export default function ArchitectureBuySection({
     });
   }, [ownedAssetIds]);
 
-  // ── Play selected asset video as bg when modal closes ───────────────────
-  useEffect(() => {
-    const video = bgVideoRef.current;
-    if (!video || !selectedAsset) return;
-    video.load();
-    video.play().catch(() => {});
-  }, [selectedAsset]);
-
   function handleSelectAsset(asset: ArchAssetItem) {
     setSelectedAsset(asset);
     if (!ownedAssetIds.has(asset.id)) {
@@ -128,14 +129,17 @@ export default function ArchitectureBuySection({
     <>
       <section className="archBuySection">
 
-        {/* Left background — selected asset video or dark placeholder */}
+        {/* Left background — cycles through all selected asset videos */}
         <div className="archBuyBgLeft">
-          {selectedAsset ? (
+          {cartItems.length > 0 ? (
             <video
               ref={bgVideoRef}
-              src={selectedAsset.videoSrc}
+              key={cartItems[cycleIndex % cartItems.length]?.id}
+              src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
               className="archBuyBgVideo"
-              autoPlay muted loop playsInline
+              autoPlay muted playsInline
+              loop={cartItems.length === 1}
+              onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
             />
           ) : (
             <div className="archBuyBgPlaceholder" />

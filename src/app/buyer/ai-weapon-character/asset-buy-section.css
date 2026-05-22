@@ -140,16 +140,22 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap:     1.25rem;
+  align-items: start;
 }
 
 .assetBuyCard {
   background:    #080808;
   border:        1px solid #141414;
   border-radius: 20px;
-  aspect-ratio:  3/2;
+  aspect-ratio:  3/4;
   position:      relative;
   overflow:      hidden;
   transition:    border-color 0.25s;
+}
+
+/* Video card — taller portrait ratio so character fills the frame */
+.assetBuyCard.assetBuyCardVideoWrap {
+  aspect-ratio: 3/4;
 }
 
 .assetBuyCard:hover { border-color: #252525; }
@@ -395,7 +401,8 @@
   position:      absolute; inset: 0;
   width:         100%;
   height:        100%;
-  object-fit:    contain;
+  object-fit:    cover;
+  object-position: center top;
   display:       block;
   border-radius: 20px;
   background:    #050505;
