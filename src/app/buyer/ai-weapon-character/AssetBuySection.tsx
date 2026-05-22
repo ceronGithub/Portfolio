@@ -609,19 +609,6 @@ export default function AssetBuySection({
                 </div>
               </div>
 
-              {/* Texture preview thumbnails */}
-              <div className="assetQuickViewTextures">
-                <p className="assetQuickViewTexturesLabel">Texture Maps</p>
-                <div className="assetQuickViewTextureList">
-                  {["Albedo", "Normal", "Roughness", "Metallic"].map(mapName => (
-                    <div key={mapName} className="assetQuickViewTextureThumb">
-                      <div className="assetQuickViewThumbPlaceholder" />
-                      <span className="assetQuickViewThumbLabel">{mapName}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* CTA */}
               {ownedAssetIds.has(previewAsset.id) ? (
                 <div className="assetQuickViewOwned">✓ You own this asset</div>

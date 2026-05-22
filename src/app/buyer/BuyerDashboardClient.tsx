@@ -129,7 +129,7 @@ function buildWishlistEntries(
         category:     meta.category,
         price:        meta.price,
         accent:       meta.accent,
-        checkoutHref: `/checkout/asset/${id}`,
+        checkoutHref: `/checkout/bundle?ids=${id}`,
       });
     }
   }
