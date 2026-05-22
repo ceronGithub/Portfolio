@@ -407,7 +407,7 @@
 
 .archModalBundleHintActive { color: #22c55e; }
 
-.archModalBuyBtn {
+.archModalAddCartBtn {
   padding:       0.6rem 1.5rem;
   border-radius: 999px;
   background:    #22c55e;
@@ -417,11 +417,18 @@
   font-weight:   800;
   border:        none;
   cursor:        pointer;
-  transition:    opacity 0.2s;
+  transition:    opacity 0.2s, background 0.2s;
   white-space:   nowrap;
 }
 
-.archModalBuyBtn:hover { opacity: 0.85; }
+.archModalAddCartBtn:hover:not(:disabled) { background: #16a34a; }
+
+.archModalAddCartBtnDisabled {
+  opacity:    0.25;
+  cursor:     not-allowed;
+  background: #1e1e1e;
+  color:      rgba(255,255,255,0.3);
+}
 
 @media (max-width: 768px) {
   .archBuyContent   { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }

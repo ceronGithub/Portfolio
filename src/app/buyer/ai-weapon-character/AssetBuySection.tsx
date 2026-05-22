@@ -1,18 +1,14 @@
 // AssetBuySection — Character / Weapon buying section.
-// TASK 2: Bundle pricing — select multiple assets, get tiered discount.
-//   2 items = 5% off, 3–4 items = 10% off, 5+ items = 15% off.
-//   Cart lives in local state; total updates live as assets are toggled.
-// TASK 3: Owned asset state — ownedAssetIds prop marks owned assets.
-//   Owned items show "✓ Owned" badge instead of Select/Buy.
-// Layout: orc-blue bg left, content right.
-// BUY button → checkout with selected bundle. Browse button → modal.
-// Select in modal → closes modal → auto-plays selected asset video in card 2.
+// BUY → direct checkout (warns if nothing selected).
+// Browse modal → Add to Cart button → toast notification.
+// Discount removed — coupon system handled by admin separately.
 
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useToast }  from "../shared/useToast";
+import ToastStack    from "../shared/ToastStack";
 import "./asset-buy-section.css";
-
 const GD = (id: string) => `/api/drive-video?id=${id}`;
 
 interface AssetItem {
@@ -77,11 +73,11 @@ export default function AssetBuySection({
   const [browseTab,     setBrowseTab]     = useState<"Character" | "Weapon">("Character");
   const [browseSearch,  setBrowseSearch]  = useState("");
   const [browseSort,    setBrowseSort]    = useState<"default" | "price-asc" | "price-desc" | "name">("default");
-  // Task 2: price range filter — null means no limit
   const [priceMin,      setPriceMin]      = useState<number | null>(null);
   const [priceMax,      setPriceMax]      = useState<number | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+  const { toasts, showToast, dismissToast } = useToast();
 
   // Task 3: expose addToCartMany so WishlistPanel "Add all to cart" can populate this cart
   useEffect(() => {
@@ -253,32 +249,21 @@ export default function AssetBuySection({
             </div>
             <div className="assetBuyActions">
               <button
-                className={"assetBuyBtn" + (cartItems.length === 0 ? " assetBuyBtnDisabled" : "")}
-                disabled={cartItems.length === 0}
-                onClick={() => {}}
-                title={cartItems.length === 0 ? "Select assets first" : `Buy ${cartItems.length} item${cartItems.length > 1 ? "s" : ""}`}
+                className="assetBuyBtn"
+                onClick={() => {
+                  if (cartItems.length === 0) {
+                    showToast("No items selected. Browse and select assets first.", "warning");
+                    return;
+                  }
+                  const ids = cartItems.map(a => a.id).join(",");
+                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                }}
               >
                 {cartItems.length > 0 ? `BUY (${cartItems.length})` : "BUY"}
               </button>
               <button className="assetBrowseBtn" onClick={() => setBrowseOpen(true)}>Browse</button>
             </div>
           </div>
-
-          {/* Bundle pricing bar */}
-          {cartItems.length >= 2 && (
-            <div className="assetBundleBar">
-              <div className="assetBundleBarLeft">
-                <span className="assetBundleTag">{discountLabel(cartItems.length)}</span>
-                <span className="assetBundleInfo">Bundle — {cartItems.length} items</span>
-              </div>
-              <div className="assetBundleBarRight">
-                {discountAmount > 0 && (
-                  <span className="assetBundleSaving">−{fmt(discountAmount)}</span>
-                )}
-                <span className="assetBundleTotal">{fmt(finalTotal)}</span>
-              </div>
-            </div>
-          )}
 
           {/* Cart pills */}
           {cartItems.length > 0 && (
@@ -468,22 +453,23 @@ export default function AssetBuySection({
             <div className="assetModalFooter">
               <div className="assetModalFooterLeft">
                 <p className="assetModalFooterNote">
-                  {cartItems.length === 0 ? "Select assets to build a bundle" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
+                  {cartItems.length === 0 ? "Select assets to add to cart" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
                 </p>
-                {cartItems.length === 1 && (
-                  <p className="assetModalBundleHint">Add 1 more for 5% bundle discount</p>
-                )}
-                {cartItems.length >= 2 && discountRate > 0 && (
-                  <p className="assetModalBundleHint assetModalBundleHintActive">
-                    {discountLabel(cartItems.length)} applied — saving {fmt(discountAmount)}
-                  </p>
-                )}
               </div>
-              {cartItems.length > 0 && (
-                <button className="assetModalBuyBtn">
-                  Buy Bundle — {fmt(finalTotal)}
-                </button>
-              )}
+              <button
+                className={"assetModalAddCartBtn" + (cartItems.length === 0 ? " assetModalAddCartBtnDisabled" : "")}
+                disabled={cartItems.length === 0}
+                onClick={() => {
+                  if (cartItems.length === 0) return;
+                  onRegisterAddToCart?.(cartItems.map(a => a.id));
+                  setBrowseOpen(false);
+                  showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
+                }}
+              >
+                {cartItems.length === 0
+                  ? "Add to Cart"
+                  : `Add ${cartItems.length} to Cart`}
+              </button>
             </div>
           </div>
         </div>
@@ -566,6 +552,8 @@ export default function AssetBuySection({
           </div>
         </div>
       )}
+
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </>
   );
 }

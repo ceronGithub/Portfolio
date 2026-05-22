@@ -5,6 +5,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useToast }  from "../shared/useToast";
+import ToastStack    from "../shared/ToastStack";
 import "./architecture-buy-section.css";
 
 interface ArchAssetItem {
@@ -19,7 +21,6 @@ interface Props {
   ownedAssetIds?: Set<string>;
   onAddToWishlist?: (id: string) => void;
   wishlistIds?: Set<string>;
-  onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
 }
 
 const SB = "https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/videos";
@@ -65,25 +66,13 @@ export default function ArchitectureBuySection({
   ownedAssetIds = new Set(),
   onAddToWishlist,
   wishlistIds = new Set(),
-  onRegisterAddToCart,
 }: Props) {
   const [browseOpen,    setBrowseOpen]    = useState(false);
   const [browseTab,     setBrowseTab]     = useState<"Interior" | "Exterior">("Interior");
   const [selectedAsset, setSelectedAsset] = useState<ArchAssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+  const { toasts, showToast, dismissToast } = useToast();
   const bgVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Register external add-to-cart so WishlistPanel / CartDrawer can populate this cart
-  useEffect(() => {
-    onRegisterAddToCart?.((ids: string[]) => {
-      setCartIds(prev => {
-        const next = new Set(prev);
-        ids.filter(id => ALL_ARCH_ASSETS.some(a => a.id === id))
-           .forEach(id => { if (!ownedAssetIds.has(id)) next.add(id); });
-        return next;
-      });
-    });
-  }, [onRegisterAddToCart, ownedAssetIds]);
 
   const filteredAssets = ALL_ARCH_ASSETS.filter(a => a.category === browseTab);
   const cartItems      = ALL_ARCH_ASSETS.filter(a => cartIds.has(a.id));
@@ -144,32 +133,21 @@ export default function ArchitectureBuySection({
             </div>
             <div className="archBuyActions">
               <button
-                className={"archBuyBtn" + (cartItems.length === 0 ? " archBuyBtnDisabled" : "")}
-                disabled={cartItems.length === 0}
-                onClick={() => {}}
-                title={cartItems.length === 0 ? "Select assets first" : `Buy ${cartItems.length} item${cartItems.length > 1 ? "s" : ""}`}
+                className="archBuyBtn"
+                onClick={() => {
+                  if (cartItems.length === 0) {
+                    showToast("No items selected. Browse and select assets first.", "warning");
+                    return;
+                  }
+                  const ids = cartItems.map(a => a.id).join(",");
+                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                }}
               >
                 {cartItems.length > 0 ? `BUY (${cartItems.length})` : "BUY"}
               </button>
               <button className="archBrowseBtn" onClick={() => setBrowseOpen(true)}>Browse</button>
             </div>
           </div>
-
-          {/* Bundle bar */}
-          {cartItems.length >= 2 && (
-            <div className="archBundleBar">
-              <div className="archBundleBarLeft">
-                <span className="archBundleTag">{discountLabel(cartItems.length)}</span>
-                <span className="archBundleInfo">Bundle — {cartItems.length} items</span>
-              </div>
-              <div className="archBundleBarRight">
-                {discountAmount > 0 && (
-                  <span className="archBundleSaving">−{fmt(discountAmount)}</span>
-                )}
-                <span className="archBundleTotal">{fmt(finalTotal)}</span>
-              </div>
-            </div>
-          )}
 
           {/* Cart pills */}
           {cartItems.length > 0 && (
@@ -275,26 +253,26 @@ export default function ArchitectureBuySection({
             <div className="archModalFooter">
               <div className="archModalFooterLeft">
                 <p className="archModalFooterNote">
-                  {cartItems.length === 0 ? "Select assets to build a bundle" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
+                  {cartItems.length === 0 ? "Select assets to add to cart" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
                 </p>
-                {cartItems.length === 1 && (
-                  <p className="archModalBundleHint">Add 1 more for 5% bundle discount</p>
-                )}
-                {cartItems.length >= 2 && discountRate > 0 && (
-                  <p className="archModalBundleHint archModalBundleHintActive">
-                    {discountLabel(cartItems.length)} applied — saving {fmt(discountAmount)}
-                  </p>
-                )}
               </div>
-              {cartItems.length > 0 && (
-                <button className="archModalBuyBtn">
-                  Buy Bundle — {fmt(finalTotal)}
-                </button>
-              )}
+              <button
+                className={"archModalAddCartBtn" + (cartItems.length === 0 ? " archModalAddCartBtnDisabled" : "")}
+                disabled={cartItems.length === 0}
+                onClick={() => {
+                  if (cartItems.length === 0) return;
+                  onRegisterAddToCart?.(cartItems.map(a => a.id));
+                  setBrowseOpen(false);
+                  showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
+                }}
+              >
+                {cartItems.length === 0 ? "Add to Cart" : `Add ${cartItems.length} to Cart`}
+              </button>
             </div>
           </div>
         </div>
       )}
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </>
   );
 }

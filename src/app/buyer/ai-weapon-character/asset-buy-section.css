@@ -360,7 +360,7 @@
   flex:         1;
 }
 
-.assetModalBuyBtn {
+.assetModalAddCartBtn {
   padding:       0.6rem 1.5rem;
   border-radius: 999px;
   background:    #22c55e;
@@ -370,10 +370,19 @@
   font-weight:   800;
   border:        none;
   cursor:        pointer;
-  transition:    opacity 0.2s;
+  transition:    opacity 0.2s, background 0.2s;
   white-space:   nowrap;
+  display:       flex;
+  align-items:   center;
+  gap:           0.4rem;
 }
-.assetModalBuyBtn:hover { opacity: 0.85; }
+.assetModalAddCartBtn:hover:not(:disabled) { background: #16a34a; }
+.assetModalAddCartBtnDisabled {
+  opacity: 0.25;
+  cursor:  not-allowed;
+  background: #1e1e1e;
+  color: rgba(255,255,255,0.3);
+}
 
 @media (max-width: 768px) {
   .assetBuyContent  { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
