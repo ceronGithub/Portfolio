@@ -38,9 +38,9 @@ export default async function CheckoutPage({ params }: Props) {
     );
   }
 
-  // Fall back to Product table (assets) — resolve by cuid id OR slug (e.g. "orc-01")
-  const product = await prisma.product.findFirst({
-    where: { OR: [{ id: productId }, { slug: productId }] },
+  // Fall back to Product table (assets) — resolve by cuid id only (Product table has no slug field)
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
     select: { id: true, name: true, price: true, description: true },
   });
 
