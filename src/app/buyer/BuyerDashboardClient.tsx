@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useWishlist }           from "./wishlist/useWishlist";
 import { useCart }               from "./cart/useCart";
 import WishlistPanel             from "./wishlist/WishlistPanel";
@@ -171,15 +171,37 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
     [wishlistIds, items]
   );
 
-  // Build cart entries from unified cartIds using ASSET_META
-  const cartEntries = useMemo(() =>
-    [...cartIds].flatMap(id => {
-      const meta = ASSET_META[id];
-      if (!meta) return [];
-      const priceNum = parseInt(meta.price.replace(/[^\d]/g, ""), 10) || 0;
-      return [{ id, name: meta.name, category: meta.category, price: priceNum, priceStr: meta.price, accent: meta.accent }];
-    }),
-  [cartIds]);
+  // Build cart entries — resolved from DB via /api/products/by-ids so cuid IDs work correctly.
+  // Falls back to ASSET_META for any ID not found in the DB response (legacy slug-based IDs).
+  const [resolvedCartEntries, setResolvedCartEntries] = useState<{
+    id: string; name: string; category: string; price: number; priceStr: string; accent: string;
+  }[]>([]);
+
+  useEffect(() => {
+    if (cartIds.size === 0) { setResolvedCartEntries([]); return; }
+    const ids = [...cartIds].join(",");
+    fetch(`/api/products/by-ids?ids=${ids}`)
+      .then(r => r.json())
+      .then(data => {
+        const fromDb = new Map(
+          (data.products ?? []).map((p: any) => [p.id, p])
+        );
+        const entries = [...cartIds].flatMap(id => {
+          const db = fromDb.get(id) as any;
+          if (db) return [{ id, name: db.name, category: db.category, price: db.price, priceStr: db.priceStr, accent: db.accent }];
+          const meta = ASSET_META[id];
+          if (meta) {
+            const priceNum = parseInt(meta.price.replace(/[^\d]/g, ""), 10) || 0;
+            return [{ id, name: meta.name, category: meta.category, price: priceNum, priceStr: meta.price, accent: meta.accent }];
+          }
+          return [];
+        });
+        setResolvedCartEntries(entries);
+      })
+      .catch(() => {});
+  }, [cartIds]);
+
+  const cartEntries = resolvedCartEntries;
 
   return (
     <>
