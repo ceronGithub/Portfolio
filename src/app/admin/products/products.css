@@ -823,3 +823,36 @@
   .apMediaRow { grid-template-columns: 1fr; gap: 0.4rem; }
   .apMediaLabel { font-size: 0.68rem; }
 }
+/* ══════════════════════════════════════════════════════════════════
+   MediaEditor — grouped fields (Tier Prices, Files, Animations)
+   ══════════════════════════════════════════════════════════════════ */
+.apMediaGroup {
+  margin-bottom: 1rem;
+}
+.apMediaGroupHeader {
+  border-left:   3px solid;
+  padding-left:  8px;
+  margin-bottom: 6px;
+}
+.apMediaGroupLabel {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.62rem;
+  font-weight:   600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color:         var(--ap-label, rgba(255,255,255,0.4));
+}
+.apMediaRowFilled {
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--border-radius-md);
+}
+.apMediaFilledDot {
+  display:       inline-block;
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  background:    #22c55e;
+  margin-left:   5px;
+  vertical-align: middle;
+  flex-shrink:   0;
+}

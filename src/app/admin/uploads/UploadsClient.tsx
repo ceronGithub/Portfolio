@@ -31,12 +31,14 @@ interface UploadsClientProps {
 
 // ── File type helpers ─────────────────────────────────────────────────
 
-const ACCEPTED_TYPES = ".mp4,.obj,.png,.jpg,.jpeg,.webp";
+const ACCEPTED_TYPES = ".mp4,.obj,.fbx,.glb,.png,.jpg,.jpeg,.webp";
 
 function getFileIcon(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase();
-  if (ext === "mp4")                          return "🎬";
-  if (ext === "obj")                          return "🧊";
+  if (ext === "mp4")                               return "🎬";
+  if (ext === "fbx")                               return "🦴";
+  if (ext === "glb")                               return "🌐";
+  if (ext === "obj")                               return "🧊";
   if (["png","jpg","jpeg","webp"].includes(ext ?? "")) return "🖼️";
   return "📄";
 }
@@ -317,7 +319,7 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
                 <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
               </svg>
               <p className="uploadsDropzoneText">Drag & drop or <span>click to browse</span></p>
-              <p className="uploadsDropzoneHint">MP4 · OBJ · PNG · JPG · WEBP — multiple files allowed</p>
+              <p className="uploadsDropzoneHint">MP4 · OBJ · FBX · GLB · PNG · JPG · WEBP — multiple files allowed</p>
               <input
                 ref={fileInputRef}
                 type="file"

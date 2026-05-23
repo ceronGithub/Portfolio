@@ -17,6 +17,14 @@ interface Product {
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
   actionTwoUrl: string | null; actionThreeUrl: string | null;
+  // Tier prices
+  priceMesh:     number | null; priceStandard: number | null; priceFull: number | null;
+  // Downloadable mesh files
+  fileKeyObj: string | null; fileKeyFbx: string | null; fileKeyGlb: string | null;
+  // Animation clips
+  animIdleUrl: string | null; animWalkUrl: string | null; animRunUrl: string | null;
+  animAttackOneUrl: string | null; animAttackTwoUrl: string | null;
+  animDeathUrl: string | null; animHitUrl: string | null;
   createdAt: Date;
 }
 
@@ -93,6 +101,11 @@ async function createProduct(data: {
   description?: string; isLatest?: boolean;
   previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
   actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
+  priceMesh?: number | null; priceStandard?: number | null; priceFull?: number | null;
+  fileKeyObj?: string | null; fileKeyFbx?: string | null; fileKeyGlb?: string | null;
+  animIdleUrl?: string | null; animWalkUrl?: string | null; animRunUrl?: string | null;
+  animAttackOneUrl?: string | null; animAttackTwoUrl?: string | null;
+  animDeathUrl?: string | null; animHitUrl?: string | null;
 }): Promise<Product | null> {
   const res = await fetch("/api/admin/products", {
     method: "POST",
@@ -431,33 +444,84 @@ function AddAddonForm({ systemId, accent, onAdded }: {
   );
 }
 
-// ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
-// Used by MediaEditor to render one inline editor row per field.
-const MEDIA_FIELDS: { field: string; label: string }[] = [
-  { field: "previewVideoUrl", label: "Preview Video URL" },
-  { field: "facePngUrl",      label: "Face PNG URL"       },
-  { field: "threeDUrl",       label: "3D Model URL"       },
-  { field: "actionOneUrl",    label: "Action 1 URL"       },
-  { field: "actionTwoUrl",    label: "Action 2 URL"       },
-  { field: "actionThreeUrl",  label: "Action 3 URL"       },
+// ── MEDIA_FIELD_GROUPS — grouped editable fields per product ──────────────
+const MEDIA_FIELD_GROUPS: {
+  group:  string;
+  color:  string;
+  fields: { field: string; label: string; type?: "url" | "number"; placeholder?: string }[];
+}[] = [
+  {
+    group: "Preview",
+    color: "#6c8af5",
+    fields: [
+      { field: "previewVideoUrl", label: "Preview Video URL",   placeholder: "GDrive /api/drive-video?id=…" },
+      { field: "facePngUrl",      label: "Face PNG URL",        placeholder: "Image URL or Supabase path" },
+      { field: "threeDUrl",       label: "3D Viewer URL",       placeholder: "Architecture only" },
+    ],
+  },
+  {
+    group: "Tier Prices",
+    color: "#fbbf24",
+    fields: [
+      { field: "priceMesh",     label: "Mesh Only Price (₱)",     type: "number" as const, placeholder: "e.g. 699" },
+      { field: "priceStandard", label: "Standard Pack Price (₱)", type: "number" as const, placeholder: "e.g. 1499" },
+      { field: "priceFull",     label: "Full Pack Price (₱)",     type: "number" as const, placeholder: "Characters only — leave blank for weapons" },
+    ],
+  },
+  {
+    group: "Downloadable Files",
+    color: "#34d399",
+    fields: [
+      { field: "fileKeyObj", label: "OBJ File Key (Supabase)", placeholder: "assets/characters/orc-01.obj" },
+      { field: "fileKeyFbx", label: "FBX File Key (Supabase)", placeholder: "assets/characters/orc-01.fbx" },
+      { field: "fileKeyGlb", label: "GLB File Key (Supabase)", placeholder: "Full Pack only — assets/characters/orc-01.glb" },
+    ],
+  },
+  {
+    group: "Animations",
+    color: "#a78bfa",
+    fields: [
+      { field: "animIdleUrl",      label: "Idle",         placeholder: "Supabase key or URL" },
+      { field: "animWalkUrl",      label: "Walk",         placeholder: "Supabase key or URL" },
+      { field: "animRunUrl",       label: "Run",          placeholder: "Supabase key or URL" },
+      { field: "animAttackOneUrl", label: "Attack 1",     placeholder: "Supabase key or URL" },
+      { field: "animAttackTwoUrl", label: "Attack 2",     placeholder: "Full Pack only" },
+      { field: "animDeathUrl",     label: "Death",        placeholder: "Supabase key or URL" },
+      { field: "animHitUrl",       label: "Hit / Flinch", placeholder: "Full Pack only" },
+    ],
+  },
+  {
+    group: "Legacy Action Slots",
+    color: "#94a3b8",
+    fields: [
+      { field: "actionOneUrl",   label: "Action 1 URL" },
+      { field: "actionTwoUrl",   label: "Action 2 URL" },
+      { field: "actionThreeUrl", label: "Action 3 URL" },
+    ],
+  },
 ];
 
-// ── MediaEditor — inline URL editor for all media fields of one product ──
-// Rendered inside an expandable row. Each field shows a text input with
-// Save / Clear buttons that PATCH only the changed field immediately.
+const ALL_MEDIA_FIELDS = MEDIA_FIELD_GROUPS.flatMap(g => g.fields);
+
+// ── MediaEditor ─────────────────────────────────────────────────────────────
 function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
 }) {
   const initialDrafts = Object.fromEntries(
-    MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
+    ALL_MEDIA_FIELDS.map(({ field }) => [
+      field,
+      (product[field as keyof Product] as string | number | null) != null
+        ? String(product[field as keyof Product]) : ""
+    ])
   );
-  const [drafts, setDrafts]   = useState<Record<string, string>>(initialDrafts);
-  const [saving, setSaving]   = useState<Record<string, boolean>>({});
-  const [saved, setSaved]     = useState<Record<string, boolean>>({});
+  const [drafts, setDrafts] = useState<Record<string, string>>(initialDrafts);
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [saved,  setSaved]  = useState<Record<string, boolean>>({});
 
-  async function handleSaveField(field: string) {
-    const value = drafts[field].trim() || null;
+  async function handleSaveField(field: string, type?: "url" | "number") {
+    const raw   = drafts[field].trim();
+    const value = raw === "" ? null : type === "number" ? String(parseInt(raw, 10)) : raw;
     setSaving(prev => ({ ...prev, [field]: true }));
     const ok = await patchProductMedia(product.id, field, value);
     if (ok) {
@@ -470,36 +534,49 @@ function MediaEditor({ product, onFieldSaved }: {
 
   return (
     <div className="apMediaEditor">
-      {MEDIA_FIELDS.map(({ field, label }) => (
-        <div key={field} className="apMediaRow">
-          <span className="apMediaLabel">{label}</span>
-          <input
-            className="apMediaInput"
-            type="text"
-            placeholder="Paste URL or leave empty to clear"
-            value={drafts[field]}
-            onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
-            onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
-          />
-          <button
-            className="apPriceSaveBtn"
-            onClick={() => handleSaveField(field)}
-            disabled={saving[field]}
-          >
-            {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
-          </button>
-          <button
-            className="apPriceCancelBtn"
-            onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field); }}
-            title="Clear this URL"
-          >
-            ✕
-          </button>
+      {MEDIA_FIELD_GROUPS.map(({ group, color, fields }) => (
+        <div key={group} className="apMediaGroup">
+          <div className="apMediaGroupHeader" style={{ borderLeftColor: color }}>
+            <span className="apMediaGroupLabel">{group}</span>
+          </div>
+          {fields.map(({ field, label, type, placeholder }) => {
+            const currentVal = (product[field as keyof Product] as string | number | null);
+            const isFilled   = currentVal !== null && currentVal !== "" && currentVal !== undefined;
+            return (
+              <div key={field} className={`apMediaRow${isFilled ? " apMediaRowFilled" : ""}`}>
+                <span className="apMediaLabel">
+                  {label}
+                  {isFilled && <span className="apMediaFilledDot" />}
+                </span>
+                <input
+                  className="apMediaInput"
+                  type={type === "number" ? "number" : "text"}
+                  placeholder={placeholder ?? "Paste URL or leave empty to clear"}
+                  value={drafts[field]}
+                  onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
+                  onKeyDown={e => { if (e.key === "Enter") handleSaveField(field, type); }}
+                />
+                <button
+                  className="apPriceSaveBtn"
+                  onClick={() => handleSaveField(field, type)}
+                  disabled={saving[field]}
+                >
+                  {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
+                </button>
+                <button
+                  className="apPriceCancelBtn"
+                  onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field, type); }}
+                  title="Clear this field"
+                >✕</button>
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>
   );
 }
+
 
 // ── AddProductForm — create a new product from the Admin UI ───────────────
 // Shown when the admin clicks "Add New Product" at the top of the table.
