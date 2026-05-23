@@ -994,3 +994,185 @@
   transition:  color 0.18s;
 }
 .assetModalPriceClear:hover { color: rgba(255,255,255,0.6); }
+/* ══════════════════════════════════════════════════════════════════
+   Package tier system — asset info card, browse modal badges
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Asset info card (replaces "3D obj file here" placeholder) ── */
+.assetBuyCardInfo { cursor: default; }
+
+.assetBuyCardEmpty {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  gap:            0.5rem;
+  height:         100%;
+  padding:        1.5rem;
+}
+.assetBuyCardEmptyIcon {
+  font-size:   1.6rem;
+  opacity:     0.25;
+  line-height: 1;
+}
+.assetBuyCardEmptyLabel {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.65rem;
+  color:       rgba(255,255,255,0.2);
+  text-align:  center;
+  line-height: 1.5;
+}
+
+.assetBuyCardFilled {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.55rem;
+  padding:        1.1rem 1.2rem;
+  height:         100%;
+}
+.abcTopRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  flex-wrap:   wrap;
+}
+.abcAssetName {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.78rem;
+  font-weight:   600;
+  color:         rgba(255,255,255,0.9);
+  letter-spacing: 0.03em;
+  margin:        0;
+}
+.abcFormatRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.3rem;
+  flex-wrap:   wrap;
+}
+.abcFmt {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.58rem;
+  font-weight:   600;
+  padding:       2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.abcFmtOn  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1); }
+.abcFmtFbx { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+.abcFmtGlb { background: rgba(45,212,191,0.12);  color: #2dd4bf; border: 1px solid rgba(45,212,191,0.25); }
+.abcFmtOff { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.05); text-decoration: line-through; }
+
+.abcAnimRow {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+}
+.abcAnimCount {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  font-weight: 600;
+  color:       #22c55e;
+}
+.abcAnimList {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.57rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.4;
+}
+.abcAnimNone {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.2);
+}
+.abcMeta {
+  display:     flex;
+  flex-wrap:   wrap;
+  gap:         0.25rem;
+  margin-top:  auto;
+}
+.abcMeta span {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.55rem;
+  color:         rgba(255,255,255,0.25);
+  background:    rgba(255,255,255,0.04);
+  border:        1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding:       2px 6px;
+}
+
+/* ── Tier badges (price-derived) ── */
+.abcTierBadge, .assetModalTierBadge {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.55rem;
+  font-weight:   600;
+  padding:       2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tierEntry     { background: rgba(148,163,184,0.12); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+.tierMid       { background: rgba(251,191,36,0.1);   color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.tierPremium   { background: rgba(167,139,250,0.1);  color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+.tierLegendary { background: rgba(251,113,133,0.1);  color: #fb7185; border: 1px solid rgba(251,113,133,0.2); }
+
+/* ── Package tier badges ── */
+.abcPkgBadge {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.55rem;
+  padding:       2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.pkgMesh     { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.08); }
+.pkgStandard { background: rgba(34,197,94,0.08);   color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+.pkgFull     { background: rgba(99,102,241,0.1);   color: #818cf8; border: 1px solid rgba(99,102,241,0.2); }
+
+/* ── Browse modal row — format badges ── */
+.assetModalRowLabelRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  flex-wrap:   wrap;
+}
+.assetModalFormatRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.25rem;
+  flex-wrap:   wrap;
+  margin-top:  3px;
+}
+.amfBadge {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.54rem;
+  font-weight:   600;
+  padding:       1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+.amfObj  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.1); }
+.amfFbx  { background: rgba(251,191,36,0.1);   color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.amfGlb  { background: rgba(45,212,191,0.1);   color: #2dd4bf; border: 1px solid rgba(45,212,191,0.2); }
+.amfAnim { background: rgba(34,197,94,0.08);   color: #22c55e; border: 1px solid rgba(34,197,94,0.15); }
+
+/* ── Bundle breakdown above BUY button ── */
+.assetBuyBundleBreakdown {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.65rem;
+  margin-bottom: 0.4rem;
+}
+.abbSubtotal { color: rgba(255,255,255,0.3); text-decoration: line-through; }
+.abbMinus    { color: #22c55e; font-size: 0.6rem; }
+.abbFinal    { color: rgba(255,255,255,0.85); font-weight: 600; }
+
+/* ── Modal footer discount line ── */
+.assetModalFooterDiscount {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.3);
+  margin:      2px 0 0;
+}
+.assetModalFooterDiscount strong { color: #22c55e; }

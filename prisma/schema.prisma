@@ -20,6 +20,16 @@ enum ProductCategory {
   exterior
 }
 
+// Package tier for character/weapon assets.
+// mesh_only  = OBJ + FBX (no animations)
+// standard   = OBJ + FBX + 5 core animations
+// full_pack  = OBJ + FBX + GLB + 7 animations
+enum PackageTier {
+  mesh_only
+  standard
+  full_pack
+}
+
 enum OrderStatus {
   PENDING          // Inquiry submitted, awaiting downpayment
   PAID             // Downpayment received — development starts
@@ -50,12 +60,34 @@ model Product {
   description       String?
   price             Int
   category          ProductCategory @default(character)
-  previewVideoUrl   String?
-  facePngUrl        String?
-  threeDUrl         String?
+  packageTier       PackageTier     @default(mesh_only)
+
+  // ── Preview assets ────────────────────────────────────────────────
+  previewVideoUrl   String?         // MP4 animation preview (GDrive proxy)
+  facePngUrl        String?         // Face / thumbnail PNG
+
+  // ── Downloadable mesh files (Supabase storage keys) ───────────────
+  fileKeyObj        String?         // .obj mesh
+  fileKeyFbx        String?         // .fbx rigged (all paid tiers)
+  fileKeyGlb        String?         // .glb web/AR ready (full_pack only)
+
+  // ── Animation clips FBX — standard + full_pack ────────────────────
+  animIdleUrl       String?         // Idle loop
+  animWalkUrl       String?         // Walk loop
+  animRunUrl        String?         // Run loop
+  animAttackOneUrl  String?         // Primary attack
+  animAttackTwoUrl  String?         // Secondary attack (full_pack only)
+  animDeathUrl      String?         // Death
+  animHitUrl        String?         // Hit / Flinch (full_pack only)
+
+  // ── Legacy action slots (weapon/arch records) ─────────────────────
   actionOneUrl      String?
   actionTwoUrl      String?
   actionThreeUrl    String?
+
+  // ── 3D viewer URL (architecture) ──────────────────────────────────
+  threeDUrl         String?
+
   isLatest          Boolean         @default(false)
   isActive          Boolean         @default(true)
   createdAt         DateTime        @default(now())

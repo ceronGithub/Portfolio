@@ -1,7 +1,8 @@
 // AssetBuySection — Character / Weapon buying section.
 // BUY → direct checkout (warns if nothing selected).
 // Browse modal → Add to Cart button → toast notification.
-// Discount removed — coupon system handled by admin separately.
+// v2: package tier labels, format badges (OBJ/FBX/GLB), anim count,
+//     updated buy card, bundle price breakdown above BUY button.
 
 "use client";
 
@@ -9,14 +10,21 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useToast }  from "../shared/useToast";
 import ToastStack    from "../shared/ToastStack";
 import "./asset-buy-section.css";
-const GD = (id: string) => `/api/drive-video?id=${id}`;
+
+// ── Types ──────────────────────────────────────────────────────────────────
 
 interface AssetItem {
-  id:       string;
-  label:    string;
-  category: "Character" | "Weapon";
-  videoSrc: string;
-  price:    number;
+  id:          string;
+  label:       string;
+  category:    "Character" | "Weapon";
+  videoSrc:    string;
+  price:       number;
+  packageTier: "mesh_only" | "standard" | "full_pack";
+  hasObj:      boolean;
+  hasFbx:      boolean;
+  hasGlb:      boolean;
+  animCount:   number;
+  animNames:   string[];
 }
 
 interface Props {
@@ -26,32 +34,47 @@ interface Props {
   onAddToCart?:         (ids: string[]) => void;
   onRegisterAddToCart?: (fn: (ids: string[]) => void) => void;
   onTrackView?:         (item: { id: string; label: string; category: string; price: number }) => void;
-  // Opens browse modal directly to a specific asset ID (from Recently Viewed)
   openToId?:            string | null;
   onOpenToIdConsumed?:  () => void;
 }
 
-// Characters + Weapons — Google Drive proxy URLs.
-// Assets are fetched from /api/products?category= per tab — see fetchAssets() below.
+// ── Helpers ────────────────────────────────────────────────────────────────
 
-// Bundle discount tiers: 2 items = 5%, 3–4 = 10%, 5+ = 15%
 function getBundleDiscount(count: number): number {
   if (count >= 5) return 0.15;
   if (count >= 3) return 0.10;
   if (count >= 2) return 0.05;
   return 0;
 }
-
 function discountLabel(count: number): string {
   if (count >= 5) return "15% off";
   if (count >= 3) return "10% off";
   if (count >= 2) return "5% off";
   return "";
 }
-
 function fmt(p: number): string {
   return "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
 }
+
+// Derive tier label + color from price (computed, no schema lookup needed)
+function getTierInfo(price: number): { label: string; cls: string } {
+  if (price <= 799)  return { label: "Entry",     cls: "tierEntry" };
+  if (price <= 1099) return { label: "Mid",        cls: "tierMid" };
+  if (price <= 1599) return { label: "Premium",    cls: "tierPremium" };
+  return               { label: "Legendary",  cls: "tierLegendary" };
+}
+
+// Package tier display
+const TIER_LABEL: Record<string, string> = {
+  mesh_only:  "Mesh Only",
+  standard:   "Standard Pack",
+  full_pack:  "Full Pack",
+};
+const TIER_CLS: Record<string, string> = {
+  mesh_only:  "pkgMesh",
+  standard:   "pkgStandard",
+  full_pack:  "pkgFull",
+};
 
 export default function AssetBuySection({
   ownedAssetIds = new Set(),
@@ -74,54 +97,53 @@ export default function AssetBuySection({
   const [cycleIndex,    setCycleIndex]    = useState(0);
   const { toasts, showToast, dismissToast } = useToast();
 
-  // DB-fetched assets per tab — cached after first fetch per category
   const [characterAssets, setCharacterAssets] = useState<AssetItem[]>([]);
   const [weaponAssets,    setWeaponAssets]    = useState<AssetItem[]>([]);
   const [assetsLoading,   setAssetsLoading]   = useState(false);
 
-  // Fetch assets from DB when browse modal opens or tab switches
+  // ── Fetch assets from DB ───────────────────────────────────────────
   useEffect(() => {
     if (!browseOpen) return;
-    const category = browseTab === "Character" ? "character" : "weapon";
+    const category      = browseTab === "Character" ? "character" : "weapon";
     const alreadyLoaded = category === "character" ? characterAssets.length > 0 : weaponAssets.length > 0;
     if (alreadyLoaded) return;
 
     setAssetsLoading(true);
     fetch(`/api/products?category=${category}`)
-      .then(r => {
-        if (!r.ok) throw new Error(`API error ${r.status}: ${r.statusText}`);
-        return r.json();
-      })
+      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
       .then(data => {
-        // Map DB product shape → AssetItem shape
         const mapped: AssetItem[] = (data.products ?? []).map((p: any) => ({
-          id:       p.id,
-          label:    p.name,
-          category: browseTab,
-          videoSrc: p.previewVideoUrl ?? "",
-          price:    p.price,
+          id:          p.id,
+          label:       p.name,
+          category:    browseTab,
+          videoSrc:    p.previewVideoUrl ?? "",
+          price:       p.price,
+          packageTier: p.packageTier ?? "mesh_only",
+          hasObj:      p.hasObj  ?? false,
+          hasFbx:      p.hasFbx  ?? false,
+          hasGlb:      p.hasGlb  ?? false,
+          animCount:   p.animCount ?? 0,
+          animNames:   p.animNames ?? [],
         }));
         if (category === "character") setCharacterAssets(mapped);
         else                          setWeaponAssets(mapped);
       })
-      .catch((err) => console.error("[AssetBuySection] fetch failed:", err))
+      .catch(err => console.error("[AssetBuySection] fetch failed:", err))
       .finally(() => setAssetsLoading(false));
   }, [browseOpen, browseTab]);
 
-  // Task 3: expose addToCartMany so WishlistPanel "Add all to cart" can populate this cart
+  // ── Register addToCartMany (for WishlistPanel) ─────────────────────
   useEffect(() => {
     onRegisterAddToCart?.((ids: string[]) => {
       setCartIds(prev => {
         const next = new Set(prev);
-        ids.forEach(id => {
-          if (!ownedAssetIds.has(id)) next.add(id);
-        });
+        ids.forEach(id => { if (!ownedAssetIds.has(id)) next.add(id); });
         return next;
       });
     });
   }, [onRegisterAddToCart, ownedAssetIds]);
-  // Open browse modal to a specific asset when openToId is set (from Recently Viewed).
-  // Tab is determined by ID prefix (orc-/axe-) since assets may not be loaded yet.
+
+  // ── Open browse to specific asset (from Recently Viewed) ──────────
   useEffect(() => {
     if (!openToId) return;
     setBrowseOpen(true);
@@ -130,33 +152,25 @@ export default function AssetBuySection({
     onOpenToIdConsumed?.();
   }, [openToId]);
 
-  // Quick View modal — shown before buyer commits to checkout
-  const [previewAsset,  setPreviewAsset]  = useState<AssetItem | null>(null);
+  const [previewAsset, setPreviewAsset] = useState<AssetItem | null>(null);
   const videoCardRef = useRef<HTMLVideoElement>(null);
   const fogCanvasRef = useRef<HTMLCanvasElement>(null);
   const fogRafRef    = useRef<number>(0);
 
-  // ── Ground fog canvas — rises from bottom of the section ─────────────────
+  // ── Ground fog canvas ──────────────────────────────────────────────
   useEffect(() => {
     const canvas = fogCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     interface FogWisp {
       x: number; y: number; vx: number; vy: number;
       swayAmp: number; swayFreq: number; swayOff: number;
-      rx: number; ry: number;
-      life: number; maxLife: number; opacity: number; layer: number;
+      rx: number; ry: number; life: number; maxLife: number; opacity: number; layer: number;
     }
-
-    function resize() {
-      canvas!.width  = canvas!.offsetWidth;
-      canvas!.height = canvas!.offsetHeight;
-    }
+    function resize() { canvas!.width = canvas!.offsetWidth; canvas!.height = canvas!.offsetHeight; }
     resize();
     window.addEventListener("resize", resize);
-
     function spawn(): FogWisp {
       const layer   = Math.floor(Math.random() * 3);
       const rs      = [2.1, 1.45, 0.9][layer];
@@ -165,59 +179,44 @@ export default function AssetBuySection({
       return {
         x: Math.random() * canvas!.width * 1.3 - canvas!.width * 0.15,
         y: canvas!.height + Math.random() * 60,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: -(Math.random() * speed + 0.08),
-        swayAmp: Math.random() * 25 + 8,
-        swayFreq: Math.random() * 0.003 + 0.001,
+        vx: (Math.random() - 0.5) * 0.22, vy: -(Math.random() * speed + 0.08),
+        swayAmp: Math.random() * 25 + 8, swayFreq: Math.random() * 0.003 + 0.001,
         swayOff: Math.random() * Math.PI * 2,
-        rx: (Math.random() * 200 + 160) * rs,
-        ry: (Math.random() * 62 + 40) * rs,
-        life: 0, maxLife: Math.random() * 480 + 340,
-        opacity, layer,
+        rx: (Math.random() * 200 + 160) * rs, ry: (Math.random() * 62 + 40) * rs,
+        life: 0, maxLife: Math.random() * 480 + 340, opacity, layer,
       };
     }
-
     const wisps: FogWisp[] = [];
     for (let i = 0; i < 28; i++) {
-      const w = spawn();
-      w.life  = Math.random() * w.maxLife * 0.65;
-      w.y     = canvas.height + 80 + w.vy * w.life;
-      wisps.push(w);
+      const w = spawn(); w.life = Math.random() * w.maxLife * 0.65;
+      w.y = canvas.height + 80 + w.vy * w.life; wisps.push(w);
     }
-
     function draw() {
       const cw = canvas!.width, ch = canvas!.height;
       ctx!.clearRect(0, 0, cw, ch);
       if (wisps.length < 34 && Math.random() < 0.5) wisps.push(spawn());
       for (let i = wisps.length - 1; i >= 0; i--) {
-        if (wisps[i].life >= wisps[i].maxLife) { wisps.splice(i, 1); continue; }
+        if (wisps[i].life >= wisps[i].maxLife) { wisps.splice(i, 1); }
       }
       wisps.sort((a, b) => a.layer - b.layer);
       for (const p of wisps) {
-        p.life += 1;
-        p.x    += p.vx + Math.sin(p.life * p.swayFreq + p.swayOff) * 0.3;
-        p.y    += p.vy;
-        const ratio   = p.life / p.maxLife;
-        const fadeIn  = Math.min(1, ratio / 0.15);
+        p.life += 1; p.x += p.vx + Math.sin(p.life * p.swayFreq + p.swayOff) * 0.3; p.y += p.vy;
+        const ratio = p.life / p.maxLife;
+        const fadeIn = Math.min(1, ratio / 0.15);
         const fadeOut = ratio > 0.78 ? Math.max(0, 1 - (ratio - 0.78) / 0.22) : 1;
-        const alpha   = p.opacity * fadeIn * fadeOut;
+        const alpha = p.opacity * fadeIn * fadeOut;
         if (alpha < 0.003) continue;
         const r = p.layer === 0 ? 185 : p.layer === 1 ? 205 : 222;
         const g = p.layer === 0 ? 200 : p.layer === 1 ? 215 : 225;
         const b = p.layer === 0 ? 230 : p.layer === 1 ? 228 : 230;
-        ctx!.save();
-        ctx!.translate(p.x, p.y);
-        ctx!.scale(1, p.ry / p.rx);
+        ctx!.save(); ctx!.translate(p.x, p.y); ctx!.scale(1, p.ry / p.rx);
         const grad = ctx!.createRadialGradient(0, 0, 0, 0, 0, p.rx);
         grad.addColorStop(0,    `rgba(${r},${g},${b},${alpha})`);
         grad.addColorStop(0.42, `rgba(${r},${g},${b},${alpha * 0.58})`);
         grad.addColorStop(0.76, `rgba(${r},${g},${b},${alpha * 0.18})`);
         grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
-        ctx!.beginPath();
-        ctx!.arc(0, 0, p.rx, 0, Math.PI * 2);
-        ctx!.fillStyle = grad;
-        ctx!.fill();
-        ctx!.restore();
+        ctx!.beginPath(); ctx!.arc(0, 0, p.rx, 0, Math.PI * 2);
+        ctx!.fillStyle = grad; ctx!.fill(); ctx!.restore();
       }
       fogRafRef.current = requestAnimationFrame(draw);
     }
@@ -225,12 +224,10 @@ export default function AssetBuySection({
     return () => { cancelAnimationFrame(fogRafRef.current); window.removeEventListener("resize", resize); };
   }, []);
 
+  // ── Filtered + sorted asset list ──────────────────────────────────
   const filteredAssets = useMemo(() => {
-    // Use the correct fetched array per active tab
     let list = browseTab === "Character" ? characterAssets : weaponAssets;
-    if (browseSearch.trim())
-      list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
-    // Price range filter
+    if (browseSearch.trim()) list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
     if (priceMin !== null) list = list.filter(a => a.price >= priceMin);
     if (priceMax !== null) list = list.filter(a => a.price <= priceMax);
     if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
@@ -239,7 +236,6 @@ export default function AssetBuySection({
     return list;
   }, [browseTab, characterAssets, weaponAssets, browseSearch, browseSort, priceMin, priceMax]);
 
-  // Build cart items from both fetched arrays combined
   const allFetchedAssets = useMemo(() => [...characterAssets, ...weaponAssets], [characterAssets, weaponAssets]);
   const cartItems      = allFetchedAssets.filter(a => cartIds.has(a.id));
   const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
@@ -247,37 +243,66 @@ export default function AssetBuySection({
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;
 
-  // Reset cycle index when cart composition changes
   const prevCartKey = useRef("");
   const cartKey = [...cartIds].sort().join(",");
-  if (cartKey !== prevCartKey.current) {
-    prevCartKey.current = cartKey;
-    if (cycleIndex !== 0) setCycleIndex(0);
-  }
+  if (cartKey !== prevCartKey.current) { prevCartKey.current = cartKey; if (cycleIndex !== 0) setCycleIndex(0); }
 
   const toggleCart = useCallback((id: string) => {
     if (ownedAssetIds.has(id)) return;
-    setCartIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+    setCartIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   }, [ownedAssetIds]);
 
   useEffect(() => {
     if (!browseOpen && selectedAsset && videoCardRef.current) {
-      const video = videoCardRef.current;
-      video.load();
-      video.play().catch(() => {});
+      const video = videoCardRef.current; video.load(); video.play().catch(() => {});
     }
   }, [browseOpen, selectedAsset]);
 
   function handleSelectAsset(asset: AssetItem) {
     setSelectedAsset(asset);
-    if (!ownedAssetIds.has(asset.id)) {
-      setCartIds(prev => new Set([...prev, asset.id]));
-    }
+    if (!ownedAssetIds.has(asset.id)) setCartIds(prev => new Set([...prev, asset.id]));
     setBrowseOpen(false);
+  }
+
+  // ── Selected asset info card content ──────────────────────────────
+  function renderAssetInfoCard(asset: AssetItem | null) {
+    if (!asset) {
+      return (
+        <div className="assetBuyCardInner assetBuyCardEmpty">
+          <span className="assetBuyCardEmptyIcon">◈</span>
+          <p className="assetBuyCardEmptyLabel">Select an asset to see what&apos;s included</p>
+        </div>
+      );
+    }
+    const tier = getTierInfo(asset.price);
+    return (
+      <div className="assetBuyCardInner assetBuyCardFilled">
+        <div className="abcTopRow">
+          <span className={`abcTierBadge ${tier.cls}`}>{tier.label}</span>
+          <span className={`abcPkgBadge ${TIER_CLS[asset.packageTier]}`}>{TIER_LABEL[asset.packageTier]}</span>
+        </div>
+        <p className="abcAssetName">{asset.label}</p>
+        <div className="abcFormatRow">
+          <span className={`abcFmt ${asset.hasObj  ? "abcFmtOn" : "abcFmtOff"}`}>OBJ</span>
+          <span className={`abcFmt ${asset.hasFbx  ? "abcFmtFbx" : "abcFmtOff"}`}>FBX</span>
+          <span className={`abcFmt ${asset.hasGlb  ? "abcFmtGlb" : "abcFmtOff"}`}>GLB</span>
+        </div>
+        {asset.animCount > 0 ? (
+          <div className="abcAnimRow">
+            <span className="abcAnimCount">{asset.animCount} animations</span>
+            <span className="abcAnimList">{asset.animNames.join(" · ")}</span>
+          </div>
+        ) : (
+          <div className="abcAnimRow abcAnimNone">Preview video only — no animation files</div>
+        )}
+        <div className="abcMeta">
+          <span>4K PBR textures</span>
+          <span>Full rig</span>
+          <span>Lifetime access</span>
+          <span>Royalty-free</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -288,8 +313,6 @@ export default function AssetBuySection({
           <img src="/images/orc-blue.png" alt="" className="assetBuyBgOrcImg" />
           <div className="assetBuyBgOrcFade" />
         </div>
-
-        {/* ── Ground fog — rises from bottom of section ── */}
         <canvas ref={fogCanvasRef} className="assetBuyFogCanvas" />
 
         <div className="assetBuyContent">
@@ -299,6 +322,14 @@ export default function AssetBuySection({
               <h2 className="assetBuyTitle">One time Purchase.<br />Lifetime access</h2>
             </div>
             <div className="assetBuyActions">
+              {/* Bundle breakdown — visible only when 2+ items in cart */}
+              {cartItems.length >= 2 && (
+                <div className="assetBuyBundleBreakdown">
+                  <span className="abbSubtotal">{fmt(rawTotal)}</span>
+                  <span className="abbMinus">−{discountLabel(cartItems.length)}</span>
+                  <span className="abbFinal">{fmt(finalTotal)}</span>
+                </div>
+              )}
               <button
                 className="assetBuyBtn"
                 onClick={() => {
@@ -310,7 +341,7 @@ export default function AssetBuySection({
                   window.location.href = `/checkout/bundle?ids=${ids}`;
                 }}
               >
-                {cartItems.length > 0 ? `BUY (${cartItems.length})` : "BUY"}
+                {cartItems.length > 0 ? `BUY (${cartItems.length}) — ${fmt(finalTotal)}` : "BUY"}
               </button>
               <button className="assetBrowseBtn" onClick={() => setBrowseOpen(true)}>Browse</button>
             </div>
@@ -323,30 +354,24 @@ export default function AssetBuySection({
                 <div key={item.id} className="assetCartPill">
                   <span className="assetCartPillLabel">{item.label}</span>
                   <span className="assetCartPillPrice">{fmt(item.price)}</span>
-                  <button
-                    className="assetCartPillRemove"
-                    onClick={() => toggleCart(item.id)}
-                    aria-label={`Remove ${item.label}`}
-                  >×</button>
+                  <button className="assetCartPillRemove" onClick={() => toggleCart(item.id)} aria-label={`Remove ${item.label}`}>×</button>
                 </div>
               ))}
             </div>
           )}
 
           <div className="assetBuyCards">
-            <div className="assetBuyCard">
-              <div className="assetBuyCardInner">
-                <span className="assetBuyCardIcon">📦</span>
-                <p className="assetBuyCardLabel">3D obj file here</p>
-              </div>
+            {/* Asset info card — shows formats/anims of selected asset */}
+            <div className="assetBuyCard assetBuyCardInfo">
+              {renderAssetInfoCard(selectedAsset)}
             </div>
 
-            {/* Animation preview — cycles through all selected items one by one */}
+            {/* Animation preview card */}
             {cartItems.length === 0 ? (
               <div className="assetBuyCard assetBuyCardVideoWrap">
-                <div className="assetBuyCardInner">
-                  <span className="assetBuyCardIcon">🎬</span>
-                  <p className="assetBuyCardLabel">Mp4 animation here</p>
+                <div className="assetBuyCardInner assetBuyCardEmpty">
+                  <span className="assetBuyCardEmptyIcon">▶</span>
+                  <p className="assetBuyCardEmptyLabel">Browse and select an asset to preview</p>
                 </div>
               </div>
             ) : (
@@ -365,10 +390,7 @@ export default function AssetBuySection({
                     {cartItems[cycleIndex % cartItems.length]?.label}
                     <span className="assetBuyCycleDots">
                       {cartItems.map((_, i) => (
-                        <span
-                          key={i}
-                          className={`assetBuyCycleDot ${i === cycleIndex % cartItems.length ? "assetBuyCycleDotActive" : ""}`}
-                        />
+                        <span key={i} className={`assetBuyCycleDot ${i === cycleIndex % cartItems.length ? "assetBuyCycleDotActive" : ""}`} />
                       ))}
                     </span>
                   </div>
@@ -379,6 +401,7 @@ export default function AssetBuySection({
         </div>
       </section>
 
+      {/* ── Browse Modal ───────────────────────────────────────────────── */}
       {browseOpen && (
         <div className="assetModalOverlay" onClick={() => setBrowseOpen(false)}>
           <div className="assetModal" onClick={e => e.stopPropagation()}>
@@ -389,9 +412,7 @@ export default function AssetBuySection({
                     key={tab}
                     className={`assetModalTab ${browseTab === tab ? "assetModalTabActive" : ""}`}
                     onClick={() => { setBrowseTab(tab); setBrowseSearch(""); }}
-                  >
-                    {tab}
-                  </button>
+                  >{tab}</button>
                 ))}
               </div>
               {cartItems.length > 0 && (
@@ -402,92 +423,59 @@ export default function AssetBuySection({
               <button className="assetModalClose" onClick={() => setBrowseOpen(false)}>✕</button>
             </div>
 
-            {/* ── Search + Sort controls ── */}
+            {/* Search + Sort + Price filter */}
             <div className="assetModalControls">
               <div className="assetModalSearchWrap">
-                <input
-                  className="assetModalSearch"
-                  type="text"
-                  placeholder="Search assets…"
-                  value={browseSearch}
-                  onChange={e => setBrowseSearch(e.target.value)}
-                />
-                {browseSearch && (
-                  <button className="assetModalSearchClear" onClick={() => setBrowseSearch("")}>✕</button>
-                )}
+                <input className="assetModalSearch" type="text" placeholder="Search assets…"
+                  value={browseSearch} onChange={e => setBrowseSearch(e.target.value)} />
+                {browseSearch && <button className="assetModalSearchClear" onClick={() => setBrowseSearch("")}>✕</button>}
               </div>
-              <select
-                className="assetModalSort"
-                value={browseSort}
-                onChange={e => setBrowseSort(e.target.value as typeof browseSort)}
-              >
+              <select className="assetModalSort" value={browseSort}
+                onChange={e => setBrowseSort(e.target.value as typeof browseSort)}>
                 <option value="default">Default</option>
                 <option value="price-asc">Price: Low → High</option>
                 <option value="price-desc">Price: High → Low</option>
                 <option value="name">Name A–Z</option>
               </select>
-
-              {/* Task 2 — Price range filter */}
               <div className="assetModalPriceFilter">
                 <span className="assetModalPriceFilterLabel">₱</span>
-                <input
-                  className="assetModalPriceInput"
-                  type="number"
-                  placeholder="Min"
-                  min={0}
-                  value={priceMin ?? ""}
-                  onChange={e => setPriceMin(e.target.value ? Number(e.target.value) : null)}
-                />
+                <input className="assetModalPriceInput" type="number" placeholder="Min" min={0}
+                  value={priceMin ?? ""} onChange={e => setPriceMin(e.target.value ? Number(e.target.value) : null)} />
                 <span className="assetModalPriceFilterSep">–</span>
-                <input
-                  className="assetModalPriceInput"
-                  type="number"
-                  placeholder="Max"
-                  min={0}
-                  value={priceMax ?? ""}
-                  onChange={e => setPriceMax(e.target.value ? Number(e.target.value) : null)}
-                />
+                <input className="assetModalPriceInput" type="number" placeholder="Max" min={0}
+                  value={priceMax ?? ""} onChange={e => setPriceMax(e.target.value ? Number(e.target.value) : null)} />
                 {(priceMin !== null || priceMax !== null) && (
-                  <button
-                    className="assetModalPriceClear"
-                    onClick={() => { setPriceMin(null); setPriceMax(null); }}
-                    title="Clear price filter"
-                  >✕</button>
+                  <button className="assetModalPriceClear"
+                    onClick={() => { setPriceMin(null); setPriceMax(null); }} title="Clear price filter">✕</button>
                 )}
               </div>
             </div>
 
             <div className="assetModalList">
-              {/* Loading skeleton */}
-              {assetsLoading && (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="assetModalRowSkeleton">
-                    <div className="assetModalSkeletonThumb" />
-                    <div className="assetModalSkeletonInfo">
-                      <div className="assetModalSkeletonLine assetModalSkeletonLineLong" />
-                      <div className="assetModalSkeletonLine assetModalSkeletonLineShort" />
-                    </div>
+              {assetsLoading && Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="assetModalRowSkeleton">
+                  <div className="assetModalSkeletonThumb" />
+                  <div className="assetModalSkeletonInfo">
+                    <div className="assetModalSkeletonLine assetModalSkeletonLineLong" />
+                    <div className="assetModalSkeletonLine assetModalSkeletonLineShort" />
                   </div>
-                ))
-              )}
-              {/* Empty state */}
-              {!assetsLoading && filteredAssets.length === 0 && (
-                <div className="assetModalEmpty">
-                  <p>No {browseTab.toLowerCase()} assets found.</p>
                 </div>
+              ))}
+              {!assetsLoading && filteredAssets.length === 0 && (
+                <div className="assetModalEmpty"><p>No {browseTab.toLowerCase()} assets found.</p></div>
               )}
               {!assetsLoading && filteredAssets.map(asset => {
                 const isOwned      = ownedAssetIds.has(asset.id);
                 const isInCart     = cartIds.has(asset.id);
                 const isWishlisted = wishlistIds.has(asset.id);
+                const tier         = getTierInfo(asset.price);
                 return (
                   <div
                     key={asset.id}
-                    className={[
-                      "assetModalRow",
+                    className={["assetModalRow",
                       selectedAsset?.id === asset.id ? "assetModalRowActive" : "",
-                      isInCart  ? "assetModalRowInCart" : "",
-                      isOwned   ? "assetModalRowOwned"  : "",
+                      isInCart ? "assetModalRowInCart" : "",
+                      isOwned  ? "assetModalRowOwned"  : "",
                     ].join(" ")}
                     onClick={() => !isOwned && setSelectedAsset(asset)}
                   >
@@ -495,8 +483,19 @@ export default function AssetBuySection({
                       <video src={asset.videoSrc} autoPlay muted loop playsInline preload="none" className="assetModalThumbVideo" />
                     </div>
                     <div className="assetModalRowInfo">
-                      <p className="assetModalRowLabel">{asset.label}</p>
-                      <p className="assetModalRowCategory">{asset.category}</p>
+                      <div className="assetModalRowLabelRow">
+                        <p className="assetModalRowLabel">{asset.label}</p>
+                        <span className={`assetModalTierBadge ${tier.cls}`}>{tier.label}</span>
+                      </div>
+                      {/* Format badges */}
+                      <div className="assetModalFormatRow">
+                        {asset.hasObj && <span className="amfBadge amfObj">OBJ</span>}
+                        {asset.hasFbx && <span className="amfBadge amfFbx">FBX</span>}
+                        {asset.hasGlb && <span className="amfBadge amfGlb">GLB</span>}
+                        {asset.animCount > 0 && (
+                          <span className="amfBadge amfAnim">{asset.animCount} anims</span>
+                        )}
+                      </div>
                     </div>
                     <div className="assetModalRowRight">
                       <p className="assetModalRowPrice">{fmt(asset.price)}</p>
@@ -509,9 +508,7 @@ export default function AssetBuySection({
                               className={"assetModalWishlistBtn" + (isWishlisted ? " assetModalWishlistBtnActive" : "")}
                               onClick={e => { e.stopPropagation(); onAddToWishlist(asset.id); }}
                               aria-label="Save to wishlist"
-                            >
-                              {isWishlisted ? "♥" : "♡"}
-                            </button>
+                            >{isWishlisted ? "♥" : "♡"}</button>
                           )}
                           <button
                             className={"assetModalSelectBtn" + (isInCart ? " assetModalSelectBtnActive" : "")}
@@ -520,9 +517,7 @@ export default function AssetBuySection({
                               handleSelectAsset(asset);
                               onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.price });
                             }}
-                          >
-                            {isInCart ? "✓ Added" : "Select"}
-                          </button>
+                          >{isInCart ? "✓ Added" : "Select"}</button>
                         </div>
                       )}
                     </div>
@@ -536,88 +531,77 @@ export default function AssetBuySection({
                 <p className="assetModalFooterNote">
                   {cartItems.length === 0 ? "Select assets to add to cart" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
                 </p>
+                {cartItems.length >= 2 && discountRate > 0 && (
+                  <p className="assetModalFooterDiscount">
+                    {fmt(rawTotal)} − {discountLabel(cartItems.length)} = <strong>{fmt(finalTotal)}</strong>
+                  </p>
+                )}
               </div>
               <button
                 className={"assetModalAddCartBtn" + (cartItems.length === 0 ? " assetModalAddCartBtnDisabled" : "")}
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  // Push selected IDs to global CartDrawer
                   onAddToCart?.(cartItems.map(a => a.id));
                   setBrowseOpen(false);
                   showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
                 }}
               >
-                {cartItems.length === 0
-                  ? "Add to Cart"
-                  : `Add ${cartItems.length} to Cart`}
+                {cartItems.length === 0 ? "Add to Cart" : `Add ${cartItems.length} to Cart`}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Asset Quick View — fullscreen preview modal ── */}
+      {/* ── Quick View Modal ───────────────────────────────────────────── */}
       {previewAsset && (
         <div className="assetQuickViewOverlay" onClick={() => setPreviewAsset(null)}>
           <div className="assetQuickViewModal" onClick={e => e.stopPropagation()}>
-
-            {/* Close */}
             <button className="assetQuickViewClose" onClick={() => setPreviewAsset(null)}>✕</button>
-
-            {/* Full video */}
             <div className="assetQuickViewVideoWrap">
-              <video
-                key={previewAsset.id}
-                src={previewAsset.videoSrc}
-                autoPlay muted loop playsInline
-                className="assetQuickViewVideo"
-              />
+              <video key={previewAsset.id} src={previewAsset.videoSrc}
+                autoPlay muted loop playsInline className="assetQuickViewVideo" />
               <div className="assetQuickViewVideoLabel">Animation Preview</div>
             </div>
-
-            {/* Info panel */}
             <div className="assetQuickViewInfo">
               <p className="assetQuickViewCategory">{previewAsset.category}</p>
               <h2 className="assetQuickViewTitle">{previewAsset.label}</h2>
               <p className="assetQuickViewPrice">{fmt(previewAsset.price)}</p>
-
-              {/* Stats */}
               <div className="assetQuickViewStats">
                 <div className="assetQuickViewStat">
-                  <span className="assetQuickViewStatLabel">Format</span>
-                  <span className="assetQuickViewStatValue">OBJ / FBX</span>
+                  <span className="assetQuickViewStatLabel">Formats</span>
+                  <span className="assetQuickViewStatValue">
+                    {[previewAsset.hasObj && "OBJ", previewAsset.hasFbx && "FBX", previewAsset.hasGlb && "GLB"]
+                      .filter(Boolean).join(" / ") || "OBJ"}
+                  </span>
+                </div>
+                <div className="assetQuickViewStat">
+                  <span className="assetQuickViewStatLabel">Animations</span>
+                  <span className="assetQuickViewStatValue">
+                    {previewAsset.animCount > 0 ? `${previewAsset.animCount} clips` : "Preview only"}
+                  </span>
                 </div>
                 <div className="assetQuickViewStat">
                   <span className="assetQuickViewStatLabel">Textures</span>
                   <span className="assetQuickViewStatValue">4K PBR</span>
                 </div>
                 <div className="assetQuickViewStat">
-                  <span className="assetQuickViewStatLabel">Rig</span>
-                  <span className="assetQuickViewStatValue">Full rig included</span>
-                </div>
-                <div className="assetQuickViewStat">
                   <span className="assetQuickViewStatLabel">Access</span>
                   <span className="assetQuickViewStatValue">Lifetime</span>
                 </div>
               </div>
-
-              {/* CTA */}
               {ownedAssetIds.has(previewAsset.id) ? (
                 <div className="assetQuickViewOwned">✓ You own this asset</div>
               ) : (
                 <button
                   className={"assetQuickViewBuyBtn" + (cartIds.has(previewAsset.id) ? " assetQuickViewBuyBtnAdded" : "")}
-                  onClick={() => {
-                    handleSelectAsset(previewAsset);
-                    setPreviewAsset(null);
-                  }}
+                  onClick={() => { handleSelectAsset(previewAsset); setPreviewAsset(null); }}
                 >
                   {cartIds.has(previewAsset.id) ? "✓ Added to Bundle" : `Buy — ${fmt(previewAsset.price)}`}
                 </button>
               )}
             </div>
-
           </div>
         </div>
       )}
