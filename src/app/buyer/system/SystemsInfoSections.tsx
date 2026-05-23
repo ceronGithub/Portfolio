@@ -381,8 +381,8 @@ function SupportSection() {
               <button
                 className="sysInfoTierBtn"
                 style={{
-                  background:  i === 2 ? "#c4b5fd" : "#22c55e",
-                  borderColor: i === 2 ? "#c4b5fd" : "#22c55e",
+                  background:  i === 3 ? "#c4b5fd" : "#22c55e",
+                  borderColor: i === 3 ? "#c4b5fd" : "#22c55e",
                   color:       "#000",
                 }}
                 onClick={() => {
