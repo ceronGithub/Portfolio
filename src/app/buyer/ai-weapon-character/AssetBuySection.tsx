@@ -88,7 +88,10 @@ export default function AssetBuySection({
 
     setAssetsLoading(true);
     fetch(`/api/products?category=${category}`)
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`API error ${r.status}: ${r.statusText}`);
+        return r.json();
+      })
       .then(data => {
         // Map DB product shape → AssetItem shape
         const mapped: AssetItem[] = (data.products ?? []).map((p: any) => ({
@@ -101,7 +104,7 @@ export default function AssetBuySection({
         if (category === "character") setCharacterAssets(mapped);
         else                          setWeaponAssets(mapped);
       })
-      .catch(() => {})
+      .catch((err) => console.error("[AssetBuySection] fetch failed:", err))
       .finally(() => setAssetsLoading(false));
   }, [browseOpen, browseTab]);
 
