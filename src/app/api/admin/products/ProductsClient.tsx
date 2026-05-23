@@ -1,4 +1,9 @@
 // ProductsClient.tsx — Admin Products & Systems page.
+// Section 1: Legacy Products table with active toggle.
+// Section 2: Systems Catalog accordion — inline base price editor,
+//            per-addon inline price editor, and add-new-addon form.
+// IntersectionObserver entrance animations on all cards.
+// Protocol v23 Rule 17 design standards applied.
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -23,12 +28,15 @@ interface Addon {
 interface System {
   id: string; tag: string; title: string; basePrice: number;
   accent: string; timeline: string; deploy: string;
-  description: string; isActive: boolean; addons: Addon[];
+  description: string; features: string[]; isActive: boolean;
+  bgVideoUrl: string | null; demoVideoUrl: string | null;
+  addons: Addon[];
 }
 
 interface Props { products: Product[]; systems: System[]; }
 
-// ── useReveal ──────────────────────────────────────────────────────────
+// ── useReveal — IntersectionObserver entrance animation ────────────────
+// Adds "apVisible" class when element enters the viewport.
 function useReveal() {
   const elementRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -55,6 +63,7 @@ async function toggleProductActive(id: string, current: boolean): Promise<boolea
   return res.ok;
 }
 
+// Toggles the isLatest flag on a product.
 async function toggleProductLatest(id: string, current: boolean): Promise<string | null> {
   const res = await fetch(`/api/admin/products/${id}`, {
     method: "PATCH",
@@ -62,11 +71,16 @@ async function toggleProductLatest(id: string, current: boolean): Promise<string
     body: JSON.stringify({ isLatest: !current }),
   });
   if (res.ok) return null;
-  const body = await res.json().catch(() => ({}));
-  return body.error ?? `HTTP ${res.status}`;
+  const b = await res.json().catch(() => ({}));
+  return b.error ?? `HTTP ${res.status}`;
 }
 
-async function patchProductMedia(id: string, field: string, value: string | null): Promise<boolean> {
+// Updates a single media URL field (or null) on a product.
+async function patchProductMedia(
+  id: string,
+  field: string,
+  value: string | null
+): Promise<boolean> {
   const res = await fetch(`/api/admin/products/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -75,6 +89,7 @@ async function patchProductMedia(id: string, field: string, value: string | null
   return res.ok;
 }
 
+// Creates a new product record.
 async function createProduct(data: {
   name: string; price: number; category: string;
   description?: string; isLatest?: boolean;
@@ -96,6 +111,23 @@ async function updateSystemBasePrice(id: string, basePrice: number): Promise<boo
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ basePrice }),
+  });
+  return res.ok;
+}
+
+// Patches any combination of editable System fields in one PATCH call.
+async function updateSystemFields(
+  id: string,
+  fields: Partial<{
+    title: string; description: string; accent: string;
+    timeline: string; deploy: string; features: string[];
+    bgVideoUrl: string | null; demoVideoUrl: string | null;
+  }>
+): Promise<boolean> {
+  const res = await fetch(`/api/admin/systems/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
   });
   return res.ok;
 }
@@ -123,21 +155,18 @@ async function createAddon(
   return json.addon ?? null;
 }
 
-// ── formatPeso ────────────────────────────────────────────────────────
-function formatPeso(value: number): string {
-  if (value >= 1_000_000) return `₱${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000)     return `₱${(value / 1_000).toFixed(1)}k`;
-  return `₱${value.toLocaleString("en-PH")}`;
-}
-
-// ── computeAnalytics ──────────────────────────────────────────────────
+// ── computeAnalytics — derives chart summary stats ─────────────────────
+// Returns total, average, peak value+label, and MoM/WoW growth %.
 function computeAnalytics(data: { label: string; value: number }[]): {
   total: number; average: number; peakValue: number; peakLabel: string; growth: number | null;
 } {
   if (data.length === 0) return { total: 0, average: 0, peakValue: 0, peakLabel: "—", growth: null };
-  const total   = data.reduce((sum, d) => sum + d.value, 0);
-  const average = Math.round(total / data.length);
-  const peak    = data.reduce((best, d) => d.value > best.value ? d : best, data[0]);
+
+  const total    = data.reduce((sum, d) => sum + d.value, 0);
+  const average  = Math.round(total / data.length);
+  const peak     = data.reduce((best, d) => d.value > best.value ? d : best, data[0]);
+
+  // Growth: compare last period vs second-to-last
   let growth: number | null = null;
   if (data.length >= 2) {
     const last = data[data.length - 1].value;
@@ -146,13 +175,23 @@ function computeAnalytics(data: { label: string; value: number }[]): {
     else if (last > 0) growth = 100;
     else growth = 0;
   }
+
   return { total, average, peakValue: peak.value, peakLabel: peak.label, growth };
 }
 
-// ── AnalyticsBar ──────────────────────────────────────────────────────
+// ── formatPeso — compact peso display ─────────────────────────────────
+function formatPeso(value: number): string {
+  if (value >= 1_000_000) return `₱${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000)     return `₱${(value / 1_000).toFixed(1)}k`;
+  return `₱${value.toLocaleString("en-PH")}`;
+}
+
+// ── AnalyticsBar — summary strip shown above each chart card ───────────
+// Shows Total, Average, Peak, and Growth for the dataset.
 function AnalyticsBar({ data, color }: { data: { label: string; value: number }[]; color: string }) {
   const { total, average, peakValue, peakLabel, growth } = computeAnalytics(data);
   const hasData = total > 0;
+
   return (
     <div className="apAnalyticsBar">
       <div className="apAnalyticsStat">
@@ -178,8 +217,10 @@ function AnalyticsBar({ data, color }: { data: { label: string; value: number }[
           <div className="apAnalyticsDivider" />
           <div className="apAnalyticsStat">
             <span className="apAnalyticsLabel">vs last period</span>
-            <span className="apAnalyticsValue apAnalyticsGrowth"
-              style={{ color: growth >= 0 ? "#68d391" : "#fc8181" }}>
+            <span
+              className="apAnalyticsValue apAnalyticsGrowth"
+              style={{ color: growth >= 0 ? "#68d391" : "#fc8181" }}
+            >
               {growth >= 0 ? "▲" : "▼"} {Math.abs(growth)}%
             </span>
           </div>
@@ -189,7 +230,7 @@ function AnalyticsBar({ data, color }: { data: { label: string; value: number }[
   );
 }
 
-// ── SystemBasePriceEditor ─────────────────────────────────────────────
+// ── SystemBasePriceEditor — inline editor for system base price ────────
 function SystemBasePriceEditor({ systemId, initialPrice, accent }: {
   systemId: string; initialPrice: number; accent: string;
 }) {
@@ -215,10 +256,15 @@ function SystemBasePriceEditor({ systemId, initialPrice, accent }: {
     return (
       <div className="apPriceEditor" onClick={e => e.stopPropagation()}>
         <span className="apPriceCurrency">₱</span>
-        <input className="apPriceInput" type="number" min="0" value={draft}
+        <input
+          className="apPriceInput"
+          type="number" min="0"
+          value={draft}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
-          autoFocus style={{ borderColor: accent }} />
+          autoFocus
+          style={{ borderColor: accent }}
+        />
         <button className="apPriceSaveBtn" onClick={handleSave} disabled={saving}
           style={{ background: accent, color: "#0d0d0d" }}>
           {saving ? "…" : "Save"}
@@ -229,18 +275,21 @@ function SystemBasePriceEditor({ systemId, initialPrice, accent }: {
   }
 
   return (
-    <button className="apPriceDisplay"
+    <button
+      className="apPriceDisplay"
       onClick={e => { e.stopPropagation(); setEditing(true); setDraft(String(price)); }}
-      title="Click to edit base price">
+      title="Click to edit base price"
+    >
       <span className="apSystemBasePrice">₱{price.toLocaleString()} base</span>
       {saved
         ? <span className="apPriceSavedTag">✓ saved</span>
-        : <span className="apPriceEditHint">✎</span>}
+        : <span className="apPriceEditHint">✎</span>
+      }
     </button>
   );
 }
 
-// ── AddonPriceEditor ──────────────────────────────────────────────────
+// ── AddonPriceEditor — inline price editor per addon row ───────────────
 function AddonPriceEditor({ addon, accent, onUpdated }: {
   addon: Addon; accent: string; onUpdated: (id: string, newPrice: number) => void;
 }) {
@@ -265,10 +314,15 @@ function AddonPriceEditor({ addon, accent, onUpdated }: {
     return (
       <div className="apAddonPriceEditor" onClick={e => e.stopPropagation()}>
         <span className="apPriceCurrency">₱</span>
-        <input className="apPriceInput apPriceInputSmall" type="number" min="0" value={draft}
+        <input
+          className="apPriceInput apPriceInputSmall"
+          type="number" min="0"
+          value={draft}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
-          autoFocus style={{ borderColor: accent }} />
+          autoFocus
+          style={{ borderColor: accent }}
+        />
         <button className="apPriceSaveBtn apPriceSaveBtnSmall" onClick={handleSave} disabled={saving}
           style={{ background: accent, color: "#0d0d0d" }}>
           {saving ? "…" : "Save"}
@@ -279,18 +333,21 @@ function AddonPriceEditor({ addon, accent, onUpdated }: {
   }
 
   return (
-    <button className="apAddonPriceDisplay"
+    <button
+      className="apAddonPriceDisplay"
       onClick={e => { e.stopPropagation(); setEditing(true); setDraft(String(addon.price)); }}
-      title="Click to edit price">
+      title="Click to edit price"
+    >
       {saved
         ? <span className="apPriceSavedTag">✓ saved</span>
-        : <span className="apAddonPriceValue">+₱{addon.price.toLocaleString()}</span>}
+        : <span className="apAddonPriceValue">+₱{addon.price.toLocaleString()}</span>
+      }
       <span className="apPriceEditHintSmall apPriceEditHintVisible">✎</span>
     </button>
   );
 }
 
-// ── AddAddonForm ──────────────────────────────────────────────────────
+// ── AddAddonForm — inline form to add a new addon to a system ──────────
 function AddAddonForm({ systemId, accent, onAdded }: {
   systemId: string; accent: string; onAdded: (addon: Addon) => void;
 }) {
@@ -320,8 +377,11 @@ function AddAddonForm({ systemId, accent, onAdded }: {
 
   if (!open) {
     return (
-      <button className="apAddAddonBtn" onClick={e => { e.stopPropagation(); setOpen(true); }}
-        style={{ borderColor: accent, color: accent }}>
+      <button
+        className="apAddAddonBtn"
+        onClick={e => { e.stopPropagation(); setOpen(true); }}
+        style={{ borderColor: accent, color: accent }}
+      >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -334,18 +394,38 @@ function AddAddonForm({ systemId, accent, onAdded }: {
     <div className="apAddAddonForm" onClick={e => e.stopPropagation()}>
       <p className="apAddAddonFormTitle">New Addon</p>
       <div className="apAddAddonFormFields">
-        <input className="apAddAddonInput" placeholder="Label (e.g. AI Chatbot)"
-          value={label} onChange={e => setLabel(e.target.value)} />
-        <input className="apAddAddonInput" placeholder="Category (e.g. AI)"
-          value={category} onChange={e => setCategory(e.target.value)} />
-        <input className="apAddAddonInput apAddAddonInputPrice" placeholder="Price (₱)"
-          type="number" min="0" value={price} onChange={e => setPrice(e.target.value)} />
+        <input
+          className="apAddAddonInput"
+          placeholder="Label (e.g. AI Chatbot)"
+          value={label}
+          onChange={e => setLabel(e.target.value)}
+        />
+        <input
+          className="apAddAddonInput"
+          placeholder="Category (e.g. AI)"
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+        />
+        <input
+          className="apAddAddonInput apAddAddonInputPrice"
+          placeholder="Price (₱)"
+          type="number"
+          min="0"
+          value={price}
+          onChange={e => setPrice(e.target.value)}
+        />
       </div>
       {error && <p className="apAddAddonError">{error}</p>}
       <div className="apAddAddonFormActions">
-        <button className="apPriceCancelBtn" onClick={() => { setOpen(false); setError(""); }}>Cancel</button>
-        <button className="apPriceSaveBtn" onClick={handleAdd} disabled={saving}
-          style={{ background: accent, color: "#0d0d0d" }}>
+        <button className="apPriceCancelBtn" onClick={() => { setOpen(false); setError(""); }}>
+          Cancel
+        </button>
+        <button
+          className="apPriceSaveBtn"
+          onClick={handleAdd}
+          disabled={saving}
+          style={{ background: accent, color: "#0d0d0d" }}
+        >
           {saving ? "Saving…" : "Add Addon"}
         </button>
       </div>
@@ -353,7 +433,8 @@ function AddAddonForm({ systemId, accent, onAdded }: {
   );
 }
 
-// ── MEDIA_FIELDS ──────────────────────────────────────────────────────
+// ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
+// Used by MediaEditor to render one inline editor row per field.
 const MEDIA_FIELDS: { field: string; label: string }[] = [
   { field: "previewVideoUrl", label: "Preview Video URL" },
   { field: "facePngUrl",      label: "Face PNG URL"       },
@@ -363,7 +444,9 @@ const MEDIA_FIELDS: { field: string; label: string }[] = [
   { field: "actionThreeUrl",  label: "Action 3 URL"       },
 ];
 
-// ── MediaEditor ───────────────────────────────────────────────────────
+// ── MediaEditor — inline URL editor for all media fields of one product ──
+// Rendered inside an expandable row. Each field shows a text input with
+// Save / Clear buttons that PATCH only the changed field immediately.
 function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
@@ -371,9 +454,9 @@ function MediaEditor({ product, onFieldSaved }: {
   const initialDrafts = Object.fromEntries(
     MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
   );
-  const [drafts, setDrafts] = useState<Record<string, string>>(initialDrafts);
-  const [saving, setSaving] = useState<Record<string, boolean>>({});
-  const [saved,  setSaved]  = useState<Record<string, boolean>>({});
+  const [drafts, setDrafts]   = useState<Record<string, string>>(initialDrafts);
+  const [saving, setSaving]   = useState<Record<string, boolean>>({});
+  const [saved, setSaved]     = useState<Record<string, boolean>>({});
 
   async function handleSaveField(field: string) {
     const value = drafts[field].trim() || null;
@@ -392,24 +475,37 @@ function MediaEditor({ product, onFieldSaved }: {
       {MEDIA_FIELDS.map(({ field, label }) => (
         <div key={field} className="apMediaRow">
           <span className="apMediaLabel">{label}</span>
-          <input className="apMediaInput" type="text"
+          <input
+            className="apMediaInput"
+            type="text"
             placeholder="Paste URL or leave empty to clear"
             value={drafts[field]}
             onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
-            onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }} />
-          <button className="apPriceSaveBtn" onClick={() => handleSaveField(field)} disabled={saving[field]}>
+            onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
+          />
+          <button
+            className="apPriceSaveBtn"
+            onClick={() => handleSaveField(field)}
+            disabled={saving[field]}
+          >
             {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
           </button>
-          <button className="apPriceCancelBtn"
+          <button
+            className="apPriceCancelBtn"
             onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field); }}
-            title="Clear this URL">✕</button>
+            title="Clear this URL"
+          >
+            ✕
+          </button>
         </div>
       ))}
     </div>
   );
 }
 
-// ── AddProductForm ────────────────────────────────────────────────────
+// ── AddProductForm — create a new product from the Admin UI ───────────────
+// Shown when the admin clicks "Add New Product" at the top of the table.
+// On success, the new product is prepended to the list in local state.
 function AddProductForm({ onProductCreated, onClose }: {
   onProductCreated: (product: Product) => void;
   onClose: () => void;
@@ -435,8 +531,11 @@ function AddProductForm({ onProductCreated, onClose }: {
     setSaving(true);
     setError("");
     const product = await createProduct({
-      name: name.trim(), price: parsedPrice, category,
-      description: description.trim() || undefined, isLatest,
+      name: name.trim(),
+      price: parsedPrice,
+      category,
+      description: description.trim() || undefined,
+      isLatest,
       previewVideoUrl: previewVideoUrl.trim() || undefined,
       facePngUrl:      facePngUrl.trim()      || undefined,
       threeDUrl:       threeDUrl.trim()        || undefined,
@@ -444,8 +543,12 @@ function AddProductForm({ onProductCreated, onClose }: {
       actionTwoUrl:    actionTwoUrl.trim()    || undefined,
       actionThreeUrl:  actionThreeUrl.trim()  || undefined,
     });
-    if (product) { onProductCreated(product); onClose(); }
-    else { setError("Failed to create product. Try again."); }
+    if (product) {
+      onProductCreated(product);
+      onClose();
+    } else {
+      setError("Failed to create product. Try again.");
+    }
     setSaving(false);
   }
 
@@ -455,13 +558,11 @@ function AddProductForm({ onProductCreated, onClose }: {
       <div className="apAddProductGrid">
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Name *</label>
-          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker"
-            value={name} onChange={e => setName(e.target.value)} />
+          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Price (₱) *</label>
-          <input className="apMediaInput" type="number" min="0" placeholder="5500"
-            value={price} onChange={e => setPrice(e.target.value)} />
+          <input className="apMediaInput" type="number" min="0" placeholder="5500" value={price} onChange={e => setPrice(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Category *</label>
@@ -474,13 +575,11 @@ function AddProductForm({ onProductCreated, onClose }: {
         </div>
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Description</label>
-          <input className="apMediaInput" placeholder="Short description…"
-            value={description} onChange={e => setDescription(e.target.value)} />
+          <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
         </div>
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Preview Video URL</label>
-          <input className="apMediaInput" placeholder="GDrive or /api/drive-video?id=…"
-            value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
+          <input className="apMediaInput" placeholder="GDrive or /api/drive-video?id=…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Face PNG URL</label>
@@ -521,35 +620,24 @@ function AddProductForm({ onProductCreated, onClose }: {
   );
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────
-function Toast({ msg, type }: { msg: string; type: "ok" | "err" }) {
-  return (
-    <div style={{
-      position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
-      background: type === "ok" ? "#22c55e" : "#ef4444",
-      color: "#fff", padding: "0.75rem 1.25rem", borderRadius: "10px",
-      fontWeight: 700, fontSize: "0.85rem",
-      boxShadow: "0 4px 24px rgba(0,0,0,0.4)", pointerEvents: "none",
-    }}>
-      {msg}
-    </div>
-  );
-}
-
-// ── ProductsSection ───────────────────────────────────────────────────
-function ProductsSection({ products, onToggle, togglingId }: {
+// ── ProductsSection — products table with media editing and add form ────
+// Each row is expandable to reveal the MediaEditor and isLatest toggle.
+// "Add New Product" button at top opens AddProductForm inline.
+function ProductsSection({
+  products, onToggle, togglingId,
+}: {
   products: Product[];
   onToggle: (id: string, current: boolean) => void;
   togglingId: string | null;
 }) {
-  const revealRef                         = useReveal();
+  const revealRef = useReveal();
   const [productList, setProductList]     = useState<Product[]>(products);
   const [expandedRow, setExpandedRow]     = useState<string | null>(null);
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
-  const [toast, setToast]                 = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: "ok"|"err" }|null>(null);
   const [showAddForm, setShowAddForm]     = useState(false);
 
-  function showToast(msg: string, type: "ok" | "err") {
+  function showToast(msg: string, type: "ok"|"err") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 4000);
   }
@@ -588,8 +676,15 @@ function ProductsSection({ products, onToggle, togglingId }: {
 
   return (
     <div className="apCard apReveal" ref={revealRef}>
-      {toast && <Toast msg={toast.msg} type={toast.type} />}
-
+      {toast && (
+        <div style={{
+          position:"fixed",bottom:"1.5rem",right:"1.5rem",zIndex:9999,
+          background:toast.type==="ok"?"#22c55e":"#ef4444",
+          color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",
+          fontWeight:700,fontSize:"0.85rem",
+          boxShadow:"0 4px 24px rgba(0,0,0,0.4)",pointerEvents:"none",
+        }}>{toast.msg}</div>
+      )}
       <div className="apCardHeader">
         <div>
           <h2 className="apCardTitle">Products</h2>
@@ -599,17 +694,14 @@ function ProductsSection({ products, onToggle, togglingId }: {
           <button
             className="apPriceSaveBtn"
             onClick={() => setShowAddForm(prev => !prev)}
-            style={{
-              background: showAddForm ? "rgba(255,255,255,0.08)" : "#22c55e",
-              color: showAddForm ? "#aaa" : "#0d0d0d",
-              fontSize: "0.78rem",
-            }}
+            style={{ background: showAddForm ? "rgba(255,255,255,0.08)" : "#22c55e", color: showAddForm ? "#aaa" : "#0d0d0d", fontSize: "0.78rem" }}
           >
             {showAddForm ? "✕ Cancel" : "+ Add New Product"}
           </button>
         </div>
       </div>
 
+      {/* Add product inline form */}
       {showAddForm && (
         <AddProductForm
           onProductCreated={handleProductCreated}
@@ -622,7 +714,6 @@ function ProductsSection({ products, onToggle, togglingId }: {
           <span>Name</span><span>Category</span><span>Price</span>
           <span>Latest</span><span>Actions</span>
         </div>
-
         {productList.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -633,7 +724,6 @@ function ProductsSection({ products, onToggle, togglingId }: {
             <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
           </div>
         )}
-
         {productList.map(p => (
           <div key={p.id}>
             <div className="apTableRow apGrid--productsV2">
@@ -651,7 +741,7 @@ function ProductsSection({ products, onToggle, togglingId }: {
                   {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
                 </button>
               </span>
-              <span className="apCell" style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", alignItems: "center" }}>
+              <span className="apCell" style={{ display:"flex",gap:"0.4rem",flexWrap:"wrap",alignItems:"center" }}>
                 <button
                   className="apActionBtn apActionBtnActivate"
                   onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
@@ -677,6 +767,7 @@ function ProductsSection({ products, onToggle, togglingId }: {
                 </button>
               </span>
             </div>
+            {/* Expanded media editor row */}
             {expandedRow === p.id && (
               <div className="apMediaEditorWrap">
                 <MediaEditor product={p} onFieldSaved={handleFieldSaved} />
@@ -689,13 +780,167 @@ function ProductsSection({ products, onToggle, togglingId }: {
   );
 }
 
-// ── SystemCard ────────────────────────────────────────────────────────
+// ── SystemFullEditor — expandable full-field editor for a System card ─
+// Renders inside the accordion body when admin clicks "✎ Edit System".
+// Saves each changed field via PATCH. Features is edited as a newline-
+// separated textarea and split back to a string array on save.
+function SystemFullEditor({ system, accent, onSaved }: {
+  system: System;
+  accent: string;
+  onSaved: (fields: Partial<System>) => void;
+}) {
+  const [title, setTitle]           = useState(system.title);
+  const [description, setDesc]      = useState(system.description);
+  const [accentVal, setAccent]      = useState(system.accent);
+  const [timeline, setTimeline]     = useState(system.timeline);
+  const [deploy, setDeploy]         = useState(system.deploy);
+  const [features, setFeatures]     = useState((system.features ?? []).join("\n"));
+  const [bgVideoUrl, setBgVideo]    = useState(system.bgVideoUrl ?? "");
+  const [demoVideoUrl, setDemoVideo]= useState(system.demoVideoUrl ?? "");
+  const [saving, setSaving]         = useState(false);
+  const [saved, setSaved]           = useState(false);
+  const [error, setError]           = useState("");
+
+  async function handleSave() {
+    if (!title.trim()) { setError("Title is required."); return; }
+    setSaving(true);
+    setError("");
+    const featuresList = features.split("\n").map(f => f.trim()).filter(Boolean);
+    const ok = await updateSystemFields(system.id, {
+      title:        title.trim(),
+      description:  description.trim(),
+      accent:       accentVal.trim(),
+      timeline:     timeline.trim(),
+      deploy:       deploy.trim(),
+      features:     featuresList,
+      bgVideoUrl:   bgVideoUrl.trim() || null,
+      demoVideoUrl: demoVideoUrl.trim() || null,
+    });
+    if (ok) {
+      onSaved({
+        title:        title.trim(),
+        description:  description.trim(),
+        accent:       accentVal.trim(),
+        timeline:     timeline.trim(),
+        deploy:       deploy.trim(),
+        features:     featuresList,
+        bgVideoUrl:   bgVideoUrl.trim() || null,
+        demoVideoUrl: demoVideoUrl.trim() || null,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      setError("Save failed. Try again.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="apSystemFullEditor" onClick={e => e.stopPropagation()}>
+      <p className="apSystemEditorTitle">Edit System Fields</p>
+      <div className="apSystemEditorGrid">
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Title</label>
+          <input className="apMediaInput" value={title} onChange={e => setTitle(e.target.value)} />
+        </div>
+
+        <div className="apSystemEditorField">
+          <label className="apMediaLabel">Accent Color (hex)</label>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input
+              className="apMediaInput"
+              value={accentVal}
+              onChange={e => setAccent(e.target.value)}
+              style={{ borderColor: accentVal }}
+            />
+            <span
+              style={{
+                width: "1.5rem", height: "1.5rem", borderRadius: "50%",
+                background: accentVal, flexShrink: 0, border: "1px solid rgba(255,255,255,0.12)"
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="apSystemEditorField">
+          <label className="apMediaLabel">Timeline (e.g. 4–6 weeks)</label>
+          <input className="apMediaInput" value={timeline} onChange={e => setTimeline(e.target.value)} />
+        </div>
+
+        <div className="apSystemEditorField">
+          <label className="apMediaLabel">Deploy (e.g. Cloud / On-premise)</label>
+          <input className="apMediaInput" value={deploy} onChange={e => setDeploy(e.target.value)} />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Description</label>
+          <textarea
+            className="apMediaInput apSystemEditorTextarea"
+            rows={3}
+            value={description}
+            onChange={e => setDesc(e.target.value)}
+          />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Features (one per line)</label>
+          <textarea
+            className="apMediaInput apSystemEditorTextarea"
+            rows={5}
+            placeholder={"Feature A\nFeature B\nFeature C"}
+            value={features}
+            onChange={e => setFeatures(e.target.value)}
+          />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Background Video URL</label>
+          <input
+            className="apMediaInput"
+            placeholder="Paste URL or leave empty to clear"
+            value={bgVideoUrl}
+            onChange={e => setBgVideo(e.target.value)}
+          />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Demo Video URL (#10)</label>
+          <input
+            className="apMediaInput"
+            placeholder="Paste URL or leave empty — buyer sees 'Demo coming soon'"
+            value={demoVideoUrl}
+            onChange={e => setDemoVideo(e.target.value)}
+          />
+        </div>
+
+      </div>
+      {error && <p className="apAddAddonError">{error}</p>}
+      <div className="apAddAddonFormActions">
+        <button
+          className="apPriceSaveBtn"
+          onClick={handleSave}
+          disabled={saving}
+          style={{ background: accent, color: "#0d0d0d" }}
+        >
+          {saving ? "Saving…" : saved ? "✓ Saved" : "Save Changes"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── SystemCard — single accordion card ────────────────────────────────
 function SystemCard({ system, isExpanded, onToggleExpand }: {
-  system: System; isExpanded: boolean; onToggleExpand: () => void;
+  system: System; isExpanded: boolean;
+  onToggleExpand: () => void;
 }) {
   const revealRef = useReveal();
-  const [addons, setAddons] = useState<Addon[]>(system.addons);
+  const [addons, setAddons]         = useState<Addon[]>(system.addons);
+  const [localSystem, setLocal]     = useState<System>(system);
+  const [editOpen, setEditOpen]     = useState(false);
 
+  // Group addons by category for organized display
   const groupedAddons = addons.reduce<Record<string, Addon[]>>((groups, addon) => {
     const cat = addon.category || "General";
     if (!groups[cat]) groups[cat] = [];
@@ -711,34 +956,73 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
     setAddons(prev => [...prev, newAddon]);
   }
 
+  // Merges saved fields back into localSystem so header reflects changes immediately.
+  function handleFieldsSaved(fields: Partial<System>) {
+    setLocal(prev => ({ ...prev, ...fields }));
+  }
+
   return (
     <div className="apSystemCard apReveal" ref={revealRef}>
-      <div className="apSystemHeader" onClick={onToggleExpand}
-        style={{ borderLeft: `3px solid ${system.accent}` }}>
+
+      {/* ── Header row — click to expand/collapse ── */}
+      <div
+        className="apSystemHeader"
+        onClick={onToggleExpand}
+        style={{ borderLeft: `3px solid ${localSystem.accent}` }}
+      >
         <div className="apSystemHeaderLeft">
-          <span className="apSystemTag" style={{ color: system.accent, borderColor: system.accent }}>
-            {system.tag}
+          <span className="apSystemTag" style={{ color: localSystem.accent, borderColor: localSystem.accent }}>
+            {localSystem.tag}
           </span>
-          <span className="apSystemTitle">{system.title}</span>
-          <span className={`apBadge ${system.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
-            {system.isActive ? "Active" : "Inactive"}
+          <span className="apSystemTitle">{localSystem.title}</span>
+          <span className={`apBadge ${localSystem.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
+            {localSystem.isActive ? "Active" : "Inactive"}
           </span>
         </div>
         <div className="apSystemHeaderRight">
-          <SystemBasePriceEditor systemId={system.id} initialPrice={system.basePrice} accent={system.accent} />
+          <SystemBasePriceEditor
+            systemId={localSystem.id}
+            initialPrice={localSystem.basePrice}
+            accent={localSystem.accent}
+          />
           <span className="apSystemAddonCount">
             {addons.length} add-on{addons.length !== 1 ? "s" : ""}
           </span>
-          <svg className={`apExpandIcon ${isExpanded ? "apExpandIconOpen" : ""}`}
-            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            className={`apExpandIcon ${isExpanded ? "apExpandIconOpen" : ""}`}
+            width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          >
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </div>
       </div>
 
+      {/* ── Expanded panel ─────────────────────── */}
       {isExpanded && (
         <div className="apSystemBody">
-          <p className="apSystemDesc">{system.description}</p>
+          <p className="apSystemDesc">{localSystem.description}</p>
+
+          {/* ── Full editor toggle ── */}
+          <div className="apSystemEditorToggleWrap">
+            <button
+              className={`apActionBtn ${editOpen ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
+              style={{ fontSize: "0.72rem" }}
+              onClick={e => { e.stopPropagation(); setEditOpen(prev => !prev); }}
+            >
+              {editOpen ? "▲ Close Editor" : "✎ Edit System"}
+            </button>
+          </div>
+
+          {/* Full editor — title, description, features, accent, videos, timeline, deploy */}
+          {editOpen && (
+            <SystemFullEditor
+              system={localSystem}
+              accent={localSystem.accent}
+              onSaved={handleFieldsSaved}
+            />
+          )}
+
+          {/* Addon groups */}
           {Object.keys(groupedAddons).length === 0 ? (
             <div className="apEmpty apEmptySmall">
               <p className="apEmptyTitle">No addons configured</p>
@@ -752,15 +1036,25 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
                   {categoryAddons.map(addon => (
                     <div key={addon.id} className="apAddonRow">
                       <span className="apAddonLabel">{addon.label}</span>
-                      <AddonPriceEditor addon={addon} accent={system.accent} onUpdated={handleAddonPriceUpdated} />
+                      <AddonPriceEditor
+                        addon={addon}
+                        accent={localSystem.accent}
+                        onUpdated={handleAddonPriceUpdated}
+                      />
                     </div>
                   ))}
                 </div>
               </div>
             ))
           )}
+
+          {/* Add new addon */}
           <div className="apAddAddonWrap">
-            <AddAddonForm systemId={system.id} accent={system.accent} onAdded={handleAddonAdded} />
+            <AddAddonForm
+              systemId={localSystem.id}
+              accent={localSystem.accent}
+              onAdded={handleAddonAdded}
+            />
           </div>
         </div>
       )}
@@ -770,10 +1064,10 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
 
 // ── Main export ────────────────────────────────────────────────────────
 export default function ProductsClient({ products, systems }: Props) {
-  const [productList, setProductList]       = useState<Product[]>(products);
-  const [togglingId, setTogglingId]         = useState<string | null>(null);
+  const [productList, setProductList]   = useState<Product[]>(products);
+  const [togglingId, setTogglingId]     = useState<string | null>(null);
   const [expandedSystem, setExpandedSystem] = useState<string | null>(null);
-  const headerRef                           = useReveal();
+  const headerRef                       = useReveal();
 
   async function handleToggleActive(id: string, current: boolean) {
     setTogglingId(id);
@@ -785,10 +1079,11 @@ export default function ProductsClient({ products, systems }: Props) {
   return (
     <div className="apPage">
 
+      {/* ── Page header ──────────────────────────── */}
       <div className="apPageHeader apReveal" ref={headerRef}>
         <div>
           <span className="apPageEyebrow">Admin</span>
-          <h1 className="apPageTitle">Products &amp; Systems</h1>
+          <h1 className="apPageTitle">Products & Systems</h1>
           <p className="apPageSubtitle">
             {products.length} product{products.length !== 1 ? "s" : ""} &middot; {systems.length} system catalog{systems.length !== 1 ? "s" : ""}
           </p>
@@ -798,12 +1093,14 @@ export default function ProductsClient({ products, systems }: Props) {
         </p>
       </div>
 
+      {/* ── Legacy Products ───────────────────────── */}
       <ProductsSection
         products={productList}
         onToggle={handleToggleActive}
         togglingId={togglingId}
       />
 
+      {/* ── Systems Catalog ───────────────────────── */}
       <div className="apSectionHeader apReveal">
         <span className="apSectionEyebrow">Catalog</span>
         <h2 className="apSectionTitle">Systems</h2>
