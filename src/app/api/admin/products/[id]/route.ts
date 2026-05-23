@@ -47,10 +47,28 @@ export async function PATCH(
     return NextResponse.json({ error: "No valid fields to update." }, { status: 400 });
   }
 
-  const updatedProduct = await prisma.product.update({
-    where: { id },
-    data,
-  });
+  // isLatest is per-category exclusive: only one product per category can be
+  // the latest drop. When setting isLatest: true, clear the flag on all other
+  // products in the same category first (atomic transaction).
+  let updatedProduct;
+  if (data.isLatest === true) {
+    const target = await prisma.product.findUnique({
+      where:  { id },
+      select: { category: true },
+    });
+    if (!target) {
+      return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    }
+    [, updatedProduct] = await prisma.$transaction([
+      prisma.product.updateMany({
+        where: { category: target.category, id: { not: id }, isLatest: true },
+        data:  { isLatest: false },
+      }),
+      prisma.product.update({ where: { id }, data }),
+    ]);
+  } else {
+    updatedProduct = await prisma.product.update({ where: { id }, data });
+  }
 
   return NextResponse.json({ product: updatedProduct });
 }

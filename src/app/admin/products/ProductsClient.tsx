@@ -643,7 +643,19 @@ function ProductsSection({
   async function handleToggleLatest(id: string, current: boolean) {
     setTogglingLatest(id);
     const ok = await toggleProductLatest(id, current);
-    if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isLatest: !current } : p));
+    if (ok) {
+      setProductList(prev => {
+        // When setting a product as latest, the server clears all other
+        // isLatest flags in the same category. Mirror that in local state.
+        const target = prev.find(p => p.id === id);
+        return prev.map(p => {
+          if (p.id === id) return { ...p, isLatest: !current };
+          // Clear same-category products only when we are setting (not unsetting)
+          if (!current && p.category === target?.category) return { ...p, isLatest: false };
+          return p;
+        });
+      });
+    }
     setTogglingLatest(null);
   }
 

@@ -1,9 +1,12 @@
-// OrdersClient.tsx — Orders table with filter tabs + inline status management.
+// OrdersClient.tsx — Orders table with filter tabs, full status control,
+// delivery note, and estimated delivery date.
 "use client";
 
 import { useState } from "react";
 
-type OrderStatus = "PAID" | "PENDING" | "FAILED";
+type OrderStatus =
+  | "PAID" | "PENDING" | "FAILED"
+  | "IN_DEVELOPMENT" | "IN_TESTING" | "DELIVERED";
 
 interface Order {
   id:              string;
@@ -11,6 +14,8 @@ interface Order {
   amountPaid:      number | null;
   paymongoOrderId: string | null;
   createdAt:       Date;
+  deliveryNote:    string | null;
+  estimatedAt:     Date | null;
   user:            { name: string | null; email: string };
   product:         { name: string };
 }
@@ -20,29 +25,127 @@ interface Props { orders: Order[]; }
 type FilterTab = "ALL" | OrderStatus;
 
 const filterTabs: { label: string; value: FilterTab }[] = [
-  { label: "All",     value: "ALL"     },
-  { label: "Paid",    value: "PAID"    },
-  { label: "Pending", value: "PENDING" },
-  { label: "Failed",  value: "FAILED"  },
+  { label: "All",           value: "ALL"           },
+  { label: "Paid",          value: "PAID"          },
+  { label: "Pending",       value: "PENDING"       },
+  { label: "Failed",        value: "FAILED"        },
+  { label: "In Dev",        value: "IN_DEVELOPMENT"},
+  { label: "In Testing",    value: "IN_TESTING"    },
+  { label: "Delivered",     value: "DELIVERED"     },
 ];
 
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  PAID:    "#68d391",
-  PENDING: "#f6ad55",
-  FAILED:  "#fc8181",
+const STATUS_COLOR: Record<OrderStatus, string> = {
+  PAID:           "#68d391",
+  PENDING:        "#f6ad55",
+  FAILED:         "#fc8181",
+  IN_DEVELOPMENT: "#63b3ed",
+  IN_TESTING:     "#b794f4",
+  DELIVERED:      "#c9a96e",
 };
+
+const STATUS_LABEL: Record<OrderStatus, string> = {
+  PAID:           "PAID",
+  PENDING:        "PENDING",
+  FAILED:         "FAILED",
+  IN_DEVELOPMENT: "IN DEV",
+  IN_TESTING:     "TESTING",
+  DELIVERED:      "DELIVERED",
+};
+
+// ── Delivery info panel — note + estimated date ───────────────────────
+function DeliveryPanel({
+  orderId, note, estimatedAt, onSaved,
+}: {
+  orderId: string;
+  note: string | null;
+  estimatedAt: Date | null;
+  onSaved: (id: string, note: string | null, est: Date | null) => void;
+}) {
+  const [noteVal, setNote] = useState(note ?? "");
+  const [estVal,  setEst]  = useState(
+    estimatedAt ? new Date(estimatedAt).toISOString().slice(0, 10) : ""
+  );
+  const [saving, setSaving] = useState(false);
+  const [saved,  setSaved]  = useState(false);
+  const [error,  setError]  = useState("");
+
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    const res = await fetch(`/api/admin/orders/${orderId}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        deliveryNote: noteVal.trim() || null,
+        estimatedAt:  estVal || null,
+      }),
+    });
+    if (res.ok) {
+      onSaved(
+        orderId,
+        noteVal.trim() || null,
+        estVal ? new Date(estVal) : null
+      );
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      setError("Save failed.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="ordDeliveryPanel">
+      <p className="ordDeliveryPanelTitle">Delivery Details</p>
+      <div className="ordDeliveryPanelFields">
+        <div className="ordDeliveryField">
+          <label className="ordDeliveryLabel">Delivery Note</label>
+          <textarea
+            className="ordDeliveryTextarea"
+            rows={2}
+            placeholder="e.g. Currently building the HR module…"
+            value={noteVal}
+            onChange={e => setNote(e.target.value)}
+          />
+        </div>
+        <div className="ordDeliveryField">
+          <label className="ordDeliveryLabel">Estimated Delivery Date</label>
+          <input
+            type="date"
+            className="ordDeliveryInput"
+            value={estVal}
+            onChange={e => setEst(e.target.value)}
+          />
+        </div>
+      </div>
+      {error && <p className="ordDeliveryError">{error}</p>}
+      <div className="ordDeliveryActions">
+        <button
+          className="ordDeliverySaveBtn"
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? "Saving…" : saved ? "✓ Saved" : "Save Details"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ── Status selector dropdown ──────────────────────────────────────────
 function StatusSelector({
   orderId, current, onUpdate, disabled,
 }: {
-  orderId: string; current: OrderStatus;
+  orderId:  string;
+  current:  OrderStatus;
   onUpdate: (id: string, status: OrderStatus) => void;
   disabled: boolean;
 }) {
   const [open, setOpen] = useState(false);
-
-  const options: OrderStatus[] = ["PAID", "PENDING", "FAILED"];
+  const options: OrderStatus[] = [
+    "PAID", "PENDING", "FAILED",
+    "IN_DEVELOPMENT", "IN_TESTING", "DELIVERED",
+  ];
 
   return (
     <div className="ordStatusWrap">
@@ -52,8 +155,8 @@ function StatusSelector({
         disabled={disabled}
         title="Click to change status"
       >
-        <span className="ordStatusDot" style={{ background: STATUS_COLORS[current] }} />
-        {current}
+        <span className="ordStatusDot" style={{ background: STATUS_COLOR[current] }} />
+        {STATUS_LABEL[current]}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -67,8 +170,8 @@ function StatusSelector({
               className={`ordStatusOption ordStatusOption--${s.toLowerCase()}`}
               onClick={() => { onUpdate(orderId, s); setOpen(false); }}
             >
-              <span className="ordStatusDot" style={{ background: STATUS_COLORS[s] }} />
-              {s}
+              <span className="ordStatusDot" style={{ background: STATUS_COLOR[s] }} />
+              {STATUS_LABEL[s]}
             </button>
           ))}
         </div>
@@ -79,10 +182,11 @@ function StatusSelector({
 
 // ── Main ──────────────────────────────────────────────────────────────
 export default function OrdersClient({ orders: initialOrders }: Props) {
-  const [orders, setOrders]     = useState<Order[]>(initialOrders);
-  const [activeFilter, setFilter] = useState<FilterTab>("ALL");
-  const [pendingId, setPending]  = useState<string | null>(null);
-  const [toast, setToast]        = useState<{ msg: string; type: "ok"|"err" } | null>(null);
+  const [orders,      setOrders]   = useState<Order[]>(initialOrders);
+  const [activeFilter, setFilter]  = useState<FilterTab>("ALL");
+  const [pendingId,   setPending]  = useState<string | null>(null);
+  const [expandedId,  setExpanded] = useState<string | null>(null);
+  const [toast,       setToast]    = useState<{ msg: string; type: "ok"|"err" } | null>(null);
 
   const filtered = activeFilter === "ALL"
     ? orders
@@ -102,11 +206,22 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
     });
     if (res.ok) {
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-      showToast(`Order updated to ${newStatus}.`, "ok");
+      showToast(`Order updated to ${STATUS_LABEL[newStatus]}.`, "ok");
     } else {
       showToast("Failed to update order.", "err");
     }
     setPending(null);
+  }
+
+  function handleDeliverySaved(
+    orderId:     string,
+    note:        string | null,
+    estimatedAt: Date | null,
+  ) {
+    setOrders(prev => prev.map(o =>
+      o.id === orderId ? { ...o, deliveryNote: note, estimatedAt } : o
+    ));
+    showToast("Delivery details saved.", "ok");
   }
 
   return (
@@ -127,7 +242,9 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
           >
             {tab.label}
             <span className="adminOrdersFilterCount">
-              {tab.value === "ALL" ? orders.length : orders.filter(o => o.status === tab.value).length}
+              {tab.value === "ALL"
+                ? orders.length
+                : orders.filter(o => o.status === tab.value).length}
             </span>
           </button>
         ))}
@@ -148,40 +265,68 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
           <p className="adminEmptyNote">No orders match this filter.</p>
         )}
 
-        {filtered.map(order => (
-          <div key={order.id} className="adminOrdersTableRow">
-            <span className="adminOrdersCell adminOrdersCellId">
-              #{order.id.slice(-6).toUpperCase()}
-            </span>
-            <span className="adminOrdersCell adminOrdersCellName">
-              <span className="adminOrdersCellNameMain">
-                {order.user.name ?? order.user.email}
-              </span>
-              {order.user.name && (
-                <span className="adminOrdersCellNameEmail">{order.user.email}</span>
+        {filtered.map(order => {
+          const isExpanded = expandedId === order.id;
+          const hasDelivery = order.deliveryNote || order.estimatedAt;
+          return (
+            <div key={order.id} className="ordRowGroup">
+              <div className="adminOrdersTableRow">
+                <span className="adminOrdersCell adminOrdersCellId">
+                  #{order.id.slice(-6).toUpperCase()}
+                </span>
+                <span className="adminOrdersCell adminOrdersCellName">
+                  <span className="adminOrdersCellNameMain">
+                    {order.user.name ?? order.user.email}
+                  </span>
+                  {order.user.name && (
+                    <span className="adminOrdersCellNameEmail">{order.user.email}</span>
+                  )}
+                </span>
+                <span className="adminOrdersCell adminOrdersCellMuted">{order.product.name}</span>
+                <span className="adminOrdersCell">
+                  <StatusSelector
+                    orderId={order.id}
+                    current={order.status}
+                    onUpdate={handleStatusUpdate}
+                    disabled={pendingId === order.id}
+                  />
+                </span>
+                <span className="adminOrdersCell adminOrdersCellMono">
+                  {order.amountPaid
+                    ? `₱${(order.amountPaid / 100).toLocaleString()}`
+                    : <span className="adminCellEmpty">—</span>}
+                </span>
+                <span className="adminOrdersCell adminOrdersCellActions">
+                  <span className="adminOrdersCellMuted adminOrdersCellDate">
+                    {new Date(order.createdAt).toLocaleDateString("en-PH", {
+                      year: "numeric", month: "short", day: "numeric",
+                    })}
+                  </span>
+                  <button
+                    className={`ordDeliveryToggleBtn ${isExpanded ? "ordDeliveryToggleBtnOpen" : ""} ${hasDelivery ? "ordDeliveryToggleBtnHasData" : ""}`}
+                    onClick={() => setExpanded(isExpanded ? null : order.id)}
+                    title="Set delivery note & estimated date"
+                  >
+                    {hasDelivery ? "📦" : "📋"}
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                </span>
+              </div>
+
+              {/* Delivery panel — expanded inline */}
+              {isExpanded && (
+                <DeliveryPanel
+                  orderId={order.id}
+                  note={order.deliveryNote}
+                  estimatedAt={order.estimatedAt}
+                  onSaved={handleDeliverySaved}
+                />
               )}
-            </span>
-            <span className="adminOrdersCell adminOrdersCellMuted">{order.product.name}</span>
-            <span className="adminOrdersCell">
-              <StatusSelector
-                orderId={order.id}
-                current={order.status}
-                onUpdate={handleStatusUpdate}
-                disabled={pendingId === order.id}
-              />
-            </span>
-            <span className="adminOrdersCell adminOrdersCellMono">
-              {order.amountPaid
-                ? `₱${(order.amountPaid / 100).toLocaleString()}`
-                : <span className="adminCellEmpty">—</span>}
-            </span>
-            <span className="adminOrdersCell adminOrdersCellMuted">
-              {new Date(order.createdAt).toLocaleDateString("en-PH", {
-                year: "numeric", month: "short", day: "numeric",
-              })}
-            </span>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
     </div>

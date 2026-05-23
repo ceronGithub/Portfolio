@@ -279,3 +279,155 @@
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* ── New status variants (IN_DEVELOPMENT, IN_TESTING, DELIVERED) ─── */
+.ordStatusBtn--in_development { background: rgba(99,179,237,0.12);  color: #63b3ed; border-color: rgba(99,179,237,0.25); }
+.ordStatusBtn--in_testing     { background: rgba(183,148,244,0.12); color: #b794f4; border-color: rgba(183,148,244,0.25); }
+.ordStatusBtn--delivered      { background: rgba(201,169,110,0.12); color: #c9a96e; border-color: rgba(201,169,110,0.25); }
+
+.ordStatusOption--in_development:hover { background: rgba(99,179,237,0.12);  }
+.ordStatusOption--in_testing:hover     { background: rgba(183,148,244,0.12); }
+.ordStatusOption--delivered:hover      { background: rgba(201,169,110,0.12); }
+
+/* ── Row group (row + optional delivery panel) ───────────────────── */
+.ordRowGroup {
+  border-bottom: 1px solid var(--sidebar-border, #252525);
+  display: flex;
+  flex-direction: column;
+}
+.ordRowGroup:last-child { border-bottom: none; }
+.ordRowGroup .adminOrdersTableRow { border-bottom: none; }
+
+/* ── Last cell — date + delivery toggle button ───────────────────── */
+.adminOrdersCellActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.adminOrdersCellDate {
+  font-size: 0.78rem;
+  color: var(--sidebar-text, #666);
+}
+
+/* ── Delivery toggle button ──────────────────────────────────────── */
+.ordDeliveryToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 7px;
+  border: 1px solid var(--sidebar-border, #252525);
+  background: transparent;
+  color: var(--sidebar-text, #666);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ordDeliveryToggleBtn:hover            { background: var(--nav-active-bg, #1e1e1e); color: var(--content-color, #e8e4de); }
+.ordDeliveryToggleBtnOpen              { background: var(--nav-active-bg, #1e1e1e); color: var(--content-color, #e8e4de); border-color: rgba(201,169,110,0.3); }
+.ordDeliveryToggleBtnOpen svg          { transform: rotate(180deg); }
+.ordDeliveryToggleBtnHasData           { border-color: rgba(201,169,110,0.35); color: #c9a96e; }
+.ordDeliveryToggleBtnHasData:hover     { background: rgba(201,169,110,0.08); }
+
+/* ── Delivery panel ──────────────────────────────────────────────── */
+.ordDeliveryPanel {
+  border-top: 1px solid var(--sidebar-border, #252525);
+  background: var(--nav-active-bg, #1e1e1e);
+  padding: 1rem 1.5rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ordDeliveryPanelTitle {
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #c9a96e;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.ordDeliveryPanelFields {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.65rem 1rem;
+  align-items: start;
+}
+
+.ordDeliveryField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ordDeliveryLabel {
+  font-size: 0.71rem;
+  font-weight: 600;
+  color: var(--sidebar-text, #666);
+}
+
+.ordDeliveryTextarea {
+  width: 100%;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 8px;
+  background: var(--sidebar-bg, #141414);
+  color: var(--content-color, #e8e4de);
+  font-family: inherit;
+  font-size: 0.8rem;
+  resize: none;
+  outline: none;
+  line-height: 1.55;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+.ordDeliveryTextarea::placeholder { color: var(--sidebar-text, #666); opacity: 0.6; }
+.ordDeliveryTextarea:focus         { border-color: #c9a96e; }
+
+.ordDeliveryInput {
+  width: 100%;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 8px;
+  background: var(--sidebar-bg, #141414);
+  color: var(--content-color, #e8e4de);
+  font-family: inherit;
+  font-size: 0.8rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+  color-scheme: dark;
+}
+.ordDeliveryInput:focus { border-color: #c9a96e; }
+
+.ordDeliveryError {
+  font-size: 0.74rem;
+  color: #fc8181;
+  margin: 0;
+}
+
+.ordDeliveryActions { display: flex; justify-content: flex-end; }
+
+.ordDeliverySaveBtn {
+  background: #22c55e;
+  border: none;
+  border-radius: 7px;
+  color: #0d0d0d;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.ordDeliverySaveBtn:hover:not(:disabled) { opacity: 0.88; }
+.ordDeliverySaveBtn:disabled             { opacity: 0.4; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .ordDeliveryPanelFields { grid-template-columns: 1fr; }
+}

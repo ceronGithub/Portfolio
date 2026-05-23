@@ -19,7 +19,14 @@ export default async function AdminOrdersPage() {
   // Fetch all orders newest-first, with user and product details
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
+    select: {
+      id:              true,
+      status:          true,
+      amountPaid:      true,
+      paymongoOrderId: true,
+      createdAt:       true,
+      deliveryNote:    true,
+      estimatedAt:     true,
       user:    { select: { name: true, email: true } },
       product: { select: { name: true } },
     },
