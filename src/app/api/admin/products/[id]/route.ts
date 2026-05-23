@@ -1,10 +1,18 @@
 // PATCH /api/admin/products/[id]
-// Admin-only. Updates isActive field on a Product record.
-// Used by the Products page toggle button.
+// Admin-only. Updates one or more editable fields on a Product record.
+// Accepts: isActive (boolean), isLatest (boolean), price (number),
+//          previewVideoUrl, facePngUrl, threeDUrl, actionOneUrl,
+//          actionTwoUrl, actionThreeUrl (all strings or null).
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
+
+// Allowed string-or-null media fields that can be patched directly.
+const MEDIA_FIELDS = [
+  "previewVideoUrl", "facePngUrl", "threeDUrl",
+  "actionOneUrl", "actionTwoUrl", "actionThreeUrl",
+] as const;
 
 export async function PATCH(
   req: NextRequest,
@@ -18,13 +26,30 @@ export async function PATCH(
   const { id } = params;
   const body   = await req.json();
 
-  if (typeof body.isActive !== "boolean") {
-    return NextResponse.json({ error: "isActive (boolean) required" }, { status: 400 });
+  // Build update data — only include fields present in the request body.
+  const data: Record<string, unknown> = {};
+
+  if (typeof body.isActive  === "boolean") data.isActive  = body.isActive;
+  if (typeof body.isLatest  === "boolean") data.isLatest  = body.isLatest;
+  if (typeof body.price     === "number")  data.price     = body.price;
+  if (typeof body.name      === "string")  data.name      = body.name.trim();
+  if (typeof body.description === "string" || body.description === null)
+    data.description = body.description;
+
+  for (const field of MEDIA_FIELDS) {
+    if (field in body) {
+      const val = body[field];
+      if (typeof val === "string" || val === null) data[field] = val;
+    }
+  }
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: "No valid fields to update." }, { status: 400 });
   }
 
   const updatedProduct = await prisma.product.update({
     where: { id },
-    data:  { isActive: body.isActive },
+    data,
   });
 
   return NextResponse.json({ product: updatedProduct });

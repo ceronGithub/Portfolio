@@ -1,6 +1,7 @@
-// GET /api/products?category=character|weapon|interior|exterior
+// GET /api/products?category=character|weapon|interior|exterior[&latest=true]
 // Public route — returns active products filtered by category.
-// Used by the buyer browse modal to populate Character and Weapon tabs.
+// Optional: &latest=true returns only products with isLatest=true.
+// Used by the buyer browse modal and Latest Drop sections.
 //
 // NOTE: The seed stores GDrive viewer URLs (drive.google.com/file/d/{id}/view).
 // Browsers cannot use these as <video src>. This route rewrites them to
@@ -26,6 +27,7 @@ function toProxyUrl(raw: string | null): string | null {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
+  const latestOnly = searchParams.get("latest") === "true";
 
   const validCategories = ["character", "weapon", "interior", "exterior"];
 
@@ -37,12 +39,14 @@ export async function GET(req: NextRequest) {
     where: {
       category: category as "character" | "weapon" | "interior" | "exterior",
       isActive: true,
+      ...(latestOnly ? { isLatest: true } : {}),
     },
     select: {
       id:              true,
       name:            true,
       price:           true,
       category:        true,
+      isLatest:        true,
       previewVideoUrl: true,
       facePngUrl:      true,
       actionOneUrl:    true,

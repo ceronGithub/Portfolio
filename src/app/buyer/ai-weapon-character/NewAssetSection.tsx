@@ -1,27 +1,32 @@
 // NewAssetSection — "Latest Drop" section for Character / Weapon studio.
-// UPDATED: Real content wired in.
-//   Card 1 — MP4 video from Supabase (latest orc drop).
-//   Card 2 — 3D OBJ placeholder (swap with real file when ready).
-//   Title and badge reflect actual latest asset.
-//   "Coming Soon" badge hidden when SHOW_LIVE = true.
+// Fetches the latest character and weapon products from the DB via
+// /api/products?latest=true&category=character|weapon
+// Falls back to "Coming Soon" state when no isLatest products exist.
 
 "use client";
 
-import { useRef, useEffect, useState } from "react";import "./new-asset-section.css";
+import { useRef, useEffect, useState } from "react";
+import "./new-asset-section.css";
 
-const GD = (id: string) => `/api/drive-video?id=${id}`;
+// ── Types ─────────────────────────────────────────────────────────────
+interface LatestProduct {
+  id:              string;
+  name:            string;
+  price:           number;
+  category:        string;
+  previewVideoUrl: string | null;
+  facePngUrl:      string | null;
+}
 
-// ── Latest drop config — change these when a new asset drops ──────────────
-const LATEST = {
-  title:       "Orc 11 — Warlord",
-  subtitle:    "New Character. Available now",
-  videoSrc:    GD("1CTk71XmBB9yNz9Osbfd-YHg9mrsgmZkf"),
-  price:       "₱5,500",
-  isLive:      false,         // false = show "Coming Soon" badge
-  releaseNote: "Full rig · 4K textures · OBJ + FBX included",
-};
-// ──────────────────────────────────────────────────────────────────────────
+// ── fetchLatestProducts — loads the isLatest=true products for a category
+async function fetchLatestProducts(category: string): Promise<LatestProduct[]> {
+  const res = await fetch(`/api/products?latest=true&category=${category}`);
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json.products ?? [];
+}
 
+// ── FireParticle — single particle in the fire canvas animation ───────
 interface FireParticle {
   x: number; y: number;
   vx: number; vy: number;
@@ -46,8 +51,21 @@ export default function NewAssetSection() {
   const fireCanvasRef = useRef<HTMLCanvasElement>(null);
   const fireRafRef    = useRef<number>(0);
   const fireParticles = useRef<FireParticle[]>([]);
-  const [parallaxY, setParallaxY] = useState(0);
+  const [parallaxY, setParallaxY]     = useState(0);
+  const [latestChar, setLatestChar]   = useState<LatestProduct | null>(null);
+  const [isLoading, setIsLoading]     = useState(true);
 
+  // Load latest character product on mount
+  useEffect(() => {
+    async function loadLatest() {
+      const characters = await fetchLatestProducts("character");
+      setLatestChar(characters[0] ?? null);
+      setIsLoading(false);
+    }
+    loadLatest();
+  }, []);
+
+  // Fire canvas animation
   useEffect(() => {
     const canvas = fireCanvasRef.current;
     if (!canvas) return;
@@ -114,6 +132,7 @@ export default function NewAssetSection() {
     };
   }, []);
 
+  // Parallax scroll handler
   useEffect(() => {
     function onScroll() {
       const el = sectionRef.current;
@@ -126,6 +145,8 @@ export default function NewAssetSection() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const isLive = !isLoading && latestChar !== null;
 
   return (
     <section ref={sectionRef} className="newAssetSection">
@@ -149,32 +170,57 @@ export default function NewAssetSection() {
       <div className="newAssetContent">
         <div className="newAssetHeaderRow">
           <div>
-            <p className="newAssetLabel">Latest Drop on Character & Weapon</p>
-            <h2 className="newAssetTitle">{LATEST.subtitle}</h2>
+            <p className="newAssetLabel">Latest Drop on Character &amp; Weapon</p>
+            <h2 className="newAssetTitle">
+              {isLoading ? "Loading…" : isLive ? latestChar!.name : "New Character. Available now"}
+            </h2>
           </div>
-          {LATEST.isLive ? (
+          {isLive ? (
             <span className="newAssetLiveBadge">● Live</span>
           ) : (
             <span className="newAssetComingSoon">Coming Soon</span>
           )}
         </div>
 
+        {isLive && latestChar && (
+          <p className="newAssetPrice">₱{latestChar.price.toLocaleString()}</p>
+        )}
+
         <div className="newAssetCards">
-          {/* Card 1 — Animation preview — static placeholder, no video loaded */}
+          {/* Card 1 — Animation preview */}
           <div className="newAssetCard newAssetCardVideo">
-            <div className="newAssetCardVideoStatic">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.2}}>
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              <p className="newAssetCardVideoStaticLabel">Animation Preview</p>
-            </div>
+            {isLive && latestChar?.previewVideoUrl ? (
+              <video
+                className="newAssetCardVideoEl"
+                src={latestChar.previewVideoUrl}
+                autoPlay muted loop playsInline
+              />
+            ) : (
+              <div className="newAssetCardVideoStatic">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.2}}>
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <p className="newAssetCardVideoStaticLabel">Animation Preview</p>
+              </div>
+            )}
           </div>
 
-          {/* Card 2 — 3D OBJ placeholder */}
+          {/* Card 2 — Face / model thumbnail */}
           <div className="newAssetCard">
             <div className="newAssetCardInner">
-              <span className="newAssetCardIcon">📦</span>
-              <p className="newAssetCardLabel">3D OBJ / FBX</p>
+              {isLive && latestChar?.facePngUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={latestChar.facePngUrl}
+                  alt={latestChar.name}
+                  className="newAssetCardFaceImg"
+                />
+              ) : (
+                <>
+                  <span className="newAssetCardIcon">📦</span>
+                  <p className="newAssetCardLabel">3D OBJ / FBX</p>
+                </>
+              )}
             </div>
           </div>
         </div>

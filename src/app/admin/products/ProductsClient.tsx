@@ -12,7 +12,12 @@ import { useState, useEffect, useRef } from "react";
 
 interface Product {
   id: string; name: string; description: string | null;
-  price: number; isActive: boolean; createdAt: Date;
+  price: number; isActive: boolean; isLatest: boolean;
+  category: string;
+  previewVideoUrl: string | null; facePngUrl: string | null;
+  threeDUrl: string | null; actionOneUrl: string | null;
+  actionTwoUrl: string | null; actionThreeUrl: string | null;
+  createdAt: Date;
 }
 
 interface Addon {
@@ -54,6 +59,47 @@ async function toggleProductActive(id: string, current: boolean): Promise<boolea
     body: JSON.stringify({ isActive: !current }),
   });
   return res.ok;
+}
+
+// Toggles the isLatest flag on a product.
+async function toggleProductLatest(id: string, current: boolean): Promise<boolean> {
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ isLatest: !current }),
+  });
+  return res.ok;
+}
+
+// Updates a single media URL field (or null) on a product.
+async function patchProductMedia(
+  id: string,
+  field: string,
+  value: string | null
+): Promise<boolean> {
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ [field]: value }),
+  });
+  return res.ok;
+}
+
+// Creates a new product record.
+async function createProduct(data: {
+  name: string; price: number; category: string;
+  description?: string; isLatest?: boolean;
+  previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
+  actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
+}): Promise<Product | null> {
+  const res = await fetch("/api/admin/products", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.product ?? null;
 }
 
 async function updateSystemBasePrice(id: string, basePrice: number): Promise<boolean> {
@@ -366,7 +412,196 @@ function AddAddonForm({ systemId, accent, onAdded }: {
   );
 }
 
-// ── ProductsSection — legacy products table ────────────────────────────
+// ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
+// Used by MediaEditor to render one inline editor row per field.
+const MEDIA_FIELDS: { field: string; label: string }[] = [
+  { field: "previewVideoUrl", label: "Preview Video URL" },
+  { field: "facePngUrl",      label: "Face PNG URL"       },
+  { field: "threeDUrl",       label: "3D Model URL"       },
+  { field: "actionOneUrl",    label: "Action 1 URL"       },
+  { field: "actionTwoUrl",    label: "Action 2 URL"       },
+  { field: "actionThreeUrl",  label: "Action 3 URL"       },
+];
+
+// ── MediaEditor — inline URL editor for all media fields of one product ──
+// Rendered inside an expandable row. Each field shows a text input with
+// Save / Clear buttons that PATCH only the changed field immediately.
+function MediaEditor({ product, onFieldSaved }: {
+  product: Product;
+  onFieldSaved: (id: string, field: string, value: string | null) => void;
+}) {
+  const initialDrafts = Object.fromEntries(
+    MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
+  );
+  const [drafts, setDrafts]   = useState<Record<string, string>>(initialDrafts);
+  const [saving, setSaving]   = useState<Record<string, boolean>>({});
+  const [saved, setSaved]     = useState<Record<string, boolean>>({});
+
+  async function handleSaveField(field: string) {
+    const value = drafts[field].trim() || null;
+    setSaving(prev => ({ ...prev, [field]: true }));
+    const ok = await patchProductMedia(product.id, field, value);
+    if (ok) {
+      onFieldSaved(product.id, field, value);
+      setSaved(prev => ({ ...prev, [field]: true }));
+      setTimeout(() => setSaved(prev => ({ ...prev, [field]: false })), 2200);
+    }
+    setSaving(prev => ({ ...prev, [field]: false }));
+  }
+
+  return (
+    <div className="apMediaEditor">
+      {MEDIA_FIELDS.map(({ field, label }) => (
+        <div key={field} className="apMediaRow">
+          <span className="apMediaLabel">{label}</span>
+          <input
+            className="apMediaInput"
+            type="text"
+            placeholder="Paste URL or leave empty to clear"
+            value={drafts[field]}
+            onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
+            onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
+          />
+          <button
+            className="apPriceSaveBtn"
+            onClick={() => handleSaveField(field)}
+            disabled={saving[field]}
+          >
+            {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
+          </button>
+          <button
+            className="apPriceCancelBtn"
+            onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field); }}
+            title="Clear this URL"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── AddProductForm — create a new product from the Admin UI ───────────────
+// Shown when the admin clicks "Add New Product" at the top of the table.
+// On success, the new product is prepended to the list in local state.
+function AddProductForm({ onProductCreated, onClose }: {
+  onProductCreated: (product: Product) => void;
+  onClose: () => void;
+}) {
+  const [name, setName]               = useState("");
+  const [price, setPrice]             = useState("");
+  const [category, setCategory]       = useState("character");
+  const [description, setDescription] = useState("");
+  const [isLatest, setIsLatest]       = useState(false);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState("");
+  const [facePngUrl, setFacePngUrl]           = useState("");
+  const [threeDUrl, setThreeDUrl]             = useState("");
+  const [actionOneUrl, setActionOneUrl]       = useState("");
+  const [actionTwoUrl, setActionTwoUrl]       = useState("");
+  const [actionThreeUrl, setActionThreeUrl]   = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError]   = useState("");
+
+  async function handleCreate() {
+    if (!name.trim()) { setError("Name is required."); return; }
+    const parsedPrice = parseInt(price.replace(/,/g, ""), 10);
+    if (isNaN(parsedPrice) || parsedPrice < 0) { setError("Enter a valid price (₱)."); return; }
+    setSaving(true);
+    setError("");
+    const product = await createProduct({
+      name: name.trim(),
+      price: parsedPrice,
+      category,
+      description: description.trim() || undefined,
+      isLatest,
+      previewVideoUrl: previewVideoUrl.trim() || undefined,
+      facePngUrl:      facePngUrl.trim()      || undefined,
+      threeDUrl:       threeDUrl.trim()        || undefined,
+      actionOneUrl:    actionOneUrl.trim()    || undefined,
+      actionTwoUrl:    actionTwoUrl.trim()    || undefined,
+      actionThreeUrl:  actionThreeUrl.trim()  || undefined,
+    });
+    if (product) {
+      onProductCreated(product);
+      onClose();
+    } else {
+      setError("Failed to create product. Try again.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="apAddProductForm">
+      <p className="apAddAddonFormTitle">New Product</p>
+      <div className="apAddProductGrid">
+        <div className="apAddProductField apAddProductFieldFull">
+          <label className="apMediaLabel">Name *</label>
+          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Price (₱) *</label>
+          <input className="apMediaInput" type="number" min="0" placeholder="5500" value={price} onChange={e => setPrice(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Category *</label>
+          <select className="apMediaInput apMediaSelect" value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="character">Character</option>
+            <option value="weapon">Weapon</option>
+            <option value="interior">Interior</option>
+            <option value="exterior">Exterior</option>
+          </select>
+        </div>
+        <div className="apAddProductField apAddProductFieldFull">
+          <label className="apMediaLabel">Description</label>
+          <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
+        </div>
+        <div className="apAddProductField apAddProductFieldFull">
+          <label className="apMediaLabel">Preview Video URL</label>
+          <input className="apMediaInput" placeholder="GDrive or /api/drive-video?id=…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Face PNG URL</label>
+          <input className="apMediaInput" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">3D Model URL</label>
+          <input className="apMediaInput" value={threeDUrl} onChange={e => setThreeDUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Action 1 URL</label>
+          <input className="apMediaInput" value={actionOneUrl} onChange={e => setActionOneUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Action 2 URL</label>
+          <input className="apMediaInput" value={actionTwoUrl} onChange={e => setActionTwoUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField apAddProductFieldFull">
+          <label className="apMediaLabel">Action 3 URL</label>
+          <input className="apMediaInput" value={actionThreeUrl} onChange={e => setActionThreeUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
+          <label className="apLatestToggleLabel">
+            <input type="checkbox" checked={isLatest} onChange={e => setIsLatest(e.target.checked)} />
+            Mark as Latest Drop
+          </label>
+        </div>
+      </div>
+      {error && <p className="apAddAddonError">{error}</p>}
+      <div className="apAddAddonFormActions">
+        <button className="apPriceCancelBtn" onClick={onClose}>Cancel</button>
+        <button className="apPriceSaveBtn" onClick={handleCreate} disabled={saving}
+          style={{ background: "#22c55e", color: "#0d0d0d" }}>
+          {saving ? "Creating…" : "Create Product"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── ProductsSection — products table with media editing and add form ────
+// Each row is expandable to reveal the MediaEditor and isLatest toggle.
+// "Add New Product" button at top opens AddProductForm inline.
 function ProductsSection({
   products, onToggle, togglingId,
 }: {
@@ -375,49 +610,114 @@ function ProductsSection({
   togglingId: string | null;
 }) {
   const revealRef = useReveal();
+  const [productList, setProductList]     = useState<Product[]>(products);
+  const [expandedRow, setExpandedRow]     = useState<string | null>(null);
+  const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm]     = useState(false);
+
+  function handleFieldSaved(productId: string, field: string, value: string | null) {
+    setProductList(prev => prev.map(p =>
+      p.id === productId ? { ...p, [field]: value } : p
+    ));
+  }
+
+  async function handleToggleLatest(id: string, current: boolean) {
+    setTogglingLatest(id);
+    const ok = await toggleProductLatest(id, current);
+    if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isLatest: !current } : p));
+    setTogglingLatest(null);
+  }
+
+  function handleProductCreated(newProduct: Product) {
+    setProductList(prev => [newProduct, ...prev]);
+  }
+
   return (
     <div className="apCard apReveal" ref={revealRef}>
       <div className="apCardHeader">
-        <h2 className="apCardTitle">Legacy Products</h2>
-        <span className="apCardBadge">{products.length}</span>
-      </div>
-      <div className="apTable">
-        <div className="apTableHead apGrid--products">
-          <span>Name</span><span>Description</span><span>Price</span>
-          <span>Status</span><span>Created</span><span>Action</span>
+        <div>
+          <h2 className="apCardTitle">Products</h2>
         </div>
-        {products.length === 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <span className="apCardBadge">{productList.length}</span>
+          <button
+            className="apPriceSaveBtn"
+            onClick={() => setShowAddForm(prev => !prev)}
+            style={{ background: showAddForm ? "rgba(255,255,255,0.08)" : "#22c55e", color: showAddForm ? "#aaa" : "#0d0d0d", fontSize: "0.78rem" }}
+          >
+            {showAddForm ? "✕ Cancel" : "+ Add New Product"}
+          </button>
+        </div>
+      </div>
+
+      {/* Add product inline form */}
+      {showAddForm && (
+        <AddProductForm
+          onProductCreated={handleProductCreated}
+          onClose={() => setShowAddForm(false)}
+        />
+      )}
+
+      <div className="apTable">
+        <div className="apTableHead apGrid--productsV2">
+          <span>Name</span><span>Category</span><span>Price</span>
+          <span>Latest</span><span>Status</span><span>Actions</span>
+        </div>
+        {productList.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
               <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
             </svg>
             <p className="apEmptyTitle">No products yet</p>
-            <p className="apEmptyHint">Legacy product entries will appear here.</p>
+            <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
           </div>
         )}
-        {products.map(p => (
-          <div key={p.id} className="apTableRow apGrid--products">
-            <span className="apCell apCellName">{p.name}</span>
-            <span className="apCell apCellMuted">{p.description ?? <em className="apNone">—</em>}</span>
-            <span className="apCell apCellMono">₱{(p.price / 100).toLocaleString()}</span>
-            <span className="apCell">
-              <span className={`apBadge ${p.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
-                {p.isActive ? "Active" : "Inactive"}
+        {productList.map(p => (
+          <div key={p.id}>
+            <div className="apTableRow apGrid--productsV2">
+              <span className="apCell apCellName">{p.name}</span>
+              <span className="apCell apCellMuted" style={{ textTransform: "capitalize" }}>{p.category}</span>
+              <span className="apCell apCellMono">₱{p.price.toLocaleString()}</span>
+              <span className="apCell">
+                <button
+                  className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}
+                  style={{ fontSize: "0.72rem" }}
+                  onClick={() => handleToggleLatest(p.id, p.isLatest)}
+                  disabled={togglingLatest === p.id}
+                  title="Toggle Latest Drop flag"
+                >
+                  {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
+                </button>
               </span>
-            </span>
-            <span className="apCell apCellMuted">
-              {new Date(p.createdAt).toLocaleDateString("en-PH", { year:"numeric", month:"short", day:"numeric" })}
-            </span>
-            <span className="apCell">
-              <button
-                className={`apActionBtn ${p.isActive ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
-                onClick={() => onToggle(p.id, p.isActive)}
-                disabled={togglingId === p.id}
-              >
-                {togglingId === p.id ? "…" : p.isActive ? "Deactivate" : "Activate"}
-              </button>
-            </span>
+              <span className="apCell">
+                <span className={`apBadge ${p.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
+                  {p.isActive ? "Active" : "Inactive"}
+                </span>
+              </span>
+              <span className="apCell" style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                <button
+                  className={`apActionBtn ${p.isActive ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
+                  onClick={() => onToggle(p.id, p.isActive)}
+                  disabled={togglingId === p.id}
+                >
+                  {togglingId === p.id ? "…" : p.isActive ? "Deactivate" : "Activate"}
+                </button>
+                <button
+                  className={`apActionBtn ${expandedRow === p.id ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
+                  style={{ fontSize: "0.72rem" }}
+                  onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
+                >
+                  {expandedRow === p.id ? "▲ Media" : "✎ Media"}
+                </button>
+              </span>
+            </div>
+            {/* Expanded media editor row */}
+            {expandedRow === p.id && (
+              <div className="apMediaEditorWrap">
+                <MediaEditor product={p} onFieldSaved={handleFieldSaved} />
+              </div>
+            )}
           </div>
         ))}
       </div>
