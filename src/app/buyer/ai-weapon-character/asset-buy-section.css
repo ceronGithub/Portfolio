@@ -619,7 +619,7 @@
   .assetBuyBtn         { width: 100%; text-align: center; }
 }
 
-   PACKAGE TIERS
+/* ── PACKAGE TIERS
    ════════════════════════════════════════════════════════════════════ */
 .assetBuyPackages {
   display:               grid;
