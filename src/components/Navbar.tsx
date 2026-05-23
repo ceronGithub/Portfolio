@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useAdminNotifications } from "@/app/admin/hooks/useAdminNotifications";
 
 /* ── SVG icons ─────────────────────────────────────────────────────── */
 
@@ -147,6 +148,23 @@ function IconOrders({ size = 22 }: { size?: number }) {
   );
 }
 
+/* ── NotifBadge — red dot with count on admin nav item ────────────────── */
+function NotifBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span style={{
+      position: "absolute", top: "1px", right: "2px",
+      minWidth: "15px", height: "15px",
+      background: "#f04343", borderRadius: "999px",
+      fontSize: "0.6rem", fontWeight: 700, color: "#fff",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "0 3px", lineHeight: 1, pointerEvents: "none", zIndex: 10,
+    }}>
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 /* ── Types ──────────────────────────────────────────────────────────── */
 
 type NavItem = {
@@ -194,6 +212,9 @@ export default function Navbar() {
   const isOnBuyer   = pathname.startsWith("/buyer") || pathname.startsWith("/checkout");
   const isOnAdmin   = pathname.startsWith("/admin");
 
+  // Notification counts — polled every 30 s when on admin pages
+  const notif = useAdminNotifications(isAdmin && isOnAdmin);
+
   /* ── Admin theme state — synced with localStorage "adminTheme" ──── */
   const [isDark, setIsDark] = useState(false);
 
@@ -223,7 +244,12 @@ export default function Navbar() {
 
   // Admin on /admin pages: Overview, Users, Products, Orders, Theme toggle, Sign Out
   const adminItems: NavItem[] = [
-    { label: "Overview",      href: "/admin/dashboard",     icon: <IconAdmin />    },
+    { label: "Overview", href: "/admin/dashboard", icon: (
+      <span style={{ position: "relative", display: "inline-flex" }}>
+        <IconAdmin />
+        <NotifBadge count={notif.total} />
+      </span>
+    )},
     { label: "Users",         href: "/admin/users",         icon: <IconAbout />    },
     { label: "Products",      href: "/admin/products",      icon: <IconSystems />  },
     { label: "Orders",        href: "/admin/orders",        icon: <IconPricing />  },

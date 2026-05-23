@@ -6,7 +6,8 @@
 
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAdminNotifications } from "@/app/admin/hooks/useAdminNotifications";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface RevenuePoint { label: string; value: number; }
@@ -259,6 +260,53 @@ function KpiCard({
 
 // ── Main component ─────────────────────────────────────────────────────────
 // Single-scroll page. KPI strip at top. 2x2 chart grid below.
+// ── NotifFeed — actionable notification summary card ──────────────────────
+// Shows counts for pending orders, unread messages, pending inquiries, new reviews.
+// Each row is a link to the relevant admin page.
+function NotifFeed({ counts }: { counts: ReturnType<typeof useAdminNotifications> }) {
+  const revealRef = useReveal();
+
+  const items = [
+    { label: "Pending orders",      count: counts.orders,    href: "/admin/orders",       color: "#f5b86c" },
+    { label: "Unread messages",     count: counts.messages,  href: "/admin/inquiries",    color: "#6c8af5" },
+    { label: "Pending inquiries",   count: counts.inquiries, href: "/admin/inquiries",    color: "#a78bfa" },
+    { label: "New reviews (7 days)", count: counts.reviews,  href: "/admin/reviews",      color: "#34d399" },
+  ];
+
+  return (
+    <div className="ovNotifCard ovReveal" ref={revealRef}>
+      <div className="ovNotifHeader">
+        <div>
+          <span className="ovPageEyebrow">Attention</span>
+          <h2 className="ovNotifTitle">Notifications</h2>
+        </div>
+        {counts.total > 0 && (
+          <span className="ovNotifTotalBadge">{counts.total} unread</span>
+        )}
+      </div>
+      <div className="ovNotifList">
+        {items.map(item => (
+          <a key={item.label} href={item.href} className="ovNotifRow">
+            <span className="ovNotifDot" style={{ background: item.color }} />
+            <span className="ovNotifLabel">{item.label}</span>
+            <span
+              className="ovNotifCount"
+              style={{ color: item.count > 0 ? item.color : "var(--ov-label)" }}
+            >
+              {item.count}
+            </span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ opacity: 0.3, flexShrink: 0 }}>
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function OverviewClient({
   stats,
   monthlyRevenueSystems,
@@ -267,6 +315,7 @@ export default function OverviewClient({
   weeklyRevenueProducts,
 }: OverviewClientProps) {
   const headerRef = useReveal();
+  const notif = useAdminNotifications(true);
 
   const kpiItems = [
     { value: stats.activeUsers,           label: "active users",       accentColor: COLOR_SYSTEMS  },
@@ -305,6 +354,9 @@ export default function OverviewClient({
           />
         ))}
       </div>
+
+      {/* ── Notification feed ─────────────────────────────────────────── */}
+      <NotifFeed counts={notif} />
 
       {/* ── Divider ─────────────────────────────────────────────────── */}
       <div className="ovDivider" />

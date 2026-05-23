@@ -362,3 +362,87 @@
   background: var(--sidebar-border);
   flex-shrink: 0;
 }
+/* ── Notification feed card ──────────────────────────────────────────────── */
+
+.ovNotifCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.ovNotifHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.ovNotifTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--content-color);
+  letter-spacing: -0.02em;
+  margin: 0.2rem 0 0;
+}
+
+.ovNotifTotalBadge {
+  background: rgba(240, 67, 67, 0.12);
+  color: #f04343;
+  border: 1px solid rgba(240, 67, 67, 0.22);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ovNotifList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ovNotifRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.ovNotifRow:hover {
+  background: var(--row-hover, rgba(0,0,0,0.04));
+}
+
+.adminShellDark .ovNotifRow:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.ovNotifDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ovNotifLabel {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--content-color);
+}
+
+.ovNotifCount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+  text-align: right;
+}
