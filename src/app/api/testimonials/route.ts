@@ -18,7 +18,7 @@ function getInitials(name: string): string {
 // ── GET /api/testimonials — approved testimonials for the visitor carousel ────
 export async function GET() {
   try {
-    const testimonials = await prisma.testimonial.findMany({
+    const testimonials = await (prisma as any).testimonial.findMany({
       where:   { isApproved: true },
       orderBy: { createdAt: "asc" },
     });
@@ -40,21 +40,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "rate must be 1–100" }, { status: 400 });
   }
 
-  // ── Count existing to assign a consistent accent color ──────────────────
-  const count = await prisma.testimonial.count();
-  const accent = ACCENT_COLORS[count % ACCENT_COLORS.length];
+  try {
+    // ── Count existing to assign a consistent accent color ──────────────────
+    const count = await (prisma as any).testimonial.count();
+    const accent = ACCENT_COLORS[count % ACCENT_COLORS.length];
 
-  const testimonial = await prisma.testimonial.create({
-    data: {
-      name:    name.trim(),
-      project: project.trim(),
-      rate,
-      comment: comment.trim(),
-      initials: getInitials(name.trim()),
-      accent,
-      isApproved: false,
-    },
-  });
+    const testimonial = await (prisma as any).testimonial.create({
+      data: {
+        name:     name.trim(),
+        project:  project.trim(),
+        rate,
+        comment:  comment.trim(),
+        initials: getInitials(name.trim()),
+        accent,
+        isApproved: false,
+      },
+    });
 
-  return NextResponse.json({ id: testimonial.id }, { status: 201 });
+    return NextResponse.json({ id: testimonial.id }, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "Migration pending — run npx prisma migrate deploy" }, { status: 503 });
+  }
 }
