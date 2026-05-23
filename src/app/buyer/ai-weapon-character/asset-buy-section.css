@@ -1,27 +1,29 @@
-/* asset-buy-section.css */
+/* asset-buy-section.css — redesigned May 2026 */
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap');
 
-/* ════════════════════════════════
-   SECTION
-   ════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════
+   SECTION SHELL
+   ════════════════════════════════════════════════════════════════════ */
 .assetBuySection {
-  position:    relative;
-  width:       100%;
-  min-height:  140vh;
-  background:  #000;
-  overflow:    hidden;
-  display:     flex;
+  position:   relative;
+  width:      100%;
+  min-height: 100vh;
+  background: #050505;
+  overflow:   hidden;
+  display:    flex;
   align-items: center;
+  justify-content: center;
   font-family: 'Syne', sans-serif;
-  border-top:  1px solid #111;
+  border-top: 1px solid #111;
 }
 
-/* BG orc */
+/* ── Background orc image — left half, fades right ── */
 .assetBuyBgOrc {
   position: absolute;
   left: 0; top: 0;
-  width: 80%; height: 100%;
+  width: 55%; height: 100%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .assetBuyBgOrcImg {
@@ -29,137 +31,417 @@
   object-fit: cover;
   object-position: center top;
   display: block;
-  opacity: 0.8;
+  opacity: 0.55;
+  filter: saturate(0.7) brightness(0.6);
 }
 
 .assetBuyBgOrcFade {
   position: absolute; inset: 0;
-  background: linear-gradient(to right, transparent 20%, rgba(0,0,0,0.75) 60%, #000 100%);
+  background:
+    linear-gradient(to right,  transparent 10%, rgba(5,5,5,0.6) 50%, #050505 85%),
+    linear-gradient(to bottom, transparent 40%, rgba(5,5,5,0.85) 100%);
 }
 
-/* ── Ground fog canvas — full width, pinned to bottom 55% ── */
+/* ── Ground fog canvas ── */
 .assetBuyFogCanvas {
   position:       absolute;
-  left:           0;
-  bottom:         0;
-  width:          100%;
-  height:         55%;
-  z-index:        4;
+  left:           0; bottom: 0;
+  width:          100%; height: 45%;
+  z-index:        3;
   pointer-events: none;
   will-change:    transform;
 }
 
-/* Content */
+/* ════════════════════════════════════════════════════════════════════
+   CONTENT WRAPPER
+   ════════════════════════════════════════════════════════════════════ */
 .assetBuyContent {
   position:        relative;
   z-index:         10;
-  margin-left:     42%;
-  width:           54%;
-  padding:         7rem 3rem 7rem 2rem;
+  width:           100%;
+  max-width:       1100px;
+  margin:          0 auto;
+  padding:         8rem 4rem 7rem;
   display:         flex;
   flex-direction:  column;
-  gap:             2.5rem;
+  gap:             3rem;
 }
 
-/* Header row */
-.assetBuyHeaderRow {
-  display:         flex;
-  align-items:     flex-start;
-  justify-content: space-between;
-  gap:             1.5rem;
-  flex-wrap:       wrap;
+/* ════════════════════════════════════════════════════════════════════
+   HERO TEXT
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyHeroText {
+  max-width: 560px;
 }
 
 .assetBuyLabel {
   font-family:    'DM Mono', monospace;
-  font-size:      0.62rem;
+  font-size:      0.6rem;
   font-weight:    300;
-  color:          rgba(255,255,255,0.2);
+  color:          rgba(201, 147, 94, 0.6);
   text-transform: uppercase;
-  letter-spacing: 0.25em;
-  margin-bottom:  0.6rem;
+  letter-spacing: 0.3em;
+  margin-bottom:  1rem;
 }
 
 .assetBuyTitle {
-  font-size:      clamp(1.4rem, 2.8vw, 2.4rem);
-  font-weight:    700;
+  font-size:      clamp(2rem, 4.5vw, 3.8rem);
+  font-weight:    800;
   color:          #fff;
-  letter-spacing: -0.02em;
-  line-height:    1.2;
+  letter-spacing: -0.03em;
+  line-height:    1.1;
+  margin-bottom:  1rem;
 }
 
-/* Action buttons */
-.assetBuyActions {
+.assetBuyTitleAccent {
+  color: #c9935e;
+}
+
+.assetBuySubline {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.75rem;
+  font-weight:  300;
+  color:        rgba(255,255,255,0.3);
+  line-height:  1.7;
+  letter-spacing: 0.01em;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   PERKS STRIP
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyPerks {
+  display:   flex;
+  gap:       0;
+  flex-wrap: wrap;
+  border:    1px solid rgba(201,147,94,0.12);
+  border-radius: 14px;
+  overflow:  hidden;
+  width:     fit-content;
+}
+
+.assetBuyPerk {
+  display:     flex;
+  align-items: center;
+  gap:         0.55rem;
+  padding:     0.65rem 1.4rem;
+  border-right: 1px solid rgba(201,147,94,0.1);
+  background:  rgba(201,147,94,0.04);
+  transition:  background 0.2s;
+}
+
+.assetBuyPerk:last-child { border-right: none; }
+.assetBuyPerk:hover      { background: rgba(201,147,94,0.08); }
+
+.assetBuyPerkIcon {
+  font-size: 0.85rem;
+  color:     rgba(201,147,94,0.7);
+  flex-shrink: 0;
+}
+
+.assetBuyPerkLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.68rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.45);
+  letter-spacing: 0.04em;
+  white-space:    nowrap;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CARD RAIL — two cards side by side
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyCardRail {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   1.25rem;
+  align-items:           stretch;
+}
+
+/* Base card */
+.assetBuyRailCard {
+  background:    rgba(12,10,8,0.9);
+  border:        1px solid rgba(201,147,94,0.1);
+  border-radius: 20px;
+  overflow:      hidden;
+  position:      relative;
+  min-height:    360px;
+  transition:    border-color 0.25s;
+}
+
+.assetBuyRailCard:hover { border-color: rgba(201,147,94,0.22); }
+
+/* Card header label */
+.assetBuyRailCardHeader {
+  padding:       1rem 1.25rem 0;
+}
+
+.assetBuyRailCardEye {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  font-weight:    300;
+  color:          rgba(201,147,94,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Video card — no padding, video fills it */
+.assetBuyRailCardVideo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+/* ── Empty state inside video card ── */
+.assetBuyRailEmptyState {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  gap:            1rem;
+  padding:        2.5rem;
+  text-align:     center;
+  height:         100%;
+}
+
+.assetBuyRailEmptyIcon {
+  font-size:  2rem;
+  color:      rgba(201,147,94,0.2);
+}
+
+.assetBuyRailEmptyLabel {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.72rem;
+  font-weight:  300;
+  color:        rgba(255,255,255,0.2);
+  line-height:  1.7;
+  letter-spacing: 0.03em;
+}
+
+.assetBuyInlineBtn {
+  font-family:    'Syne', sans-serif;
+  font-size:      0.72rem;
+  font-weight:    700;
+  letter-spacing: 0.06em;
+  color:          #c9935e;
+  background:     rgba(201,147,94,0.08);
+  border:         1px solid rgba(201,147,94,0.2);
+  border-radius:  999px;
+  padding:        0.45rem 1.25rem;
+  cursor:         pointer;
+  transition:     background 0.2s, border-color 0.2s;
+  margin-top:     0.25rem;
+}
+
+.assetBuyInlineBtn:hover {
+  background:   rgba(201,147,94,0.14);
+  border-color: rgba(201,147,94,0.35);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CTA BAR
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyCTABar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             1.5rem;
+  padding:         1.5rem 2rem;
+  background:      rgba(201,147,94,0.04);
+  border:          1px solid rgba(201,147,94,0.1);
+  border-radius:   16px;
+  flex-wrap:       wrap;
+}
+
+.assetBuyCTAButtons {
   display:     flex;
   align-items: center;
   gap:         0.75rem;
   flex-shrink: 0;
-  margin-top:  0.5rem;
 }
 
-.assetBuyBtn {
-  padding:       0.65rem 2rem;
-  border-radius: 999px;
-  background:    #22c55e;
-  color:         #000;
-  font-family:   'Syne', sans-serif;
-  font-size:     0.78rem;
-  font-weight:   800;
-  letter-spacing: 0.06em;
-  border:        none;
-  cursor:        pointer;
-  transition:    opacity 0.2s, transform 0.15s;
-}
-
-.assetBuyBtn:hover {
-  opacity:   0.85;
-  transform: translateY(-1px);
-}
-
+/* Browse button — amber ghost */
 .assetBrowseBtn {
-  padding:       0.65rem 1.75rem;
-  border-radius: 999px;
-  background:    #4a2e18;
-  color:         #c9935e;
-  font-family:   'Syne', sans-serif;
-  font-size:     0.78rem;
-  font-weight:   700;
+  padding:        0.7rem 1.75rem;
+  border-radius:  999px;
+  background:     transparent;
+  color:          #c9935e;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.8rem;
+  font-weight:    700;
   letter-spacing: 0.06em;
-  border:        1px solid rgba(201,147,94,0.25);
-  cursor:        pointer;
-  transition:    opacity 0.2s, background 0.2s;
+  border:         1px solid rgba(201,147,94,0.3);
+  cursor:         pointer;
+  transition:     background 0.2s, border-color 0.2s;
+  white-space:    nowrap;
 }
 
 .assetBrowseBtn:hover {
-  background: #5a3a20;
-  opacity:    0.9;
+  background:   rgba(201,147,94,0.08);
+  border-color: rgba(201,147,94,0.5);
 }
 
-/* Placeholder cards */
-.assetBuyCards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap:     1.25rem;
-  align-items: start;
+/* Buy button — amber solid */
+.assetBuyBtn {
+  padding:        0.7rem 2rem;
+  border-radius:  999px;
+  background:     #c9935e;
+  color:          #0d0a07;
+  font-family:    'Syne', sans-serif;
+  font-size:      0.8rem;
+  font-weight:    800;
+  letter-spacing: 0.06em;
+  border:         none;
+  cursor:         pointer;
+  transition:     opacity 0.2s, transform 0.15s;
+  white-space:    nowrap;
 }
 
-.assetBuyCard {
-  background:    #080808;
-  border:        1px solid #141414;
-  border-radius: 20px;
-  aspect-ratio:  3/4;
-  position:      relative;
-  overflow:      hidden;
-  transition:    border-color 0.25s;
+.assetBuyBtn:hover {
+  opacity:   0.88;
+  transform: translateY(-1px);
 }
 
-/* Video card — taller portrait ratio so character fills the frame */
-.assetBuyCard.assetBuyCardVideoWrap {
-  aspect-ratio: 3/4;
+/* ════════════════════════════════════════════════════════════════════
+   CART PILLS
+   ════════════════════════════════════════════════════════════════════ */
+.assetCartPills {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       0.5rem;
 }
 
-.assetBuyCard:hover { border-color: #252525; }
+.assetCartPill {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  padding:     0.35rem 0.5rem 0.35rem 0.9rem;
+  background:  rgba(201,147,94,0.08);
+  border:      1px solid rgba(201,147,94,0.18);
+  border-radius: 999px;
+}
 
+.assetCartPillLabel {
+  font-family:  'Syne', sans-serif;
+  font-size:    0.72rem;
+  font-weight:  700;
+  color:        rgba(255,255,255,0.75);
+  letter-spacing: 0.02em;
+}
+
+.assetCartPillPrice {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.68rem;
+  font-weight:  300;
+  color:        #c9935e;
+}
+
+.assetCartPillRemove {
+  width:        18px;
+  height:       18px;
+  border-radius: 50%;
+  background:   rgba(255,255,255,0.07);
+  border:       1px solid rgba(255,255,255,0.1);
+  color:        rgba(255,255,255,0.4);
+  font-size:    0.72rem;
+  line-height:  1;
+  cursor:       pointer;
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
+  transition:   background 0.15s, color 0.15s;
+  flex-shrink:  0;
+}
+
+.assetCartPillRemove:hover {
+  background: rgba(255,255,255,0.12);
+  color:      #fff;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   BUNDLE BREAKDOWN
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyBundleBreakdown {
+  display:     flex;
+  align-items: center;
+  gap:         0.6rem;
+  flex:        1;
+}
+
+.abbSubtotal {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.78rem;
+  color:          rgba(255,255,255,0.25);
+  text-decoration: line-through;
+}
+
+.abbMinus {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.72rem;
+  color:        #4ade80;
+  background:   rgba(74,222,128,0.1);
+  border:       1px solid rgba(74,222,128,0.2);
+  border-radius: 999px;
+  padding:      0.15rem 0.6rem;
+}
+
+.abbFinal {
+  font-family:  'Syne', sans-serif;
+  font-size:    1rem;
+  font-weight:  800;
+  color:        #c9935e;
+  letter-spacing: -0.01em;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   VIDEO INSIDE CARD
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyCardVideo {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+  position:   absolute;
+  inset:      0;
+}
+
+.assetBuyCycleLabel {
+  position:    absolute;
+  bottom:      1rem;
+  left:        1rem;
+  right:       1rem;
+  display:     flex;
+  align-items: center;
+  justify-content: space-between;
+  gap:         0.75rem;
+  font-family: 'Syne', sans-serif;
+  font-size:   0.72rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.7);
+  letter-spacing: 0.04em;
+  z-index:     5;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+}
+
+.assetBuyCycleDots {
+  display: flex;
+  gap:     4px;
+}
+
+.assetBuyCycleDot {
+  width:         5px;
+  height:        5px;
+  border-radius: 50%;
+  background:    rgba(255,255,255,0.25);
+  flex-shrink:   0;
+  transition:    background 0.2s;
+}
+
+.assetBuyCycleDotActive { background: #c9935e; }
+
+/* ════════════════════════════════════════════════════════════════════
+   ASSET INFO CARD CONTENTS (inside rail card)
+   ════════════════════════════════════════════════════════════════════ */
 .assetBuyCardInner {
   position:        absolute; inset: 0;
   display:         flex;
@@ -169,12 +451,285 @@
   gap:             0.75rem;
 }
 
-.assetBuyCardIcon  { font-size: 2rem; opacity: 0.25; }
-.assetBuyCardLabel {
-  font-size:      0.75rem;
-  color:          rgba(255,255,255,0.18);
+/* Empty state for info card */
+.assetBuyCardEmpty {
+  padding: 2rem;
+  text-align: center;
+}
+
+.assetBuyCardEmptyIcon {
+  font-size: 1.6rem;
+  color:     rgba(201,147,94,0.18);
+  display:   block;
+  margin-bottom: 0.5rem;
+}
+
+.assetBuyCardEmptyLabel {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.7rem;
+  font-weight:  300;
+  color:        rgba(255,255,255,0.18);
+  line-height:  1.6;
+  letter-spacing: 0.04em;
+}
+
+/* Filled info card */
+.assetBuyCardFilled {
+  padding:         1.5rem 1.25rem;
+  align-items:     flex-start;
+  justify-content: flex-start;
+  gap:             1rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ABC — asset detail sub-components
+   ════════════════════════════════════════════════════════════════════ */
+.abcTopRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  flex-wrap:   wrap;
+}
+
+.abcAssetName {
+  font-size:      1.1rem;
+  font-weight:    800;
+  color:          #fff;
+  letter-spacing: -0.02em;
+  line-height:    1.2;
+}
+
+.abcFormatRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  flex-wrap:   wrap;
+}
+
+.abcFmt {
   font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    400;
+  padding:        0.2rem 0.55rem;
+  border-radius:  5px;
+  letter-spacing: 0.04em;
+}
+
+.abcFmtOn  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);  border: 1px solid rgba(255,255,255,0.1); }
+.abcFmtFbx { background: rgba(251,191,36,0.1);   color: #fbbf24;                border: 1px solid rgba(251,191,36,0.2); }
+.abcFmtGlb { background: rgba(45,212,191,0.1);   color: #2dd4bf;                border: 1px solid rgba(45,212,191,0.2); }
+.abcFmtOff { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.05); text-decoration: line-through; }
+
+.abcAnimRow {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+}
+
+.abcAnimCount {
+  font-size:   0.78rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.7);
+}
+
+.abcAnimList {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.3);
+  line-height:    1.5;
+  letter-spacing: 0.02em;
+}
+
+.abcAnimNone {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.65rem;
+  font-weight:  300;
+  color:        rgba(255,255,255,0.2);
+  font-style:   italic;
+}
+
+.abcMeta {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       0.35rem;
+  margin-top: 0.25rem;
+}
+
+.abcMeta span {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.6rem;
+  font-weight:  300;
+  color:        rgba(201,147,94,0.5);
+  background:   rgba(201,147,94,0.05);
+  border:       1px solid rgba(201,147,94,0.1);
+  border-radius: 4px;
+  padding:      0.15rem 0.5rem;
   letter-spacing: 0.06em;
+}
+
+/* Tier + package badges */
+.abcTierBadge, .assetModalTierBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    400;
+  padding:        0.2rem 0.6rem;
+  border-radius:  4px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tierEntry     { background: rgba(148,163,184,0.12); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+.tierMid       { background: rgba(251,191,36,0.1);   color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.tierPremium   { background: rgba(167,139,250,0.1);  color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+.tierLegendary { background: rgba(251,113,133,0.1);  color: #fb7185; border: 1px solid rgba(251,113,133,0.2); }
+
+.abcPkgBadge {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    400;
+  padding:        0.2rem 0.6rem;
+  border-radius:  4px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pkgMeshOnly  { background: rgba(148,163,184,0.08); color: #64748b; border: 1px solid rgba(148,163,184,0.15); }
+.pkgStandard  { background: rgba(251,191,36,0.08);  color: #b45309; border: 1px solid rgba(251,191,36,0.18); }
+.pkgFullPack  { background: rgba(167,139,250,0.08); color: #7c3aed; border: 1px solid rgba(167,139,250,0.18); }
+
+/* ════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .assetBuyContent     { padding: 5rem 1.75rem 5rem; }
+  .assetBuyCardRail    { grid-template-columns: 1fr; }
+  .assetBuyRailCard    { min-height: 280px; }
+  .assetBuyBgOrc       { width: 100%; opacity: 0.15; }
+  .assetBuyPerks       { width: 100%; border-radius: 12px; }
+  .assetBuyPerk        { flex: 1 1 40%; }
+  .assetBuyCTABar      { flex-direction: column; align-items: stretch; }
+  .assetBuyCTAButtons  { justify-content: flex-end; }
+}
+
+@media (max-width: 560px) {
+  .assetBuyTitle       { font-size: clamp(1.8rem, 7vw, 2.4rem); }
+  .assetBuyCTAButtons  { flex-direction: column; }
+  .assetBrowseBtn,
+  .assetBuyBtn         { width: 100%; text-align: center; }
+}
+
+   PACKAGE TIERS
+   ════════════════════════════════════════════════════════════════════ */
+.assetBuyPackages {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   1rem;
+}
+
+.abcPkgCard {
+  background:     rgba(12,10,8,0.9);
+  border-radius:  16px;
+  padding:        1.5rem 1.25rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.9rem;
+  position:       relative;
+  transition:     border-color 0.25s, transform 0.2s;
+}
+
+.abcPkgCardMesh     { border: 1px solid rgba(148,163,184,0.12); }
+.abcPkgCardStandard { border: 1px solid rgba(251,191,36,0.14); }
+.abcPkgCardFull     { border: 1px solid rgba(201,147,94,0.18); }
+
+.abcPkgCardFeatured {
+  border-color: rgba(201,147,94,0.4) !important;
+  background:   rgba(20,15,8,0.97);
+}
+
+.abcPkgCardFeatured:hover { transform: translateY(-3px); }
+
+.abcPkgFeaturedBadge {
+  position:       absolute;
+  top:            0;
+  left:           50%;
+  transform:      translateX(-50%) translateY(-50%);
+  background:     #c9935e;
+  color:          #0d0a07;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  font-weight:    400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding:        0.2rem 0.85rem;
+  border-radius:  999px;
+  white-space:    nowrap;
+}
+
+.abcPkgName {
+  font-size:      0.88rem;
+  font-weight:    800;
+  color:          rgba(255,255,255,0.85);
+  letter-spacing: -0.01em;
+}
+
+.abcPkgPrice {
+  font-family:    'DM Mono', monospace;
+  font-size:      1rem;
+  font-weight:    400;
+  letter-spacing: -0.01em;
+}
+
+.abcPkgCardMesh     .abcPkgPrice { color: rgba(148,163,184,0.7); }
+.abcPkgCardStandard .abcPkgPrice { color: #fbbf24; }
+.abcPkgCardFull     .abcPkgPrice { color: #c9935e; }
+
+.abcPkgList {
+  list-style:     none;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.45rem;
+  flex:           1;
+}
+
+.abcPkgListItem {
+  display:     flex;
+  align-items: flex-start;
+  gap:         0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.68rem;
+  font-weight: 300;
+  color:       rgba(255,255,255,0.55);
+  line-height: 1.4;
+}
+
+.abcPkgCheck {
+  font-size:   0.7rem;
+  flex-shrink: 0;
+  margin-top:  1px;
+}
+
+.abcPkgCardMesh     .abcPkgCheck { color: rgba(148,163,184,0.5); }
+.abcPkgCardStandard .abcPkgCheck { color: #fbbf24; }
+.abcPkgCardFull     .abcPkgCheck { color: #c9935e; }
+
+.abcPkgNote {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    300;
+  color:          rgba(255,255,255,0.2);
+  letter-spacing: 0.05em;
+  border-top:     1px solid rgba(255,255,255,0.05);
+  padding-top:    0.75rem;
+  margin-top:     auto;
+}
+
+@media (max-width: 900px) {
+  .assetBuyPackages { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .assetBuyPackages { grid-template-columns: 1fr; }
 }
 
 /* ════════════════════════════════

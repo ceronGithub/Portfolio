@@ -308,6 +308,8 @@ export default function AssetBuySection({
   return (
     <>
       <section className="assetBuySection">
+
+        {/* ── Background orc image — full bleed, fades to black ── */}
         <div className="assetBuyBgOrc">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/orc-blue.png" alt="" className="assetBuyBgOrcImg" />
@@ -315,39 +317,132 @@ export default function AssetBuySection({
         </div>
         <canvas ref={fogCanvasRef} className="assetBuyFogCanvas" />
 
+        {/* ── Main content wrapper ── */}
         <div className="assetBuyContent">
-          <div className="assetBuyHeaderRow">
-            <div>
-              <p className="assetBuyLabel">Character & Weapon</p>
-              <h2 className="assetBuyTitle">One time Purchase.<br />Lifetime access</h2>
-            </div>
-            <div className="assetBuyActions">
-              {/* Bundle breakdown — visible only when 2+ items in cart */}
-              {cartItems.length >= 2 && (
-                <div className="assetBuyBundleBreakdown">
-                  <span className="abbSubtotal">{fmt(rawTotal)}</span>
-                  <span className="abbMinus">−{discountLabel(cartItems.length)}</span>
-                  <span className="abbFinal">{fmt(finalTotal)}</span>
-                </div>
-              )}
-              <button
-                className="assetBuyBtn"
-                onClick={() => {
-                  if (cartItems.length === 0) {
-                    showToast("No items selected. Browse and select assets first.", "warning");
-                    return;
-                  }
-                  const ids = cartItems.map(a => a.id).join(",");
-                  window.location.href = `/checkout/bundle?ids=${ids}`;
-                }}
-              >
-                {cartItems.length > 0 ? `BUY (${cartItems.length}) — ${fmt(finalTotal)}` : "BUY"}
-              </button>
-              <button className="assetBrowseBtn" onClick={() => setBrowseOpen(true)}>Browse</button>
-            </div>
+
+          {/* ── Section eyebrow + headline ── */}
+          <div className="assetBuyHeroText">
+            <p className="assetBuyLabel">Character &amp; Weapon Studio</p>
+            <h2 className="assetBuyTitle">
+              One purchase.<br />
+              <span className="assetBuyTitleAccent">Lifetime access.</span>
+            </h2>
+            <p className="assetBuySubline">
+              Hand-crafted in Blender. Clean topology, 4K PBR textures,<br />
+              retargetable rigs. No subscriptions.
+            </p>
           </div>
 
-          {/* Cart pills */}
+          {/* ── Perks strip ── */}
+          <div className="assetBuyPerks">
+            {[
+              { icon: "◈", label: "OBJ + FBX + GLB" },
+              { icon: "⬡", label: "4K PBR textures" },
+              { icon: "◉", label: "Hand-keyed anims" },
+              { icon: "∞", label: "Royalty-free" },
+            ].map(p => (
+              <div key={p.label} className="assetBuyPerk">
+                <span className="assetBuyPerkIcon">{p.icon}</span>
+                <span className="assetBuyPerkLabel">{p.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Package tiers ── */}
+          <div className="assetBuyPackages">
+            {[
+              {
+                key:   "mesh_only",
+                name:  "Mesh Only",
+                price: "₱699–₱999",
+                cls:   "abcPkgCardMesh",
+                items: ["OBJ mesh", "FBX (no rig)", "4K PBR textures"],
+                note:  "Static props, background NPCs",
+              },
+              {
+                key:   "standard",
+                name:  "Standard Pack",
+                price: "₱1,800–₱2,200",
+                cls:   "abcPkgCardStandard",
+                items: ["OBJ + FBX rigged", "4K PBR textures", "Idle + Walk + Attack 1"],
+                note:  "Game-ready, Unity / Unreal",
+              },
+              {
+                key:   "full_pack",
+                name:  "Full Pack",
+                price: "₱2,500–₱3,200",
+                cls:   "abcPkgCardFull",
+                items: ["OBJ + FBX + GLB", "4K PBR textures", "7+ animations incl. Talk, Eat, Hit, Die", "Web / AR ready GLB", "Face PNG included"],
+                note:  "Production-ready, VR / AR / cinematics",
+                featured: true,
+              },
+            ].map(pkg => (
+              <div key={pkg.key} className={`abcPkgCard ${pkg.cls}${(pkg as any).featured ? " abcPkgCardFeatured" : ""}`}>
+                {(pkg as any).featured && <span className="abcPkgFeaturedBadge">Most complete</span>}
+                <p className="abcPkgName">{pkg.name}</p>
+                <p className="abcPkgPrice">{pkg.price}</p>
+                <ul className="abcPkgList">
+                  {pkg.items.map(item => (
+                    <li key={item} className="abcPkgListItem">
+                      <span className="abcPkgCheck">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="abcPkgNote">{pkg.note}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Two-up card rail ── */}
+          <div className="assetBuyCardRail">
+
+            {/* Card 1 — Asset info / formats */}
+            <div className="assetBuyRailCard assetBuyRailCardInfo">
+              <div className="assetBuyRailCardHeader">
+                <span className="assetBuyRailCardEye">Asset Details</span>
+              </div>
+              {renderAssetInfoCard(selectedAsset)}
+            </div>
+
+            {/* Card 2 — Animation preview video */}
+            <div className="assetBuyRailCard assetBuyRailCardVideo">
+              {cartItems.length === 0 ? (
+                <div className="assetBuyRailEmptyState">
+                  <span className="assetBuyRailEmptyIcon">▶</span>
+                  <p className="assetBuyRailEmptyLabel">Browse and select an asset<br />to preview the animation</p>
+                  <button className="assetBuyInlineBtn" onClick={() => setBrowseOpen(true)}>
+                    Browse assets →
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <video
+                    ref={videoCardRef}
+                    key={cartItems[cycleIndex % cartItems.length]?.id}
+                    src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
+                    className="assetBuyCardVideo"
+                    autoPlay muted playsInline
+                    loop={cartItems.length === 1}
+                    onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
+                  />
+                  {cartItems.length > 1 && (
+                    <div className="assetBuyCycleLabel">
+                      {cartItems[cycleIndex % cartItems.length]?.label}
+                      <span className="assetBuyCycleDots">
+                        {cartItems.map((_, i) => (
+                          <span key={i} className={`assetBuyCycleDot ${i === cycleIndex % cartItems.length ? "assetBuyCycleDotActive" : ""}`} />
+                        ))}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+          </div>
+
+          {/* ── Cart pills row ── */}
           {cartItems.length > 0 && (
             <div className="assetCartPills">
               {cartItems.map(item => (
@@ -360,44 +455,36 @@ export default function AssetBuySection({
             </div>
           )}
 
-          <div className="assetBuyCards">
-            {/* Asset info card — shows formats/anims of selected asset */}
-            <div className="assetBuyCard assetBuyCardInfo">
-              {renderAssetInfoCard(selectedAsset)}
-            </div>
-
-            {/* Animation preview card */}
-            {cartItems.length === 0 ? (
-              <div className="assetBuyCard assetBuyCardVideoWrap">
-                <div className="assetBuyCardInner assetBuyCardEmpty">
-                  <span className="assetBuyCardEmptyIcon">▶</span>
-                  <p className="assetBuyCardEmptyLabel">Browse and select an asset to preview</p>
-                </div>
-              </div>
-            ) : (
-              <div className="assetBuyCard assetBuyCardVideoWrap">
-                <video
-                  ref={videoCardRef}
-                  key={cartItems[cycleIndex % cartItems.length]?.id}
-                  src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
-                  className="assetBuyCardVideo"
-                  autoPlay muted playsInline
-                  loop={cartItems.length === 1}
-                  onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
-                />
-                {cartItems.length > 1 && (
-                  <div className="assetBuyCycleLabel">
-                    {cartItems[cycleIndex % cartItems.length]?.label}
-                    <span className="assetBuyCycleDots">
-                      {cartItems.map((_, i) => (
-                        <span key={i} className={`assetBuyCycleDot ${i === cycleIndex % cartItems.length ? "assetBuyCycleDotActive" : ""}`} />
-                      ))}
-                    </span>
-                  </div>
-                )}
+          {/* ── CTA bar ── */}
+          <div className="assetBuyCTABar">
+            {/* Bundle breakdown */}
+            {cartItems.length >= 2 && (
+              <div className="assetBuyBundleBreakdown">
+                <span className="abbSubtotal">{fmt(rawTotal)}</span>
+                <span className="abbMinus">−{discountLabel(cartItems.length)}</span>
+                <span className="abbFinal">{fmt(finalTotal)}</span>
               </div>
             )}
+            <div className="assetBuyCTAButtons">
+              <button className="assetBrowseBtn" onClick={() => setBrowseOpen(true)}>
+                Browse catalog
+              </button>
+              <button
+                className="assetBuyBtn"
+                onClick={() => {
+                  if (cartItems.length === 0) {
+                    showToast("No items selected. Browse and select assets first.", "warning");
+                    return;
+                  }
+                  const ids = cartItems.map(a => a.id).join(",");
+                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                }}
+              >
+                {cartItems.length > 0 ? `Buy now (${cartItems.length}) — ${fmt(finalTotal)}` : "Buy now"}
+              </button>
+            </div>
           </div>
+
         </div>
       </section>
 
