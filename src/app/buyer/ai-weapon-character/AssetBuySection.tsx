@@ -1,8 +1,7 @@
 // AssetBuySection — Character / Weapon buying section.
-// BUY → direct checkout (warns if nothing selected).
-// Browse modal → Add to Cart button → toast notification.
-// v2: package tier labels, format badges (OBJ/FBX/GLB), anim count,
-//     updated buy card, bundle price breakdown above BUY button.
+// Task 1: Per-asset pack tier selection (Mesh Only / Standard / Full Pack).
+//         Each item in the cart stores its own chosen tier + price.
+// Task 2: Unselecting an asset instantly removes it from Asset Details card.
 
 "use client";
 
@@ -11,20 +10,31 @@ import { useToast }  from "../shared/useToast";
 import ToastStack    from "../shared/ToastStack";
 import "./asset-buy-section.css";
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
+
+type PackTier = "mesh_only" | "standard" | "full_pack";
 
 interface AssetItem {
   id:          string;
   label:       string;
   category:    "Character" | "Weapon";
   videoSrc:    string;
+  // Base prices per tier (set by admin, fallback to computed)
+  priceMesh:    number;
+  priceStandard:number;
+  priceFull:    number;
+  hasObj:       boolean;
+  hasFbx:       boolean;
+  hasGlb:       boolean;
+  animCount:    number;
+  animNames:    string[];
+}
+
+// A cart entry = asset + buyer's chosen tier
+interface CartEntry {
+  asset:       AssetItem;
+  tier:        PackTier;
   price:       number;
-  packageTier: "mesh_only" | "standard" | "full_pack";
-  hasObj:      boolean;
-  hasFbx:      boolean;
-  hasGlb:      boolean;
-  animCount:   number;
-  animNames:   string[];
 }
 
 interface Props {
@@ -38,7 +48,29 @@ interface Props {
   onOpenToIdConsumed?:  () => void;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Constants ───────────────────────────────────────────────────────────────
+
+const TIER_LABEL: Record<PackTier, string> = {
+  mesh_only: "Mesh Only",
+  standard:  "Standard Pack",
+  full_pack: "Full Pack",
+};
+
+const TIER_CLS: Record<PackTier, string> = {
+  mesh_only: "pkgMesh",
+  standard:  "pkgStandard",
+  full_pack: "pkgFull",
+};
+
+const TIER_ORDER: PackTier[] = ["mesh_only", "standard", "full_pack"];
+
+const TIER_INCLUDES: Record<PackTier, string[]> = {
+  mesh_only: ["OBJ mesh", "FBX (no rig)", "4K PBR textures"],
+  standard:  ["OBJ + FBX rigged", "4K PBR textures", "Idle · Walk · Attack 1"],
+  full_pack: ["OBJ + FBX + GLB", "4K PBR textures", "7+ animations", "Web / AR ready GLB", "Face PNG"],
+};
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function getBundleDiscount(count: number): number {
   if (count >= 5) return 0.15;
@@ -56,25 +88,19 @@ function fmt(p: number): string {
   return "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
 }
 
-// Derive tier label + color from price (computed, no schema lookup needed)
-function getTierInfo(price: number): { label: string; cls: string } {
-  if (price <= 799)  return { label: "Entry",     cls: "tierEntry" };
-  if (price <= 1099) return { label: "Mid",        cls: "tierMid" };
-  if (price <= 1599) return { label: "Premium",    cls: "tierPremium" };
-  return               { label: "Legendary",  cls: "tierLegendary" };
+// Derive tier price from base product price + tier multiplier
+function computeTierPrice(asset: AssetItem, tier: PackTier): number {
+  if (tier === "mesh_only")  return asset.priceMesh;
+  if (tier === "standard")   return asset.priceStandard;
+  return asset.priceFull;
 }
 
-// Package tier display
-const TIER_LABEL: Record<string, string> = {
-  mesh_only:  "Mesh Only",
-  standard:   "Standard Pack",
-  full_pack:  "Full Pack",
-};
-const TIER_CLS: Record<string, string> = {
-  mesh_only:  "pkgMesh",
-  standard:   "pkgStandard",
-  full_pack:  "pkgFull",
-};
+function getTierInfo(price: number): { label: string; cls: string } {
+  if (price <= 999)  return { label: "Entry",     cls: "tierEntry" };
+  if (price <= 1599) return { label: "Mid",        cls: "tierMid" };
+  if (price <= 2499) return { label: "Premium",    cls: "tierPremium" };
+  return               { label: "Legendary",  cls: "tierLegendary" };
+}
 
 export default function AssetBuySection({
   ownedAssetIds = new Set(),
@@ -93,16 +119,39 @@ export default function AssetBuySection({
   const [priceMin,      setPriceMin]      = useState<number | null>(null);
   const [priceMax,      setPriceMax]      = useState<number | null>(null);
   const [tierFilter,    setTierFilter]    = useState<string | null>(null);
-  const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
-  const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
+
+  // Task 1: cart is now Map<assetId, CartEntry> — each entry has its own tier
+  const [cart,          setCart]          = useState<Map<string, CartEntry>>(new Map());
+
+  // Tier picker state — which asset's tier picker is open in browse modal
+  const [tierPickerId,  setTierPickerId]  = useState<string | null>(null);
+
   const [cycleIndex,    setCycleIndex]    = useState(0);
+  const [animIndex,     setAnimIndex]     = useState(0);  // which anim clip to preview
   const { toasts, showToast, dismissToast } = useToast();
 
   const [characterAssets, setCharacterAssets] = useState<AssetItem[]>([]);
   const [weaponAssets,    setWeaponAssets]    = useState<AssetItem[]>([]);
   const [assetsLoading,   setAssetsLoading]   = useState(false);
 
-  // ── Fetch assets from DB ───────────────────────────────────────────
+  // Task 2: selectedAsset — only shows in card if still in cart
+  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+
+  const videoCardRef = useRef<HTMLVideoElement>(null);
+  const fogCanvasRef = useRef<HTMLCanvasElement>(null);
+  const fogRafRef    = useRef<number>(0);
+
+  // ── Derived state ─────────────────────────────────────────────────────────
+  const cartEntries = useMemo(() => Array.from(cart.values()), [cart]);
+  const rawTotal    = cartEntries.reduce((sum, e) => sum + e.price, 0);
+  const discRate    = getBundleDiscount(cartEntries.length);
+  const discAmount  = Math.round(rawTotal * discRate);
+  const finalTotal  = rawTotal - discAmount;
+
+  // Task 2: selectedAsset only valid while it's in the cart
+  const selectedEntry = selectedAssetId ? cart.get(selectedAssetId) ?? null : null;
+
+  // ── Fetch assets from DB ──────────────────────────────────────────────────
   useEffect(() => {
     if (!browseOpen) return;
     const category      = browseTab === "Character" ? "character" : "weapon";
@@ -113,19 +162,25 @@ export default function AssetBuySection({
     fetch(`/api/products?category=${category}`)
       .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
       .then(data => {
-        const mapped: AssetItem[] = (data.products ?? []).map((p: any) => ({
-          id:          p.id,
-          label:       p.name,
-          category:    browseTab,
-          videoSrc:    p.previewVideoUrl ?? "",
-          price:       p.price,
-          packageTier: p.packageTier ?? "mesh_only",
-          hasObj:      p.hasObj  ?? false,
-          hasFbx:      p.hasFbx  ?? false,
-          hasGlb:      p.hasGlb  ?? false,
-          animCount:   p.animCount ?? 0,
-          animNames:   p.animNames ?? [],
-        }));
+        const mapped: AssetItem[] = (data.products ?? []).map((p: any) => {
+          // Derive 3 tier prices from DB price fields or compute from base
+          const base = p.price ?? 0;
+          return {
+            id:           p.id,
+            label:        p.name,
+            category:     browseTab,
+            videoSrc:     p.previewVideoUrl ?? "",
+            // Use DB tier prices if available, else compute multipliers
+            priceMesh:    p.priceMesh    ?? Math.round(base * 0.45),
+            priceStandard:p.priceStandard ?? Math.round(base * 0.75),
+            priceFull:    p.priceFull    ?? base,
+            hasObj:       p.hasObj  ?? true,
+            hasFbx:       p.hasFbx  ?? true,
+            hasGlb:       p.hasGlb  ?? false,
+            animCount:    p.animCount ?? 0,
+            animNames:    p.animNames ?? [],
+          };
+        });
         if (category === "character") setCharacterAssets(mapped);
         else                          setWeaponAssets(mapped);
       })
@@ -133,18 +188,24 @@ export default function AssetBuySection({
       .finally(() => setAssetsLoading(false));
   }, [browseOpen, browseTab]);
 
-  // ── Register addToCartMany (for WishlistPanel) ─────────────────────
+  // ── Register addToCartMany (for WishlistPanel) ────────────────────────────
   useEffect(() => {
     onRegisterAddToCart?.((ids: string[]) => {
-      setCartIds(prev => {
-        const next = new Set(prev);
-        ids.forEach(id => { if (!ownedAssetIds.has(id)) next.add(id); });
+      setCart(prev => {
+        const next = new Map(prev);
+        const allAssets = [...characterAssets, ...weaponAssets];
+        ids.forEach(id => {
+          if (ownedAssetIds.has(id) || next.has(id)) return;
+          const asset = allAssets.find(a => a.id === id);
+          if (!asset) return;
+          next.set(id, { asset, tier: "mesh_only", price: computeTierPrice(asset, "mesh_only") });
+        });
         return next;
       });
     });
-  }, [onRegisterAddToCart, ownedAssetIds]);
+  }, [onRegisterAddToCart, ownedAssetIds, characterAssets, weaponAssets]);
 
-  // ── Open browse to specific asset (from Recently Viewed) ──────────
+  // ── Open browse to specific asset (from Recently Viewed) ──────────────────
   useEffect(() => {
     if (!openToId) return;
     setBrowseOpen(true);
@@ -153,12 +214,7 @@ export default function AssetBuySection({
     onOpenToIdConsumed?.();
   }, [openToId]);
 
-  const [previewAsset, setPreviewAsset] = useState<AssetItem | null>(null);
-  const videoCardRef = useRef<HTMLVideoElement>(null);
-  const fogCanvasRef = useRef<HTMLCanvasElement>(null);
-  const fogRafRef    = useRef<number>(0);
-
-  // ── Ground fog canvas ──────────────────────────────────────────────
+  // ── Ground fog canvas ─────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = fogCanvasRef.current;
     if (!canvas) return;
@@ -225,83 +281,110 @@ export default function AssetBuySection({
     return () => { cancelAnimationFrame(fogRafRef.current); window.removeEventListener("resize", resize); };
   }, []);
 
-  // ── Filtered + sorted asset list ──────────────────────────────────
+  // ── Filtered + sorted asset list ──────────────────────────────────────────
   const filteredAssets = useMemo(() => {
     let list = browseTab === "Character" ? characterAssets : weaponAssets;
     if (browseSearch.trim()) list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
-    if (priceMin !== null) list = list.filter(a => a.price >= priceMin);
-    if (priceMax !== null) list = list.filter(a => a.price <= priceMax);
-    if (tierFilter !== null) list = list.filter(a => a.packageTier === tierFilter);
-    if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
-    if (browseSort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
+    if (priceMin !== null) list = list.filter(a => a.priceFull >= priceMin);
+    if (priceMax !== null) list = list.filter(a => a.priceMesh <= priceMax);
+    if (tierFilter !== null) list = list.filter(a => tierFilter === "mesh_only"
+      ? a.priceMesh > 0 : tierFilter === "standard" ? a.priceStandard > 0 : a.priceFull > 0);
+    if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.priceMesh - b.priceMesh);
+    if (browseSort === "price-desc") list = [...list].sort((a, b) => b.priceFull - a.priceFull);
     if (browseSort === "name")       list = [...list].sort((a, b) => a.label.localeCompare(b.label));
     return list;
   }, [browseTab, characterAssets, weaponAssets, browseSearch, browseSort, priceMin, priceMax, tierFilter]);
 
-  const allFetchedAssets = useMemo(() => [...characterAssets, ...weaponAssets], [characterAssets, weaponAssets]);
-  const cartItems      = allFetchedAssets.filter(a => cartIds.has(a.id));
-  const rawTotal       = cartItems.reduce((sum, a) => sum + a.price, 0);
-  const discountRate   = getBundleDiscount(cartItems.length);
-  const discountAmount = Math.round(rawTotal * discountRate);
-  const finalTotal     = rawTotal - discountAmount;
+  // ── Cart actions ──────────────────────────────────────────────────────────
 
-  const prevCartKey = useRef("");
-  const cartKey = [...cartIds].sort().join(",");
-  if (cartKey !== prevCartKey.current) { prevCartKey.current = cartKey; if (cycleIndex !== 0) setCycleIndex(0); }
-
-  const toggleCart = useCallback((id: string) => {
-    if (ownedAssetIds.has(id)) return;
-    setCartIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  }, [ownedAssetIds]);
-
-  useEffect(() => {
-    if (!browseOpen && selectedAsset && videoCardRef.current) {
-      const video = videoCardRef.current; video.load(); video.play().catch(() => {});
-    }
-  }, [browseOpen, selectedAsset]);
-
-  function handleSelectAsset(asset: AssetItem) {
-    setSelectedAsset(asset);
-    if (!ownedAssetIds.has(asset.id)) setCartIds(prev => new Set([...prev, asset.id]));
-    setBrowseOpen(false);
+  // Task 1: toggle asset in cart — opens tier picker if adding, removes if already in
+  function toggleCart(asset: AssetItem, defaultTier: PackTier = "mesh_only") {
+    if (ownedAssetIds.has(asset.id)) return;
+    setCart(prev => {
+      const next = new Map(prev);
+      if (next.has(asset.id)) {
+        next.delete(asset.id);
+        // Task 2: clear selected if this asset was selected
+        setSelectedAssetId(id => id === asset.id ? null : id);
+      } else {
+        next.set(asset.id, { asset, tier: defaultTier, price: computeTierPrice(asset, defaultTier) });
+        setSelectedAssetId(asset.id);
+      }
+      return next;
+    });
   }
 
-  // ── Selected asset info card content ──────────────────────────────
-  function renderAssetInfoCard(asset: AssetItem | null) {
-    // If multiple items in cart, show a summary list of all of them
-    if (cartItems.length > 1) {
-      return (
-        <div className="assetBuyCardInner assetBuyCardFilled assetBuyCardMulti">
-          <p className="abcMultiTitle">{cartItems.length} assets selected</p>
-          <div className="abcMultiList">
-            {cartItems.map(item => {
-              const tier = getTierInfo(item.price);
-              return (
-                <div key={item.id} className="abcMultiRow">
+  // Task 1: change tier of an asset already in cart
+  function changeTier(assetId: string, tier: PackTier) {
+    setCart(prev => {
+      const entry = prev.get(assetId);
+      if (!entry) return prev;
+      const next = new Map(prev);
+      next.set(assetId, { ...entry, tier, price: computeTierPrice(entry.asset, tier) });
+      return next;
+    });
+    setTierPickerId(null);
+  }
+
+  // Remove from cart (pill × button or asset details × button)
+  const removeFromCart = useCallback((assetId: string) => {
+    setCart(prev => {
+      const next = new Map(prev);
+      next.delete(assetId);
+      return next;
+    });
+    // Task 2: clear selected immediately
+    setSelectedAssetId(id => id === assetId ? null : id);
+  }, []);
+
+  useEffect(() => {
+    if (!browseOpen && selectedEntry && videoCardRef.current) {
+      const video = videoCardRef.current;
+      video.load(); video.play().catch(() => {});
+    }
+  }, [browseOpen, selectedEntry]);
+
+  // Reset cycle when cart changes
+  const cartKey = cartEntries.map(e => e.asset.id).sort().join(",");
+  const prevCartKey = useRef("");
+  if (cartKey !== prevCartKey.current) { prevCartKey.current = cartKey; if (cycleIndex !== 0) setCycleIndex(0); }
+
+  // ── Asset Details Card ────────────────────────────────────────────────────
+
+  function renderAssetInfoCard() {
+    // Task 2: if nothing selected (or selected was removed), show empty state
+    if (!selectedEntry) {
+      if (cartEntries.length > 1) {
+        // Multi-item summary when no single item is focused
+        return (
+          <div className="assetBuyCardInner assetBuyCardFilled assetBuyCardMulti">
+            <p className="abcMultiTitle">{cartEntries.length} assets in bundle</p>
+            <div className="abcMultiList">
+              {cartEntries.map(entry => (
+                <div key={entry.asset.id} className="abcMultiRow">
                   <div className="abcMultiRowLeft">
-                    <span className={`abcTierBadge ${tier.cls}`}>{tier.label}</span>
-                    <span className={`abcPkgBadge ${TIER_CLS[item.packageTier]}`}>{TIER_LABEL[item.packageTier]}</span>
+                    <span className={`abcPkgBadge ${TIER_CLS[entry.tier]}`}>{TIER_LABEL[entry.tier]}</span>
                   </div>
-                  <span className="abcMultiRowName">{item.label}</span>
-                  <span className="abcMultiRowPrice">{fmt(item.price)}</span>
+                  <span
+                    className="abcMultiRowName"
+                    onClick={() => setSelectedAssetId(entry.asset.id)}
+                    title="Click to view details"
+                  >{entry.asset.label}</span>
+                  <span className="abcMultiRowPrice">{fmt(entry.price)}</span>
                   <button
                     className="abcMultiRowRemove"
-                    onClick={() => toggleCart(item.id)}
-                    aria-label={`Remove ${item.label}`}
+                    onClick={() => removeFromCart(entry.asset.id)}
+                    aria-label={`Remove ${entry.asset.label}`}
                   >×</button>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            <div className="abcMeta">
+              <span>Click any asset name to view details</span>
+            </div>
           </div>
-          <div className="abcMeta">
-            <span>Each asset has its own tier &amp; files</span>
-            <span>Bundle discount applied</span>
-          </div>
-        </div>
-      );
-    }
-
-    if (!asset) {
+        );
+      }
       return (
         <div className="assetBuyCardInner assetBuyCardEmpty">
           <span className="assetBuyCardEmptyIcon">◈</span>
@@ -309,42 +392,85 @@ export default function AssetBuySection({
         </div>
       );
     }
-    const tier = getTierInfo(asset.price);
+
+    const { asset, tier, price } = selectedEntry;
+
     return (
       <div className="assetBuyCardInner assetBuyCardFilled">
+        {/* Header row */}
         <div className="abcTopRow">
-          <span className={`abcTierBadge ${tier.cls}`}>{tier.label}</span>
-          <span className={`abcPkgBadge ${TIER_CLS[asset.packageTier]}`}>{TIER_LABEL[asset.packageTier]}</span>
+          <p className="abcAssetName">{asset.label}</p>
+          {/* Task 2: X button removes from cart + clears card instantly */}
+          <button
+            className="abcRemoveBtn"
+            onClick={() => removeFromCart(asset.id)}
+            aria-label={`Remove ${asset.label}`}
+            title="Remove from bundle"
+          >×</button>
         </div>
-        <p className="abcAssetName">{asset.label}</p>
+
+        {/* Task 1: Pack tier selector — 3 pills the buyer clicks to choose */}
+        <div className="abcTierSelector">
+          <p className="abcTierSelectorLabel">Choose pack:</p>
+          <div className="abcTierBtns">
+            {TIER_ORDER.map(t => (
+              <button
+                key={t}
+                className={`abcTierBtn ${t === tier ? "abcTierBtnActive" : ""} abcTierBtn_${t}`}
+                onClick={() => changeTier(asset.id, t)}
+              >
+                <span className="abcTierBtnName">{TIER_LABEL[t]}</span>
+                <span className="abcTierBtnPrice">{fmt(computeTierPrice(asset, t))}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* What's included for selected tier */}
+        <div className="abcIncludesList">
+          <p className="abcIncludesLabel">Includes:</p>
+          {TIER_INCLUDES[tier].map(item => (
+            <div key={item} className="abcIncludesItem">
+              <span className="abcIncludesCheck">✓</span>
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Format badges */}
         <div className="abcFormatRow">
-          <span className={`abcFmt ${asset.hasObj  ? "abcFmtOn" : "abcFmtOff"}`}>OBJ</span>
-          <span className={`abcFmt ${asset.hasFbx  ? "abcFmtFbx" : "abcFmtOff"}`}>FBX</span>
-          <span className={`abcFmt ${asset.hasGlb  ? "abcFmtGlb" : "abcFmtOff"}`}>GLB</span>
+          <span className={`abcFmt ${asset.hasObj ? "abcFmtOn"  : "abcFmtOff"}`}>OBJ</span>
+          <span className={`abcFmt ${asset.hasFbx ? "abcFmtFbx" : "abcFmtOff"}`}>FBX</span>
+          <span className={`abcFmt ${asset.hasGlb && tier === "full_pack" ? "abcFmtGlb" : "abcFmtOff"}`}>GLB</span>
         </div>
-        {asset.animCount > 0 ? (
+
+        {/* Anim info */}
+        {asset.animCount > 0 && tier !== "mesh_only" ? (
           <div className="abcAnimRow">
             <span className="abcAnimCount">{asset.animCount} animations</span>
             <span className="abcAnimList">{asset.animNames.join(" · ")}</span>
           </div>
+        ) : tier === "mesh_only" ? (
+          <div className="abcAnimRow abcAnimNone">Static mesh — no animation files</div>
         ) : (
-          <div className="abcAnimRow abcAnimNone">Preview video only — no animation files</div>
+          <div className="abcAnimRow abcAnimNone">Preview video only</div>
         )}
+
         <div className="abcMeta">
           <span>4K PBR textures</span>
-          <span>Full rig</span>
-          <span>Lifetime access</span>
           <span>Royalty-free</span>
+          <span>Lifetime access</span>
         </div>
       </div>
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
     <>
       <section className="assetBuySection">
 
-        {/* ── Background orc image — full bleed, fades to black ── */}
         <div className="assetBuyBgOrc">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/orc-blue.png" alt="" className="assetBuyBgOrcImg" />
@@ -352,10 +478,8 @@ export default function AssetBuySection({
         </div>
         <canvas ref={fogCanvasRef} className="assetBuyFogCanvas" />
 
-        {/* ── Main content wrapper ── */}
         <div className="assetBuyContent">
 
-          {/* ── Section eyebrow + headline ── */}
           <div className="assetBuyHeroText">
             <p className="assetBuyLabel">Character &amp; Weapon Studio</p>
             <h2 className="assetBuyTitle">
@@ -368,7 +492,7 @@ export default function AssetBuySection({
             </p>
           </div>
 
-          {/* ── Perks strip ── */}
+          {/* Perks strip */}
           <div className="assetBuyPerks">
             {[
               { icon: "◈", label: "OBJ + FBX + GLB" },
@@ -383,42 +507,42 @@ export default function AssetBuySection({
             ))}
           </div>
 
-          {/* ── Package tiers ── */}
+          {/* Package tier info cards — clicking opens browse filtered to that tier */}
           <div className="assetBuyPackages">
             {[
               {
-                key:   "mesh_only",
+                key:   "mesh_only" as PackTier,
                 name:  "Mesh Only",
                 price: "₱699–₱999",
                 cls:   "abcPkgCardMesh",
-                items: ["OBJ mesh", "FBX (no rig)", "4K PBR textures"],
+                items: TIER_INCLUDES.mesh_only,
                 note:  "Static props, background NPCs",
               },
               {
-                key:   "standard",
+                key:   "standard" as PackTier,
                 name:  "Standard Pack",
                 price: "₱1,800–₱2,200",
                 cls:   "abcPkgCardStandard",
-                items: ["OBJ + FBX rigged", "4K PBR textures", "Idle + Walk + Attack 1"],
+                items: TIER_INCLUDES.standard,
                 note:  "Game-ready, Unity / Unreal",
               },
               {
-                key:   "full_pack",
+                key:   "full_pack" as PackTier,
                 name:  "Full Pack",
                 price: "₱2,500–₱3,200",
                 cls:   "abcPkgCardFull",
-                items: ["OBJ + FBX + GLB", "4K PBR textures", "7+ animations incl. Talk, Eat, Hit, Die", "Web / AR ready GLB", "Face PNG included"],
+                items: TIER_INCLUDES.full_pack,
                 note:  "Production-ready, VR / AR / cinematics",
                 featured: true,
               },
             ].map(pkg => (
               <div
                 key={pkg.key}
-                className={`abcPkgCard ${pkg.cls}${(pkg as any).featured ? " abcPkgCardFeatured" : ""}`}
+                className={`abcPkgCard ${pkg.cls}${pkg.featured ? " abcPkgCardFeatured" : ""}`}
                 onClick={() => { setTierFilter(pkg.key); setBrowseOpen(true); }}
                 title={`Browse ${pkg.name} assets`}
               >
-                {(pkg as any).featured && <span className="abcPkgFeaturedBadge">Most complete</span>}
+                {pkg.featured && <span className="abcPkgFeaturedBadge">Most complete</span>}
                 <p className="abcPkgName">{pkg.name}</p>
                 <p className="abcPkgPrice">{pkg.price}</p>
                 <ul className="abcPkgList">
@@ -435,20 +559,23 @@ export default function AssetBuySection({
             ))}
           </div>
 
-          {/* ── Two-up card rail ── */}
+          {/* Two-up card rail */}
           <div className="assetBuyCardRail">
 
-            {/* Card 1 — Asset info / formats */}
+            {/* Card 1 — Asset Details (with tier selector) */}
             <div className="assetBuyRailCard assetBuyRailCardInfo">
               <div className="assetBuyRailCardHeader">
                 <span className="assetBuyRailCardEye">Asset Details</span>
+                {cartEntries.length > 1 && (
+                  <span className="assetBuyRailCardCount">{cartEntries.length} in bundle</span>
+                )}
               </div>
-              {renderAssetInfoCard(selectedAsset)}
+              {renderAssetInfoCard()}
             </div>
 
             {/* Card 2 — Animation preview video */}
             <div className="assetBuyRailCard assetBuyRailCardVideo">
-              {cartItems.length === 0 ? (
+              {cartEntries.length === 0 ? (
                 <div className="assetBuyRailEmptyState">
                   <span className="assetBuyRailEmptyIcon">▶</span>
                   <p className="assetBuyRailEmptyLabel">Browse and select an asset<br />to preview the animation</p>
@@ -456,53 +583,88 @@ export default function AssetBuySection({
                     Browse assets →
                   </button>
                 </div>
-              ) : (
-                <>
-                  <video
-                    ref={videoCardRef}
-                    key={cartItems[cycleIndex % cartItems.length]?.id}
-                    src={cartItems[cycleIndex % cartItems.length]?.videoSrc}
-                    className="assetBuyCardVideo"
-                    autoPlay muted playsInline
-                    loop={cartItems.length === 1}
-                    onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
-                  />
-                  {cartItems.length > 1 && (
-                    <div className="assetBuyCycleLabel">
-                      {cartItems[cycleIndex % cartItems.length]?.label}
-                      <span className="assetBuyCycleDots">
-                        {cartItems.map((_, i) => (
-                          <span key={i} className={`assetBuyCycleDot ${i === cycleIndex % cartItems.length ? "assetBuyCycleDotActive" : ""}`} />
-                        ))}
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
+              ) : (() => {
+                // Task 3: show the focused asset's video if selected, else cycle through cart
+                const focusedEntry = selectedEntry ?? cartEntries[cycleIndex % cartEntries.length];
+                const animNames    = focusedEntry?.asset.animNames ?? [];
+                const hasAnims     = animNames.length > 1;
+
+                return (
+                  <>
+                    <video
+                      ref={videoCardRef}
+                      key={`${focusedEntry?.asset.id}-${animIndex}`}
+                      src={focusedEntry?.asset.videoSrc}
+                      className="assetBuyCardVideo"
+                      autoPlay muted playsInline
+                      loop
+                    />
+
+                    {/* Task 3: Animation name tabs — shown when asset has multiple anims */}
+                    {hasAnims && (
+                      <div className="assetAnimSwitcher">
+                        <p className="assetAnimSwitcherLabel">Animations</p>
+                        <div className="assetAnimSwitcherTabs">
+                          {animNames.map((name, i) => (
+                            <button
+                              key={name}
+                              className={`assetAnimTab ${animIndex === i ? "assetAnimTabActive" : ""}`}
+                              onClick={() => setAnimIndex(i)}
+                              title={name}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Multi-asset cycle dots */}
+                    {cartEntries.length > 1 && !selectedEntry && (
+                      <div className="assetBuyCycleLabel">
+                        {cartEntries[cycleIndex % cartEntries.length]?.asset.label}
+                        <span className="assetBuyCycleDots">
+                          {cartEntries.map((_, i) => (
+                            <span key={i} className={`assetBuyCycleDot ${i === cycleIndex % cartEntries.length ? "assetBuyCycleDotActive" : ""}`} />
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
           </div>
 
-          {/* ── Cart pills row ── */}
-          {cartItems.length > 0 && (
+          {/* Cart pills row */}
+          {cartEntries.length > 0 && (
             <div className="assetCartPills">
-              {cartItems.map(item => (
-                <div key={item.id} className="assetCartPill">
-                  <span className="assetCartPillLabel">{item.label}</span>
-                  <span className="assetCartPillPrice">{fmt(item.price)}</span>
-                  <button className="assetCartPillRemove" onClick={() => toggleCart(item.id)} aria-label={`Remove ${item.label}`}>×</button>
+              {cartEntries.map(entry => (
+                <div
+                  key={entry.asset.id}
+                  className={`assetCartPill ${selectedAssetId === entry.asset.id ? "assetCartPillActive" : ""}`}
+                  onClick={() => setSelectedAssetId(entry.asset.id)}
+                >
+                  <span className="assetCartPillLabel">{entry.asset.label}</span>
+                  <span className={`assetCartPillTier ${TIER_CLS[entry.tier]}`}>{TIER_LABEL[entry.tier]}</span>
+                  <span className="assetCartPillPrice">{fmt(entry.price)}</span>
+                  <button
+                    className="assetCartPillRemove"
+                    onClick={e => { e.stopPropagation(); removeFromCart(entry.asset.id); }}
+                    aria-label={`Remove ${entry.asset.label}`}
+                  >×</button>
                 </div>
               ))}
             </div>
           )}
 
-          {/* ── CTA bar ── */}
+          {/* CTA bar */}
           <div className="assetBuyCTABar">
-            {/* Bundle breakdown */}
-            {cartItems.length >= 2 && (
+            {cartEntries.length >= 2 && (
               <div className="assetBuyBundleBreakdown">
                 <span className="abbSubtotal">{fmt(rawTotal)}</span>
-                <span className="abbMinus">−{discountLabel(cartItems.length)}</span>
+                <span className="abbMinus">−{discountLabel(cartEntries.length)}</span>
                 <span className="abbFinal">{fmt(finalTotal)}</span>
               </div>
             )}
@@ -513,15 +675,18 @@ export default function AssetBuySection({
               <button
                 className="assetBuyBtn"
                 onClick={() => {
-                  if (cartItems.length === 0) {
+                  if (cartEntries.length === 0) {
                     showToast("No items selected. Browse and select assets first.", "warning");
                     return;
                   }
-                  const ids = cartItems.map(a => a.id).join(",");
-                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                  // Pass ids + tiers to checkout
+                  const params = cartEntries.map(e => `${e.asset.id}:${e.tier}`).join(",");
+                  window.location.href = `/checkout/bundle?items=${params}`;
                 }}
               >
-                {cartItems.length > 0 ? `Buy now (${cartItems.length}) — ${fmt(finalTotal)}` : "Buy now"}
+                {cartEntries.length > 0
+                  ? `Buy now (${cartEntries.length}) — ${fmt(finalTotal)}`
+                  : "Buy now"}
               </button>
             </div>
           </div>
@@ -529,7 +694,7 @@ export default function AssetBuySection({
         </div>
       </section>
 
-      {/* ── Browse Modal ───────────────────────────────────────────────── */}
+      {/* ── Browse Modal ─────────────────────────────────────────────────────── */}
       {browseOpen && (
         <div className="assetModalOverlay" onClick={() => setBrowseOpen(false)}>
           <div className="assetModal" onClick={e => e.stopPropagation()}>
@@ -539,25 +704,25 @@ export default function AssetBuySection({
                   <button
                     key={tab}
                     className={`assetModalTab ${browseTab === tab ? "assetModalTabActive" : ""}`}
-                    onClick={() => { setBrowseTab(tab); setBrowseSearch(""); setTierFilter(null); }}
+                    onClick={() => { setBrowseTab(tab); setBrowseSearch(""); setTierFilter(null); setTierPickerId(null); }}
                   >{tab}</button>
                 ))}
               </div>
-              {cartItems.length > 0 && (
+              {cartEntries.length > 0 && (
                 <span className="assetModalCartBadge">
-                  {cartItems.length} in bundle{discountRate > 0 ? ` · ${discountLabel(cartItems.length)}` : ""}
+                  {cartEntries.length} in bundle{discRate > 0 ? ` · ${discountLabel(cartEntries.length)}` : ""}
                 </span>
               )}
               {tierFilter && (
                 <span className="assetModalTierFilterPill">
-                  {TIER_LABEL[tierFilter]}
+                  {TIER_LABEL[tierFilter as PackTier]}
                   <button className="assetModalTierFilterClear" onClick={() => setTierFilter(null)} title="Clear tier filter">×</button>
                 </span>
               )}
-              <button className="assetModalClose" onClick={() => { setBrowseOpen(false); setTierFilter(null); }}>✕</button>
+              <button className="assetModalClose" onClick={() => { setBrowseOpen(false); setTierFilter(null); setTierPickerId(null); }}>✕</button>
             </div>
 
-            {/* Search + Sort + Price filter */}
+            {/* Search + Sort + Price */}
             <div className="assetModalControls">
               <div className="assetModalSearchWrap">
                 <input className="assetModalSearch" type="text" placeholder="Search assets…"
@@ -600,26 +765,27 @@ export default function AssetBuySection({
               )}
               {!assetsLoading && filteredAssets.map(asset => {
                 const isOwned      = ownedAssetIds.has(asset.id);
-                const isInCart     = cartIds.has(asset.id);
+                const entry        = cart.get(asset.id);
+                const isInCart     = !!entry;
                 const isWishlisted = wishlistIds.has(asset.id);
-                const tier         = getTierInfo(asset.price);
+                const showPicker   = tierPickerId === asset.id;
+
                 return (
                   <div
                     key={asset.id}
-                    className={["assetModalRow",
-                      selectedAsset?.id === asset.id ? "assetModalRowActive" : "",
-                      isInCart ? "assetModalRowInCart" : "",
-                      isOwned  ? "assetModalRowOwned"  : "",
+                    className={[
+                      "assetModalRow",
+                      isInCart  ? "assetModalRowInCart" : "",
+                      isOwned   ? "assetModalRowOwned"  : "",
                     ].join(" ")}
-                    onClick={() => !isOwned && setSelectedAsset(asset)}
                   >
                     <div className="assetModalThumb">
                       <video src={asset.videoSrc} autoPlay muted loop playsInline preload="none" className="assetModalThumbVideo" />
                     </div>
+
                     <div className="assetModalRowInfo">
                       <div className="assetModalRowLabelRow">
                         <p className="assetModalRowLabel">{asset.label}</p>
-                        <span className={`assetModalTierBadge ${tier.cls}`}>{tier.label}</span>
                       </div>
                       {/* Format badges */}
                       <div className="assetModalFormatRow">
@@ -630,12 +796,32 @@ export default function AssetBuySection({
                           <span className="amfBadge amfAnim">{asset.animCount} anims</span>
                         )}
                       </div>
+                      {/* Price range */}
+                      <p className="assetModalRowPriceRange">
+                        {fmt(asset.priceMesh)} – {fmt(asset.priceFull)}
+                      </p>
                     </div>
+
                     <div className="assetModalRowRight">
-                      <p className="assetModalRowPrice">{fmt(asset.price)}</p>
                       {isOwned ? (
                         <span className="assetModalOwnedBadge">✓ Owned</span>
+                      ) : isInCart ? (
+                        // Already in cart — show current tier + change/remove options
+                        <div className="assetModalInCartActions">
+                          <span className={`assetModalInCartTier ${TIER_CLS[entry!.tier]}`}>
+                            {TIER_LABEL[entry!.tier]} · {fmt(entry!.price)}
+                          </span>
+                          <button
+                            className="assetModalChangeTierBtn"
+                            onClick={e => { e.stopPropagation(); setTierPickerId(showPicker ? null : asset.id); }}
+                          >Change tier ▾</button>
+                          <button
+                            className="assetModalRemoveBtn"
+                            onClick={e => { e.stopPropagation(); removeFromCart(asset.id); setTierPickerId(null); }}
+                          >Remove</button>
+                        </div>
                       ) : (
+                        // Not in cart — show wishlist + add buttons
                         <div className="assetModalRowBtns">
                           {onAddToWishlist && (
                             <button
@@ -645,16 +831,45 @@ export default function AssetBuySection({
                             >{isWishlisted ? "♥" : "♡"}</button>
                           )}
                           <button
-                            className={"assetModalSelectBtn" + (isInCart ? " assetModalSelectBtnActive" : "")}
+                            className="assetModalSelectBtn"
                             onClick={e => {
                               e.stopPropagation();
-                              handleSelectAsset(asset);
-                              onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.price });
+                              setTierPickerId(asset.id);
+                              onTrackView?.({ id: asset.id, label: asset.label, category: asset.category, price: asset.priceFull });
                             }}
-                          >{isInCart ? "✓ Added" : "Select"}</button>
+                          >Select pack ▾</button>
                         </div>
                       )}
                     </div>
+
+                    {/* Task 1: Inline tier picker — appears below the row */}
+                    {showPicker && !isOwned && (
+                      <div className="assetTierPicker" onClick={e => e.stopPropagation()}>
+                        <p className="assetTierPickerLabel">Choose a pack for <strong>{asset.label}</strong>:</p>
+                        <div className="assetTierPickerBtns">
+                          {TIER_ORDER.map(t => (
+                            <button
+                              key={t}
+                              className={`assetTierPickerBtn assetTierPickerBtn_${t} ${isInCart && entry?.tier === t ? "assetTierPickerBtnActive" : ""}`}
+                              onClick={() => {
+                                if (isInCart) {
+                                  changeTier(asset.id, t);
+                                } else {
+                                  toggleCart(asset, t);
+                                }
+                                setTierPickerId(null);
+                                setBrowseOpen(false);
+                              }}
+                            >
+                              <span className="atpBtnName">{TIER_LABEL[t]}</span>
+                              <span className="atpBtnIncludes">{TIER_INCLUDES[t].slice(0, 2).join(", ")}</span>
+                              <span className="atpBtnPrice">{fmt(computeTierPrice(asset, t))}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <button className="assetTierPickerCancel" onClick={() => setTierPickerId(null)}>Cancel</button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -663,78 +878,26 @@ export default function AssetBuySection({
             <div className="assetModalFooter">
               <div className="assetModalFooterLeft">
                 <p className="assetModalFooterNote">
-                  {cartItems.length === 0 ? "Select assets to add to cart" : `${cartItems.length} item${cartItems.length > 1 ? "s" : ""} selected`}
+                  {cartEntries.length === 0 ? "Select assets and choose a pack" : `${cartEntries.length} item${cartEntries.length > 1 ? "s" : ""} selected`}
                 </p>
-                {cartItems.length >= 2 && discountRate > 0 && (
+                {cartEntries.length >= 2 && discRate > 0 && (
                   <p className="assetModalFooterDiscount">
-                    {fmt(rawTotal)} − {discountLabel(cartItems.length)} = <strong>{fmt(finalTotal)}</strong>
+                    {fmt(rawTotal)} − {discountLabel(cartEntries.length)} = <strong>{fmt(finalTotal)}</strong>
                   </p>
                 )}
               </div>
               <button
-                className={"assetModalAddCartBtn" + (cartItems.length === 0 ? " assetModalAddCartBtnDisabled" : "")}
-                disabled={cartItems.length === 0}
+                className={"assetModalAddCartBtn" + (cartEntries.length === 0 ? " assetModalAddCartBtnDisabled" : "")}
+                disabled={cartEntries.length === 0}
                 onClick={() => {
-                  if (cartItems.length === 0) return;
-                  onAddToCart?.(cartItems.map(a => a.id));
+                  if (cartEntries.length === 0) return;
+                  onAddToCart?.(cartEntries.map(e => e.asset.id));
                   setBrowseOpen(false);
-                  showToast(`${cartItems.length} item${cartItems.length > 1 ? "s" : ""} added to cart`, "success");
+                  showToast(`${cartEntries.length} item${cartEntries.length > 1 ? "s" : ""} added to cart`, "success");
                 }}
               >
-                {cartItems.length === 0 ? "Add to Cart" : `Add ${cartItems.length} to Cart`}
+                {cartEntries.length === 0 ? "Add to Cart" : `Add ${cartEntries.length} to Cart`}
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Quick View Modal ───────────────────────────────────────────── */}
-      {previewAsset && (
-        <div className="assetQuickViewOverlay" onClick={() => setPreviewAsset(null)}>
-          <div className="assetQuickViewModal" onClick={e => e.stopPropagation()}>
-            <button className="assetQuickViewClose" onClick={() => setPreviewAsset(null)}>✕</button>
-            <div className="assetQuickViewVideoWrap">
-              <video key={previewAsset.id} src={previewAsset.videoSrc}
-                autoPlay muted loop playsInline className="assetQuickViewVideo" />
-              <div className="assetQuickViewVideoLabel">Animation Preview</div>
-            </div>
-            <div className="assetQuickViewInfo">
-              <p className="assetQuickViewCategory">{previewAsset.category}</p>
-              <h2 className="assetQuickViewTitle">{previewAsset.label}</h2>
-              <p className="assetQuickViewPrice">{fmt(previewAsset.price)}</p>
-              <div className="assetQuickViewStats">
-                <div className="assetQuickViewStat">
-                  <span className="assetQuickViewStatLabel">Formats</span>
-                  <span className="assetQuickViewStatValue">
-                    {[previewAsset.hasObj && "OBJ", previewAsset.hasFbx && "FBX", previewAsset.hasGlb && "GLB"]
-                      .filter(Boolean).join(" / ") || "OBJ"}
-                  </span>
-                </div>
-                <div className="assetQuickViewStat">
-                  <span className="assetQuickViewStatLabel">Animations</span>
-                  <span className="assetQuickViewStatValue">
-                    {previewAsset.animCount > 0 ? `${previewAsset.animCount} clips` : "Preview only"}
-                  </span>
-                </div>
-                <div className="assetQuickViewStat">
-                  <span className="assetQuickViewStatLabel">Textures</span>
-                  <span className="assetQuickViewStatValue">4K PBR</span>
-                </div>
-                <div className="assetQuickViewStat">
-                  <span className="assetQuickViewStatLabel">Access</span>
-                  <span className="assetQuickViewStatValue">Lifetime</span>
-                </div>
-              </div>
-              {ownedAssetIds.has(previewAsset.id) ? (
-                <div className="assetQuickViewOwned">✓ You own this asset</div>
-              ) : (
-                <button
-                  className={"assetQuickViewBuyBtn" + (cartIds.has(previewAsset.id) ? " assetQuickViewBuyBtnAdded" : "")}
-                  onClick={() => { handleSelectAsset(previewAsset); setPreviewAsset(null); }}
-                >
-                  {cartIds.has(previewAsset.id) ? "✓ Added to Bundle" : `Buy — ${fmt(previewAsset.price)}`}
-                </button>
-              )}
             </div>
           </div>
         </div>

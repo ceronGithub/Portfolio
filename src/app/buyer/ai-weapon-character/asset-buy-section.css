@@ -29,7 +29,7 @@
 .assetBuyBgOrcImg {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center 100%;
+  object-position: left 100%;
   display: block;
   opacity: 0.72;
   filter: saturate(0.8) brightness(0.75);
@@ -478,10 +478,11 @@
 
 /* Filled info card */
 .assetBuyCardFilled {
-  padding:         1.5rem 1.25rem;
-  align-items:     flex-start;
+  padding:         1.5rem 1.5rem;
+  align-items:     center;
   justify-content: flex-start;
-  gap:             1rem;
+  gap:             0.85rem;
+  text-align:      center;
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -832,8 +833,8 @@
 .assetModalRow {
   display:       flex;
   align-items:   center;
-  gap:           1rem;
-  padding:       0.75rem;
+  gap:           1.25rem;
+  padding:       0.9rem 1rem;
   border-radius: 12px;
   border:        1px solid #1a1a1a;
   background:    #111;
@@ -846,9 +847,10 @@
 
 /* Thumbnail */
 .assetModalThumb {
-  width:         72px;
-  height:        72px;
+  width:         80px;
+  height:        80px;
   border-radius: 10px;
+  margin-right: 20px;
   overflow:      hidden;
   flex-shrink:   0;
   background:    #0a0a0a;
@@ -864,9 +866,10 @@
 .assetModalRowInfo { flex: 1; min-width: 0; }
 
 .assetModalRowLabel {
-  font-size:   0.88rem;
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size:   0.92rem;
   font-weight: 700;
-  color:       rgba(255,255,255,0.85);
+  color:       rgba(255,255,255,0.9);
   white-space: nowrap;
   overflow:    hidden;
   text-overflow: ellipsis;
@@ -1591,27 +1594,32 @@
 .assetBuyCardFilled {
   display:        flex;
   flex-direction: column;
+  align-items:    center;
   gap:            0.55rem;
   padding:        1.1rem 1.2rem;
   height:         100%;
+  text-align:     center;
 }
 .abcTopRow {
   display:     flex;
   align-items: center;
+  justify-content: center;
   gap:         0.4rem;
   flex-wrap:   wrap;
+  width:       100%;
 }
 .abcAssetName {
-  font-family:   'DM Mono', monospace;
-  font-size:     0.78rem;
-  font-weight:   600;
-  color:         rgba(255,255,255,0.9);
-  letter-spacing: 0.03em;
+  font-family:   var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size:     1rem;
+  font-weight:   700;
+  color:         rgba(255,255,255,0.95);
+  letter-spacing: -0.01em;
   margin:        0;
 }
 .abcFormatRow {
   display:     flex;
   align-items: center;
+  justify-content: center;
   gap:         0.3rem;
   flex-wrap:   wrap;
 }
@@ -1856,3 +1864,324 @@
   transition:  color 0.15s;
 }
 .assetModalTierFilterClear:hover { color: #c9935e; }
+/* ══════════════════════════════════════════════════════════════════
+   TASK 1 & 2 — Per-asset tier selector + instant card removal
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Asset Details card header row ── */
+.abcTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.abcRemoveBtn {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.abcRemoveBtn:hover { background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.4); }
+
+/* ── Tier selector inside Asset Details card ── */
+.abcTierSelector { margin-bottom: 0.75rem; width: 100%; }
+.abcTierSelectorLabel {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.abcTierBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+  width: 100%;
+}
+.abcTierBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+  width: 100%;
+}
+.abcTierBtn:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); }
+.abcTierBtn_mesh_only.abcTierBtnActive  { border-color: rgba(148,163,184,0.5); background: rgba(148,163,184,0.08); }
+.abcTierBtn_standard.abcTierBtnActive   { border-color: rgba(251,191,36,0.5);  background: rgba(251,191,36,0.08); }
+.abcTierBtn_full_pack.abcTierBtnActive  { border-color: rgba(201,147,94,0.55); background: rgba(201,147,94,0.1); }
+.abcTierBtnName  { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); }
+.abcTierBtnPrice { font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.6); }
+.abcTierBtn_standard.abcTierBtnActive  .abcTierBtnPrice { color: #fbbf24; }
+.abcTierBtn_full_pack.abcTierBtnActive .abcTierBtnPrice { color: #c9935e; }
+
+/* ── Includes list inside Asset Details card ── */
+.abcIncludesList { margin-bottom: 0.75rem; width: 100%; }
+.abcIncludesLabel {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+.abcIncludesItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.75);
+  padding: 0.18rem 0;
+}
+.abcIncludesCheck { color: #22c55e; font-size: 0.8rem; flex-shrink: 0; }
+
+/* ── Rail card count badge ── */
+.assetBuyRailCardCount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 20px;
+  color: #22c55e;
+}
+
+/* ── Cart pill — active state + tier badge ── */
+.assetCartPill { cursor: pointer; }
+.assetCartPillActive {
+  border-color: rgba(201,147,94,0.5) !important;
+  background: rgba(201,147,94,0.06) !important;
+}
+.assetCartPillTier {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Price range in modal row ── */
+.assetModalRowPriceRange {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 0.2rem;
+}
+
+/* ── In-cart actions inside modal row ── */
+.assetModalInCartActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+.assetModalInCartTier {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+}
+.assetModalChangeTierBtn {
+  font-size: 0.72rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  color: rgba(255,255,255,0.7);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.assetModalChangeTierBtn:hover { background: rgba(255,255,255,0.12); }
+.assetModalRemoveBtn {
+  font-size: 0.72rem;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.18);
+  border-radius: 5px;
+  color: #ef4444;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.assetModalRemoveBtn:hover { background: rgba(239,68,68,0.18); }
+
+/* ── Inline tier picker (expands below modal row) ── */
+.assetTierPicker {
+  grid-column: 1 / -1;
+  background: rgba(10,10,15,0.97);
+  border: 1px solid rgba(201,147,94,0.25);
+  border-radius: 12px;
+  padding: 1.2rem 1.4rem;
+  margin: 0.6rem 0;
+  animation: tierPickerIn 0.18s ease;
+}
+@keyframes tierPickerIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.assetTierPickerLabel {
+  font-size: 0.83rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 0.9rem;
+}
+.assetTierPickerLabel strong { color: rgba(255,255,255,0.9); }
+.assetTierPickerBtns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.assetTierPickerBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
+}
+.assetTierPickerBtn:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
+.assetTierPickerBtn_mesh_only { border-color: rgba(148,163,184,0.15); }
+.assetTierPickerBtn_mesh_only:hover { border-color: rgba(148,163,184,0.4); }
+.assetTierPickerBtn_standard  { border-color: rgba(251,191,36,0.18); }
+.assetTierPickerBtn_standard:hover  { border-color: rgba(251,191,36,0.45); }
+.assetTierPickerBtn_full_pack { border-color: rgba(201,147,94,0.22); }
+.assetTierPickerBtn_full_pack:hover { border-color: rgba(201,147,94,0.55); }
+.assetTierPickerBtnActive { ring: 2px solid rgba(201,147,94,0.5); }
+.atpBtnName {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+.atpBtnIncludes {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.4;
+}
+.atpBtnPrice {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+.assetTierPickerBtn_mesh_only .atpBtnPrice { color: rgba(148,163,184,0.8); }
+.assetTierPickerBtn_standard  .atpBtnPrice { color: #fbbf24; }
+.assetTierPickerBtn_full_pack .atpBtnPrice { color: #c9935e; }
+.assetTierPickerCancel {
+  font-size: 0.78rem;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  padding: 0.25rem 0;
+  transition: color 0.15s;
+}
+.assetTierPickerCancel:hover { color: rgba(255,255,255,0.6); }
+
+/* ── Modal row layout — allow picker to expand full-width ── */
+.assetModalList .assetModalRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+}
+.assetModalList .assetModalRow > .assetModalThumb,
+.assetModalList .assetModalRow > .assetModalRowInfo,
+.assetModalList .assetModalRow > .assetModalRowRight {
+  margin-bottom: 0;
+}
+.assetModalList .assetTierPicker {
+  width: 100%;
+  flex-basis: 100%;
+  margin-top: 0.75rem;
+}
+
+/* Responsive tier picker */
+@media (max-width: 600px) {
+  .assetTierPickerBtns { grid-template-columns: 1fr; }
+  .abcTierBtns { gap: 0.35rem; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TASK 3 — Animation switcher on video card
+   ══════════════════════════════════════════════════════════════════ */
+
+.assetAnimSwitcher {
+  position: absolute;
+  bottom:   0;
+  left:     0;
+  right:    0;
+  padding:  0.75rem 1rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.assetAnimSwitcherLabel {
+  font-family:    var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size:      0.6rem;
+  font-weight:    600;
+  color:          rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.assetAnimSwitcherTabs {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       0.35rem;
+}
+
+.assetAnimTab {
+  font-family:   var(--font-jakarta, 'Plus Jakarta Sans', sans-serif);
+  font-size:     0.72rem;
+  font-weight:   500;
+  padding:       0.3rem 0.7rem;
+  border-radius: 6px;
+  border:        1px solid rgba(255,255,255,0.12);
+  background:    rgba(255,255,255,0.06);
+  color:         rgba(255,255,255,0.55);
+  cursor:        pointer;
+  transition:    all 0.15s ease;
+  white-space:   nowrap;
+}
+
+.assetAnimTab:hover {
+  background: rgba(255,255,255,0.12);
+  color:      rgba(255,255,255,0.85);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.assetAnimTabActive {
+  background:   rgba(34,197,94,0.15);
+  border-color: rgba(34,197,94,0.4);
+  color:        #22c55e;
+  font-weight:  700;
+}
+
+/* Ensure video card is position:relative for the overlay */
+.assetBuyRailCardVideo {
+  position: relative;
+  overflow: hidden;
+}
