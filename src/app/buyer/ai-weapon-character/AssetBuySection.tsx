@@ -92,6 +92,7 @@ export default function AssetBuySection({
   const [browseSort,    setBrowseSort]    = useState<"default" | "price-asc" | "price-desc" | "name">("default");
   const [priceMin,      setPriceMin]      = useState<number | null>(null);
   const [priceMax,      setPriceMax]      = useState<number | null>(null);
+  const [tierFilter,    setTierFilter]    = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
   const [cartIds,       setCartIds]       = useState<Set<string>>(new Set());
   const [cycleIndex,    setCycleIndex]    = useState(0);
@@ -230,11 +231,12 @@ export default function AssetBuySection({
     if (browseSearch.trim()) list = list.filter(a => a.label.toLowerCase().includes(browseSearch.toLowerCase()));
     if (priceMin !== null) list = list.filter(a => a.price >= priceMin);
     if (priceMax !== null) list = list.filter(a => a.price <= priceMax);
+    if (tierFilter !== null) list = list.filter(a => a.packageTier === tierFilter);
     if (browseSort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (browseSort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
     if (browseSort === "name")       list = [...list].sort((a, b) => a.label.localeCompare(b.label));
     return list;
-  }, [browseTab, characterAssets, weaponAssets, browseSearch, browseSort, priceMin, priceMax]);
+  }, [browseTab, characterAssets, weaponAssets, browseSearch, browseSort, priceMin, priceMax, tierFilter]);
 
   const allFetchedAssets = useMemo(() => [...characterAssets, ...weaponAssets], [characterAssets, weaponAssets]);
   const cartItems      = allFetchedAssets.filter(a => cartIds.has(a.id));
@@ -266,6 +268,39 @@ export default function AssetBuySection({
 
   // ── Selected asset info card content ──────────────────────────────
   function renderAssetInfoCard(asset: AssetItem | null) {
+    // If multiple items in cart, show a summary list of all of them
+    if (cartItems.length > 1) {
+      return (
+        <div className="assetBuyCardInner assetBuyCardFilled assetBuyCardMulti">
+          <p className="abcMultiTitle">{cartItems.length} assets selected</p>
+          <div className="abcMultiList">
+            {cartItems.map(item => {
+              const tier = getTierInfo(item.price);
+              return (
+                <div key={item.id} className="abcMultiRow">
+                  <div className="abcMultiRowLeft">
+                    <span className={`abcTierBadge ${tier.cls}`}>{tier.label}</span>
+                    <span className={`abcPkgBadge ${TIER_CLS[item.packageTier]}`}>{TIER_LABEL[item.packageTier]}</span>
+                  </div>
+                  <span className="abcMultiRowName">{item.label}</span>
+                  <span className="abcMultiRowPrice">{fmt(item.price)}</span>
+                  <button
+                    className="abcMultiRowRemove"
+                    onClick={() => toggleCart(item.id)}
+                    aria-label={`Remove ${item.label}`}
+                  >×</button>
+                </div>
+              );
+            })}
+          </div>
+          <div className="abcMeta">
+            <span>Each asset has its own tier &amp; files</span>
+            <span>Bundle discount applied</span>
+          </div>
+        </div>
+      );
+    }
+
     if (!asset) {
       return (
         <div className="assetBuyCardInner assetBuyCardEmpty">
@@ -377,7 +412,12 @@ export default function AssetBuySection({
                 featured: true,
               },
             ].map(pkg => (
-              <div key={pkg.key} className={`abcPkgCard ${pkg.cls}${(pkg as any).featured ? " abcPkgCardFeatured" : ""}`}>
+              <div
+                key={pkg.key}
+                className={`abcPkgCard ${pkg.cls}${(pkg as any).featured ? " abcPkgCardFeatured" : ""}`}
+                onClick={() => { setTierFilter(pkg.key); setBrowseOpen(true); }}
+                title={`Browse ${pkg.name} assets`}
+              >
                 {(pkg as any).featured && <span className="abcPkgFeaturedBadge">Most complete</span>}
                 <p className="abcPkgName">{pkg.name}</p>
                 <p className="abcPkgPrice">{pkg.price}</p>
@@ -390,6 +430,7 @@ export default function AssetBuySection({
                   ))}
                 </ul>
                 <p className="abcPkgNote">{pkg.note}</p>
+                <span className="abcPkgCta">Browse {pkg.name} →</span>
               </div>
             ))}
           </div>
@@ -498,7 +539,7 @@ export default function AssetBuySection({
                   <button
                     key={tab}
                     className={`assetModalTab ${browseTab === tab ? "assetModalTabActive" : ""}`}
-                    onClick={() => { setBrowseTab(tab); setBrowseSearch(""); }}
+                    onClick={() => { setBrowseTab(tab); setBrowseSearch(""); setTierFilter(null); }}
                   >{tab}</button>
                 ))}
               </div>
@@ -507,7 +548,13 @@ export default function AssetBuySection({
                   {cartItems.length} in bundle{discountRate > 0 ? ` · ${discountLabel(cartItems.length)}` : ""}
                 </span>
               )}
-              <button className="assetModalClose" onClick={() => setBrowseOpen(false)}>✕</button>
+              {tierFilter && (
+                <span className="assetModalTierFilterPill">
+                  {TIER_LABEL[tierFilter]}
+                  <button className="assetModalTierFilterClear" onClick={() => setTierFilter(null)} title="Clear tier filter">×</button>
+                </span>
+              )}
+              <button className="assetModalClose" onClick={() => { setBrowseOpen(false); setTierFilter(null); }}>✕</button>
             </div>
 
             {/* Search + Sort + Price filter */}
