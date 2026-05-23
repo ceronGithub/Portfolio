@@ -207,7 +207,7 @@ export default function Navbar() {
 
   const hideOn     = ["/login", "/register"];
   const isAdmin    = (session?.user as any)?.role === "ADMIN";
-  const isOnVisitor = pathname === "/" || pathname === "/visitor";
+  const isOnVisitor = pathname === "/" || pathname === "/visitor" || pathname.startsWith("/visitor/");
   // /checkout is a buyer-context route — show buyer navbar links there too
   const isOnBuyer   = pathname.startsWith("/buyer") || pathname.startsWith("/checkout");
   const isOnAdmin   = pathname.startsWith("/admin");
@@ -262,11 +262,11 @@ export default function Navbar() {
 
   // Visitor page logged in: full nav with Dash shortcut
   const visitorLoggedIn: NavItem[] = [
-    { label: "Home",    href: "/",            icon: <IconHome />    },
-    { label: "Systems", href: "/#systems",    icon: <IconSystems />, isHash: true, hashId: "systems"    },
-    { label: "Pricing", href: "/#pricing",    icon: <IconPricing />, isHash: true, hashId: "pricing"    },
-    { label: "About",   href: "/#about",      icon: <IconAbout />,   isHash: true, hashId: "about"      },
-    { label: "AI",      href: "/#ai-visuals", icon: <IconAI />,      isHash: true, hashId: "ai-visuals" },
+    { label: "Home",    href: "/visitor",            icon: <IconHome />    },
+    { label: "Systems", href: "/visitor#systems",    icon: <IconSystems />, isHash: true, hashId: "systems"    },
+    { label: "Pricing", href: "/visitor#pricing",    icon: <IconPricing />, isHash: true, hashId: "pricing"    },
+    { label: "About",   href: "/visitor#about",      icon: <IconAbout />,   isHash: true, hashId: "about"      },
+    { label: "AI",      href: "/visitor#ai-visuals", icon: <IconAI />,      isHash: true, hashId: "ai-visuals" },
     {
       label: isAdmin ? "Admin" : "Dash",
       href:  isAdmin ? "/admin/dashboard" : "/buyer",
@@ -277,11 +277,11 @@ export default function Navbar() {
 
   // Visitor page guest: full nav with Sign In + Sign Up
   const visitorGuest: NavItem[] = [
-    { label: "Home",    href: "/",            icon: <IconHome />    },
-    { label: "Systems", href: "/#systems",    icon: <IconSystems />, isHash: true, hashId: "systems"    },
-    { label: "Pricing", href: "/#pricing",    icon: <IconPricing />, isHash: true, hashId: "pricing"    },
-    { label: "About",   href: "/#about",      icon: <IconAbout />,   isHash: true, hashId: "about"      },
-    { label: "AI",      href: "/#ai-visuals", icon: <IconAI />,      isHash: true, hashId: "ai-visuals" },
+    { label: "Home",    href: "/visitor",            icon: <IconHome />    },
+    { label: "Systems", href: "/visitor#systems",    icon: <IconSystems />, isHash: true, hashId: "systems"    },
+    { label: "Pricing", href: "/visitor#pricing",    icon: <IconPricing />, isHash: true, hashId: "pricing"    },
+    { label: "About",   href: "/visitor#about",      icon: <IconAbout />,   isHash: true, hashId: "about"      },
+    { label: "AI",      href: "/visitor#ai-visuals", icon: <IconAI />,      isHash: true, hashId: "ai-visuals" },
     { label: "Sign In", href: "/login",       icon: <IconSignIn />  },
     { label: "Sign Up", href: "/register",    icon: <IconSignUp />  },
   ];
@@ -480,7 +480,7 @@ export default function Navbar() {
     clickLockRef.current = setTimeout(() => setClickedIndex(null), 1000);
 
     if (item.isHash && item.hashId) {
-      if (isOnVisitor || isOnBuyer) {
+      if (isOnVisitor) {
         document.getElementById(item.hashId)?.scrollIntoView({ behavior: "smooth" });
       } else {
         router.push(item.href);
