@@ -32,12 +32,15 @@ export default async function AdminUsersPage() {
     logs = [];
   }
 
-  const activeCount    = users.filter((u: { isActive: boolean; isBanned: boolean }) => u.isActive && !u.isBanned).length;
-  const nonActiveCount = users.filter((u: { isActive: boolean; isBanned: boolean }) => !u.isActive || u.isBanned).length;
+  // Fetch all products so the manual unlock modal can list them.
+  const products = await prisma.product.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <AdminShell adminName={adminName}>
-      <UsersClient initialUsers={users} initialLogs={logs} />
+      <UsersClient initialUsers={users} initialLogs={logs} products={products} />
     </AdminShell>
   );
 }

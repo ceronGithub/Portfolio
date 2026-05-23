@@ -665,3 +665,44 @@
   .apAddAddonFormFields { grid-template-columns: 1fr; }
   .apAnalyticsBar { gap: 0.5rem; }
 }
+/* ── SystemFullEditor ─────────────────────────────── */
+.apSystemEditorToggleWrap {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.apSystemFullEditor {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.apSystemEditorTitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin: 0 0 1rem;
+}
+
+.apSystemEditorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+.apSystemEditorField { display: flex; flex-direction: column; gap: 0.35rem; }
+.apSystemEditorFieldFull { grid-column: 1 / -1; }
+
+.apSystemEditorTextarea {
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+  line-height: 1.55;
+}
+
+@media (max-width: 600px) {
+  .apSystemEditorGrid { grid-template-columns: 1fr; }
+}

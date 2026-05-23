@@ -44,11 +44,14 @@ export default async function BuyerPage() {
 
   const ownedSet = new Set(ownedProductIds);
 
-  const demoVideos: Record<string, string> = {
+  // Fallback maps for systems whose video URLs haven't been set in the DB yet.
+  // Once admin sets demoVideoUrl / bgVideoUrl via the System Full Editor,
+  // the DB value takes precedence and these fallbacks are ignored.
+  const demoVideoFallbacks: Record<string, string> = {
     Restaurant: "/videos/restaurant-demo.mp4",
   };
 
-  const bgVideos: Record<string, string> = {
+  const bgVideoFallbacks: Record<string, string> = {
     Restaurant:    "/videos/restaurant-bg.mp4",
     Finance:       "/videos/finance-bg.mp4",
     Booking:       "/videos/booking-bg.mp4",
@@ -70,8 +73,8 @@ export default async function BuyerPage() {
     basePrice:    s.basePrice,
     timeline:     s.timeline ?? "",
     features:     s.features ?? [],
-    demoVideoUrl: demoVideos[s.tag] ?? null,
-    bgVideoUrl:   bgVideos[s.tag]   ?? null,
+    demoVideoUrl: s.demoVideoUrl ?? demoVideoFallbacks[s.tag] ?? null,
+    bgVideoUrl:   s.bgVideoUrl   ?? bgVideoFallbacks[s.tag]   ?? null,
     owned:        ownedSet.has(s.id),
     addons:       s.addons.map((a: any) => ({
       id:       a.id,

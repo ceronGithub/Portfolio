@@ -28,7 +28,9 @@ interface Addon {
 interface System {
   id: string; tag: string; title: string; basePrice: number;
   accent: string; timeline: string; deploy: string;
-  description: string; isActive: boolean; addons: Addon[];
+  description: string; features: string[]; isActive: boolean;
+  bgVideoUrl: string | null; demoVideoUrl: string | null;
+  addons: Addon[];
 }
 
 interface Props { products: Product[]; systems: System[]; }
@@ -107,6 +109,23 @@ async function updateSystemBasePrice(id: string, basePrice: number): Promise<boo
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ basePrice }),
+  });
+  return res.ok;
+}
+
+// Patches any combination of editable System fields in one PATCH call.
+async function updateSystemFields(
+  id: string,
+  fields: Partial<{
+    title: string; description: string; accent: string;
+    timeline: string; deploy: string; features: string[];
+    bgVideoUrl: string | null; demoVideoUrl: string | null;
+  }>
+): Promise<boolean> {
+  const res = await fetch(`/api/admin/systems/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
   });
   return res.ok;
 }
@@ -725,13 +744,165 @@ function ProductsSection({
   );
 }
 
+// ── SystemFullEditor — expandable full-field editor for a System card ─
+// Renders inside the accordion body when admin clicks "✎ Edit System".
+// Saves each changed field via PATCH. Features is edited as a newline-
+// separated textarea and split back to a string array on save.
+function SystemFullEditor({ system, accent, onSaved }: {
+  system: System;
+  accent: string;
+  onSaved: (fields: Partial<System>) => void;
+}) {
+  const [title, setTitle]           = useState(system.title);
+  const [description, setDesc]      = useState(system.description);
+  const [accentVal, setAccent]      = useState(system.accent);
+  const [timeline, setTimeline]     = useState(system.timeline);
+  const [deploy, setDeploy]         = useState(system.deploy);
+  const [features, setFeatures]     = useState((system.features ?? []).join("\n"));
+  const [bgVideoUrl, setBgVideo]    = useState(system.bgVideoUrl ?? "");
+  const [demoVideoUrl, setDemoVideo]= useState(system.demoVideoUrl ?? "");
+  const [saving, setSaving]         = useState(false);
+  const [saved, setSaved]           = useState(false);
+  const [error, setError]           = useState("");
+
+  async function handleSave() {
+    if (!title.trim()) { setError("Title is required."); return; }
+    setSaving(true);
+    setError("");
+    const featuresList = features.split("\n").map(f => f.trim()).filter(Boolean);
+    const ok = await updateSystemFields(system.id, {
+      title:        title.trim(),
+      description:  description.trim(),
+      accent:       accentVal.trim(),
+      timeline:     timeline.trim(),
+      deploy:       deploy.trim(),
+      features:     featuresList,
+      bgVideoUrl:   bgVideoUrl.trim() || null,
+      demoVideoUrl: demoVideoUrl.trim() || null,
+    });
+    if (ok) {
+      onSaved({
+        title:        title.trim(),
+        description:  description.trim(),
+        accent:       accentVal.trim(),
+        timeline:     timeline.trim(),
+        deploy:       deploy.trim(),
+        features:     featuresList,
+        bgVideoUrl:   bgVideoUrl.trim() || null,
+        demoVideoUrl: demoVideoUrl.trim() || null,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      setError("Save failed. Try again.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="apSystemFullEditor" onClick={e => e.stopPropagation()}>
+      <p className="apSystemEditorTitle">Edit System Fields</p>
+      <div className="apSystemEditorGrid">
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Title</label>
+          <input className="apMediaInput" value={title} onChange={e => setTitle(e.target.value)} />
+        </div>
+
+        <div className="apSystemEditorField">
+          <label className="apMediaLabel">Accent Color (hex)</label>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input
+              className="apMediaInput"
+              value={accentVal}
+              onChange={e => setAccent(e.target.value)}
+              style={{ borderColor: accentVal }}
+            />
+            <span
+              style={{
+                width: "1.5rem", height: "1.5rem", borderRadius: "50%",
+                background: accentVal, flexShrink: 0, border: "1px solid rgba(255,255,255,0.12)"
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="apSystemEditorField">
+          <label className="apMediaLabel">Timeline (e.g. 4–6 weeks)</label>
+          <input className="apMediaInput" value={timeline} onChange={e => setTimeline(e.target.value)} />
+        </div>
+
+        <div className="apSystemEditorField">
+          <label className="apMediaLabel">Deploy (e.g. Cloud / On-premise)</label>
+          <input className="apMediaInput" value={deploy} onChange={e => setDeploy(e.target.value)} />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Description</label>
+          <textarea
+            className="apMediaInput apSystemEditorTextarea"
+            rows={3}
+            value={description}
+            onChange={e => setDesc(e.target.value)}
+          />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Features (one per line)</label>
+          <textarea
+            className="apMediaInput apSystemEditorTextarea"
+            rows={5}
+            placeholder={"Feature A\nFeature B\nFeature C"}
+            value={features}
+            onChange={e => setFeatures(e.target.value)}
+          />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Background Video URL</label>
+          <input
+            className="apMediaInput"
+            placeholder="Paste URL or leave empty to clear"
+            value={bgVideoUrl}
+            onChange={e => setBgVideo(e.target.value)}
+          />
+        </div>
+
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Demo Video URL (#10)</label>
+          <input
+            className="apMediaInput"
+            placeholder="Paste URL or leave empty — buyer sees 'Demo coming soon'"
+            value={demoVideoUrl}
+            onChange={e => setDemoVideo(e.target.value)}
+          />
+        </div>
+
+      </div>
+      {error && <p className="apAddAddonError">{error}</p>}
+      <div className="apAddAddonFormActions">
+        <button
+          className="apPriceSaveBtn"
+          onClick={handleSave}
+          disabled={saving}
+          style={{ background: accent, color: "#0d0d0d" }}
+        >
+          {saving ? "Saving…" : saved ? "✓ Saved" : "Save Changes"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── SystemCard — single accordion card ────────────────────────────────
 function SystemCard({ system, isExpanded, onToggleExpand }: {
   system: System; isExpanded: boolean;
   onToggleExpand: () => void;
 }) {
   const revealRef = useReveal();
-  const [addons, setAddons] = useState<Addon[]>(system.addons);
+  const [addons, setAddons]         = useState<Addon[]>(system.addons);
+  const [localSystem, setLocal]     = useState<System>(system);
+  const [editOpen, setEditOpen]     = useState(false);
 
   // Group addons by category for organized display
   const groupedAddons = addons.reduce<Record<string, Addon[]>>((groups, addon) => {
@@ -749,6 +920,11 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
     setAddons(prev => [...prev, newAddon]);
   }
 
+  // Merges saved fields back into localSystem so header reflects changes immediately.
+  function handleFieldsSaved(fields: Partial<System>) {
+    setLocal(prev => ({ ...prev, ...fields }));
+  }
+
   return (
     <div className="apSystemCard apReveal" ref={revealRef}>
 
@@ -756,22 +932,22 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
       <div
         className="apSystemHeader"
         onClick={onToggleExpand}
-        style={{ borderLeft: `3px solid ${system.accent}` }}
+        style={{ borderLeft: `3px solid ${localSystem.accent}` }}
       >
         <div className="apSystemHeaderLeft">
-          <span className="apSystemTag" style={{ color: system.accent, borderColor: system.accent }}>
-            {system.tag}
+          <span className="apSystemTag" style={{ color: localSystem.accent, borderColor: localSystem.accent }}>
+            {localSystem.tag}
           </span>
-          <span className="apSystemTitle">{system.title}</span>
-          <span className={`apBadge ${system.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
-            {system.isActive ? "Active" : "Inactive"}
+          <span className="apSystemTitle">{localSystem.title}</span>
+          <span className={`apBadge ${localSystem.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
+            {localSystem.isActive ? "Active" : "Inactive"}
           </span>
         </div>
         <div className="apSystemHeaderRight">
           <SystemBasePriceEditor
-            systemId={system.id}
-            initialPrice={system.basePrice}
-            accent={system.accent}
+            systemId={localSystem.id}
+            initialPrice={localSystem.basePrice}
+            accent={localSystem.accent}
           />
           <span className="apSystemAddonCount">
             {addons.length} add-on{addons.length !== 1 ? "s" : ""}
@@ -788,7 +964,27 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
       {/* ── Expanded panel ─────────────────────── */}
       {isExpanded && (
         <div className="apSystemBody">
-          <p className="apSystemDesc">{system.description}</p>
+          <p className="apSystemDesc">{localSystem.description}</p>
+
+          {/* ── Full editor toggle ── */}
+          <div className="apSystemEditorToggleWrap">
+            <button
+              className={`apActionBtn ${editOpen ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
+              style={{ fontSize: "0.72rem" }}
+              onClick={e => { e.stopPropagation(); setEditOpen(prev => !prev); }}
+            >
+              {editOpen ? "▲ Close Editor" : "✎ Edit System"}
+            </button>
+          </div>
+
+          {/* Full editor — title, description, features, accent, videos, timeline, deploy */}
+          {editOpen && (
+            <SystemFullEditor
+              system={localSystem}
+              accent={localSystem.accent}
+              onSaved={handleFieldsSaved}
+            />
+          )}
 
           {/* Addon groups */}
           {Object.keys(groupedAddons).length === 0 ? (
@@ -806,7 +1002,7 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
                       <span className="apAddonLabel">{addon.label}</span>
                       <AddonPriceEditor
                         addon={addon}
-                        accent={system.accent}
+                        accent={localSystem.accent}
                         onUpdated={handleAddonPriceUpdated}
                       />
                     </div>
@@ -819,8 +1015,8 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
           {/* Add new addon */}
           <div className="apAddAddonWrap">
             <AddAddonForm
-              systemId={system.id}
-              accent={system.accent}
+              systemId={localSystem.id}
+              accent={localSystem.accent}
               onAdded={handleAddonAdded}
             />
           </div>

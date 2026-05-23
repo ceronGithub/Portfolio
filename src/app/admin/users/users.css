@@ -522,3 +522,110 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+/* ── umGrid--allV2 — 7-col grid with Unlock column ─────────── */
+.umGrid--allV2 { grid-template-columns: 1.5fr 2.5fr 1fr 1fr 1.5fr 2fr 1fr; }
+
+@media (max-width: 900px) {
+  .umGrid--allV2 { grid-template-columns: 1.5fr 2fr 1fr 1fr 2fr 1fr; }
+}
+@media (max-width: 640px) {
+  .umGrid--allV2 { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ── ManualUnlockModal ───────────────────────────────────────── */
+.umUnlockOverlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.65);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.umUnlockModal {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  min-width: 320px;
+  max-width: 460px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.umUnlockTitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin: 0;
+}
+
+.umUnlockUser {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.8);
+  margin: 0;
+}
+
+.umUnlockUser strong { color: #fff; }
+
+.umUnlockSelect {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color: #fff;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.umUnlockSelect:focus { border-color: rgba(255,255,255,0.25); }
+
+.umUnlockError {
+  font-size: 0.78rem;
+  color: #fc8181;
+  margin: 0;
+}
+
+.umUnlockEmpty {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}
+
+.umUnlockActions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+}
+
+.umUnlockCancelBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.5);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.umUnlockCancelBtn:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+
+.umUnlockGrantBtn {
+  background: #22c55e;
+  border: none;
+  border-radius: 6px;
+  color: #0d0d0d;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.umUnlockGrantBtn:hover:not(:disabled) { opacity: 0.88; }
+.umUnlockGrantBtn:disabled { opacity: 0.45; cursor: not-allowed; }

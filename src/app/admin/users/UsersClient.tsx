@@ -40,7 +40,8 @@ interface ActionLog {
   adminEmail: string; reason: string | null; createdAt: Date;
 }
 
-interface Props { initialUsers: User[]; initialLogs: ActionLog[]; }
+interface ProductOption { id: string; name: string; }
+interface Props { initialUsers: User[]; initialLogs: ActionLog[]; products: ProductOption[]; }
 
 type ActionType = "ban" | "unban" | "deactivate" | "activate" | "delete";
 type LogTab = "BAN" | "DELETE" | "DEACTIVATE" | "ACTIVATE";
@@ -66,6 +67,86 @@ async function deleteUser(userId: string, reason?: string): Promise<boolean> {
 }
 
 // ── Shared UI atoms ───────────────────────────────────────────────────
+
+// Calls /api/admin/unlock to create an Ownership record without payment.
+async function grantUnlock(userId: string, productId: string): Promise<boolean> {
+  const res = await fetch("/api/admin/unlock", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, productId }),
+  });
+  return res.ok;
+}
+
+// ── ManualUnlockModal — modal to grant a buyer access to a product ────
+// Admin picks a product from a dropdown; calls /api/admin/unlock on confirm.
+function ManualUnlockModal({ user, products, onDone, onClose }: {
+  user: User;
+  products: ProductOption[];
+  onDone: (userId: string, productId: string, productName: string) => void;
+  onClose: () => void;
+}) {
+  const [selectedProductId, setSelected] = useState(products[0]?.id ?? "");
+  const [saving, setSaving]              = useState(false);
+  const [error, setError]                = useState("");
+
+  const alreadyOwned = new Set(user.ownership.map(o => o.productId));
+  const available    = products.filter(p => !alreadyOwned.has(p.id));
+
+  async function handleGrant() {
+    if (!selectedProductId) return;
+    setSaving(true);
+    setError("");
+    const ok = await grantUnlock(user.id, selectedProductId);
+    if (ok) {
+      const productName = products.find(p => p.id === selectedProductId)?.name ?? selectedProductId;
+      onDone(user.id, selectedProductId, productName);
+      onClose();
+    } else {
+      setError("Failed to grant access. Try again.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="umUnlockOverlay" onClick={onClose}>
+      <div className="umUnlockModal" onClick={e => e.stopPropagation()}>
+        <p className="umUnlockTitle">Manual Unlock</p>
+        <p className="umUnlockUser">
+          Grant asset access to <strong>{user.name ?? user.email}</strong>
+        </p>
+        {available.length === 0 ? (
+          <p className="umUnlockEmpty">User already owns all products.</p>
+        ) : (
+          <>
+            <select
+              className="umUnlockSelect"
+              value={selectedProductId}
+              onChange={e => setSelected(e.target.value)}
+            >
+              {available.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            {error && <p className="umUnlockError">{error}</p>}
+            <div className="umUnlockActions">
+              <button className="umUnlockCancelBtn" onClick={onClose}>Cancel</button>
+              <button
+                className="umUnlockGrantBtn"
+                onClick={handleGrant}
+                disabled={saving}
+              >
+                {saving ? "Granting…" : "Grant Access"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
 
 function RoleBadge({ role }: { role: string }) {
   return <span className={`umRoleBadge umRoleBadge--${role.toLowerCase()}`}>{role}</span>;
@@ -128,8 +209,14 @@ function ConfirmPopover({ message, danger, withReason, onConfirm, onCancel }: {
 
 // ── Card 1 — All Users ────────────────────────────────────────────────
 
-function AllUsersCard({ users }: { users: User[] }) {
+function AllUsersCard({ users, products, onOwnershipGranted }: {
+  users: User[];
+  products: ProductOption[];
+  onOwnershipGranted: (userId: string, productId: string, productName: string) => void;
+}) {
   const revealRef = useReveal();
+  const [unlockTarget, setUnlockTarget] = useState<User | null>(null);
+
   return (
     <div className="umCard" ref={revealRef}>
       <div className="umCardHeader">
@@ -137,9 +224,9 @@ function AllUsersCard({ users }: { users: User[] }) {
         <span className="umCardBadge">{users.length}</span>
       </div>
       <div className="umTable">
-        <div className="umTableHead umGrid--all">
+        <div className="umTableHead umGrid--allV2">
           <span>Name</span><span>Email</span><span>Role</span>
-          <span>Status</span><span>Joined</span><span>Owned</span>
+          <span>Status</span><span>Joined</span><span>Owned</span><span>Unlock</span>
         </div>
         {users.length === 0 && (
           <div className="umEmpty">
@@ -151,7 +238,7 @@ function AllUsersCard({ users }: { users: User[] }) {
           </div>
         )}
         {users.map(u => (
-          <div key={u.id} className="umTableRow umGrid--all">
+          <div key={u.id} className="umTableRow umGrid--allV2">
             <span className="umCell umCellName">{u.name ?? <em className="umNone">—</em>}</span>
             <span className="umCell umCellMuted">{u.email}</span>
             <span className="umCell"><RoleBadge role={u.role} /></span>
@@ -165,9 +252,29 @@ function AllUsersCard({ users }: { users: User[] }) {
                 : u.ownership.map(o => <span key={o.productId} className="umOwnedTag">{o.product.name}</span>)
               }
             </span>
+            <span className="umCell">
+              <button
+                className="umActionBtn umActionBtn--activate"
+                style={{ fontSize: "0.7rem", padding: "0.25rem 0.55rem" }}
+                onClick={() => setUnlockTarget(u)}
+                title="Manually grant product access"
+              >
+                🔓 Unlock
+              </button>
+            </span>
           </div>
         ))}
       </div>
+
+      {/* Manual unlock modal */}
+      {unlockTarget && (
+        <ManualUnlockModal
+          user={unlockTarget}
+          products={products}
+          onDone={onOwnershipGranted}
+          onClose={() => setUnlockTarget(null)}
+        />
+      )}
     </div>
   );
 }
@@ -393,7 +500,7 @@ function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
 
 // ── Main ──────────────────────────────────────────────────────────────
 
-export default function UsersClient({ initialUsers, initialLogs }: Props) {
+export default function UsersClient({ initialUsers, initialLogs, products }: Props) {
   const [users, setUsers]       = useState<User[]>(initialUsers);
   const [logs, setLogs]         = useState<ActionLog[]>(initialLogs);
   const [pendingId, setPending] = useState<string | null>(null);
@@ -406,6 +513,17 @@ export default function UsersClient({ initialUsers, initialLogs }: Props) {
   function showToast(msg: string, type: "ok"|"err") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
+  }
+
+  // Optimistically appends the newly granted ownership to the target user in local state.
+  function handleOwnershipGranted(userId: string, productId: string, productName: string) {
+    setUsers(prev => prev.map(u => {
+      if (u.id !== userId) return u;
+      const alreadyHas = u.ownership.some(o => o.productId === productId);
+      if (alreadyHas) return u;
+      return { ...u, ownership: [...u.ownership, { productId, product: { name: productName } }] };
+    }));
+    showToast(`Access granted: ${productName}`, "ok");
   }
 
   // Append a new log entry to local state immediately (optimistic)
@@ -479,7 +597,7 @@ export default function UsersClient({ initialUsers, initialLogs }: Props) {
 
       {toast && <div className={`umToast umToast--${toast.type}`}>{toast.msg}</div>}
       <div className="umRoot">
-        <AllUsersCard    users={users} />
+        <AllUsersCard users={users} products={products} onOwnershipGranted={handleOwnershipGranted} />
         <ActiveUsersCard    users={activeUsers}    onAction={handleAction} pendingId={pendingId} />
         <NonActiveUsersCard users={nonActiveUsers} onAction={handleAction} pendingId={pendingId} />
         <ActionLogsCard  logs={logs} />

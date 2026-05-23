@@ -104,6 +104,8 @@ model System {
   deploy       String
   description  String
   features     String[]               // base feature list
+  bgVideoUrl   String?                // background video for buyer UI
+  demoVideoUrl String?                // demo video shown in Configure modal
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
 
