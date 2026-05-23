@@ -18,7 +18,7 @@ interface LatestArchProduct {
 
 // ── fetchLatestArch — loads isLatest=true products for a category ─────
 async function fetchLatestArch(category: string): Promise<LatestArchProduct | null> {
-  const res = await fetch(`/api/products?latest=true&category=${category}`);
+  const res = await fetch(`/api/products?latest=true&category=${category}`, { cache: "no-store" });
   if (!res.ok) return null;
   const json = await res.json();
   return (json.products ?? [])[0] ?? null;

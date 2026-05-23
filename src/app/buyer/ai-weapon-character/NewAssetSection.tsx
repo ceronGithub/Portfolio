@@ -20,7 +20,7 @@ interface LatestProduct {
 
 // ── fetchLatestProducts — loads the isLatest=true products for a category
 async function fetchLatestProducts(category: string): Promise<LatestProduct[]> {
-  const res = await fetch(`/api/products?latest=true&category=${category}`);
+  const res = await fetch(`/api/products?latest=true&category=${category}`, { cache: "no-store" });
   if (!res.ok) return [];
   const json = await res.json();
   return json.products ?? [];

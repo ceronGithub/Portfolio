@@ -1,55 +1,73 @@
-// POST /api/admin/products
-// Admin-only. Creates a new Product record in the database.
-// Required body fields: name (string), price (number), category (string).
-// Optional: description, isLatest, isActive, previewVideoUrl, facePngUrl,
-//           threeDUrl, actionOneUrl, actionTwoUrl, actionThreeUrl.
+// GET /api/products?category=character|weapon|interior|exterior[&latest=true]
+// Public route — returns active products filtered by category.
+// Optional: &latest=true returns only products with isLatest=true.
+// Used by the buyer browse modal and Latest Drop sections.
+//
+// NOTE: The seed stores GDrive viewer URLs (drive.google.com/file/d/{id}/view).
+// Browsers cannot use these as <video src>. This route rewrites them to
+// /api/drive-video?id={id} proxy URLs before returning so videos load correctly.
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession }          from "next-auth";
-import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
-const VALID_CATEGORIES = ["weapon", "character", "interior", "exterior"] as const;
-type ProductCategory = typeof VALID_CATEGORIES[number];
+// Force dynamic rendering — this route reads live DB data.
+// Without this Next.js caches the response at build time.
+export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+// Extract the raw Drive file ID from any supported GDrive URL format,
+// or return the value unchanged if it's already a proxy URL or null.
+function toProxyUrl(raw: string | null): string | null {
+  if (!raw) return null;
+  // Already a proxy URL — leave it alone
+  if (raw.startsWith("/api/drive-video")) return raw;
+  // drive.google.com/file/d/{id}/view  OR  /open?id={id}  OR  /uc?id={id}
+  const matchFile = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchFile) return `/api/drive-video?id=${matchFile[1]}`;
+  const matchParam = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchParam) return `/api/drive-video?id=${matchParam[1]}`;
+  return raw;
+}
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get("category");
+  const latestOnly = searchParams.get("latest") === "true";
+
+  const validCategories = ["character", "weapon", "interior", "exterior"];
+
+  if (!category || !validCategories.includes(category)) {
+    return NextResponse.json({ error: "Valid category required: character | weapon | interior | exterior" }, { status: 400 });
   }
 
-  const body = await req.json();
-
-  // Validate required fields
-  if (!body.name || typeof body.name !== "string" || !body.name.trim()) {
-    return NextResponse.json({ error: "name (string) is required." }, { status: 400 });
-  }
-  if (typeof body.price !== "number" || body.price < 0) {
-    return NextResponse.json({ error: "price (non-negative number) is required." }, { status: 400 });
-  }
-  if (!body.category || !VALID_CATEGORIES.includes(body.category as ProductCategory)) {
-    return NextResponse.json(
-      { error: "category must be one of: weapon | character | interior | exterior" },
-      { status: 400 }
-    );
-  }
-
-  const newProduct = await prisma.product.create({
-    data: {
-      name:            body.name.trim(),
-      price:           body.price,
-      category:        body.category as ProductCategory,
-      description:     typeof body.description  === "string" ? body.description  : null,
-      isLatest:        typeof body.isLatest      === "boolean" ? body.isLatest    : false,
-      isActive:        typeof body.isActive      === "boolean" ? body.isActive    : true,
-      previewVideoUrl: typeof body.previewVideoUrl === "string" ? body.previewVideoUrl : null,
-      facePngUrl:      typeof body.facePngUrl      === "string" ? body.facePngUrl      : null,
-      threeDUrl:       typeof body.threeDUrl        === "string" ? body.threeDUrl        : null,
-      actionOneUrl:    typeof body.actionOneUrl    === "string" ? body.actionOneUrl    : null,
-      actionTwoUrl:    typeof body.actionTwoUrl    === "string" ? body.actionTwoUrl    : null,
-      actionThreeUrl:  typeof body.actionThreeUrl  === "string" ? body.actionThreeUrl  : null,
+  const products = await prisma.product.findMany({
+    where: {
+      category: category as "character" | "weapon" | "interior" | "exterior",
+      isActive: true,
+      ...(latestOnly ? { isLatest: true } : {}),
     },
+    select: {
+      id:              true,
+      name:            true,
+      price:           true,
+      category:        true,
+      isLatest:        true,
+      previewVideoUrl: true,
+      facePngUrl:      true,
+      actionOneUrl:    true,
+      actionTwoUrl:    true,
+      actionThreeUrl:  true,
+    },
+    orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json({ product: newProduct }, { status: 201 });
+  // Rewrite all GDrive viewer URLs → /api/drive-video proxy URLs
+  const mapped = products.map(p => ({
+    ...p,
+    previewVideoUrl: toProxyUrl(p.previewVideoUrl),
+    actionOneUrl:    toProxyUrl(p.actionOneUrl),
+    actionTwoUrl:    toProxyUrl(p.actionTwoUrl),
+    actionThreeUrl:  toProxyUrl(p.actionThreeUrl),
+  }));
+
+  return NextResponse.json({ products: mapped });
 }
