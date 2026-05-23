@@ -223,10 +223,13 @@ export default function Navbar() {
 
   // Admin on /admin pages: Overview, Users, Products, Orders, Theme toggle, Sign Out
   const adminItems: NavItem[] = [
-    { label: "Overview", href: "/admin/dashboard", icon: <IconAdmin />                               },
-    { label: "Users",    href: "/admin/users",     icon: <IconAbout />                               },
-    { label: "Products", href: "/admin/products",  icon: <IconSystems />                             },
-    { label: "Orders",   href: "/admin/orders",    icon: <IconPricing />                             },
+    { label: "Overview",      href: "/admin/dashboard",     icon: <IconAdmin />    },
+    { label: "Users",         href: "/admin/users",         icon: <IconAbout />    },
+    { label: "Products",      href: "/admin/products",      icon: <IconSystems />  },
+    { label: "Orders",        href: "/admin/orders",        icon: <IconPricing />  },
+    { label: "Reviews",       href: "/admin/reviews",       icon: <IconAbout />    },
+    { label: "Testimonials",  href: "/admin/testimonials",  icon: <IconSystems />  },
+    { label: "Inquiries",     href: "/admin/inquiries",     icon: <IconPricing />  },
     { label: isDark ? "Light" : "Dark", href: "#", icon: isDark ? <IconSun /> : <IconMoon />, toggleTheme: true },
     { label: "Sign Out", href: "#",                icon: <IconSignOut />, signOut: true              },
   ];

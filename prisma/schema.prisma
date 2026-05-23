@@ -142,6 +142,33 @@ model Review {
   @@unique([userId, assetId])
 }
 
+// ── Visitor Testimonials ───────────────────────────────────────────────────
+// Submitted by visitors on the landing page. Admin can approve or delete.
+model Testimonial {
+  id         String   @id @default(cuid())
+  name       String
+  project    String
+  rate       Int                        // 1–100 satisfaction percentage
+  comment    String
+  initials   String
+  accent     String
+  isApproved Boolean  @default(false)   // Admin must approve before showing
+  createdAt  DateTime @default(now())
+}
+
+// ── Contact Messages (General Inquiries from InquirySection) ──────────────
+// Stores general Get-in-Touch form submissions from buyer/inquiries page.
+// No auth required — stores contactName + contactEmail.
+model ContactMessage {
+  id          String   @id @default(cuid())
+  contactName String
+  email       String
+  subject     String?
+  message     String
+  status      String   @default("new")   // new | read | replied
+  createdAt   DateTime @default(now())
+}
+
 // ── Custom Inquiries ───────────────────────────────────────────────────────
 model Inquiry {
   id            String   @id @default(cuid())

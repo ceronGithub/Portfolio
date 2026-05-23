@@ -77,6 +77,17 @@ export default function InquirySection() {
     } catch {
       setStatus("error");
     }
+    // ── Also write to DB for admin paper trail (fire-and-forget) ────────────
+    fetch("/api/contact", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        contactName: form.name,
+        email:       form.email,
+        subject:     form.subject || "General Inquiry",
+        message:     form.message,
+      }),
+    }).catch(() => {});
   }
 
   return (

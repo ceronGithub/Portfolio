@@ -1535,19 +1535,8 @@ function getInitials(name: string) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-const STORAGE_KEY = "ms_testimonials";
-
-function loadTestimonials(): Testimonial[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function saveTestimonials(list: Testimonial[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch { }
-}
+// Testimonials are now DB-backed via /api/testimonials.
+// loadTestimonials and saveTestimonials removed — replaced by fetch calls.
 
 function RateBar({ rate, accent }: { rate: number; accent: string }) {
   return (
@@ -1585,22 +1574,17 @@ function TestimonialsSection() {
   const [form, setForm] = useState({ name: "", project: "", rate: 80, comment: "" });
   const [submitted, setSubmitted] = useState(false);
 
+  // ── Fetch approved testimonials from DB on mount ──────────────────────────
   useEffect(() => {
-    const loaded = loadTestimonials();
-    if (loaded.length > 0) {
-      setTestimonials(loaded);
-    } else {
-      // seed placeholders
-      const seeds: Testimonial[] = [
-        { id: "1", name: "Carlo Reyes", project: "Inventory Control System", rate: 95, comment: "Delivered exactly what we needed. The system is fast, clean, and our team picked it up in a day.", initials: "CR", accent: "#7dc9a0" },
-        { id: "2", name: "Maria Santos", project: "Payroll & HR System", rate: 98, comment: "BIR compliance used to take us hours. Now it's automated. Best investment we made this year.", initials: "MS", accent: "#7eb8d4" },
-        { id: "3", name: "Jason Lim", project: "POS + E-commerce", rate: 92, comment: "Online and in-store sales now sync perfectly. PayMongo integration worked first try.", initials: "JL", accent: "#c4b5fd" },
-        { id: "4", name: "Ana Flores", project: "Booking & Appointment System", rate: 97, comment: "Our clinic runs so much smoother. Patients love the online booking and the reminders work great.", initials: "AF", accent: "#f9a8d4" },
-        { id: "5", name: "Rodel Cruz", project: "Restaurant Ordering System", rate: 90, comment: "QR menu, kitchen display, daily reports — everything we asked for and more. Highly recommend.", initials: "RC", accent: "#fcd34d" },
-      ];
-      setTestimonials(seeds);
-      saveTestimonials(seeds);
-    }
+    fetch("/api/testimonials")
+      .then(res => res.json())
+      .then((data: Testimonial[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setTestimonials(data);
+        }
+        // If DB has no approved testimonials yet, carousel stays empty — no fake seeds
+      })
+      .catch(() => {});
   }, []);
 
   const total = testimonials.length;
@@ -1608,21 +1592,21 @@ function TestimonialsSection() {
   const prev = () => setActive(a => ((a - 1) + total) % total);
   const next = () => setActive(a => (a + 1) % total);
 
-  function handleSubmit() {
+  // ── Submit testimonial to DB (pending admin approval) ──────────────────────
+  async function handleSubmit() {
     if (!form.name.trim() || !form.project.trim() || !form.comment.trim()) return;
-    const newT: Testimonial = {
-      id: Date.now().toString(),
-      name: form.name.trim(),
-      project: form.project.trim(),
-      rate: form.rate,
-      comment: form.comment.trim(),
-      initials: getInitials(form.name.trim()),
-      accent: accentColors[testimonials.length % accentColors.length],
-    };
-    const updated = [...testimonials, newT];
-    setTestimonials(updated);
-    saveTestimonials(updated);
-    setActive(updated.length - 1);
+    try {
+      await fetch("/api/testimonials", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          name:    form.name.trim(),
+          project: form.project.trim(),
+          rate:    form.rate,
+          comment: form.comment.trim(),
+        }),
+      });
+    } catch { /* fire and forget — submission is best-effort */ }
     setForm({ name: "", project: "", rate: 80, comment: "" });
     setSubmitted(true);
     setTimeout(() => { setSubmitted(false); setShowForm(false); }, 2000);
