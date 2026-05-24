@@ -104,7 +104,7 @@
   background: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ── Card header ──────────────────────────────────── */
@@ -137,13 +137,28 @@
 }
 
 /* ── Table ────────────────────────────────────────── */
-.apTable { display: flex; flex-direction: column; }
+.apTable {
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-border) transparent;
+}
+
+.apTable::-webkit-scrollbar { width: 5px; }
+.apTable::-webkit-scrollbar-track { background: transparent; }
+.apTable::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 999px; }
 
 .apTableHead {
   display: grid;
   padding: 0.55rem 1.5rem;
   border-bottom: 1px solid var(--sidebar-border);
   background: var(--nav-active-bg);
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .apTableHead span {
