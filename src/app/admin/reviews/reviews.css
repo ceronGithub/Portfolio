@@ -3,7 +3,7 @@
    ================================================ */
 
 .adminReviewsPage {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
   padding: 2.5rem;
 }
 

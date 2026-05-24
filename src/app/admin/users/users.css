@@ -13,6 +13,11 @@
   box-sizing: border-box;
   max-width: 1320px;
   margin: 0 auto;
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+}
+
+.adminUsersPage * {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
 }
 
 /* ── Page header ──────────────────────────────────── */
