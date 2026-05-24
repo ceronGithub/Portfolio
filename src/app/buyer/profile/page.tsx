@@ -1,5 +1,5 @@
 // /buyer/profile/page.tsx — Server Component.
-// Task 2: Also fetches ownedItems for system history section.
+// Fetches orders + ownerships; merges manually-granted items into order history.
 
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -29,17 +29,46 @@ export default async function ProfilePage() {
         estimatedAt:  true,
         deliveredAt:  true,
         createdAt:    true,
-        product: { select: { name: true, price: true } },
+        product: { select: { id: true, name: true, price: true } },
       },
     }),
     prisma.ownership.findMany({
       where:   { userId },
       orderBy: { grantedAt: "desc" },
-      include: { product: { select: { name: true } } },
+      include: { product: { select: { id: true, name: true } } },
     }),
   ]);
 
   if (!user) redirect("/login");
+
+  // Build order rows from real orders
+  const orderRows = orders.map(o => ({
+    id:           o.id,
+    productName:  o.product.name,
+    amount:       o.amountPaid ?? o.product.price,
+    status:       o.status as string,
+    deliveryNote: (o.deliveryNote as string | null) ?? null,
+    estimatedAt:  o.estimatedAt ? (o.estimatedAt as Date).toISOString() : null,
+    deliveredAt:  o.deliveredAt ? (o.deliveredAt as Date).toISOString() : null,
+    createdAt:    o.createdAt.toISOString(),
+    isGranted:    false,
+  }));
+
+  // Manually-granted ownerships (no matching order) → synthetic order rows
+  const orderedProductIds = new Set(orders.map(o => o.product.id));
+  const grantedRows = ownerships
+    .filter(o => !orderedProductIds.has(o.product.id))
+    .map(o => ({
+      id:           `grant-${o.productId}`,
+      productName:  o.product.name,
+      amount:       0,
+      status:       "GRANTED",
+      deliveryNote: null,
+      estimatedAt:  null,
+      deliveredAt:  null,
+      createdAt:    o.grantedAt.toISOString(),
+      isGranted:    true,
+    }));
 
   return (
     <ProfileClient
@@ -50,16 +79,7 @@ export default async function ProfilePage() {
         role:        user.role,
         memberSince: user.createdAt.toISOString(),
       }}
-      orders={orders.map(o => ({
-        id:           o.id,
-        productName:  o.product.name,
-        amount:       o.amountPaid ?? o.product.price,
-        status:       o.status,
-        deliveryNote: (o.deliveryNote as string | null) ?? null,
-        estimatedAt:  o.estimatedAt ? (o.estimatedAt as Date).toISOString() : null,
-        deliveredAt:  o.deliveredAt ? (o.deliveredAt as Date).toISOString() : null,
-        createdAt:    o.createdAt.toISOString(),
-      }))}
+      orders={[...orderRows, ...grantedRows]}
       ownedCount={ownerships.length}
       ownedItems={ownerships.map(o => ({
         productId:   o.productId,

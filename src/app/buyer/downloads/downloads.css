@@ -328,6 +328,34 @@
 
 .dlFileBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ── Pending / files-not-ready state ────────────── */
+.dlPendingState {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.85rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+
+.dlPendingIcon { font-size: 1rem; opacity: 0.5; flex-shrink: 0; }
+
+.dlPendingText { display: flex; flex-direction: column; gap: 0.1rem; }
+
+.dlPendingTitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+}
+
+.dlPendingSub {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.25);
+  margin: 0;
+}
+
 .dlRowBtn:hover:not(.dlRowBtnDisabled):not(.dlRowBtnBusy) {
   background: #16a34a;
   transform: translateY(-1px);

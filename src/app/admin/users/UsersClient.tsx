@@ -475,9 +475,13 @@ function ActiveUsersCard({ users, onAction, pendingId }: {
                 />
               ) : (
                 <div className="umActionsGroup">
-                  <ActionBtn label="Ban"        variant="ban"        disabled={!!pendingId} onClick={() => setConfirmState({ userId: u.id, action: "ban" })} />
-                  <ActionBtn label="Deactivate" variant="deactivate" disabled={!!pendingId} onClick={() => onAction(u.id, "deactivate")} />
-                  <ActionBtn label="Delete"     variant="delete"     disabled={!!pendingId} onClick={() => setConfirmState({ userId: u.id, action: "delete" })} />
+                  {u.role !== "ADMIN" && (
+                    <>
+                      <ActionBtn label="Ban"        variant="ban"        disabled={!!pendingId} onClick={() => setConfirmState({ userId: u.id, action: "ban" })} />
+                      <ActionBtn label="Deactivate" variant="deactivate" disabled={!!pendingId} onClick={() => onAction(u.id, "deactivate")} />
+                    </>
+                  )}
+                  <ActionBtn label="Delete" variant="delete" disabled={!!pendingId} onClick={() => setConfirmState({ userId: u.id, action: "delete" })} />
                 </div>
               )}
             </span>

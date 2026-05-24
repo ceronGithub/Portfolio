@@ -13,11 +13,12 @@ interface Order {
   id:           string;
   productName:  string;
   amount:       number;
-  status:       "PENDING" | "PAID" | "IN_DEVELOPMENT" | "IN_TESTING" | "DELIVERED" | "FAILED";
+  status:       string;
   deliveryNote: string | null;
   estimatedAt:  string | null;
   deliveredAt:  string | null;
   createdAt:    string;
+  isGranted:    boolean;
 }
 
 interface OwnedItem {
@@ -57,12 +58,13 @@ function getInitials(name: string, email: string): string {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  PAID:           { label: "Paid",      color: "#22c55e" },
-  PENDING:        { label: "Pending",   color: "#f59e0b" },
-  IN_DEVELOPMENT: { label: "In Dev",    color: "#3b82f6" },
-  IN_TESTING:     { label: "Testing",   color: "#a855f7" },
-  DELIVERED:      { label: "Delivered", color: "#22c55e" },
-  FAILED:         { label: "Cancelled", color: "#ef4444" },
+  PAID:           { label: "Paid",         color: "#22c55e" },
+  PENDING:        { label: "Pending",      color: "#f6ad55" },
+  IN_DEVELOPMENT: { label: "In Dev",       color: "#63b3ed" },
+  IN_TESTING:     { label: "In Testing",   color: "#b794f4" },
+  DELIVERED:      { label: "Delivered",    color: "#c9a96e" },
+  FAILED:         { label: "Failed",       color: "#fc8181" },
+  GRANTED:        { label: "Admin Grant",  color: "#68d391" },
 };
 
 export default function ProfileClient({ user, orders, ownedCount, ownedItems }: Props) {
@@ -187,10 +189,10 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
       {/* ── Delivery Tracker ── */}
       {activeOrders.length > 0 && (
         <DeliveryTracker
-          orders={orders.map(o => ({
+          orders={orders.filter(o => !o.isGranted).map(o => ({
             id:           o.id,
             productName:  o.productName,
-            status:       o.status,
+            status:       o.status as "PENDING"|"PAID"|"IN_DEVELOPMENT"|"IN_TESTING"|"DELIVERED"|"FAILED",
             deliveryNote: o.deliveryNote,
             estimatedAt:  o.estimatedAt,
             deliveredAt:  o.deliveredAt,
@@ -200,48 +202,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
         />
       )}
 
-      {/* ── Task 2 — System / Owned History ── */}
-      <div className="profileSection">
-        <div className="profileSectionHeader">
-          <p className="profileSectionLabel">System History</p>
-          <span className="profileSectionCount">{ownedItems.length}</span>
-        </div>
-
-        {ownedItems.length === 0 ? (
-          <div className="profileEmpty">
-            <span className="profileEmptyIcon">🖥️</span>
-            <p className="profileEmptyText">No systems owned yet</p>
-            <p className="profileEmptySub">Systems you purchase will appear here with access details.</p>
-          </div>
-        ) : (
-
-          <div className="profileOrderList profileOrderListScroll">
-            <div className="profileOrderHeader profileOrderHeaderSys">
-              <span>System</span>
-              <span>Granted</span>
-              <span>Access</span>
-            </div>
-            {ownedItems.map((item, i) => (
-              <div
-                key={item.productId}
-                className="profileOrderRow"
-                style={{ animationDelay: `${i * 0.04}s` }}
-              >
-                <span className="profileOrderProduct">{item.productName}</span>
-                <span className="profileOrderDate">{fmtDate(item.grantedAt)}</span>
-                <span
-                  className="profileOrderStatus"
-                  style={{ color: "#22c55e", borderColor: "#22c55e33", background: "#22c55e10" }}
-                >
-                  ✓ Owned
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Order History — Task 4 scrollable ── */}
+      {/* ── Order History ── */}
       <div className="profileSection">
         <div className="profileSectionHeader">
           <p className="profileSectionLabel">Order History</p>
@@ -272,7 +233,9 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
                 >
                   <span className="profileOrderProduct">{order.productName}</span>
                   <span className="profileOrderDate">{fmtDate(order.createdAt)}</span>
-                  <span className="profileOrderAmount">{fmt(order.amount)}</span>
+                  <span className="profileOrderAmount">
+                    {order.isGranted ? <em style={{ opacity: 0.35, fontStyle: "normal" }}>—</em> : fmt(order.amount)}
+                  </span>
                   <span
                     className="profileOrderStatus"
                     style={{ color: sc.color, borderColor: sc.color + "33", background: sc.color + "10" }}

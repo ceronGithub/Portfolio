@@ -192,10 +192,13 @@ export default function DownloadsClient({ downloads }: Props) {
                         </button>
                       ))
                     ) : (
-                      <button className="dlRowBtn dlRowBtnDisabled" disabled title="File not yet available">
-                        <span className="dlRowBtnIcon">⏳</span>
-                        <span>Pending</span>
-                      </button>
+                      <div className="dlPendingState">
+                        <span className="dlPendingIcon">⏳</span>
+                        <div className="dlPendingText">
+                          <p className="dlPendingTitle">Files being prepared</p>
+                          <p className="dlPendingSub">Admin will attach your download files. Check back soon.</p>
+                        </div>
+                      </div>
                     )}
                   </div>
 
