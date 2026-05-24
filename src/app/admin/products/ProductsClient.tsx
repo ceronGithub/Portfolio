@@ -708,73 +708,34 @@ function AddProductForm({ onProductCreated, onClose }: {
 // Each row is expandable to reveal the MediaEditor and isLatest toggle.
 // "Add New Product" button at top opens AddProductForm inline.
 function ProductsSection({
-  products, onToggle, togglingId,
+  products, onToggle, togglingId, onToggleLatest, togglingLatestId, onDelete, deletingId, onProductCreated,
 }: {
-  products: Product[];
-  onToggle: (id: string, current: boolean) => void;
-  togglingId: string | null;
+  products:         Product[];
+  onToggle:         (id: string, current: boolean) => void;
+  togglingId:       string | null;
+  onToggleLatest:   (id: string, current: boolean) => void;
+  togglingLatestId: string | null;
+  onDelete:         (id: string, name: string) => void;
+  deletingId:       string | null;
+  onProductCreated: (p: Product) => void;
 }) {
   const revealRef = useReveal();
-  const [expandedRow, setExpandedRow]     = useState<string | null>(null);
-  const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm]     = useState(false);
-  const [filterName, setFilterName]       = useState("");
+  const [expandedRow, setExpandedRow]       = useState<string | null>(null);
+  const [showAddForm, setShowAddForm]       = useState(false);
+  const [filterName, setFilterName]         = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-  const [filterStatus, setFilterStatus]   = useState("");
-  const [deletingId, setDeletingId]       = useState<string | null>(null);
-  const [productList, setProductList]     = useState<Product[]>(products);
+  const [filterStatus, setFilterStatus]     = useState("");
 
   // Filter products based on active filters
-  const filteredProducts = productList.filter(p => {
-    const nameMatch = filterName === "" || p.name.toLowerCase().includes(filterName.toLowerCase());
+  const filteredProducts = products.filter(p => {
+    const nameMatch     = filterName     === "" || p.name.toLowerCase().includes(filterName.toLowerCase());
     const categoryMatch = filterCategory === "" || p.category === filterCategory;
-    const statusMatch = filterStatus === "" || (filterStatus === "active" ? p.isActive : !p.isActive);
+    const statusMatch   = filterStatus   === "" || (filterStatus === "active" ? p.isActive : !p.isActive);
     return nameMatch && categoryMatch && statusMatch;
   });
 
   // Get unique categories from products
-  const uniqueCategories = Array.from(new Set(productList.map(p => p.category)));
-
-  function handleFieldSaved(productId: string, field: string, value: string | null) {
-    // This updates parent state through callback
-  }
-
-  async function handleToggleLatest(id: string, current: boolean) {
-    setTogglingLatest(id);
-    const ok = await toggleProductLatest(id, current);
-    if (ok) {
-      setProductList(prev => {
-        // Find the category of the toggled product
-        const target = prev.find(p => p.id === id);
-        if (!target) return prev;
-        return prev.map(p => {
-          if (p.id === id) return { ...p, isLatest: !current };
-          // Clear isLatest on siblings in same category when setting true
-          if (!current && p.category === target.category) return { ...p, isLatest: false };
-          return p;
-        });
-      });
-    }
-    setTogglingLatest(null);
-  }
-
-  async function handleDeleteProduct(id: string, name: string) {
-    if (!window.confirm(`Delete product "${name}"? This will also remove all associated orders and ownership records.`)) {
-      return;
-    }
-    setDeletingId(id);
-    const ok = await deleteProduct(id);
-    if (ok) {
-      setProductList(prev => prev.filter(p => p.id !== id));
-    } else {
-      alert("Failed to delete product. Try again.");
-    }
-    setDeletingId(null);
-  }
-
-  function handleProductCreated(newProduct: Product) {
-    setProductList(prev => [newProduct, ...prev]);
-  }
+  const uniqueCategories = Array.from(new Set(products.map(p => p.category)));
 
   return (
     <div className="apCard apReveal" ref={revealRef}>
@@ -797,7 +758,7 @@ function ProductsSection({
       {/* Add product inline form */}
       {showAddForm && (
         <AddProductForm
-          onProductCreated={handleProductCreated}
+          onProductCreated={onProductCreated}
           onClose={() => setShowAddForm(false)}
         />
       )}
@@ -857,11 +818,11 @@ function ProductsSection({
                 <button
                   className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}
                   style={{ fontSize: "0.72rem" }}
-                  onClick={() => handleToggleLatest(p.id, p.isLatest)}
-                  disabled={togglingLatest === p.id}
+                  onClick={() => onToggleLatest(p.id, p.isLatest)}
+                  disabled={togglingLatestId === p.id}
                   title="Toggle Latest Drop flag"
                 >
-                  {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
+                  {togglingLatestId === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
                 </button>
               </span>
               <span className="apCell">
@@ -887,7 +848,7 @@ function ProductsSection({
                 <button
                   className="apActionBtn apActionBtnDelete"
                   style={{ fontSize: "0.72rem" }}
-                  onClick={() => handleDeleteProduct(p.id, p.name)}
+                  onClick={() => onDelete(p.id, p.name)}
                   disabled={deletingId === p.id}
                   title="Delete this product permanently"
                 >
@@ -898,7 +859,7 @@ function ProductsSection({
             {/* Expanded media editor row */}
             {expandedRow === p.id && (
               <div className="apMediaEditorWrap">
-                <MediaEditor product={p} onFieldSaved={handleFieldSaved} />
+                <MediaEditor product={p} onFieldSaved={() => {}} />
               </div>
             )}
           </div>
@@ -1192,11 +1153,14 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
 
 // ── Main export ────────────────────────────────────────────────────────
 export default function ProductsClient({ products, systems }: Props) {
-  const [productList, setProductList]   = useState<Product[]>(products);
-  const [togglingId, setTogglingId]     = useState<string | null>(null);
+  const [productList, setProductList]       = useState<Product[]>(products);
+  const [togglingId, setTogglingId]         = useState<string | null>(null);
+  const [togglingLatestId, setTogglingLatestId] = useState<string | null>(null);
+  const [deletingId, setDeletingId]         = useState<string | null>(null);
   const [expandedSystem, setExpandedSystem] = useState<string | null>(null);
-  const headerRef                       = useReveal();
+  const headerRef                           = useReveal();
 
+  // Toggle isActive — single source of truth in parent
   async function handleToggleActive(id: string, current: boolean) {
     setTogglingId(id);
     const ok = await toggleProductActive(id, current);
@@ -1204,6 +1168,44 @@ export default function ProductsClient({ products, systems }: Props) {
       setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
     }
     setTogglingId(null);
+  }
+
+  // Toggle isLatest — clears siblings in same category when setting true
+  async function handleToggleLatest(id: string, current: boolean) {
+    setTogglingLatestId(id);
+    const ok = await toggleProductLatest(id, current);
+    if (ok) {
+      setProductList(prev => {
+        const target = prev.find(p => p.id === id);
+        if (!target) return prev;
+        return prev.map(p => {
+          if (p.id === id) return { ...p, isLatest: !current };
+          if (!current && p.category === target.category) return { ...p, isLatest: false };
+          return p;
+        });
+      });
+    }
+    setTogglingLatestId(null);
+  }
+
+  // Delete product with cascade
+  async function handleDeleteProduct(id: string, name: string) {
+    if (!window.confirm(`Delete product "${name}"? This will also remove all associated orders and ownership records.`)) {
+      return;
+    }
+    setDeletingId(id);
+    const ok = await deleteProduct(id);
+    if (ok) {
+      setProductList(prev => prev.filter(p => p.id !== id));
+    } else {
+      alert("Failed to delete product. Try again.");
+    }
+    setDeletingId(null);
+  }
+
+  // Add new product to top of list
+  function handleProductCreated(newProduct: Product) {
+    setProductList(prev => [newProduct, ...prev]);
   }
 
   return (
@@ -1215,7 +1217,7 @@ export default function ProductsClient({ products, systems }: Props) {
           <span className="apPageEyebrow">Admin</span>
           <h1 className="apPageTitle">Products & Systems</h1>
           <p className="apPageSubtitle">
-            {products.length} product{products.length !== 1 ? "s" : ""} &middot; {systems.length} system catalog{systems.length !== 1 ? "s" : ""}
+            {productList.length} product{productList.length !== 1 ? "s" : ""} &middot; {systems.length} system catalog{systems.length !== 1 ? "s" : ""}
           </p>
         </div>
         <p className="apPageDate">
@@ -1228,6 +1230,11 @@ export default function ProductsClient({ products, systems }: Props) {
         products={productList}
         onToggle={handleToggleActive}
         togglingId={togglingId}
+        onToggleLatest={handleToggleLatest}
+        togglingLatestId={togglingLatestId}
+        onDelete={handleDeleteProduct}
+        deletingId={deletingId}
+        onProductCreated={handleProductCreated}
       />
 
       {/* ── Systems Catalog ───────────────────────── */}
