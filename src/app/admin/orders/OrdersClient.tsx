@@ -1,8 +1,9 @@
 // OrdersClient.tsx — Orders table with filter tabs, full status control,
-// delivery note, and estimated delivery date.
+// delivery note, estimated delivery date, and buyer email notification via EmailJS.
 "use client";
 
 import { useState } from "react";
+import emailjs      from "@emailjs/browser";
 
 type OrderStatus =
   | "PAID" | "PENDING" | "FAILED"
@@ -24,14 +25,19 @@ interface Props { orders: Order[]; }
 
 type FilterTab = "ALL" | OrderStatus;
 
+// ── EmailJS config — reads from env ──────────────────────────────────
+const EMAILJS_SERVICE_ID  = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID  ?? "";
+const EMAILJS_PUBLIC_KEY  = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY  ?? "";
+const EMAILJS_STATUS_TEMPLATE = process.env.NEXT_PUBLIC_EMAILJS_ORDER_STATUS_TEMPLATE_ID ?? "";
+
 const filterTabs: { label: string; value: FilterTab }[] = [
-  { label: "All",           value: "ALL"           },
-  { label: "Paid",          value: "PAID"          },
-  { label: "Pending",       value: "PENDING"       },
-  { label: "Failed",        value: "FAILED"        },
-  { label: "In Dev",        value: "IN_DEVELOPMENT"},
-  { label: "In Testing",    value: "IN_TESTING"    },
-  { label: "Delivered",     value: "DELIVERED"     },
+  { label: "All",        value: "ALL"           },
+  { label: "Paid",       value: "PAID"          },
+  { label: "Pending",    value: "PENDING"       },
+  { label: "Failed",     value: "FAILED"        },
+  { label: "In Dev",     value: "IN_DEVELOPMENT"},
+  { label: "In Testing", value: "IN_TESTING"    },
+  { label: "Delivered",  value: "DELIVERED"     },
 ];
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -52,14 +58,40 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   DELIVERED:      "DELIVERED",
 };
 
+// Sends an order status email to the buyer via EmailJS.
+// Template variables: buyer_name, product_name, status, delivery_note, estimated_date.
+async function sendStatusEmail(order: Order, newStatus: OrderStatus): Promise<void> {
+  if (!EMAILJS_SERVICE_ID || !EMAILJS_STATUS_TEMPLATE || !EMAILJS_PUBLIC_KEY) return;
+
+  const estimatedDate = order.estimatedAt
+    ? new Date(order.estimatedAt).toLocaleDateString("en-PH", {
+        year: "numeric", month: "long", day: "numeric",
+      })
+    : "To be determined";
+
+  await emailjs.send(
+    EMAILJS_SERVICE_ID,
+    EMAILJS_STATUS_TEMPLATE,
+    {
+      buyer_name:     order.user.name ?? order.user.email,
+      product_name:   order.product.name,
+      status:         STATUS_LABEL[newStatus],
+      delivery_note:  order.deliveryNote ?? "No additional notes at this time.",
+      estimated_date: estimatedDate,
+      buyer_email:    order.user.email,
+    },
+    EMAILJS_PUBLIC_KEY
+  );
+}
+
 // ── Delivery info panel — note + estimated date ───────────────────────
 function DeliveryPanel({
   orderId, note, estimatedAt, onSaved,
 }: {
-  orderId: string;
-  note: string | null;
+  orderId:     string;
+  note:        string | null;
   estimatedAt: Date | null;
-  onSaved: (id: string, note: string | null, est: Date | null) => void;
+  onSaved:     (id: string, note: string | null, est: Date | null) => void;
 }) {
   const [noteVal, setNote] = useState(note ?? "");
   const [estVal,  setEst]  = useState(
@@ -182,34 +214,52 @@ function StatusSelector({
 
 // ── Main ──────────────────────────────────────────────────────────────
 export default function OrdersClient({ orders: initialOrders }: Props) {
-  const [orders,      setOrders]   = useState<Order[]>(initialOrders);
+  const [orders,       setOrders]  = useState<Order[]>(initialOrders);
   const [activeFilter, setFilter]  = useState<FilterTab>("ALL");
-  const [pendingId,   setPending]  = useState<string | null>(null);
-  const [expandedId,  setExpanded] = useState<string | null>(null);
-  const [toast,       setToast]    = useState<{ msg: string; type: "ok"|"err" } | null>(null);
+  const [pendingId,    setPending] = useState<string | null>(null);
+  const [expandedId,   setExpanded]= useState<string | null>(null);
+  const [toast,        setToast]   = useState<{ msg: string; type: "ok"|"err"|"info" } | null>(null);
 
   const filtered = activeFilter === "ALL"
     ? orders
     : orders.filter(o => o.status === activeFilter);
 
-  function showToast(msg: string, type: "ok"|"err") {
+  function showToast(msg: string, type: "ok"|"err"|"info") {
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), 3500);
   }
 
+  // Updates order status in DB then sends buyer email notification.
   async function handleStatusUpdate(orderId: string, newStatus: OrderStatus) {
     setPending(orderId);
+
     const res = await fetch(`/api/admin/orders/${orderId}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ status: newStatus }),
     });
+
     if (res.ok) {
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-      showToast(`Order updated to ${STATUS_LABEL[newStatus]}.`, "ok");
+      // Update local state first so delivery note is available for the email
+      const updatedOrder = orders.find(o => o.id === orderId);
+      setOrders(prev => prev.map(o =>
+        o.id === orderId ? { ...o, status: newStatus } : o
+      ));
+      showToast(`Status updated to ${STATUS_LABEL[newStatus]}.`, "ok");
+
+      // Send buyer notification email — non-blocking, silent on failure
+      if (updatedOrder) {
+        const orderWithNewStatus = { ...updatedOrder, status: newStatus };
+        sendStatusEmail(orderWithNewStatus, newStatus).then(() => {
+          showToast(`✉ Buyer notified: ${STATUS_LABEL[newStatus]}.`, "info");
+        }).catch(() => {
+          // Email failure is non-critical — do not disrupt admin workflow
+        });
+      }
     } else {
       showToast("Failed to update order.", "err");
     }
+
     setPending(null);
   }
 
