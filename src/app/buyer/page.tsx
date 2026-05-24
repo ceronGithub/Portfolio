@@ -6,6 +6,11 @@
 //   - Owned asset state (Task 3)
 //   - Architecture Asset Studio sections (Task 4)
 
+
+// force-dynamic ensures this page re-fetches from DB on every request
+// so isLatest changes from admin (via revalidatePath) are reflected immediately.
+export const dynamic = "force-dynamic";
+
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { prisma }           from "@/lib/prisma";

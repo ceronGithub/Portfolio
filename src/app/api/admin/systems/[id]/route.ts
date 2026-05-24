@@ -9,7 +9,7 @@ import { prisma }                    from "@/lib/prisma";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN") {
@@ -59,6 +59,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
 
-  const system = await prisma.system.update({ where: { id: params.id }, data });
+  const { id } = await params;
+  const system = await prisma.system.update({ where: { id }, data });
   return NextResponse.json({ system });
 }

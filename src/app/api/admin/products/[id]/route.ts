@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath }            from "next/cache";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body   = await req.json();
 
     // ── isLatest toggle ───────────────────────────────────────────────
@@ -44,7 +44,6 @@ export async function PATCH(
         data:  { isLatest: body.isLatest },
       });
       revalidatePath("/buyer", "layout");
-      revalidateTag("latest-products");
       return NextResponse.json({ product: updated });
     }
 
@@ -70,6 +69,7 @@ export async function PATCH(
     }
 
     const updated = await prisma.product.update({ where: { id }, data });
+    revalidatePath("/buyer", "layout");
     return NextResponse.json({ product: updated });
 
   } catch (err: any) {

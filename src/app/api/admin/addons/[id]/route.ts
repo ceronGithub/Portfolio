@@ -8,7 +8,7 @@ import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // ── Guard: Admin only ─────────────────────────────────────────────────────────
 async function requireAdmin() {
@@ -22,6 +22,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { id } = await params;
   const body    = await req.json();
   const allowed = ["label", "price", "category", "description"];
   const data: Record<string, unknown> = {};
@@ -30,7 +31,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   try {
-    const addon = await prisma.systemAddon.update({ where: { id: params.id }, data });
+    const addon = await prisma.systemAddon.update({ where: { id }, data });
     return NextResponse.json({ addon });
   } catch {
     return NextResponse.json({ error: "Addon not found" }, { status: 404 });
@@ -42,8 +43,9 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { id } = await params;
   try {
-    await prisma.systemAddon.delete({ where: { id: params.id } });
+    await prisma.systemAddon.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Addon not found" }, { status: 404 });
