@@ -168,6 +168,12 @@ function DeliveryPanel({
 
 // ── FileKeyPanel — admin attaches Supabase fileKey to buyer's Ownership record ──
 // Only shown when order status is DELIVERED. Writes to Ownership via PATCH /api/admin/unlock.
+const TIER_LABELS: Record<string, string> = {
+  mesh_only:  "Mesh Only (OBJ + FBX)",
+  standard:   "Standard (+ 5 Animations)",
+  full_pack:  "Full Pack (+ GLB + 7 Animations)",
+};
+
 function FileKeyPanel({
   userId, productId, onSaved,
 }: {
@@ -175,10 +181,11 @@ function FileKeyPanel({
   productId: string;
   onSaved:   () => void;
 }) {
-  const [fileKey, setFileKey] = useState("");
-  const [saving,  setSaving]  = useState(false);
-  const [saved,   setSaved]   = useState(false);
-  const [error,   setError]   = useState("");
+  const [fileKey,     setFileKey]     = useState("");
+  const [grantedTier, setGrantedTier] = useState("mesh_only");
+  const [saving,      setSaving]      = useState(false);
+  const [saved,       setSaved]       = useState(false);
+  const [error,       setError]       = useState("");
 
   async function handleAttach() {
     if (!fileKey.trim()) { setError("Enter a file key."); return; }
@@ -187,7 +194,7 @@ function FileKeyPanel({
     const res = await fetch("/api/admin/unlock", {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ userId, productId, fileKey: fileKey.trim() }),
+      body:    JSON.stringify({ userId, productId, fileKey: fileKey.trim(), grantedTier }),
     });
     if (res.ok) {
       setSaved(true);
@@ -229,13 +236,25 @@ function FileKeyPanel({
         Attach Download File
       </p>
       <p className="ordFileKeyPanelHint">
-        Paste the Supabase storage key for this product. Buyer sees it immediately on their Downloads page.
+        Select the tier granted, then paste the Supabase storage key. Buyer sees only files for their tier.
       </p>
+      <div className="ordFileKeyTierRow">
+        {Object.entries(TIER_LABELS).map(([val, label]) => (
+          <button
+            key={val}
+            className={`ordTierBtn ${grantedTier === val ? "ordTierBtnActive" : ""}`}
+            onClick={() => setGrantedTier(val)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="ordFileKeyRow">
         <input
           className="ordFileKeyInput"
           type="text"
-          placeholder="e.g. characters/orc-01/orc-01-full.zip"
+          placeholder="e.g. weapons/axe-01/axe-01-mesh.zip"
           value={fileKey}
           onChange={e => setFileKey(sanitize(e.target.value))}
           spellCheck={false}

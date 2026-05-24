@@ -408,3 +408,41 @@
     font-size: 0.82rem;
   }
 }
+/* ── Tier badge ───────────────────────────────── */
+.dlRowTier {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #c9a96e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Coming Soon state ────────────────────────── */
+.dlComingSoon {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+
+.dlComingSoonIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.dlComingSoonTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}
+
+.dlComingSoonSub {
+  font-size: 0.73rem;
+  color: rgba(255,255,255,0.25);
+  margin: 0.15rem 0 0;
+}

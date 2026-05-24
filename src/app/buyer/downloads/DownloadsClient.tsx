@@ -15,11 +15,37 @@ interface DownloadItem {
   name:        string;
   description: string;
   fileKey:     string | null;  // Admin-attached delivery key (Ownership.fileKey)
+  grantedTier: string;         // mesh_only | standard | full_pack
   fileKeyObj:  string | null;  // Product .obj mesh
   fileKeyFbx:  string | null;  // Product .fbx rigged
   fileKeyGlb:  string | null;  // Product .glb web/AR
   grantedAt:   string;
 }
+
+// Files available per tier
+function getTierFiles(item: DownloadItem): { label: string; key: string; ext: string }[] {
+  const files: { label: string; key: string; ext: string }[] = [];
+  const tier = item.grantedTier;
+
+  // Delivery package (admin-attached zip) always shown if present
+  if (item.fileKey) files.push({ label: "Package", key: item.fileKey, ext: "zip" });
+
+  // Mesh files — all tiers
+  if (item.fileKeyObj) files.push({ label: "OBJ", key: item.fileKeyObj, ext: "obj" });
+  if (item.fileKeyFbx) files.push({ label: "FBX", key: item.fileKeyFbx, ext: "fbx" });
+
+  // GLB — standard + full_pack only
+  if ((tier === "standard" || tier === "full_pack") && item.fileKeyGlb)
+    files.push({ label: "GLB", key: item.fileKeyGlb, ext: "glb" });
+
+  return files;
+}
+
+const TIER_LABEL: Record<string, string> = {
+  mesh_only:  "Mesh Only",
+  standard:   "Standard",
+  full_pack:  "Full Pack",
+};
 
 interface Props {
   downloads: DownloadItem[];
@@ -152,13 +178,7 @@ export default function DownloadsClient({ downloads }: Props) {
               const cat    = getCategory(item.name);
               const isBusy = downloading === item.id;
 
-              // Collect available files: admin delivery key + product mesh files
-              const files: { label: string; key: string; ext: string }[] = [];
-              if (item.fileKey)    files.push({ label: "Package",  key: item.fileKey,    ext: "zip" });
-              if (item.fileKeyObj) files.push({ label: "OBJ",      key: item.fileKeyObj, ext: "obj" });
-              if (item.fileKeyFbx) files.push({ label: "FBX",      key: item.fileKeyFbx, ext: "fbx" });
-              if (item.fileKeyGlb) files.push({ label: "GLB",      key: item.fileKeyGlb, ext: "glb" });
-
+              const files      = getTierFiles(item);
               const hasAnyFile = files.length > 0;
 
               return (
@@ -170,6 +190,8 @@ export default function DownloadsClient({ downloads }: Props) {
                     <p className="dlRowName">{item.name}</p>
                     <p className="dlRowMeta">
                       <span className="dlRowCat">{cat}</span>
+                      <span className="dlRowDot">·</span>
+                      <span className="dlRowTier">{TIER_LABEL[item.grantedTier] ?? item.grantedTier}</span>
                       <span className="dlRowDot">·</span>
                       <span className="dlRowDate">Purchased {formatDate(item.grantedAt)}</span>
                     </p>
@@ -193,11 +215,11 @@ export default function DownloadsClient({ downloads }: Props) {
                         </button>
                       ))
                     ) : (
-                      <div className="dlPendingState">
-                        <span className="dlPendingIcon">⏳</span>
-                        <div className="dlPendingText">
-                          <p className="dlPendingTitle">Files being prepared</p>
-                          <p className="dlPendingSub">Admin will attach your download files. Check back soon.</p>
+                      <div className="dlComingSoon">
+                        <span className="dlComingSoonIcon">🔒</span>
+                        <div className="dlComingSoonText">
+                          <p className="dlComingSoonTitle">Coming Soon</p>
+                          <p className="dlComingSoonSub">Files for your {TIER_LABEL[item.grantedTier] ?? ""} pack are being prepared.</p>
                         </div>
                       </div>
                     )}

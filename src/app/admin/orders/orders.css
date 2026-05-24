@@ -34,9 +34,9 @@
   line-height: 1;
 }
 
-.adminOrdersStripValuePaid { color: #38a169; }
+.adminOrdersStripValuePaid    { color: #38a169; }
 .adminOrdersStripValuePending { color: #d69e2e; }
-.adminOrdersStripValueFailed { color: #e53e3e; }
+.adminOrdersStripValueFailed  { color: #e53e3e; }
 .adminOrdersStripValueRevenue { color: #c9a96e; }
 
 .adminOrdersStripLabel {
@@ -172,21 +172,11 @@
 }
 
 .adminOrdersCellNameMain { font-weight: 600; }
-.adminOrdersCellNameEmail {
-  font-size: 0.75rem;
-  color: var(--sidebar-text, #888);
-  font-weight: 400;
-}
-.adminOrdersCellMuted {
-  color: var(--sidebar-text, #888);
-  font-weight: 400;
-}
-.adminOrdersCellMono {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
+.adminOrdersCellNameEmail { font-size: 0.75rem; color: var(--sidebar-text, #888); font-weight: 400; }
+.adminOrdersCellMuted { color: var(--sidebar-text, #888); font-weight: 400; }
+.adminOrdersCellMono  { font-variant-numeric: tabular-nums; font-weight: 600; }
 
-/* ── Status badges ────── */
+/* ── Status badges (shared with dashboard) ────── */
 .adminStatusBadge {
   display: inline-flex;
   align-items: center;
@@ -198,14 +188,11 @@
   letter-spacing: 0.05em;
 }
 
-.adminStatusBadgePAID { background: rgba(56,161,105,0.12); color: #2f855a; }
-.adminStatusBadgePENDING { background: rgba(246,173,85,0.12); color: #b7791f; }
-.adminStatusBadgeFAILED { background: rgba(229,62,62,0.1); color: #c53030; }
+.adminStatusBadgePAID    { background: rgba(56, 161, 105, 0.12); color: #2f855a; }
+.adminStatusBadgePENDING { background: rgba(246, 173, 85, 0.12); color: #b7791f; }
+.adminStatusBadgeFAILED  { background: rgba(229, 62, 62, 0.1);   color: #c53030; }
 
-.adminCellEmpty {
-  color: var(--sidebar-text, #bbb);
-  font-weight: 400;
-}
+.adminCellEmpty { color: var(--sidebar-text, #bbb); font-weight: 400; }
 
 .adminEmptyNote {
   font-size: 0.85rem;
@@ -215,22 +202,20 @@
 }
 
 .adminProductsPage * { font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif; }
+
 .adminOrdersPage * { font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif; }
 
-/* ── Status selector ─────────────────────────── */
+/* ── Status selector (task 4) ─────────────────── */
 .ordStatusWrap {
   position: relative;
   display: inline-flex;
 }
 
 .ordStatusBtn {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  display: flex; align-items: center; gap: 0.35rem;
   padding: 0.28rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.68rem; font-weight: 700;
   letter-spacing: 0.05em;
   border: 1px solid transparent;
   cursor: pointer;
@@ -239,15 +224,12 @@
   white-space: nowrap;
 }
 .ordStatusBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-.ordStatusBtn--paid { background: rgba(56,161,105,0.15); color: #68d391; border-color: rgba(56,161,105,0.25); }
-.ordStatusBtn--pending { background: rgba(246,173,85,0.15); color: #f6ad55; border-color: rgba(246,173,85,0.25); }
-.ordStatusBtn--failed { background: rgba(229,62,62,0.12); color: #fc8181; border-color: rgba(229,62,62,0.2); }
+.ordStatusBtn--paid    { background: rgba(56,161,105,0.15);  color: #68d391; border-color: rgba(56,161,105,0.25); }
+.ordStatusBtn--pending { background: rgba(246,173,85,0.15);  color: #f6ad55; border-color: rgba(246,173,85,0.25); }
+.ordStatusBtn--failed  { background: rgba(229,62,62,0.12);   color: #fc8181; border-color: rgba(229,62,62,0.2);  }
 
 .ordStatusDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
 }
 
 .ordStatusDropdown {
@@ -258,66 +240,54 @@
   border: 1px solid #2a2a2a;
   border-radius: 10px;
   padding: 0.3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   z-index: 50;
   min-width: 110px;
 }
 
 .ordStatusOption {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  display: flex; align-items: center; gap: 0.4rem;
   padding: 0.4rem 0.65rem;
   border-radius: 7px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border: none;
-  background: transparent;
+  font-size: 0.72rem; font-weight: 600;
+  border: none; background: transparent;
   cursor: pointer;
   font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
   transition: background 0.12s;
   white-space: nowrap;
 }
-.ordStatusOption--paid { color: #68d391; }
+.ordStatusOption--paid    { color: #68d391; }
 .ordStatusOption--pending { color: #f6ad55; }
-.ordStatusOption--failed { color: #fc8181; }
+.ordStatusOption--failed  { color: #fc8181; }
 .ordStatusOption:hover { background: rgba(255,255,255,0.05); }
 
 /* ── Toast ────────────────────────────────────── */
 .ordToast {
-  position: fixed;
-  bottom: 6rem;
-  right: 2rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  z-index: 999;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  position: fixed; bottom: 6rem; right: 2rem;
+  padding: 0.75rem 1.25rem; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 600;
+  z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   animation: ordToastIn 0.25s ease;
   font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
 }
-.ordToast--ok { background: #1a1a1a; color: #68d391; border: 1px solid rgba(104,211,145,0.25); }
-.ordToast--err { background: #1a1a1a; color: #fc8181; border: 1px solid rgba(252,129,129,0.25); }
+.ordToast--ok   { background: #1a1a1a; color: #68d391; border: 1px solid rgba(104,211,145,0.25); }
+.ordToast--err  { background: #1a1a1a; color: #fc8181; border: 1px solid rgba(252,129,129,0.25); }
 .ordToast--info { background: #1a1a1a; color: #63b3ed; border: 1px solid rgba(99,179,237,0.25); }
 @keyframes ordToastIn {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+/* ── New status variants (IN_DEVELOPMENT, IN_TESTING, DELIVERED) ─── */
+.ordStatusBtn--in_development { background: rgba(99,179,237,0.12);  color: #63b3ed; border-color: rgba(99,179,237,0.25); }
+.ordStatusBtn--in_testing     { background: rgba(183,148,244,0.12); color: #b794f4; border-color: rgba(183,148,244,0.25); }
+.ordStatusBtn--delivered      { background: rgba(201,169,110,0.12); color: #c9a96e; border-color: rgba(201,169,110,0.25); }
 
-/* ── New status variants ─── */
-.ordStatusBtn--in_development { background: rgba(99,179,237,0.12); color: #63b3ed; border-color: rgba(99,179,237,0.25); }
-.ordStatusBtn--in_testing { background: rgba(183,148,244,0.12); color: #b794f4; border-color: rgba(183,148,244,0.25); }
-.ordStatusBtn--delivered { background: rgba(201,169,110,0.12); color: #c9a96e; border-color: rgba(201,169,110,0.25); }
+.ordStatusOption--in_development:hover { background: rgba(99,179,237,0.12);  }
+.ordStatusOption--in_testing:hover     { background: rgba(183,148,244,0.12); }
+.ordStatusOption--delivered:hover      { background: rgba(201,169,110,0.12); }
 
-.ordStatusOption--in_development:hover { background: rgba(99,179,237,0.12); }
-.ordStatusOption--in_testing:hover { background: rgba(183,148,244,0.12); }
-.ordStatusOption--delivered:hover { background: rgba(201,169,110,0.12); }
-
-/* ── Row group ───────────────────────────────────────────────────── */
+/* ── Row group (row + optional delivery panel) ───────────────────── */
 .ordRowGroup {
   border-bottom: 1px solid var(--sidebar-border, #252525);
   display: flex;
@@ -326,7 +296,7 @@
 .ordRowGroup:last-child { border-bottom: none; }
 .ordRowGroup .adminOrdersTableRow { border-bottom: none; }
 
-/* ── Last cell ───────────────────────────────────────────────────── */
+/* ── Last cell — date + delivery toggle button ───────────────────── */
 .adminOrdersCellActions {
   display: flex;
   align-items: center;
@@ -355,18 +325,11 @@
   font-family: inherit;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.ordDeliveryToggleBtn:hover {
-  background: var(--nav-active-bg, #1e1e1e);
-  color: var(--content-color, #e8e4de);
-}
-.ordDeliveryToggleBtnOpen {
-  background: var(--nav-active-bg, #1e1e1e);
-  color: var(--content-color, #e8e4de);
-  border-color: rgba(201,169,110,0.3);
-}
-.ordDeliveryToggleBtnOpen svg { transform: rotate(180deg); }
-.ordDeliveryToggleBtnHasData { border-color: rgba(201,169,110,0.35); color: #c9a96e; }
-.ordDeliveryToggleBtnHasData:hover { background: rgba(201,169,110,0.08); }
+.ordDeliveryToggleBtn:hover            { background: var(--nav-active-bg, #1e1e1e); color: var(--content-color, #e8e4de); }
+.ordDeliveryToggleBtnOpen              { background: var(--nav-active-bg, #1e1e1e); color: var(--content-color, #e8e4de); border-color: rgba(201,169,110,0.3); }
+.ordDeliveryToggleBtnOpen svg          { transform: rotate(180deg); }
+.ordDeliveryToggleBtnHasData           { border-color: rgba(201,169,110,0.35); color: #c9a96e; }
+.ordDeliveryToggleBtnHasData:hover     { background: rgba(201,169,110,0.08); }
 
 /* ── Delivery panel ──────────────────────────────────────────────── */
 .ordDeliveryPanel {
@@ -395,7 +358,11 @@
   align-items: start;
 }
 
-.ordDeliveryField { display: flex; flex-direction: column; gap: 0.3rem; }
+.ordDeliveryField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
 
 .ordDeliveryLabel {
   font-size: 0.71rem;
@@ -419,7 +386,7 @@
   transition: border-color 0.15s ease;
 }
 .ordDeliveryTextarea::placeholder { color: var(--sidebar-text, #666); opacity: 0.6; }
-.ordDeliveryTextarea:focus { border-color: #c9a96e; }
+.ordDeliveryTextarea:focus         { border-color: #c9a96e; }
 
 .ordDeliveryInput {
   width: 100%;
@@ -437,7 +404,12 @@
 }
 .ordDeliveryInput:focus { border-color: #c9a96e; }
 
-.ordDeliveryError { font-size: 0.74rem; color: #fc8181; margin: 0; }
+.ordDeliveryError {
+  font-size: 0.74rem;
+  color: #fc8181;
+  margin: 0;
+}
+
 .ordDeliveryActions { display: flex; justify-content: flex-end; }
 
 .ordDeliverySaveBtn {
@@ -453,18 +425,17 @@
   transition: opacity 0.15s ease;
 }
 .ordDeliverySaveBtn:hover:not(:disabled) { opacity: 0.88; }
-.ordDeliverySaveBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ordDeliverySaveBtn:disabled             { opacity: 0.4; cursor: not-allowed; }
 
 @media (max-width: 640px) {
   .ordDeliveryPanelFields { grid-template-columns: 1fr; }
 }
-
-/* ── FileKeyPanel ─────────────────────────────────────────────────── */
+/* ── FileKeyPanel — attach Supabase fileKey after delivery ─────────── */
 .ordFileKeyPanel {
   margin: 0 1.5rem 1rem;
   padding: 1rem 1.25rem;
-  background: rgba(34,197,94,0.04);
-  border: 1px solid rgba(34,197,94,0.18);
+  background: rgba(34, 197, 94, 0.04);
+  border: 1px solid rgba(34, 197, 94, 0.18);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -511,7 +482,7 @@
   transition: border-color 0.15s ease;
 }
 .ordFileKeyInput::placeholder { color: var(--sidebar-text, #666); opacity: 0.6; }
-.ordFileKeyInput:focus { border-color: #68d391; }
+.ordFileKeyInput:focus         { border-color: #68d391; }
 
 .ordFileKeySaveBtn {
   background: #22c55e;
@@ -527,7 +498,7 @@
   transition: opacity 0.15s ease;
 }
 .ordFileKeySaveBtn:hover:not(:disabled) { opacity: 0.88; }
-.ordFileKeySaveBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ordFileKeySaveBtn:disabled             { opacity: 0.4; cursor: not-allowed; }
 
 .ordFileKeyClearBtn {
   background: transparent;
@@ -543,6 +514,39 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .ordFileKeyClearBtn:hover:not(:disabled) { border-color: #fc8181; color: #fc8181; }
-.ordFileKeyClearBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ordFileKeyClearBtn:disabled             { opacity: 0.4; cursor: not-allowed; }
 
-.ordFileKeyError { font-size: 0.74rem; color: #fc8181; margin: 0; }
+.ordFileKeyError {
+  font-size: 0.74rem;
+  color: #fc8181;
+  margin: 0;
+}
+/* ── Tier selector in FileKeyPanel ───────────────────────────────── */
+.ordFileKeyTierRow {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.ordTierBtn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 7px;
+  border: 1px solid var(--sidebar-border, #252525);
+  background: transparent;
+  color: var(--sidebar-text, #666);
+  font-size: 0.73rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ordTierBtn:hover {
+  border-color: #c9a96e;
+  color: #c9a96e;
+}
+.ordTierBtnActive {
+  background: rgba(201,169,110,0.12);
+  border-color: #c9a96e;
+  color: #c9a96e;
+}

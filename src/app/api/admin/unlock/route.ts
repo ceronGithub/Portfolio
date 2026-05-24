@@ -14,26 +14,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { userId, productId, fileKey } = await req.json();
+  const { userId, productId, fileKey, grantedTier } = await req.json();
   if (!userId || !productId) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Auto-resolve fileKey from Product if not provided by admin
-  let resolvedFileKey = fileKey ?? null;
-  if (!resolvedFileKey) {
-    const product = await prisma.product.findUnique({
-      where:  { id: productId },
-      select: { fileKeyObj: true, fileKeyFbx: true, fileKeyGlb: true },
-    });
-    // Use first available file key from product
-    resolvedFileKey = product?.fileKeyObj ?? product?.fileKeyFbx ?? product?.fileKeyGlb ?? null;
-  }
+  const tier = grantedTier ?? "mesh_only";
 
   const ownership = await (prisma.ownership as any).upsert({
     where:  { userId_productId: { userId, productId } },
-    update: { fileKey: resolvedFileKey },
-    create: { userId, productId, fileKey: resolvedFileKey },
+    update: { fileKey: fileKey ?? null, grantedTier: tier },
+    create: { userId, productId, fileKey: fileKey ?? null, grantedTier: tier },
   });
 
   return NextResponse.json({ ownership });
@@ -47,14 +38,17 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { userId, productId, fileKey } = await req.json();
+  const { userId, productId, fileKey, grantedTier } = await req.json();
   if (!userId || !productId) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
+  const data: any = { fileKey: fileKey ?? null };
+  if (grantedTier) data.grantedTier = grantedTier;
+
   const ownership = await (prisma.ownership as any).update({
     where: { userId_productId: { userId, productId } },
-    data:  { fileKey: fileKey ?? null },
+    data,
   });
 
   return NextResponse.json({ ownership });

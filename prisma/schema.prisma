@@ -114,11 +114,12 @@ model Order {
 }
 
 model Ownership {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  fileKey   String?  // Supabase storage key — set by admin after delivery
-  grantedAt DateTime @default(now())
+  id          String      @id @default(cuid())
+  userId      String
+  productId   String
+  fileKey     String?     // Supabase storage key — set by admin after delivery
+  grantedTier PackageTier @default(mesh_only) // Tier admin granted: mesh_only | standard | full_pack
+  grantedAt   DateTime    @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   product Product @relation(fields: [productId], references: [id])
