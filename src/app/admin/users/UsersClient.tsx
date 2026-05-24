@@ -78,6 +78,16 @@ async function grantUnlock(userId: string, productId: string): Promise<boolean> 
   return res.ok;
 }
 
+// Calls /api/admin/unlock (DELETE) to remove an Ownership record.
+async function revokeUnlock(userId: string, productId: string): Promise<boolean> {
+  const res = await fetch("/api/admin/unlock", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, productId }),
+  });
+  return res.ok;
+}
+
 // ── ManualUnlockModal — modal to grant a buyer access to a product ────
 // Admin picks a product from a custom dropdown with video preview;
 // calls /api/admin/unlock on confirm.
@@ -319,11 +329,21 @@ function ConfirmPopover({ message, danger, withReason, onConfirm, onCancel }: {
 
 // ── Card 1 — All Users ────────────────────────────────────────────────
 
-function AllUsersCard({ users, onUnlock }: {
+function AllUsersCard({ users, onUnlock, onOwnershipRevoked }: {
   users: User[];
   onUnlock: (user: User) => void;
+  onOwnershipRevoked: (userId: string, productId: string) => void;
 }) {
   const revealRef = useReveal();
+  const [revokingKey, setRevokingKey] = useState<string | null>(null);
+
+  async function handleRevoke(userId: string, productId: string) {
+    const key = `${userId}:${productId}`;
+    setRevokingKey(key);
+    const ok = await revokeUnlock(userId, productId);
+    if (ok) onOwnershipRevoked(userId, productId);
+    setRevokingKey(null);
+  }
 
   return (
     <div className="umCard" ref={revealRef}>
@@ -357,7 +377,19 @@ function AllUsersCard({ users, onUnlock }: {
             <span className="umCell umCellOwned">
               {u.ownership.length === 0
                 ? <em className="umNone">None</em>
-                : u.ownership.map(o => <span key={o.productId} className="umOwnedTag">{o.product.name}</span>)
+                : u.ownership.map(o => (
+                    <span key={o.productId} className="umOwnedTagRevoke">
+                      <span className="umOwnedTagName">{o.product.name}</span>
+                      <button
+                        className="umRevokeBtn"
+                        title={`Revoke ${o.product.name}`}
+                        disabled={revokingKey === `${u.id}:${o.productId}`}
+                        onClick={() => handleRevoke(u.id, o.productId)}
+                      >
+                        {revokingKey === `${u.id}:${o.productId}` ? "…" : "✕"}
+                      </button>
+                    </span>
+                  ))
               }
             </span>
             <span className="umCell">
@@ -625,6 +657,15 @@ export default function UsersClient({ initialUsers, initialLogs, products }: Pro
     showToast(`Access granted: ${productName}`, "ok");
   }
 
+  // Optimistically removes the revoked ownership from the target user in local state.
+  function handleOwnershipRevoked(userId: string, productId: string) {
+    setUsers(prev => prev.map(u => {
+      if (u.id !== userId) return u;
+      return { ...u, ownership: u.ownership.filter(o => o.productId !== productId) };
+    }));
+    showToast("Access revoked.", "ok");
+  }
+
   // Append a new log entry to local state immediately (optimistic)
   function appendLog(action: string, target: User, adminEmail: string, reason?: string) {
     const newLog: ActionLog = {
@@ -696,7 +737,7 @@ export default function UsersClient({ initialUsers, initialLogs, products }: Pro
 
       {toast && <div className={`umToast umToast--${toast.type}`}>{toast.msg}</div>}
       <div className="umRoot">
-        <AllUsersCard users={users} onUnlock={setUnlockTarget} />
+        <AllUsersCard users={users} onUnlock={setUnlockTarget} onOwnershipRevoked={handleOwnershipRevoked} />
         <ActiveUsersCard    users={activeUsers}    onAction={handleAction} pendingId={pendingId} />
         <NonActiveUsersCard users={nonActiveUsers} onAction={handleAction} pendingId={pendingId} />
         <ActionLogsCard  logs={logs} />

@@ -25,3 +25,23 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ownership });
 }
+
+// DELETE /api/admin/unlock
+// Admin-only. Removes an Ownership record, revoking product access from a user.
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { userId, productId } = await req.json();
+  if (!userId || !productId) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  await prisma.ownership.deleteMany({
+    where: { userId, productId },
+  });
+
+  return NextResponse.json({ ok: true });
+}

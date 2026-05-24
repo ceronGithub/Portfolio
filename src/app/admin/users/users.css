@@ -247,6 +247,44 @@
   border: 1px solid var(--sidebar-border);
 }
 
+/* Owned tag with inline revoke button */
+.umOwnedTagRevoke {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--nav-active-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  padding: 0.18rem 0.35rem 0.18rem 0.5rem;
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: var(--content-color);
+}
+
+.umOwnedTagName { line-height: 1; }
+
+.umRevokeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(252,129,129,0.5);
+  font-size: 0.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.15rem;
+  border-radius: 3px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.umRevokeBtn:hover:not(:disabled) {
+  color: #fc8181;
+  background: rgba(229,62,62,0.12);
+}
+
+.umRevokeBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
 .umOwnedCount {
   font-size: 0.78rem;
   font-weight: 600;
