@@ -4,7 +4,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import "./login.css";
 
@@ -23,10 +23,16 @@ const ARCH_VIDEOS = [
 ];
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const reason       = searchParams.get("reason");
+
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
+  const [error, setError]       = useState(
+    reason === "banned"      ? "Your account has been banned. Contact support." :
+    reason === "deactivated" ? "Your account has been deactivated. Contact support." : ""
+  );
   const [loading, setLoading]   = useState(false);
   const [vidIdx, setVidIdx]     = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
