@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { sanitize } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -67,15 +68,6 @@ async function toggleProductActive(id: string, current: boolean): Promise<boolea
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ isActive: !current }),
-  });
-  return res.ok;
-}
-
-// Deletes a product with cascade handling for orders and ownership.
-async function deleteProduct(id: string): Promise<boolean> {
-  const res = await fetch(`/api/admin/products/${id}`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
   });
   return res.ok;
 }
@@ -280,7 +272,7 @@ function SystemBasePriceEditor({ systemId, initialPrice, accent }: {
           className="apPriceInput"
           type="number" min="0"
           value={draft}
-          onChange={e => setDraft(e.target.value)}
+          onChange={e => setDraft(sanitize(e.target.value))}
           onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
           autoFocus
           style={{ borderColor: accent }}
@@ -338,7 +330,7 @@ function AddonPriceEditor({ addon, accent, onUpdated }: {
           className="apPriceInput apPriceInputSmall"
           type="number" min="0"
           value={draft}
-          onChange={e => setDraft(e.target.value)}
+          onChange={e => setDraft(sanitize(e.target.value))}
           onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
           autoFocus
           style={{ borderColor: accent }}
@@ -418,7 +410,7 @@ function AddAddonForm({ systemId, accent, onAdded }: {
           className="apAddAddonInput"
           placeholder="Label (e.g. AI Chatbot)"
           value={label}
-          onChange={e => setLabel(e.target.value)}
+          onChange={e => setLabel(sanitize(e.target.value))}
         />
         <input
           className="apAddAddonInput"
@@ -517,27 +509,16 @@ function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
 }) {
-  const buildDrafts = (p: Product) => Object.fromEntries(
+  const initialDrafts = Object.fromEntries(
     ALL_MEDIA_FIELDS.map(({ field }) => [
       field,
-      (p[field as keyof Product] as string | number | null) != null
-        ? String(p[field as keyof Product]) : ""
+      (product[field as keyof Product] as string | number | null) != null
+        ? String(product[field as keyof Product]) : ""
     ])
   );
-
-  const [drafts, setDrafts] = useState<Record<string, string>>(() => buildDrafts(product));
+  const [drafts, setDrafts] = useState<Record<string, string>>(initialDrafts);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved,  setSaved]  = useState<Record<string, boolean>>({});
-  const lastSavedField = useRef<{ field: string; value: string } | null>(null);
-
-  // When the product prop updates (after parent state change), sync only the
-  // field that was just saved — preserving all other unsaved draft edits.
-  useEffect(() => {
-    if (!lastSavedField.current) return;
-    const { field, value } = lastSavedField.current;
-    setDrafts(prev => ({ ...prev, [field]: value }));
-    lastSavedField.current = null;
-  }, [product]);
 
   async function handleSaveField(field: string, type?: "url" | "number") {
     const raw   = drafts[field].trim();
@@ -545,7 +526,6 @@ function MediaEditor({ product, onFieldSaved }: {
     setSaving(prev => ({ ...prev, [field]: true }));
     const ok = await patchProductMedia(product.id, field, value);
     if (ok) {
-      lastSavedField.current = { field, value: value ?? "" };
       onFieldSaved(product.id, field, value);
       setSaved(prev => ({ ...prev, [field]: true }));
       setTimeout(() => setSaved(prev => ({ ...prev, [field]: false })), 2200);
@@ -574,7 +554,7 @@ function MediaEditor({ product, onFieldSaved }: {
                   type={type === "number" ? "number" : "text"}
                   placeholder={placeholder ?? "Paste URL or leave empty to clear"}
                   value={drafts[field]}
-                  onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
+                  onChange={e => setDrafts(prev => ({ ...prev, [field]: sanitize(e.target.value) }))}
                   onKeyDown={e => { if (e.key === "Enter") handleSaveField(field, type); }}
                 />
                 <button
@@ -654,7 +634,7 @@ function AddProductForm({ onProductCreated, onClose }: {
       <div className="apAddProductGrid">
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Name *</label>
-          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(e.target.value)} />
+          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(sanitize(e.target.value))} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Price (₱) *</label>
@@ -671,7 +651,7 @@ function AddProductForm({ onProductCreated, onClose }: {
         </div>
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Description</label>
-          <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
+          <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(sanitize(e.target.value))} />
         </div>
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Preview Video URL</label>
@@ -720,35 +700,66 @@ function AddProductForm({ onProductCreated, onClose }: {
 // Each row is expandable to reveal the MediaEditor and isLatest toggle.
 // "Add New Product" button at top opens AddProductForm inline.
 function ProductsSection({
-  products, onToggle, togglingId, onToggleLatest, togglingLatestId, onDelete, deletingId, onProductCreated, onFieldSaved,
+  products, onToggle, togglingId,
 }: {
-  products:         Product[];
-  onToggle:         (id: string, current: boolean) => void;
-  togglingId:       string | null;
-  onToggleLatest:   (id: string, current: boolean) => void;
-  togglingLatestId: string | null;
-  onDelete:         (id: string, name: string) => void;
-  deletingId:       string | null;
-  onProductCreated: (p: Product) => void;
-  onFieldSaved:     (id: string, field: string, value: string | null) => void;
+  products: Product[];
+  onToggle: (id: string, current: boolean) => void;
+  togglingId: string | null;
 }) {
   const revealRef = useReveal();
+  const [productList, setProductList]       = useState<Product[]>(products);
   const [expandedRow, setExpandedRow]       = useState<string | null>(null);
+  const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
   const [showAddForm, setShowAddForm]       = useState(false);
-  const [filterName, setFilterName]         = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterStatus, setFilterStatus]     = useState("");
 
-  // Filter products based on active filters
-  const filteredProducts = products.filter(p => {
-    const nameMatch     = filterName     === "" || p.name.toLowerCase().includes(filterName.toLowerCase());
-    const categoryMatch = filterCategory === "" || p.category === filterCategory;
-    const statusMatch   = filterStatus   === "" || (filterStatus === "active" ? p.isActive : !p.isActive);
-    return nameMatch && categoryMatch && statusMatch;
+  // ── Column filters ────────────────────────────────────────────────
+  const [filterName,     setFilterName]     = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterPrice,    setFilterPrice]    = useState("");
+  const [filterLatest,   setFilterLatest]   = useState<"" | "latest" | "not">(""); 
+  const [filterStatus,   setFilterStatus]   = useState<"" | "active" | "inactive">("");
+
+  // Derives the visible list by applying all active column filters.
+  const filteredList = productList.filter(p => {
+    if (filterName     && !p.name.toLowerCase().includes(filterName.toLowerCase())) return false;
+    if (filterCategory && p.category.toLowerCase() !== filterCategory.toLowerCase()) return false;
+    if (filterPrice    && !String(p.price).includes(filterPrice)) return false;
+    if (filterLatest   === "latest"   && !p.isLatest)  return false;
+    if (filterLatest   === "not"      && p.isLatest)   return false;
+    if (filterStatus   === "active"   && !p.isActive)  return false;
+    if (filterStatus   === "inactive" && p.isActive)   return false;
+    return true;
   });
 
-  // Get unique categories from products
-  const uniqueCategories = Array.from(new Set(products.map(p => p.category)));
+  const uniqueCategories = [...new Set(productList.map(p => p.category))].sort();
+
+  function handleFieldSaved(productId: string, field: string, value: string | null) {
+    setProductList(prev => prev.map(p =>
+      p.id === productId ? { ...p, [field]: value } : p
+    ));
+  }
+
+  async function handleToggleLatest(id: string, current: boolean) {
+    setTogglingLatest(id);
+    const ok = await toggleProductLatest(id, current);
+    if (ok) {
+      setProductList(prev => {
+        const target = prev.find(p => p.id === id);
+        return prev.map(p => {
+          if (p.id === id) return { ...p, isLatest: !current };
+          if (!current && p.category === target?.category) return { ...p, isLatest: false };
+          return p;
+        });
+      });
+    }
+    setTogglingLatest(null);
+  }
+
+  function handleProductCreated(newProduct: Product) {
+    setProductList(prev => [newProduct, ...prev]);
+  }
+
+  const hasActiveFilters = filterName || filterCategory || filterPrice || filterLatest || filterStatus;
 
   return (
     <div className="apCard apReveal" ref={revealRef}>
@@ -757,7 +768,7 @@ function ProductsSection({
           <h2 className="apCardTitle">Products</h2>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span className="apCardBadge">{products.length}</span>
+          <span className="apCardBadge">{filteredList.length}{hasActiveFilters ? ` / ${productList.length}` : ""}</span>
           <button
             className="apPriceSaveBtn"
             onClick={() => setShowAddForm(prev => !prev)}
@@ -771,57 +782,109 @@ function ProductsSection({
       {/* Add product inline form */}
       {showAddForm && (
         <AddProductForm
-          onProductCreated={onProductCreated}
+          onProductCreated={handleProductCreated}
           onClose={() => setShowAddForm(false)}
         />
       )}
 
-      {/* Filter Row */}
-      <div className="apTableFilterRow">
-        <input
-          className="apTableFilterInput"
-          type="text"
-          placeholder="Filter by name…"
-          value={filterName}
-          onChange={e => setFilterName(e.target.value)}
-        />
-        <select
-          className="apTableFilterSelect"
-          value={filterCategory}
-          onChange={e => setFilterCategory(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {uniqueCategories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-        <select
-          className="apTableFilterSelect"
-          value={filterStatus}
-          onChange={e => setFilterStatus(e.target.value)}
-        >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
-
       <div className="apTable">
+        {/* ── Column headers ── */}
         <div className="apTableHead apGrid--productsV2">
           <span>Name</span><span>Category</span><span>Price</span>
           <span>Latest</span><span>Status</span><span>Actions</span>
         </div>
-        {filteredProducts.length === 0 && (
+
+        {/* ── Column filter row ── */}
+        <div className="apFilterRow apGrid--productsV2">
+          {/* Name filter */}
+          <div className="apFilterCell">
+            <input
+              className="apFilterInput"
+              placeholder="Filter name…"
+              value={filterName}
+              onChange={e => setFilterName(sanitize(e.target.value))}
+            />
+            {filterName && <button className="apFilterClear" onClick={() => setFilterName("")}>✕</button>}
+          </div>
+
+          {/* Category filter */}
+          <div className="apFilterCell">
+            <select
+              className="apFilterSelect"
+              value={filterCategory}
+              onChange={e => setFilterCategory(e.target.value)}
+            >
+              <option value="">All</option>
+              {uniqueCategories.map(c => (
+                <option key={c} value={c} style={{ textTransform: "capitalize" }}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Price filter */}
+          <div className="apFilterCell">
+            <input
+              className="apFilterInput"
+              placeholder="Filter price…"
+              value={filterPrice}
+              onChange={e => setFilterPrice(sanitize(e.target.value))}
+            />
+            {filterPrice && <button className="apFilterClear" onClick={() => setFilterPrice("")}>✕</button>}
+          </div>
+
+          {/* Latest filter */}
+          <div className="apFilterCell">
+            <select
+              className="apFilterSelect"
+              value={filterLatest}
+              onChange={e => setFilterLatest(e.target.value as "" | "latest" | "not")}
+            >
+              <option value="">All</option>
+              <option value="latest">Latest</option>
+              <option value="not">Not Latest</option>
+            </select>
+          </div>
+
+          {/* Status filter */}
+          <div className="apFilterCell">
+            <select
+              className="apFilterSelect"
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value as "" | "active" | "inactive")}
+            >
+              <option value="">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          {/* Clear all filters */}
+          <div className="apFilterCell">
+            {hasActiveFilters && (
+              <button
+                className="apFilterClearAll"
+                onClick={() => {
+                  setFilterName(""); setFilterCategory("");
+                  setFilterPrice(""); setFilterLatest(""); setFilterStatus("");
+                }}
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+
+        {filteredList.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
               <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
             </svg>
-            <p className="apEmptyTitle">No products found</p>
-            <p className="apEmptyHint">{products.length === 0 ? 'Click "Add New Product" above to create one.' : "Try adjusting your filters."}</p>
+            <p className="apEmptyTitle">{hasActiveFilters ? "No products match" : "No products yet"}</p>
+            <p className="apEmptyHint">{hasActiveFilters ? "Try adjusting your filters." : "Click \"Add New Product\" above to create one."}</p>
           </div>
         )}
-        {filteredProducts.map(p => (
+        {filteredList.map(p => (
           <div key={p.id}>
             <div className="apTableRow apGrid--productsV2">
               <span className="apCell apCellName">{p.name}</span>
@@ -831,11 +894,11 @@ function ProductsSection({
                 <button
                   className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}
                   style={{ fontSize: "0.72rem" }}
-                  onClick={() => onToggleLatest(p.id, p.isLatest)}
-                  disabled={togglingLatestId === p.id}
+                  onClick={() => handleToggleLatest(p.id, p.isLatest)}
+                  disabled={togglingLatest === p.id}
                   title="Toggle Latest Drop flag"
                 >
-                  {togglingLatestId === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
+                  {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
                 </button>
               </span>
               <span className="apCell">
@@ -858,21 +921,12 @@ function ProductsSection({
                 >
                   {expandedRow === p.id ? "▲ Media" : "✎ Media"}
                 </button>
-                <button
-                  className="apActionBtn apActionBtnDelete"
-                  style={{ fontSize: "0.72rem" }}
-                  onClick={() => onDelete(p.id, p.name)}
-                  disabled={deletingId === p.id}
-                  title="Delete this product permanently"
-                >
-                  {deletingId === p.id ? "…" : "✕ Delete"}
-                </button>
               </span>
             </div>
             {/* Expanded media editor row */}
             {expandedRow === p.id && (
               <div className="apMediaEditorWrap">
-                <MediaEditor product={p} onFieldSaved={onFieldSaved} />
+                <MediaEditor product={p} onFieldSaved={handleFieldSaved} />
               </div>
             )}
           </div>
@@ -1166,66 +1220,16 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
 
 // ── Main export ────────────────────────────────────────────────────────
 export default function ProductsClient({ products, systems }: Props) {
-  const [productList, setProductList]       = useState<Product[]>(products);
-  const [togglingId, setTogglingId]         = useState<string | null>(null);
-  const [togglingLatestId, setTogglingLatestId] = useState<string | null>(null);
-  const [deletingId, setDeletingId]         = useState<string | null>(null);
+  const [productList, setProductList]   = useState<Product[]>(products);
+  const [togglingId, setTogglingId]     = useState<string | null>(null);
   const [expandedSystem, setExpandedSystem] = useState<string | null>(null);
-  const headerRef                           = useReveal();
+  const headerRef                       = useReveal();
 
-  // Toggle isActive — single source of truth in parent
   async function handleToggleActive(id: string, current: boolean) {
     setTogglingId(id);
     const ok = await toggleProductActive(id, current);
-    if (ok) {
-      setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
-    }
+    if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
     setTogglingId(null);
-  }
-
-  // Toggle isLatest — clears siblings in same category when setting true
-  async function handleToggleLatest(id: string, current: boolean) {
-    setTogglingLatestId(id);
-    const ok = await toggleProductLatest(id, current);
-    if (ok) {
-      setProductList(prev => {
-        const target = prev.find(p => p.id === id);
-        if (!target) return prev;
-        return prev.map(p => {
-          if (p.id === id) return { ...p, isLatest: !current };
-          if (!current && p.category === target.category) return { ...p, isLatest: false };
-          return p;
-        });
-      });
-    }
-    setTogglingLatestId(null);
-  }
-
-  // Delete product with cascade
-  async function handleDeleteProduct(id: string, name: string) {
-    if (!window.confirm(`Delete product "${name}"? This will also remove all associated orders and ownership records.`)) {
-      return;
-    }
-    setDeletingId(id);
-    const ok = await deleteProduct(id);
-    if (ok) {
-      setProductList(prev => prev.filter(p => p.id !== id));
-    } else {
-      alert("Failed to delete product. Try again.");
-    }
-    setDeletingId(null);
-  }
-
-  // Update a media field on a product in local state after save
-  function handleFieldSaved(id: string, field: string, value: string | null) {
-    setProductList(prev => prev.map(p =>
-      p.id === id ? { ...p, [field]: value } : p
-    ));
-  }
-
-  // Add new product to top of list
-  function handleProductCreated(newProduct: Product) {
-    setProductList(prev => [newProduct, ...prev]);
   }
 
   return (
@@ -1237,7 +1241,7 @@ export default function ProductsClient({ products, systems }: Props) {
           <span className="apPageEyebrow">Admin</span>
           <h1 className="apPageTitle">Products & Systems</h1>
           <p className="apPageSubtitle">
-            {productList.length} product{productList.length !== 1 ? "s" : ""} &middot; {systems.length} system catalog{systems.length !== 1 ? "s" : ""}
+            {products.length} product{products.length !== 1 ? "s" : ""} &middot; {systems.length} system catalog{systems.length !== 1 ? "s" : ""}
           </p>
         </div>
         <p className="apPageDate">
@@ -1250,12 +1254,6 @@ export default function ProductsClient({ products, systems }: Props) {
         products={productList}
         onToggle={handleToggleActive}
         togglingId={togglingId}
-        onToggleLatest={handleToggleLatest}
-        togglingLatestId={togglingLatestId}
-        onDelete={handleDeleteProduct}
-        deletingId={deletingId}
-        onProductCreated={handleProductCreated}
-        onFieldSaved={handleFieldSaved}
       />
 
       {/* ── Systems Catalog ───────────────────────── */}

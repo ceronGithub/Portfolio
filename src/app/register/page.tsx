@@ -5,7 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import "./register.css";
+import { sanitize } from "@/lib/utils";
 
 const WEAPON_VIDEOS = [
   "/weapon_character/axe-01-animation.mp4",
@@ -119,7 +119,7 @@ export default function RegisterPage() {
   }, [vidIdx]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: sanitize(e.target.value) });
   }
 
   async function handleSubmit(e: React.FormEvent) {

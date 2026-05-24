@@ -8,6 +8,7 @@
 import { useState }  from "react";
 import emailjs       from "@emailjs/browser";
 import "./inquiry-section.css";
+import { sanitize } from "@/lib/utils";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -55,7 +56,7 @@ export default function InquirySection() {
   const [status, setStatus] = useState<Status>("idle");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm(prev => ({ ...prev, [e.target.name]: sanitize(e.target.value) }));
   }
 
   async function handleSubmit() {

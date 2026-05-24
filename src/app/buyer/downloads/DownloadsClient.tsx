@@ -7,6 +7,7 @@
 
 import { useState, useMemo } from "react";
 import "./downloads.css";
+import { sanitize } from "@/lib/utils";
 
 interface DownloadItem {
   id:          string;
@@ -109,7 +110,7 @@ export default function DownloadsClient({ downloads }: Props) {
               type="text"
               placeholder="Search your library…"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => setSearch(sanitize(e.target.value))}
             />
             {search && (
               <button className="dlSearchClear" onClick={() => setSearch("")}>✕</button>

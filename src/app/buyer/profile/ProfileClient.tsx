@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from "react";
 import DeliveryTracker         from "./DeliveryTracker";
+import { sanitize }            from "@/lib/utils";
 import "./profile.css";
 
 interface Order {
@@ -127,7 +128,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
               <input
                 className="profileNameInput"
                 value={editVal}
-                onChange={e => setEditVal(e.target.value)}
+                onChange={e => setEditVal(sanitize(e.target.value))}
                 onKeyDown={e => {
                   if (e.key === "Enter")  saveName();
                   if (e.key === "Escape") setEditing(false);

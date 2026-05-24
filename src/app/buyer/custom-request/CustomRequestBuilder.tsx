@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import "./custom-request-builder.css";
+import { sanitize } from "@/lib/utils";
 
 type AssetType     = "Character" | "Weapon" | "System" | "Other";
 type PolyBudget    = "Low (game-ready)" | "Mid (cinematic)" | "High (hero asset)";
@@ -223,7 +224,7 @@ export default function CustomRequestBuilder() {
                     value={form.description}
                     maxLength={600}
                     rows={4}
-                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    onChange={e => setForm(f => ({ ...f, description: sanitize(e.target.value) }))}
                   />
                   <span className="crbCharCount">{form.description.length}/600</span>
                 </div>
@@ -266,7 +267,7 @@ export default function CustomRequestBuilder() {
                     type="text"
                     placeholder="ArtStation, Pinterest, Google Drive…"
                     value={form.reference}
-                    onChange={e => setForm(f => ({ ...f, reference: e.target.value }))}
+                    onChange={e => setForm(f => ({ ...f, reference: sanitize(e.target.value) }))}
                   />
                 </div>
 

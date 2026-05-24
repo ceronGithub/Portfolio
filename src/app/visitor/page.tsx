@@ -9,6 +9,7 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
 import { ArchitectureIntroSection, ArchitectureVideosSection } from "./architecture";
 import { ModelingIntro, ModelingMagazine } from "./modeling";
+import { sanitize } from "@/lib/utils";
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
 
@@ -1750,12 +1751,12 @@ function TestimonialsSection() {
                 <div className="tFormField">
                   <label className="tFormLabel">Your name</label>
                   <input className="tFormInput" placeholder="e.g. Juan dela Cruz" value={form.name}
-                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                    onChange={e => setForm(f => ({ ...f, name: sanitize(e.target.value) }))} />
                 </div>
                 <div className="tFormField">
                   <label className="tFormLabel">Project / System</label>
                   <input className="tFormInput" placeholder="e.g. Inventory Control System" value={form.project}
-                    onChange={e => setForm(f => ({ ...f, project: e.target.value }))} />
+                    onChange={e => setForm(f => ({ ...f, project: sanitize(e.target.value) }))} />
                 </div>
               </div>
               <div className="tFormField">
@@ -1766,7 +1767,7 @@ function TestimonialsSection() {
               <div className="tFormField">
                 <label className="tFormLabel">Your comment</label>
                 <textarea className="tFormTextarea" rows={3} placeholder="Tell us about your experience..."
-                  value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} />
+                  value={form.comment} onChange={e => setForm(f => ({ ...f, comment: sanitize(e.target.value) }))} />
               </div>
               <div className="tFormActions">
                 <button className="tFormCancel" onClick={() => setShowForm(false)}>Cancel</button>

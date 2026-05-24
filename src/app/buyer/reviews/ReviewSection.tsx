@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import "./review-section.css";
+import { sanitize } from "@/lib/utils";
 
 // ── Asset label map ────────────────────────────────────────────────────────
 const ASSET_LABELS: Record<string, string> = {
@@ -214,7 +215,7 @@ export default function ReviewSection({ ownedProductIds }: Props) {
               <select
                 className="rvFormSelect"
                 value={formAsset}
-                onChange={e => setFormAsset(e.target.value)}
+                onChange={e => setFormAsset(sanitize(e.target.value))}
               >
                 {ownedProductIds.map(id => (
                   <option key={id} value={id}>{assetLabel(id)}</option>
@@ -232,7 +233,7 @@ export default function ReviewSection({ ownedProductIds }: Props) {
                 value={formText}
                 maxLength={500}
                 rows={3}
-                onChange={e => setFormText(e.target.value)}
+                onChange={e => setFormText(sanitize(e.target.value))}
               />
               <span className="rvFormCharCount">{formText.length}/500</span>
 

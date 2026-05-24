@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { sanitize } from "@/lib/utils";
 import Link from "next/link";
 import "./login.css";
 
@@ -232,7 +233,7 @@ export default function LoginPage() {
                 className="authInput"
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => setEmail(sanitize(e.target.value))}
                 required
                 placeholder="you@example.com"
                 autoComplete="email"
@@ -246,7 +247,7 @@ export default function LoginPage() {
                 className="authInput"
                 type="password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={e => setPassword(sanitize(e.target.value))}
                 required
                 placeholder="••••••••"
                 autoComplete="current-password"

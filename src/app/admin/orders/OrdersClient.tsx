@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import emailjs      from "@emailjs/browser";
+import { sanitize } from "@/lib/utils";
 
 type OrderStatus =
   | "PAID" | "PENDING" | "FAILED"
@@ -138,7 +139,7 @@ function DeliveryPanel({
             rows={2}
             placeholder="e.g. Currently building the HR module…"
             value={noteVal}
-            onChange={e => setNote(e.target.value)}
+            onChange={e => setNote(sanitize(e.target.value))}
           />
         </div>
         <div className="ordDeliveryField">
@@ -236,7 +237,7 @@ function FileKeyPanel({
           type="text"
           placeholder="e.g. characters/orc-01/orc-01-full.zip"
           value={fileKey}
-          onChange={e => setFileKey(e.target.value)}
+          onChange={e => setFileKey(sanitize(e.target.value))}
           spellCheck={false}
         />
         <button

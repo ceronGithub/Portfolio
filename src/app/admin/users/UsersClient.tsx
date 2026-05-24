@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { sanitize } from "@/lib/utils";
 
 // ── useReveal — IntersectionObserver entrance animation ───────────────
 // Adds "umVisible" class when the element enters the viewport.
@@ -311,7 +312,7 @@ function ConfirmPopover({ message, danger, withReason, onConfirm, onCancel }: {
           type="text"
           placeholder="Reason (optional)"
           value={reason}
-          onChange={e => setReason(e.target.value)}
+          onChange={e => setReason(sanitize(e.target.value))}
         />
       )}
       <div className="umConfirmBtns">
@@ -434,7 +435,7 @@ function ActiveUsersCard({ users, onAction, pendingId }: {
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         <input className="umSearchInput" placeholder="Search by name or email..."
-          value={search} onChange={e => setSearch(e.target.value)} />
+          value={search} onChange={e => setSearch(sanitize(e.target.value))} />
         {search && <button className="umSearchClear" onClick={() => setSearch("")}>✕</button>}
       </div>
       <div className="umTable">
