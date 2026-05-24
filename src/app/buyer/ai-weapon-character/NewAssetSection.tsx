@@ -13,8 +13,24 @@ interface LatestProduct {
   name:            string;
   price:           number;
   category:        string;
+  packageTier:     string;
   previewVideoUrl: string | null;
   facePngUrl:      string | null;
+}
+
+// What's included per tier
+function getIncludes(tier: string, category: string): string[] {
+  const isWeapon = category === "weapon";
+  if (tier === "mesh_only") return isWeapon
+    ? ["OBJ mesh", "FBX file", "4K PBR textures"]
+    : ["OBJ mesh", "FBX file", "4K PBR textures", "No rig"];
+  if (tier === "standard") return isWeapon
+    ? ["OBJ + FBX", "4K PBR textures", "5 animation clips"]
+    : ["OBJ + FBX", "4K PBR textures", "Rig included", "5 animations (Idle, Walk, Run, Attack ×2)"];
+  // full_pack
+  return isWeapon
+    ? ["OBJ + FBX", "GLB (web/AR)", "4K PBR textures", "7 animations"]
+    : ["OBJ + FBX + GLB", "4K PBR textures", "Full rig", "7 animations (Idle, Walk, Run, Attack ×2, Death, Hit)"];
 }
 
 interface Props {
@@ -189,6 +205,11 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
                 <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn">
                   Buy Now →
                 </a>
+                <ul className="newAssetCardIncludes">
+                  {getIncludes(latestChar.packageTier, latestChar.category).map(item => (
+                    <li key={item}><span className="newAssetIncludeCheck">✓</span>{item}</li>
+                  ))}
+                </ul>
               </div>
             </div>
           )}
@@ -211,6 +232,11 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
                 <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn">
                   Buy Now →
                 </a>
+                <ul className="newAssetCardIncludes">
+                  {getIncludes(latestWeapon.packageTier, latestWeapon.category).map(item => (
+                    <li key={item}><span className="newAssetIncludeCheck">✓</span>{item}</li>
+                  ))}
+                </ul>
               </div>
             </div>
           )}

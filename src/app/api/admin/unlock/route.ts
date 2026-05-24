@@ -19,10 +19,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
+  // Auto-resolve fileKey from Product if not provided by admin
+  let resolvedFileKey = fileKey ?? null;
+  if (!resolvedFileKey) {
+    const product = await prisma.product.findUnique({
+      where:  { id: productId },
+      select: { fileKeyObj: true, fileKeyFbx: true, fileKeyGlb: true },
+    });
+    // Use first available file key from product
+    resolvedFileKey = product?.fileKeyObj ?? product?.fileKeyFbx ?? product?.fileKeyGlb ?? null;
+  }
+
   const ownership = await (prisma.ownership as any).upsert({
     where:  { userId_productId: { userId, productId } },
-    update: fileKey !== undefined ? { fileKey: fileKey ?? null } : {},
-    create: { userId, productId, fileKey: fileKey ?? null },
+    update: { fileKey: resolvedFileKey },
+    create: { userId, productId, fileKey: resolvedFileKey },
   });
 
   return NextResponse.json({ ownership });
