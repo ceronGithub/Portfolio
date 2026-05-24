@@ -432,3 +432,94 @@
 @media (max-width: 640px) {
   .ordDeliveryPanelFields { grid-template-columns: 1fr; }
 }
+/* ── FileKeyPanel — attach Supabase fileKey after delivery ─────────── */
+.ordFileKeyPanel {
+  margin: 0 1.5rem 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(34, 197, 94, 0.04);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ordFileKeyPanelTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #68d391;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.ordFileKeyPanelHint {
+  font-size: 0.74rem;
+  color: var(--sidebar-text, #666);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ordFileKeyRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ordFileKeyInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 7px;
+  background: var(--sidebar-bg, #141414);
+  color: var(--content-color, #e8e4de);
+  font-family: monospace;
+  font-size: 0.79rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+.ordFileKeyInput::placeholder { color: var(--sidebar-text, #666); opacity: 0.6; }
+.ordFileKeyInput:focus         { border-color: #68d391; }
+
+.ordFileKeySaveBtn {
+  background: #22c55e;
+  border: none;
+  border-radius: 7px;
+  color: #0d0d0d;
+  padding: 0.42rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+.ordFileKeySaveBtn:hover:not(:disabled) { opacity: 0.88; }
+.ordFileKeySaveBtn:disabled             { opacity: 0.4; cursor: not-allowed; }
+
+.ordFileKeyClearBtn {
+  background: transparent;
+  border: 1px solid var(--sidebar-border, #252525);
+  border-radius: 7px;
+  color: var(--sidebar-text, #666);
+  padding: 0.42rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.ordFileKeyClearBtn:hover:not(:disabled) { border-color: #fc8181; color: #fc8181; }
+.ordFileKeyClearBtn:disabled             { opacity: 0.4; cursor: not-allowed; }
+
+.ordFileKeyError {
+  font-size: 0.74rem;
+  color: #fc8181;
+  margin: 0;
+}

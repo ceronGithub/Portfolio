@@ -117,6 +117,7 @@ model Ownership {
   id        String   @id @default(cuid())
   userId    String
   productId String
+  fileKey   String?  // Supabase storage key — set by admin after delivery
   grantedAt DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])

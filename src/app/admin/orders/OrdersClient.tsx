@@ -17,8 +17,9 @@ interface Order {
   createdAt:       Date;
   deliveryNote:    string | null;
   estimatedAt:     Date | null;
+  userId:          string;
   user:            { name: string | null; email: string };
-  product:         { name: string };
+  product:         { id: string; name: string };
 }
 
 interface Props { orders: Order[]; }
@@ -160,6 +161,101 @@ function DeliveryPanel({
           {saving ? "Saving…" : saved ? "✓ Saved" : "Save Details"}
         </button>
       </div>
+    </div>
+  );
+}
+
+// ── FileKeyPanel — admin attaches Supabase fileKey to buyer's Ownership record ──
+// Only shown when order status is DELIVERED. Writes to Ownership via PATCH /api/admin/unlock.
+function FileKeyPanel({
+  userId, productId, onSaved,
+}: {
+  userId:    string;
+  productId: string;
+  onSaved:   () => void;
+}) {
+  const [fileKey, setFileKey] = useState("");
+  const [saving,  setSaving]  = useState(false);
+  const [saved,   setSaved]   = useState(false);
+  const [error,   setError]   = useState("");
+
+  async function handleAttach() {
+    if (!fileKey.trim()) { setError("Enter a file key."); return; }
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/admin/unlock", {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ userId, productId, fileKey: fileKey.trim() }),
+    });
+    if (res.ok) {
+      setSaved(true);
+      onSaved();
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      const data = await res.json();
+      setError(data.error ?? "Save failed.");
+    }
+    setSaving(false);
+  }
+
+  async function handleClear() {
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/admin/unlock", {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ userId, productId, fileKey: null }),
+    });
+    if (res.ok) {
+      setFileKey("");
+      setSaved(false);
+      onSaved();
+    } else {
+      setError("Clear failed.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="ordFileKeyPanel">
+      <p className="ordFileKeyPanelTitle">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Attach Download File
+      </p>
+      <p className="ordFileKeyPanelHint">
+        Paste the Supabase storage key for this product. Buyer sees it immediately on their Downloads page.
+      </p>
+      <div className="ordFileKeyRow">
+        <input
+          className="ordFileKeyInput"
+          type="text"
+          placeholder="e.g. characters/orc-01/orc-01-full.zip"
+          value={fileKey}
+          onChange={e => setFileKey(e.target.value)}
+          spellCheck={false}
+        />
+        <button
+          className="ordFileKeySaveBtn"
+          onClick={handleAttach}
+          disabled={saving}
+        >
+          {saving ? "Saving…" : saved ? "✓ Attached" : "Attach"}
+        </button>
+        <button
+          className="ordFileKeyClearBtn"
+          onClick={handleClear}
+          disabled={saving}
+          title="Clear existing fileKey from this ownership record"
+        >
+          Clear
+        </button>
+      </div>
+      {error && <p className="ordFileKeyError">{error}</p>}
     </div>
   );
 }
@@ -365,14 +461,23 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                 </span>
               </div>
 
-              {/* Delivery panel — expanded inline */}
+              {/* Delivery panel + FileKey panel — expanded inline */}
               {isExpanded && (
-                <DeliveryPanel
-                  orderId={order.id}
-                  note={order.deliveryNote}
-                  estimatedAt={order.estimatedAt}
-                  onSaved={handleDeliverySaved}
-                />
+                <>
+                  <DeliveryPanel
+                    orderId={order.id}
+                    note={order.deliveryNote}
+                    estimatedAt={order.estimatedAt}
+                    onSaved={handleDeliverySaved}
+                  />
+                  {order.status === "DELIVERED" && (
+                    <FileKeyPanel
+                      userId={order.userId}
+                      productId={order.product.id}
+                      onSaved={() => showToast("✓ File key attached. Buyer can now download.", "ok")}
+                    />
+                  )}
+                </>
               )}
             </div>
           );

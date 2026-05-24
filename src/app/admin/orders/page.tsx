@@ -27,8 +27,9 @@ export default async function AdminOrdersPage() {
       createdAt:       true,
       deliveryNote:    true,
       estimatedAt:     true,
+      userId:          true,
       user:    { select: { name: true, email: true } },
-      product: { select: { name: true } },
+      product: { select: { id: true, name: true } },
     },
   });
 
