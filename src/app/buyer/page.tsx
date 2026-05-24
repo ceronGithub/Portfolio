@@ -20,7 +20,7 @@ export default async function BuyerPage() {
   const userName = session.user?.name ?? session.user?.email ?? "Buyer";
   const userId   = (session.user as any).id as string;
 
-  const [systems, ownerships] = await Promise.all([
+  const [systems, ownerships, latestProducts] = await Promise.all([
     prisma.system.findMany({
       where:   { isActive: true },
       orderBy: { createdAt: "asc" },
@@ -29,6 +29,10 @@ export default async function BuyerPage() {
     prisma.ownership.findMany({
       where:  { userId },
       select: { productId: true },
+    }),
+    prisma.product.findMany({
+      where:   { isLatest: true, isActive: true },
+      select:  { id: true, name: true, price: true, category: true, previewVideoUrl: true, facePngUrl: true },
     }),
   ]);
 
@@ -90,6 +94,12 @@ export default async function BuyerPage() {
   const ownedAssetIds  = ownedProductIds;
   const ownedProducts  = ownedProductRecords.map((p: any) => ({ id: p.id, name: p.name }));
 
+  // Group latest products by category for the Latest Drop sections
+  const latestCharacter  = latestProducts.find((p: any) => p.category === "character") ?? null;
+  const latestWeapon     = latestProducts.find((p: any) => p.category === "weapon")    ?? null;
+  const latestInterior   = latestProducts.find((p: any) => p.category === "interior")  ?? null;
+  const latestExterior   = latestProducts.find((p: any) => p.category === "exterior")  ?? null;
+
   return (
     <div className="dashboardLanding">
       <DashboardHero userName={userName} />
@@ -97,6 +107,10 @@ export default async function BuyerPage() {
         items={items}
         ownedAssetIds={ownedAssetIds}
         ownedProducts={ownedProducts}
+        latestCharacter={latestCharacter}
+        latestWeapon={latestWeapon}
+        latestInterior={latestInterior}
+        latestExterior={latestExterior}
       />
     </div>
   );

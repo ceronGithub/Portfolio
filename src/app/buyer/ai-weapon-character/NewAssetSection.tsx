@@ -1,6 +1,5 @@
 // NewAssetSection — "Latest Drop" section for Character / Weapon studio.
-// Fetches the latest character and weapon products from the DB via
-// /api/products?latest=true&category=character|weapon
+// Receives latest products as props from buyer/page.tsx (Server Component).
 // Falls back to "Coming Soon" state when no isLatest products exist.
 
 "use client";
@@ -18,12 +17,9 @@ interface LatestProduct {
   facePngUrl:      string | null;
 }
 
-// ── fetchLatestProducts — loads the isLatest=true products for a category
-async function fetchLatestProducts(category: string): Promise<LatestProduct[]> {
-  const res = await fetch(`/api/products?latest=true&category=${category}`, { cache: "no-store" });
-  if (!res.ok) return [];
-  const json = await res.json();
-  return json.products ?? [];
+interface Props {
+  latestCharacter: LatestProduct | null;
+  latestWeapon:    LatestProduct | null;
 }
 
 // ── FireParticle — single particle in the fire canvas animation ───────
@@ -46,24 +42,15 @@ function spawnFireParticle(canvasWidth: number, canvasHeight: number): FireParti
   };
 }
 
-export default function NewAssetSection() {
+export default function NewAssetSection({ latestCharacter, latestWeapon }: Props) {
   const sectionRef    = useRef<HTMLDivElement>(null);
   const fireCanvasRef = useRef<HTMLCanvasElement>(null);
   const fireRafRef    = useRef<number>(0);
   const fireParticles = useRef<FireParticle[]>([]);
-  const [parallaxY, setParallaxY]     = useState(0);
-  const [latestChar, setLatestChar]   = useState<LatestProduct | null>(null);
-  const [isLoading, setIsLoading]     = useState(true);
+  const [parallaxY, setParallaxY] = useState(0);
 
-  // Load latest character product on mount
-  useEffect(() => {
-    async function loadLatest() {
-      const characters = await fetchLatestProducts("character");
-      setLatestChar(characters[0] ?? null);
-      setIsLoading(false);
-    }
-    loadLatest();
-  }, []);
+  // latestChar comes from server — no loading state needed
+  const latestChar = latestCharacter;
 
   // Fire canvas animation
   useEffect(() => {
@@ -146,7 +133,7 @@ export default function NewAssetSection() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isLive = !isLoading && latestChar !== null;
+  const isLive = latestChar !== null;
 
   return (
     <section ref={sectionRef} className="newAssetSection">
@@ -172,7 +159,7 @@ export default function NewAssetSection() {
           <div>
             <p className="newAssetLabel">Latest Drop on Character &amp; Weapon</p>
             <h2 className="newAssetTitle">
-              {isLoading ? "Loading…" : isLive ? latestChar!.name : "New Character. Available now"}
+              {isLive ? latestChar!.name : "New Character. Available now"}
             </h2>
           </div>
           {isLive ? (

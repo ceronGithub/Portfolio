@@ -1,11 +1,9 @@
 // NewArchitectureSection — Architecture Studio latest drop teaser.
-// Fetches the latest interior and exterior products from the DB via
-// /api/products?latest=true&category=interior|exterior
+// Receives latest products as props from buyer/page.tsx (Server Component).
 // Falls back to "Coming Soon" when no isLatest products exist.
 
 "use client";
 
-import { useEffect, useState } from "react";
 import "./new-architecture-section.css";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -16,34 +14,13 @@ interface LatestArchProduct {
   category: string;
 }
 
-// ── fetchLatestArch — loads isLatest=true products for a category ─────
-async function fetchLatestArch(category: string): Promise<LatestArchProduct | null> {
-  const res = await fetch(`/api/products?latest=true&category=${category}`, { cache: "no-store" });
-  if (!res.ok) return null;
-  const json = await res.json();
-  return (json.products ?? [])[0] ?? null;
+interface Props {
+  latestInterior: LatestArchProduct | null;
+  latestExterior: LatestArchProduct | null;
 }
 
-export default function NewArchitectureSection() {
-  const [latestExterior, setLatestExterior] = useState<LatestArchProduct | null>(null);
-  const [latestInterior, setLatestInterior] = useState<LatestArchProduct | null>(null);
-  const [isLoading, setIsLoading]           = useState(true);
-
-  // Load both latest products in parallel on mount
-  useEffect(() => {
-    async function loadLatest() {
-      const [exterior, interior] = await Promise.all([
-        fetchLatestArch("exterior"),
-        fetchLatestArch("interior"),
-      ]);
-      setLatestExterior(exterior);
-      setLatestInterior(interior);
-      setIsLoading(false);
-    }
-    loadLatest();
-  }, []);
-
-  const isLive = !isLoading && (latestExterior !== null || latestInterior !== null);
+export default function NewArchitectureSection({ latestInterior, latestExterior }: Props) {
+  const isLive = latestExterior !== null || latestInterior !== null;
 
   return (
     <section className="newArchSection">

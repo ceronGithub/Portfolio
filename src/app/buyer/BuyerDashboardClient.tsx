@@ -45,10 +45,19 @@ interface SystemItem {
   owned: boolean; addons: AddonItem[];
 }
 
+interface LatestProduct {
+  id: string; name: string; price: number;
+  category: string; previewVideoUrl: string | null; facePngUrl: string | null;
+}
+
 interface Props {
-  items:         SystemItem[];
-  ownedAssetIds: string[];
-  ownedProducts: { id: string; name: string }[];
+  items:           SystemItem[];
+  ownedAssetIds:   string[];
+  ownedProducts:   { id: string; name: string }[];
+  latestCharacter: LatestProduct | null;
+  latestWeapon:    LatestProduct | null;
+  latestInterior:  LatestProduct | null;
+  latestExterior:  LatestProduct | null;
 }
 
 // ── Static asset metadata map for wishlist panel display ─────────────────────
@@ -137,7 +146,7 @@ function buildWishlistEntries(
   return entries;
 }
 
-export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts }: Props) {
+export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
   const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
   const { cartIds, addToCart, removeFromCart, clearCart, hydrated: cartHydrated } = useCart();
   const [wishlistOpen, setWishlistOpen] = useState(false);
@@ -282,7 +291,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         openToId={browseOpenId}
         onOpenToIdConsumed={() => setBrowseOpenId(null)}
       />
-      <NewAssetSection />
+      <NewAssetSection latestCharacter={latestCharacter} latestWeapon={latestWeapon} />
       <AssetCompareTool ownedAssetIds={ownedSet} />
 
       {/* ── Architecture Studio ── */}
@@ -294,7 +303,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         onRegisterAddToCart={fn => { addAllToCartArchRef.current = fn; }}
         onTrackView={handleTrackView}
       />
-      <NewArchitectureSection />
+      <NewArchitectureSection latestInterior={latestInterior} latestExterior={latestExterior} />
 
       {/* ── Reviews ── */}
       <ReviewSection

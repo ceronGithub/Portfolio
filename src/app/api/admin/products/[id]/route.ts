@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
-import { revalidatePath }            from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function PATCH(
   req: NextRequest,
@@ -43,8 +43,8 @@ export async function PATCH(
         where: { id },
         data:  { isLatest: body.isLatest },
       });
-      revalidatePath("/buyer");
-      revalidatePath("/api/products");
+      revalidatePath("/buyer", "layout");
+      revalidateTag("latest-products");
       return NextResponse.json({ product: updated });
     }
 
