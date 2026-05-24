@@ -100,6 +100,22 @@
 .newArchMetaPrice { font-size: 0.85rem; font-weight: 800; color: #c9a36e; margin: 0; }
 .newArchMetaNote  { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.2); letter-spacing: 0.04em; margin: 0; }
 
+.newArchBuyBtn {
+  display:         inline-flex;
+  align-items:     center;
+  margin-top:      0.6rem;
+  padding:         0.38rem 1rem;
+  background:      #a78bfa;
+  color:           #0d0d0d;
+  border-radius:   6px;
+  font-size:       0.73rem;
+  font-weight:     700;
+  text-decoration: none;
+  width:           fit-content;
+  transition:      opacity 0.15s ease;
+}
+.newArchBuyBtn:hover { opacity: 0.85; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .newArchSection  { justify-content: flex-start; }

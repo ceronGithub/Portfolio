@@ -743,7 +743,17 @@ function ProductsSection({
     setTogglingLatest(id);
     const ok = await toggleProductLatest(id, current);
     if (ok) {
-      // Trigger parent re-fetch or update through callback if needed
+      setProductList(prev => {
+        // Find the category of the toggled product
+        const target = prev.find(p => p.id === id);
+        if (!target) return prev;
+        return prev.map(p => {
+          if (p.id === id) return { ...p, isLatest: !current };
+          // Clear isLatest on siblings in same category when setting true
+          if (!current && p.category === target.category) return { ...p, isLatest: false };
+          return p;
+        });
+      });
     }
     setTogglingLatest(null);
   }

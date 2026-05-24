@@ -81,6 +81,9 @@ export default function NewArchitectureSection({ latestInterior, latestExterior 
                 <p className="newArchMetaName">{latestExterior.name}</p>
                 <p className="newArchMetaPrice">₱{latestExterior.price.toLocaleString()}</p>
                 <p className="newArchMetaNote">Exterior · editable Blender file</p>
+                <a href={`/checkout/${latestExterior.id}`} className="newArchBuyBtn">
+                  Buy Now →
+                </a>
               </div>
             )}
             {latestExterior && latestInterior && (
@@ -91,6 +94,9 @@ export default function NewArchitectureSection({ latestInterior, latestExterior 
                 <p className="newArchMetaName">{latestInterior.name}</p>
                 <p className="newArchMetaPrice">₱{latestInterior.price.toLocaleString()}</p>
                 <p className="newArchMetaNote">Interior · editable Blender file</p>
+                <a href={`/checkout/${latestInterior.id}`} className="newArchBuyBtn">
+                  Buy Now →
+                </a>
               </div>
             )}
           </div>

@@ -133,7 +133,8 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isLive = latestChar !== null;
+  const isLive      = latestChar !== null || latestWeapon !== null;
+  const displayItem = latestChar ?? latestWeapon; // prefer character, fallback weapon
 
   return (
     <section ref={sectionRef} className="newAssetSection">
@@ -159,7 +160,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
           <div>
             <p className="newAssetLabel">Latest Drop on Character &amp; Weapon</p>
             <h2 className="newAssetTitle">
-              {isLive ? latestChar!.name : "New Character. Available now"}
+              {isLive ? (displayItem?.name ?? "New Asset") : "New Character. Available now"}
             </h2>
           </div>
           {isLive ? (
@@ -169,17 +170,57 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
           )}
         </div>
 
-        {isLive && latestChar && (
-          <p className="newAssetPrice">₱{latestChar.price.toLocaleString()}</p>
-        )}
-
         <div className="newAssetCards">
-          {/* Card 1 — Animation preview */}
+          {/* Character card */}
+          {latestChar && (
+            <div className="newAssetCard">
+              <div className="newAssetCardInner">
+                {latestChar.facePngUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={latestChar.facePngUrl} alt={latestChar.name} className="newAssetCardFaceImg" />
+                ) : (
+                  <span className="newAssetCardIcon">🧟</span>
+                )}
+              </div>
+              <div className="newAssetCardMeta">
+                <p className="newAssetCardCat">Character</p>
+                <p className="newAssetCardName">{latestChar.name}</p>
+                <p className="newAssetCardPrice">₱{latestChar.price.toLocaleString()}</p>
+                <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn">
+                  Buy Now →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Weapon card */}
+          {latestWeapon && (
+            <div className="newAssetCard">
+              <div className="newAssetCardInner">
+                {latestWeapon.facePngUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={latestWeapon.facePngUrl} alt={latestWeapon.name} className="newAssetCardFaceImg" />
+                ) : (
+                  <span className="newAssetCardIcon">⚔️</span>
+                )}
+              </div>
+              <div className="newAssetCardMeta">
+                <p className="newAssetCardCat">Weapon</p>
+                <p className="newAssetCardName">{latestWeapon.name}</p>
+                <p className="newAssetCardPrice">₱{latestWeapon.price.toLocaleString()}</p>
+                <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn">
+                  Buy Now →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Animation preview card (character preferred) */}
           <div className="newAssetCard newAssetCardVideo">
-            {isLive && latestChar?.previewVideoUrl ? (
+            {isLive && displayItem?.previewVideoUrl ? (
               <video
                 className="newAssetCardVideoEl"
-                src={latestChar.previewVideoUrl}
+                src={displayItem.previewVideoUrl}
                 autoPlay muted loop playsInline
               />
             ) : (
@@ -191,26 +232,12 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
               </div>
             )}
           </div>
-
-          {/* Card 2 — Face / model thumbnail */}
-          <div className="newAssetCard">
-            <div className="newAssetCardInner">
-              {isLive && latestChar?.facePngUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={latestChar.facePngUrl}
-                  alt={latestChar.name}
-                  className="newAssetCardFaceImg"
-                />
-              ) : (
-                <>
-                  <span className="newAssetCardIcon">📦</span>
-                  <p className="newAssetCardLabel">3D OBJ / FBX</p>
-                </>
-              )}
-            </div>
-          </div>
         </div>
+
+        {/* Coming Soon state */}
+        {!isLive && (
+          <p className="newAssetComingSoonSub">Check back soon for the next drop.</p>
+        )}
       </div>
 
     </section>
