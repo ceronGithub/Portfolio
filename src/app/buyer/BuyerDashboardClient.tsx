@@ -30,6 +30,7 @@ import CustomRequestBuilder      from "./custom-request/CustomRequestBuilder";
 import "./wishlist/wishlist-panel.css";
 import "./cart/cart-drawer.css";
 import "./buyer-dashboard-client.css";
+import LatestDropTicker        from "./LatestDropTicker";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface AddonItem {
@@ -220,6 +221,14 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
 
   return (
     <>
+      {/* ── Latest Drop Ticker — sticky top bar, renders only when drops exist ── */}
+      <LatestDropTicker
+        latestCharacter={latestCharacter}
+        latestWeapon={latestWeapon}
+        latestInterior={latestInterior}
+        latestExterior={latestExterior}
+      />
+
       {/* ── Floating Cart Button ── */}
       <button
         className="buyerCartFloatBtn"

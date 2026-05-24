@@ -1,17 +1,21 @@
 // NewArchitectureSection — Architecture Studio latest drop teaser.
 // Receives latest products as props from buyer/page.tsx (Server Component).
 // Falls back to "Coming Soon" when no isLatest products exist.
+// Background video plays from previewVideoUrl when a latest drop is active.
 
 "use client";
 
+import { useRef, useEffect } from "react";
 import "./new-architecture-section.css";
 
 // ── Types ─────────────────────────────────────────────────────────────
 interface LatestArchProduct {
-  id:       string;
-  name:     string;
-  price:    number;
-  category: string;
+  id:              string;
+  name:            string;
+  price:           number;
+  category:        string;
+  previewVideoUrl: string | null;
+  facePngUrl:      string | null;
 }
 
 interface Props {
@@ -22,8 +26,42 @@ interface Props {
 export default function NewArchitectureSection({ latestInterior, latestExterior }: Props) {
   const isLive = latestExterior !== null || latestInterior !== null;
 
+  // Prefer interior video; fall back to exterior if only exterior exists.
+  const bgVideoSrc = latestInterior?.previewVideoUrl ?? latestExterior?.previewVideoUrl ?? null;
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Play video as soon as src is available — autoplay policies require
+  // muted + playsInline for autoplaying without user interaction.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !bgVideoSrc) return;
+    video.load();
+    video.play().catch(() => {});
+  }, [bgVideoSrc]);
+
   return (
     <section className="newArchSection">
+
+      {/* ── Background video — left half ─────────────────────────────── */}
+      <div className="newArchBgLeft">
+        {bgVideoSrc ? (
+          <video
+            ref={videoRef}
+            src={bgVideoSrc}
+            className="newArchBgVideo"
+            muted
+            playsInline
+            loop
+            autoPlay
+          />
+        ) : (
+          <div className="newArchBgPlaceholder" />
+        )}
+        <div className="newArchBgFade" />
+      </div>
+
+      {/* ── Content — right center ─────────────────────────────────────── */}
       <div className="newArchContent">
 
         <p className="newArchLabel">Latest Drop on Exterior &amp; Interior Design</p>

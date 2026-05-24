@@ -105,3 +105,46 @@
   .newArchSection  { justify-content: flex-start; }
   .newArchContent  { width: 100%; padding: 4rem 1.5rem; }
 }
+/* ── Background video — left half ──────────────────────────────────────── */
+.newArchBgLeft {
+  position:   absolute;
+  inset:      0;
+  width:      100%;
+  overflow:   hidden;
+  z-index:    0;
+}
+
+.newArchBgVideo {
+  position:   absolute;
+  inset:      0;
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  opacity:    0.72;
+}
+
+.newArchBgPlaceholder {
+  position:   absolute;
+  inset:      0;
+  background: #050505;
+}
+
+/* Right-to-left fade so video doesn't bleed into the text column */
+.newArchBgFade {
+  position:   absolute;
+  inset:      0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.25) 0%,
+    rgba(0,0,0,0.35) 40%,
+    rgba(0,0,0,0.75) 65%,
+    rgba(0,0,0,0.95) 85%,
+    #000 100%
+  );
+}
+
+/* Ensure content sits above the background layer */
+.newArchContent {
+  position: relative;
+  z-index:  1;
+}
