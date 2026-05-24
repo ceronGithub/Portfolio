@@ -180,6 +180,47 @@
 .apTableRow:last-child { border-bottom: none; }
 .apTableRow:hover      { background: var(--nav-active-bg); }
 
+/* ── Filter row ───────────────────────────────────── */
+.apTableFilterRow {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--nav-active-bg);
+  border-bottom: 1px solid var(--sidebar-border);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.apTableFilterInput,
+.apTableFilterSelect {
+  padding: 0.55rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 5px;
+  color: var(--content-color);
+  font-size: 0.81rem;
+  font-weight: 500;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  min-width: 140px;
+  flex: 0 1 auto;
+}
+
+.apTableFilterInput::placeholder {
+  color: var(--sidebar-text);
+}
+
+.apTableFilterInput:focus,
+.apTableFilterSelect:focus {
+  outline: none;
+  border-color: #c9a96e;
+  background: rgba(201, 169, 110, 0.06);
+}
+
+.apTableFilterSelect option {
+  background: var(--main-bg);
+  color: var(--content-color);
+}
+
 /* ── Grid columns ─────────────────────────────────── */
 .apGrid--products   { grid-template-columns: 2fr 3fr 1.2fr 1fr 1.5fr 1.2fr; }
 .apGrid--productsV2 { grid-template-columns: 2fr 1.2fr 1.2fr 1fr 1fr 1.5fr; }
@@ -244,6 +285,13 @@
   border-color: rgba(56, 161, 105, 0.2);
 }
 .apActionBtnActivate:hover:not(:disabled) { background: rgba(56, 161, 105, 0.18); }
+
+.apActionBtnDelete {
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+.apActionBtnDelete:hover:not(:disabled) { background: rgba(239, 68, 68, 0.18); }
 
 /* ── Empty state ──────────────────────────────────── */
 .apEmpty {

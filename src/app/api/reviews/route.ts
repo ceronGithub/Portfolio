@@ -46,6 +46,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "comment max 500 chars" }, { status: 400 });
   }
 
+  // Verify buyer owns this product. assetId is either:
+  // - A cuid (for new products)
+  // - A slug like "orc-01" (for legacy assets)
+  // Try to find product by slug first, fallback to cuid.
+  const product = await prisma.product.findFirst({
+    where: {
+      OR: [
+        { slug: assetId },      // Try slug match first
+        { id: assetId },        // Fallback to cuid
+      ],
+    },
+    select: { id: true, slug: true },
+  });
+
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  }
+
+  // Check ownership using product cuid
+  const ownership = await prisma.ownership.findUnique({
+    where: { userId_productId: { userId, productId: product.id } },
+  });
+  if (!ownership) {
+    return NextResponse.json({ error: "You don't own this product" }, { status: 403 });
+  }
+
+  // Check if already reviewed using the original assetId
   const existing = await prisma.review.findUnique({
     where: { userId_assetId: { userId, assetId } },
   });

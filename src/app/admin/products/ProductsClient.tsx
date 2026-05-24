@@ -71,6 +71,15 @@ async function toggleProductActive(id: string, current: boolean): Promise<boolea
   return res.ok;
 }
 
+// Deletes a product with cascade handling for orders and ownership.
+async function deleteProduct(id: string): Promise<boolean> {
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  return res.ok;
+}
+
 // Toggles the isLatest flag on a product.
 async function toggleProductLatest(id: string, current: boolean): Promise<boolean> {
   const res = await fetch(`/api/admin/products/${id}`, {
@@ -709,6 +718,22 @@ function ProductsSection({
   const [expandedRow, setExpandedRow]     = useState<string | null>(null);
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
   const [showAddForm, setShowAddForm]     = useState(false);
+  const [filterName, setFilterName]       = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterStatus, setFilterStatus]   = useState("");
+  const [deletingId, setDeletingId]       = useState<string | null>(null);
+  const [productList, setProductList]     = useState<Product[]>(products);
+
+  // Filter products based on active filters
+  const filteredProducts = productList.filter(p => {
+    const nameMatch = filterName === "" || p.name.toLowerCase().includes(filterName.toLowerCase());
+    const categoryMatch = filterCategory === "" || p.category === filterCategory;
+    const statusMatch = filterStatus === "" || (filterStatus === "active" ? p.isActive : !p.isActive);
+    return nameMatch && categoryMatch && statusMatch;
+  });
+
+  // Get unique categories from products
+  const uniqueCategories = Array.from(new Set(productList.map(p => p.category)));
 
   function handleFieldSaved(productId: string, field: string, value: string | null) {
     // This updates parent state through callback
@@ -723,8 +748,22 @@ function ProductsSection({
     setTogglingLatest(null);
   }
 
+  async function handleDeleteProduct(id: string, name: string) {
+    if (!window.confirm(`Delete product "${name}"? This will also remove all associated orders and ownership records.`)) {
+      return;
+    }
+    setDeletingId(id);
+    const ok = await deleteProduct(id);
+    if (ok) {
+      setProductList(prev => prev.filter(p => p.id !== id));
+    } else {
+      alert("Failed to delete product. Try again.");
+    }
+    setDeletingId(null);
+  }
+
   function handleProductCreated(newProduct: Product) {
-    // Notify parent through callback
+    setProductList(prev => [newProduct, ...prev]);
   }
 
   return (
@@ -753,22 +792,52 @@ function ProductsSection({
         />
       )}
 
+      {/* Filter Row */}
+      <div className="apTableFilterRow">
+        <input
+          className="apTableFilterInput"
+          type="text"
+          placeholder="Filter by name…"
+          value={filterName}
+          onChange={e => setFilterName(e.target.value)}
+        />
+        <select
+          className="apTableFilterSelect"
+          value={filterCategory}
+          onChange={e => setFilterCategory(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          {uniqueCategories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+        <select
+          className="apTableFilterSelect"
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
       <div className="apTable">
         <div className="apTableHead apGrid--productsV2">
           <span>Name</span><span>Category</span><span>Price</span>
           <span>Latest</span><span>Status</span><span>Actions</span>
         </div>
-        {products.length === 0 && (
+        {filteredProducts.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
               <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
             </svg>
-            <p className="apEmptyTitle">No products yet</p>
-            <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
+            <p className="apEmptyTitle">No products found</p>
+            <p className="apEmptyHint">{products.length === 0 ? 'Click "Add New Product" above to create one.' : "Try adjusting your filters."}</p>
           </div>
         )}
-        {products.map(p => (
+        {filteredProducts.map(p => (
           <div key={p.id}>
             <div className="apTableRow apGrid--productsV2">
               <span className="apCell apCellName">{p.name}</span>
@@ -804,6 +873,15 @@ function ProductsSection({
                   onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
                 >
                   {expandedRow === p.id ? "▲ Media" : "✎ Media"}
+                </button>
+                <button
+                  className="apActionBtn apActionBtnDelete"
+                  style={{ fontSize: "0.72rem" }}
+                  onClick={() => handleDeleteProduct(p.id, p.name)}
+                  disabled={deletingId === p.id}
+                  title="Delete this product permanently"
+                >
+                  {deletingId === p.id ? "…" : "✕ Delete"}
                 </button>
               </span>
             </div>
