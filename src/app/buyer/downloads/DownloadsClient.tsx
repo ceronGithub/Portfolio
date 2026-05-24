@@ -13,7 +13,10 @@ interface DownloadItem {
   productId:   string;
   name:        string;
   description: string;
-  fileKey:     string | null;
+  fileKey:     string | null;  // Admin-attached delivery key (Ownership.fileKey)
+  fileKeyObj:  string | null;  // Product .obj mesh
+  fileKeyFbx:  string | null;  // Product .fbx rigged
+  fileKeyGlb:  string | null;  // Product .glb web/AR
   grantedAt:   string;
 }
 
@@ -68,6 +71,16 @@ export default function DownloadsClient({ downloads }: Props) {
     } finally {
       setTimeout(() => setDownloading(null), 1200);
     }
+  }
+
+  // Opens a Supabase asset URL directly for a specific file key.
+  function openFileKey(fileKey: string, filename: string) {
+    const url = `https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/assets/${fileKey}`;
+    const a   = document.createElement("a");
+    a.href     = url;
+    a.download = filename;
+    a.target   = "_blank";
+    a.click();
   }
 
   return (
@@ -135,9 +148,17 @@ export default function DownloadsClient({ downloads }: Props) {
         {filtered.length > 0 && (
           <div className="dlList">
             {filtered.map(item => {
-              const cat     = getCategory(item.name);
-              const isBusy  = downloading === item.id;
-              const hasFile = !!item.fileKey;
+              const cat    = getCategory(item.name);
+              const isBusy = downloading === item.id;
+
+              // Collect available files: admin delivery key + product mesh files
+              const files: { label: string; key: string; ext: string }[] = [];
+              if (item.fileKey)    files.push({ label: "Package",  key: item.fileKey,    ext: "zip" });
+              if (item.fileKeyObj) files.push({ label: "OBJ",      key: item.fileKeyObj, ext: "obj" });
+              if (item.fileKeyFbx) files.push({ label: "FBX",      key: item.fileKeyFbx, ext: "fbx" });
+              if (item.fileKeyGlb) files.push({ label: "GLB",      key: item.fileKeyGlb, ext: "glb" });
+
+              const hasAnyFile = files.length > 0;
 
               return (
                 <div key={item.id} className="dlRow">
@@ -156,21 +177,27 @@ export default function DownloadsClient({ downloads }: Props) {
                     )}
                   </div>
 
-                  <button
-                    className={`dlRowBtn ${!hasFile ? "dlRowBtnDisabled" : ""} ${isBusy ? "dlRowBtnBusy" : ""}`}
-                    onClick={() => handleDownload(item)}
-                    disabled={!hasFile || isBusy}
-                    title={!hasFile ? "File not yet available" : "Download"}
-                  >
-                    {isBusy ? (
-                      <span className="dlRowBtnSpinner" />
+                  <div className="dlRowFiles">
+                    {hasAnyFile ? (
+                      files.map(f => (
+                        <button
+                          key={f.key}
+                          className={`dlFileBtn ${isBusy ? "dlRowBtnBusy" : ""}`}
+                          onClick={() => openFileKey(f.key, `${item.name}.${f.ext}`)}
+                          disabled={isBusy}
+                          title={`Download ${f.label}`}
+                        >
+                          <span className="dlRowBtnIcon">↓</span>
+                          <span>{f.label}</span>
+                        </button>
+                      ))
                     ) : (
-                      <>
-                        <span className="dlRowBtnIcon">↓</span>
-                        <span>{hasFile ? "Download" : "Pending"}</span>
-                      </>
+                      <button className="dlRowBtn dlRowBtnDisabled" disabled title="File not yet available">
+                        <span className="dlRowBtnIcon">⏳</span>
+                        <span>Pending</span>
+                      </button>
                     )}
-                  </button>
+                  </div>
 
                 </div>
               );

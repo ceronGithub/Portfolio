@@ -25,7 +25,10 @@ export default async function DownloadsPage() {
     productId:   o.product.id,
     name:        o.product.name,
     description: o.product.description ?? "",
-    fileKey:     o.product.fileKey ?? null,
+    fileKey:     (o as any).fileKey ?? null,   // fileKey lives on Ownership, not Product
+    fileKeyObj:  o.product.fileKeyObj ?? null,
+    fileKeyFbx:  o.product.fileKeyFbx ?? null,
+    fileKeyGlb:  o.product.fileKeyGlb ?? null,
     grantedAt:   o.grantedAt.toISOString(),
   }));
 
