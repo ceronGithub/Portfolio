@@ -1,10 +1,10 @@
-// GET /api/products?category=character|weapon|interior|exterior[&latest=true]
-// Returns active products filtered by category.
-// GDrive viewer URLs are rewritten to /api/drive-video proxy URLs.
-// New: packageTier, hasObj/hasFbx/hasGlb flags, animCount, animNames returned.
-
+// GET  /api/admin/products?category=... — Returns active products by category.
+// POST /api/admin/products             — Creates a new product (admin only).
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession }          from "next-auth";
+import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
+import { revalidatePath }            from "next/cache";
 
 // Force dynamic — reads live DB, must not be cached at build time.
 export const dynamic = "force-dynamic";
@@ -103,4 +103,77 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.json({ products: mapped });
+}
+// POST /api/admin/products — Create a new product. Admin only.
+// Accepts all product fields; only name, price, category are required.
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any)?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { name, price, category, description, isLatest,
+            previewVideoUrl, facePngUrl, threeDUrl,
+            actionOneUrl, actionTwoUrl, actionThreeUrl,
+            fileKeyObj, fileKeyFbx, fileKeyGlb,
+            animIdleUrl, animWalkUrl, animRunUrl,
+            animAttackOneUrl, animAttackTwoUrl, animDeathUrl, animHitUrl,
+          } = body;
+
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return NextResponse.json({ error: "name is required" }, { status: 400 });
+    }
+    if (typeof price !== "number" || price < 0) {
+      return NextResponse.json({ error: "price must be a non-negative number" }, { status: 400 });
+    }
+    const validCategories = ["character", "weapon", "interior", "exterior"];
+    if (!category || !validCategories.includes(category)) {
+      return NextResponse.json({ error: "category must be character | weapon | interior | exterior" }, { status: 400 });
+    }
+
+    // If isLatest is true, clear siblings in same category first
+    if (isLatest === true) {
+      await prisma.product.updateMany({
+        where: { category, isLatest: true },
+        data:  { isLatest: false },
+      });
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name:            name.trim(),
+        price,
+        category,
+        description:     description?.trim() || null,
+        isLatest:        isLatest === true,
+        isActive:        true,
+        previewVideoUrl: previewVideoUrl?.trim() || null,
+        facePngUrl:      facePngUrl?.trim()      || null,
+        threeDUrl:       threeDUrl?.trim()        || null,
+        actionOneUrl:    actionOneUrl?.trim()     || null,
+        actionTwoUrl:    actionTwoUrl?.trim()     || null,
+        actionThreeUrl:  actionThreeUrl?.trim()   || null,
+        fileKeyObj:      fileKeyObj?.trim()       || null,
+        fileKeyFbx:      fileKeyFbx?.trim()       || null,
+        fileKeyGlb:      fileKeyGlb?.trim()       || null,
+        animIdleUrl:     animIdleUrl?.trim()      || null,
+        animWalkUrl:     animWalkUrl?.trim()       || null,
+        animRunUrl:      animRunUrl?.trim()        || null,
+        animAttackOneUrl: animAttackOneUrl?.trim() || null,
+        animAttackTwoUrl: animAttackTwoUrl?.trim() || null,
+        animDeathUrl:    animDeathUrl?.trim()      || null,
+        animHitUrl:      animHitUrl?.trim()        || null,
+      },
+    });
+
+    revalidatePath("/buyer", "layout");
+    revalidatePath("/admin/products", "layout");
+
+    return NextResponse.json({ product }, { status: 201 });
+  } catch (err: any) {
+    console.error("[POST /api/admin/products]", err?.message);
+    return NextResponse.json({ error: err?.message ?? "Server error" }, { status: 500 });
+  }
 }
