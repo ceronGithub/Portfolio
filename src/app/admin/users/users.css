@@ -1002,7 +1002,16 @@
   padding:    0.8rem 1.4rem 1.2rem;
   overflow-y: auto;
   flex:       1;
+  min-height: 0;        /* required for flex child to scroll */
+  max-height: calc(80vh - 80px); /* 80px = approx header height */
+
+  /* custom scrollbar */
+  scrollbar-width:       thin;
+  scrollbar-color:       rgba(255,255,255,0.12) transparent;
 }
+.umModalBody::-webkit-scrollbar { width: 5px; }
+.umModalBody::-webkit-scrollbar-track { background: transparent; }
+.umModalBody::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 99px; }
 
 .umModalEmpty {
   color:      #555;
