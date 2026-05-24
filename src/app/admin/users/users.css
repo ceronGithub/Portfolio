@@ -545,8 +545,6 @@
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
   padding: 1.75rem 1.75rem 1.5rem;
-  min-width: 320px;
-  max-width: 460px;
   width: 90%;
   display: flex;
   flex-direction: column;
@@ -570,20 +568,123 @@
 
 .umUnlockUser strong { color: #fff; }
 
-.umUnlockSelect {
+/* ── Custom product picker dropdown ──────────────────────────────── */
+.umProductPicker {
+  position: relative;
   width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 7px;
-  color: #fff;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.85rem;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
 }
 
-.umUnlockSelect:focus { border-color: rgba(255,255,255,0.25); }
+.umProductPickerTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #fff;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.umProductPickerTrigger:hover {
+  border-color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08);
+}
+
+.umProductPickerLabel { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.umProductPickerChevron {
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.4);
+  transition: transform 0.2s ease;
+}
+
+.umProductPickerChevronOpen { transform: rotate(180deg); }
+
+/* ── Dropdown list ── */
+.umProductDropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: 260px;
+  z-index: 10;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+}
+
+/* ── Each product option ── */
+.umProductOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.75);
+  font-size: 0.83rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.umProductOption:last-child { border-bottom: none; }
+
+.umProductOption:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.umProductOptionSelected {
+  background: rgba(34,197,94,0.08);
+  color: #fff;
+}
+
+/* ── Video / thumbnail cell ── */
+.umProductOptionMedia {
+  width: 52px;
+  height: 36px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.umProductOptionVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.umProductOptionNoMedia {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.2);
+}
+
+.umProductOptionName { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.umProductOptionCheck { flex-shrink: 0; margin-left: auto; }
 
 .umUnlockError {
   font-size: 0.78rem;
@@ -629,3 +730,137 @@
 }
 .umUnlockGrantBtn:hover:not(:disabled) { opacity: 0.88; }
 .umUnlockGrantBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── ManualUnlockModal — user info card ──────────────────────── */
+.umUnlockModal {
+  min-width: 340px;
+  max-width: 500px;
+}
+
+.umUnlockInfoCard {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.umUnlockInfoHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.umUnlockAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.umUnlockInfoMeta { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+
+.umUnlockInfoName {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.umUnlockInfoEmail {
+  font-size: 0.76rem;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.umUnlockInfoRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.umUnlockInfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 1.1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.umUnlockInfoRow:last-child { border-bottom: none; }
+
+.umUnlockInfoLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.umUnlockInfoValue {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+  text-align: right;
+}
+
+.umUnlockOwnedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}
+
+/* ── How-to hint block ───────────────────────────────────────── */
+.umUnlockHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 9px;
+  padding: 0.85rem 1rem;
+}
+
+.umUnlockHintIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(99,179,237,0.12);
+  border: 1px solid rgba(99,179,237,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #63b3ed;
+  flex-shrink: 0;
+}
+
+.umUnlockHintTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 0.2rem;
+}
+
+.umUnlockHintDesc {
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+  line-height: 1.5;
+}

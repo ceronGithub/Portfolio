@@ -40,7 +40,7 @@ interface ActionLog {
   adminEmail: string; reason: string | null; createdAt: Date;
 }
 
-interface ProductOption { id: string; name: string; }
+interface ProductOption { id: string; name: string; previewVideoUrl?: string | null; facePngUrl?: string | null; }
 interface Props { initialUsers: User[]; initialLogs: ActionLog[]; products: ProductOption[]; }
 
 type ActionType = "ban" | "unban" | "deactivate" | "activate" | "delete";
@@ -79,19 +79,23 @@ async function grantUnlock(userId: string, productId: string): Promise<boolean> 
 }
 
 // ── ManualUnlockModal — modal to grant a buyer access to a product ────
-// Admin picks a product from a dropdown; calls /api/admin/unlock on confirm.
+// Admin picks a product from a custom dropdown with video preview;
+// calls /api/admin/unlock on confirm.
 function ManualUnlockModal({ user, products, onDone, onClose }: {
   user: User;
   products: ProductOption[];
   onDone: (userId: string, productId: string, productName: string) => void;
   onClose: () => void;
 }) {
-  const [selectedProductId, setSelected] = useState(products[0]?.id ?? "");
+  const alreadyOwned  = new Set(user.ownership.map(o => o.productId));
+  const available     = products.filter(p => !alreadyOwned.has(p.id));
+
+  const [selectedProductId, setSelected] = useState(available[0]?.id ?? "");
+  const [dropdownOpen, setDropdownOpen]  = useState(false);
   const [saving, setSaving]              = useState(false);
   const [error, setError]                = useState("");
 
-  const alreadyOwned = new Set(user.ownership.map(o => o.productId));
-  const available    = products.filter(p => !alreadyOwned.has(p.id));
+  const selectedProduct = available.find(p => p.id === selectedProductId) ?? null;
 
   async function handleGrant() {
     if (!selectedProductId) return;
@@ -99,7 +103,7 @@ function ManualUnlockModal({ user, products, onDone, onClose }: {
     setError("");
     const ok = await grantUnlock(user.id, selectedProductId);
     if (ok) {
-      const productName = products.find(p => p.id === selectedProductId)?.name ?? selectedProductId;
+      const productName = selectedProduct?.name ?? selectedProductId;
       onDone(user.id, selectedProductId, productName);
       onClose();
     } else {
@@ -111,23 +115,129 @@ function ManualUnlockModal({ user, products, onDone, onClose }: {
   return (
     <div className="umUnlockOverlay" onClick={onClose}>
       <div className="umUnlockModal" onClick={e => e.stopPropagation()}>
+
+        {/* ── Modal eyebrow ── */}
         <p className="umUnlockTitle">Manual Unlock</p>
-        <p className="umUnlockUser">
-          Grant asset access to <strong>{user.name ?? user.email}</strong>
-        </p>
+
+        {/* ── User info card ── */}
+        <div className="umUnlockInfoCard">
+          <div className="umUnlockInfoHeader">
+            <div className="umUnlockAvatar">
+              {(user.name ?? user.email).charAt(0).toUpperCase()}
+            </div>
+            <div className="umUnlockInfoMeta">
+              <p className="umUnlockInfoName">{user.name ?? <em style={{ fontStyle: "normal", opacity: 0.5 }}>No name</em>}</p>
+              <p className="umUnlockInfoEmail">{user.email}</p>
+            </div>
+          </div>
+          <div className="umUnlockInfoRows">
+            <div className="umUnlockInfoRow">
+              <span className="umUnlockInfoLabel">Role</span>
+              <RoleBadge role={user.role} />
+            </div>
+            <div className="umUnlockInfoRow">
+              <span className="umUnlockInfoLabel">Status</span>
+              <StatusBadge isActive={user.isActive} isBanned={user.isBanned} />
+            </div>
+            <div className="umUnlockInfoRow">
+              <span className="umUnlockInfoLabel">Joined</span>
+              <span className="umUnlockInfoValue">
+                {new Date(user.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+              </span>
+            </div>
+            <div className="umUnlockInfoRow">
+              <span className="umUnlockInfoLabel">Owned</span>
+              <span className="umUnlockInfoValue">
+                {user.ownership.length === 0
+                  ? <em style={{ fontStyle: "normal", opacity: 0.4 }}>None</em>
+                  : <span className="umUnlockOwnedList">
+                      {user.ownership.map(o => (
+                        <span key={o.productId} className="umOwnedTag">{o.product.name}</span>
+                      ))}
+                    </span>
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── How-to hint ── */}
+        <div className="umUnlockHint">
+          <div className="umUnlockHintIcon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5,3 19,12 5,21"/>
+            </svg>
+          </div>
+          <div>
+            <p className="umUnlockHintTitle">How to grant access</p>
+            <p className="umUnlockHintDesc">Select a product from the dropdown and click "Grant Access" to unlock it for this user.</p>
+          </div>
+        </div>
+
+        {/* ── Product picker ── */}
         {available.length === 0 ? (
           <p className="umUnlockEmpty">User already owns all products.</p>
         ) : (
           <>
-            <select
-              className="umUnlockSelect"
-              value={selectedProductId}
-              onChange={e => setSelected(e.target.value)}
-            >
-              {available.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+            {/* Custom dropdown trigger */}
+            <div className="umProductPicker">
+              <button
+                className="umProductPickerTrigger"
+                onClick={() => setDropdownOpen(prev => !prev)}
+                type="button"
+              >
+                <span className="umProductPickerLabel">
+                  {selectedProduct ? selectedProduct.name : "Select a product"}
+                </span>
+                <svg
+                  className={`umProductPickerChevron${dropdownOpen ? " umProductPickerChevronOpen" : ""}`}
+                  width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5"
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+
+              {/* Dropdown list with video previews */}
+              {dropdownOpen && (
+                <div className="umProductDropdown">
+                  {available.map(p => (
+                    <button
+                      key={p.id}
+                      className={`umProductOption${p.id === selectedProductId ? " umProductOptionSelected" : ""}`}
+                      onClick={() => { setSelected(p.id); setDropdownOpen(false); }}
+                      type="button"
+                    >
+                      {/* Video or fallback thumbnail */}
+                      <div className="umProductOptionMedia">
+                        {p.previewVideoUrl ? (
+                          <video
+                            className="umProductOptionVideo"
+                            src={p.previewVideoUrl}
+                            autoPlay muted loop playsInline
+                          />
+                        ) : p.facePngUrl ? (
+                          <img className="umProductOptionVideo" src={p.facePngUrl} alt={p.name} />
+                        ) : (
+                          <div className="umProductOptionNoMedia">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <span className="umProductOptionName">{p.name}</span>
+                      {p.id === selectedProductId && (
+                        <svg className="umProductOptionCheck" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {error && <p className="umUnlockError">{error}</p>}
             <div className="umUnlockActions">
               <button className="umUnlockCancelBtn" onClick={onClose}>Cancel</button>
@@ -209,13 +319,11 @@ function ConfirmPopover({ message, danger, withReason, onConfirm, onCancel }: {
 
 // ── Card 1 — All Users ────────────────────────────────────────────────
 
-function AllUsersCard({ users, products, onOwnershipGranted }: {
+function AllUsersCard({ users, onUnlock }: {
   users: User[];
-  products: ProductOption[];
-  onOwnershipGranted: (userId: string, productId: string, productName: string) => void;
+  onUnlock: (user: User) => void;
 }) {
   const revealRef = useReveal();
-  const [unlockTarget, setUnlockTarget] = useState<User | null>(null);
 
   return (
     <div className="umCard" ref={revealRef}>
@@ -256,7 +364,7 @@ function AllUsersCard({ users, products, onOwnershipGranted }: {
               <button
                 className="umActionBtn umActionBtn--activate"
                 style={{ fontSize: "0.7rem", padding: "0.25rem 0.55rem" }}
-                onClick={() => setUnlockTarget(u)}
+                onClick={() => onUnlock(u)}
                 title="Manually grant product access"
               >
                 🔓 Unlock
@@ -265,16 +373,6 @@ function AllUsersCard({ users, products, onOwnershipGranted }: {
           </div>
         ))}
       </div>
-
-      {/* Manual unlock modal */}
-      {unlockTarget && (
-        <ManualUnlockModal
-          user={unlockTarget}
-          products={products}
-          onDone={onOwnershipGranted}
-          onClose={() => setUnlockTarget(null)}
-        />
-      )}
     </div>
   );
 }
@@ -501,11 +599,12 @@ function ActionLogsCard({ logs }: { logs: ActionLog[] }) {
 // ── Main ──────────────────────────────────────────────────────────────
 
 export default function UsersClient({ initialUsers, initialLogs, products }: Props) {
-  const [users, setUsers]       = useState<User[]>(initialUsers);
-  const [logs, setLogs]         = useState<ActionLog[]>(initialLogs);
-  const [pendingId, setPending] = useState<string | null>(null);
-  const [toast, setToast]       = useState<{ msg: string; type: "ok"|"err" } | null>(null);
-  const headerRef               = useReveal();
+  const [users, setUsers]             = useState<User[]>(initialUsers);
+  const [logs, setLogs]               = useState<ActionLog[]>(initialLogs);
+  const [pendingId, setPending]       = useState<string | null>(null);
+  const [toast, setToast]             = useState<{ msg: string; type: "ok"|"err" } | null>(null);
+  const [unlockTarget, setUnlockTarget] = useState<User | null>(null);
+  const headerRef                     = useReveal();
 
   const activeUsers    = users.filter(u => u.isActive && !u.isBanned);
   const nonActiveUsers = users.filter(u => !u.isActive || u.isBanned);
@@ -597,11 +696,21 @@ export default function UsersClient({ initialUsers, initialLogs, products }: Pro
 
       {toast && <div className={`umToast umToast--${toast.type}`}>{toast.msg}</div>}
       <div className="umRoot">
-        <AllUsersCard users={users} products={products} onOwnershipGranted={handleOwnershipGranted} />
+        <AllUsersCard users={users} onUnlock={setUnlockTarget} />
         <ActiveUsersCard    users={activeUsers}    onAction={handleAction} pendingId={pendingId} />
         <NonActiveUsersCard users={nonActiveUsers} onAction={handleAction} pendingId={pendingId} />
         <ActionLogsCard  logs={logs} />
       </div>
+
+      {/* Manual unlock modal — rendered at root to escape umCard overflow:hidden */}
+      {unlockTarget && (
+        <ManualUnlockModal
+          user={unlockTarget}
+          products={products}
+          onDone={handleOwnershipGranted}
+          onClose={() => setUnlockTarget(null)}
+        />
+      )}
     </div>
   );
 }

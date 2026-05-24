@@ -318,6 +318,7 @@ export default function OverviewClient({
   const notif = useAdminNotifications(true);
 
   const kpiItems = [
+    { value: stats.visitors,              label: "website visitors",   accentColor: "#60a5fa"      },
     { value: stats.activeUsers,           label: "active users",       accentColor: COLOR_SYSTEMS  },
     { value: stats.totalUsers,            label: "total registered",   accentColor: "rgba(255,255,255,0.18)" },
     { value: stats.notActive,             label: "not yet active",     accentColor: "rgba(248,113,113,0.55)" },

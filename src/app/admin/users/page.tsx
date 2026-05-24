@@ -34,7 +34,7 @@ export default async function AdminUsersPage() {
 
   // Fetch all products so the manual unlock modal can list them.
   const products = await prisma.product.findMany({
-    select: { id: true, name: true },
+    select: { id: true, name: true, previewVideoUrl: true, facePngUrl: true },
     orderBy: { name: "asc" },
   });
 

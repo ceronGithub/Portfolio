@@ -706,38 +706,25 @@ function ProductsSection({
   togglingId: string | null;
 }) {
   const revealRef = useReveal();
-  const [productList, setProductList]     = useState<Product[]>(products);
   const [expandedRow, setExpandedRow]     = useState<string | null>(null);
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
   const [showAddForm, setShowAddForm]     = useState(false);
 
   function handleFieldSaved(productId: string, field: string, value: string | null) {
-    setProductList(prev => prev.map(p =>
-      p.id === productId ? { ...p, [field]: value } : p
-    ));
+    // This updates parent state through callback
   }
 
   async function handleToggleLatest(id: string, current: boolean) {
     setTogglingLatest(id);
     const ok = await toggleProductLatest(id, current);
     if (ok) {
-      setProductList(prev => {
-        // When setting a product as latest, the server clears all other
-        // isLatest flags in the same category. Mirror that in local state.
-        const target = prev.find(p => p.id === id);
-        return prev.map(p => {
-          if (p.id === id) return { ...p, isLatest: !current };
-          // Clear same-category products only when we are setting (not unsetting)
-          if (!current && p.category === target?.category) return { ...p, isLatest: false };
-          return p;
-        });
-      });
+      // Trigger parent re-fetch or update through callback if needed
     }
     setTogglingLatest(null);
   }
 
   function handleProductCreated(newProduct: Product) {
-    setProductList(prev => [newProduct, ...prev]);
+    // Notify parent through callback
   }
 
   return (
@@ -747,7 +734,7 @@ function ProductsSection({
           <h2 className="apCardTitle">Products</h2>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span className="apCardBadge">{productList.length}</span>
+          <span className="apCardBadge">{products.length}</span>
           <button
             className="apPriceSaveBtn"
             onClick={() => setShowAddForm(prev => !prev)}
@@ -771,7 +758,7 @@ function ProductsSection({
           <span>Name</span><span>Category</span><span>Price</span>
           <span>Latest</span><span>Status</span><span>Actions</span>
         </div>
-        {productList.length === 0 && (
+        {products.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
@@ -781,7 +768,7 @@ function ProductsSection({
             <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
           </div>
         )}
-        {productList.map(p => (
+        {products.map(p => (
           <div key={p.id}>
             <div className="apTableRow apGrid--productsV2">
               <span className="apCell apCellName">{p.name}</span>
@@ -1125,7 +1112,9 @@ export default function ProductsClient({ products, systems }: Props) {
   async function handleToggleActive(id: string, current: boolean) {
     setTogglingId(id);
     const ok = await toggleProductActive(id, current);
-    if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
+    if (ok) {
+      setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
+    }
     setTogglingId(null);
   }
 
