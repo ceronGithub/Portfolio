@@ -167,32 +167,36 @@ export default function BundleCheckoutClient({
   useEntranceAnimation(rightRef);
 
   // ── Place order via API ────────────────────────────────────────────────
-  // When payment gateway is ready, POST to /api/checkout/bundle with:
-  // { items: [{ productId: item.id (real cuid), method: "gcash"|"card"|"bank" }] }
+  // POST to /api/checkout/bundle with items and payment method.
+  // Creates Order + Ownership records for each product in the bundle.
   async function handlePlaceOrder() {
     if (placing || placed) return;
     setPlacing(true);
 
     try {
-      // TODO: Wire to real POST /api/checkout/bundle endpoint
-      // const res = await fetch("/api/checkout/bundle", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     items: items.map(item => ({ productId: item.id })), // real cuid
-      //     method,
-      //     total: finalTotal,
-      //   }),
-      // });
-      // if (!res.ok) throw new Error("Order failed");
+      const res = await fetch("/api/checkout/bundle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map(item => ({ productId: item.id, price: item.price })),
+          method,
+          total: finalTotal,
+        }),
+      });
 
-      // Placeholder: simulate success after delay
-      setTimeout(() => {
-        setPlacing(false);
-        setPlaced(true);
-      }, 1800);
-    } catch (err) {
-      console.error("Order error:", err);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Order failed");
+      }
+
+      const data = await res.json();
+      console.log("[Bundle Order Success]", data);
+
+      setPlacing(false);
+      setPlaced(true);
+    } catch (err: any) {
+      console.error("[Bundle Order Error]", err?.message);
+      alert(`Order failed: ${err?.message}`);
       setPlacing(false);
     }
   }

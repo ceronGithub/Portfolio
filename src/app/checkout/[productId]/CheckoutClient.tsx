@@ -37,15 +37,38 @@ export default function CheckoutClient({
   const downpayment = Math.round(price * 0.30);
   const remainder   = price - downpayment;
 
-  // ── Simulate place order ─────────────────────────────────────────────────
-  // Replace with actual POST /api/checkout/create when payment gateway is ready
-  function handlePlaceOrder() {
+  // ── Place order via API ──────────────────────────────────────────────────
+  // POST to /api/checkout/[productId] with payment method and total.
+  // Creates Order + Ownership records.
+  async function handlePlaceOrder() {
     if (placing || placed) return;
     setPlacing(true);
-    setTimeout(() => {
+
+    try {
+      const res = await fetch(`/api/checkout/${checkoutProductId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          method,
+          total: price,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Order failed");
+      }
+
+      const data = await res.json();
+      console.log("[Single Product Order Success]", data);
+
       setPlacing(false);
       setPlaced(true);
-    }, 1800);
+    } catch (err: any) {
+      console.error("[Single Product Order Error]", err?.message);
+      alert(`Order failed: ${err?.message}`);
+      setPlacing(false);
+    }
   }
 
   // ── Success state ────────────────────────────────────────────────────────
