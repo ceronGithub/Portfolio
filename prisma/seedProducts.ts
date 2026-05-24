@@ -38,9 +38,9 @@ const products = [
     name:            "Orc-01",
     description:     "Low-poly orc warrior. Clean Blender topology, 4K PBR textures. OBJ + FBX included. No rig — ideal for background NPCs and static props.",
     price:           2499,
-    priceMesh:       699,
-    priceStandard:   1499,
-    priceFull:       2499,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -66,9 +66,9 @@ const products = [
     name:            "Orc-02",
     description:     "Heavy orc warrior built for front-line combat roles. Broad silhouette, chunky armor design. OBJ + FBX, 4K PBR textures.",
     price:           2499,
-    priceMesh:       699,
-    priceStandard:   1499,
-    priceFull:       2499,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -94,9 +94,9 @@ const products = [
     name:            "Orc-03",
     description:     "Tribal orc with hand-painted detail and bone accessories. OBJ + FBX, 4K PBR textures. Great for cutscenes and environment dressing.",
     price:           2499,
-    priceMesh:       699,
-    priceStandard:   1499,
-    priceFull:       2499,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -127,9 +127,9 @@ const products = [
     name:            "Orc-04",
     description:     "Battle-scarred orc veteran with chipped armor and war paint. OBJ + FBX, 4K PBR. High detail for close-up renders and game cinematics.",
     price:           2799,
-    priceMesh:       799,
-    priceStandard:   1699,
-    priceFull:       2799,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -155,9 +155,9 @@ const products = [
     name:            "Orc-05",
     description:     "Shaman orc with ceremonial armor and skull trophies. OBJ + FBX, 4K PBR. Detailed bone accessories and layered cloth.",
     price:           2799,
-    priceMesh:       799,
-    priceStandard:   1699,
-    priceFull:       2799,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -183,9 +183,9 @@ const products = [
     name:            "Orc-06",
     description:     "Armored guard orc — tower shield, full plate. OBJ + FBX, 4K PBR. Designed for defensive tank roles and city gate encounters.",
     price:           2799,
-    priceMesh:       799,
-    priceStandard:   1699,
-    priceFull:       2799,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -211,9 +211,9 @@ const products = [
     name:            "Orc-07",
     description:     "Berserker orc — unarmored, rage-fueled, primal energy. OBJ + FBX, 4K PBR. Dynamic silhouette built for fast attack animations.",
     price:           2799,
-    priceMesh:       799,
-    priceStandard:   1699,
-    priceFull:       2799,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -244,9 +244,9 @@ const products = [
     name:            "Orc-08",
     description:     "Elite orc commander. Fully rigged FBX. 4K PBR textures. Ready for Unity and Unreal. Standard tier includes Idle, Walk, Attack 1.",
     price:           2999,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       2999,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -272,9 +272,9 @@ const products = [
     name:            "Orc-09",
     description:     "Scout orc built for speed and stealth. Fully rigged FBX. Animations: Idle, Walk, Attack 1. 4K PBR textures. Unity/Unreal ready.",
     price:           2999,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       2999,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -300,9 +300,9 @@ const products = [
     name:            "Orc-10",
     description:     "Orc warchief with elaborate horned crown and layered armor. Fully rigged FBX. Animations: Idle, Walk, Attack 1. 4K PBR. Unity/Unreal compatible.",
     price:           2999,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       2999,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -328,9 +328,9 @@ const products = [
     name:            "Orc-11",
     description:     "Siege orc built to break walls — heavy plate and giant pauldrons. Fully rigged FBX. Animations: Idle, Walk, Ground Slam. 4K PBR. Unity/Unreal ready.",
     price:           2999,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       2999,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -361,9 +361,9 @@ const products = [
     name:            "Orc-12",
     description:     "Dark shaman orc — glowing rune engravings, tattered robes, bone staff. Full pack: OBJ + FBX rigged + face PNG. Animation slots ready. 4K PBR.",
     price:           3299,
-    priceMesh:       999,
-    priceStandard:   1999,
-    priceFull:       3299,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -389,9 +389,9 @@ const products = [
     name:            "Orc-13",
     description:     "Legendary orc hero — apex of the orc series. Full cinematic quality, intricate gold-and-iron armor. Full pack: OBJ + FBX rigged + face PNG. 4K PBR.",
     price:           3499,
-    priceMesh:       999,
-    priceStandard:   1999,
-    priceFull:       3499,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -422,9 +422,9 @@ const products = [
     name:            "Axe-01",
     description:     "Standard battle axe — single blade, iron head, hardwood haft. Clean PBR textures. OBJ + FBX. Ideal for warrior and grunt inventory systems.",
     price:           999,
-    priceMesh:       499,
-    priceStandard:   999,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -450,9 +450,9 @@ const products = [
     name:            "Axe-02",
     description:     "Dual-blade axe with mirrored crescent heads and wrapped grip. OBJ + FBX, 4K PBR. Good for high-tier loot tables and elite enemies.",
     price:           999,
-    priceMesh:       499,
-    priceStandard:   999,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -478,9 +478,9 @@ const products = [
     name:            "Axe-03",
     description:     "Ornate ceremonial axe with engraved runes and gold inlay. OBJ + FBX, 4K PBR. Perfect for quest reward weapons and hero character loadouts.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -506,9 +506,9 @@ const products = [
     name:            "Axe-04",
     description:     "Heavy war axe — oversized blade for two-handed wielding. OBJ + FBX, 4K PBR. Designed for slow, devastating overhead attack animations.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -534,9 +534,9 @@ const products = [
     name:            "Axe-05",
     description:     "Rune-carved axe with glowing blue engravings and ember texture detail. OBJ + FBX, 4K PBR. High visual impact for magic-class builds.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -562,9 +562,9 @@ const products = [
     name:            "Axe-06",
     description:     "Berserker axe — jagged edge, dark iron, blood-stained texture. OBJ + FBX, 4K PBR. High-detail close-up geometry for first-person game views.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -590,9 +590,9 @@ const products = [
     name:            "Axe-07",
     description:     "Twin axe set — matched pair with worn leather grip and chain link connector. OBJ + FBX, 4K PBR. Designed for dual-wield combat builds.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -618,9 +618,9 @@ const products = [
     name:            "Axe-08",
     description:     "Legendary axe — particle-effect blade with ember and smoke trails on swing. OBJ + FBX, 4K PBR. Premium detail for final boss and legendary loot drops.",
     price:           1599,
-    priceMesh:       799,
-    priceStandard:   1599,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -651,9 +651,9 @@ const products = [
     name:            "Hammer-01",
     description:     "War hammer with flanged iron head and worn oak haft. OBJ + FBX, 4K PBR. Solid choice for paladin, blacksmith, and siege roles.",
     price:           999,
-    priceMesh:       499,
-    priceStandard:   999,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -679,9 +679,9 @@ const products = [
     name:            "Hammer-02",
     description:     "Thunder hammer — electrified head with crackling lightning effect on impact. OBJ + FBX, 4K PBR. Premium detail for divine and storm-class builds.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -707,9 +707,9 @@ const products = [
     name:            "Sword-03",
     description:     "Broad sword with double-edged blade and ornate crossguard. OBJ + FBX, 4K PBR. Clean slash geometry ideal for combo attack and parry animations.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -736,29 +736,29 @@ const products = [
   //  ARCHITECTURE — EXTERIOR
   // ══════════════════════════════════════════════════════════════════════
 
-  { name: "Exterior Design 01", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1kp23x5YBnWovDamPDT2FS00d1ID9SB0k"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Exterior Design 02", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Exterior Design 03", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Exterior Design 04", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Exterior Design 05", description: "AI-generated architectural cinematic exterior. Dramatic angles, photorealistic render.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1MJR8A38OCNRDxb_jRheBdRgexnAOugZf"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Exterior Design 01", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1kp23x5YBnWovDamPDT2FS00d1ID9SB0k"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Exterior Design 02", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Exterior Design 03", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Exterior Design 04", description: "AI-generated exterior architectural visualization. Cinematic lighting, photorealistic materials.", price: 499, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1On-oICTEgx81tNSRyW7DZYk3IOEDBiAT"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Exterior Design 05", description: "AI-generated architectural cinematic exterior. Dramatic angles, photorealistic render.", price: 499, category: "exterior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1MJR8A38OCNRDxb_jRheBdRgexnAOugZf"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
 
   // ══════════════════════════════════════════════════════════════════════
   //  ARCHITECTURE — INTERIOR
   // ══════════════════════════════════════════════════════════════════════
 
-  { name: "Interior Design 01", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("16IlbksfqFgAsIUlIbSnfG1k0miktYC0d"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Interior Design 02", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Interior Design 03", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Interior Design 04", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Interior Design 05", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Interior Design 06", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
-  { name: "Interior Design 07", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 01", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("16IlbksfqFgAsIUlIbSnfG1k0miktYC0d"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 02", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 03", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 04", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 05", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 06", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1iqOFR1-0gO4v-Wk7PzBKZ2TsSeL0qoOW"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "Interior Design 07", description: "AI-generated cinematic interior visualization. Moody ambient lighting, photorealistic surfaces.", price: 499, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1p34uCYAykKSH9c5fHXh1PuRn_S5XS3sG"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
 
   // ══════════════════════════════════════════════════════════════════════
   //  TIMELAPSE
   // ══════════════════════════════════════════════════════════════════════
 
-  { name: "House Build Timelapse 01", description: "Full AI-generated house construction timelapse — exterior to interior reveal. Cinematic camera work, photorealistic render throughout.", price: 799, priceMesh: null, priceStandard: null, priceFull: null, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1-V_JEJtAQvcl6FuldAxpFUFCUV9qwo5Q"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
+  { name: "House Build Timelapse 01", description: "Full AI-generated house construction timelapse — exterior to interior reveal. Cinematic camera work, photorealistic render throughout.", price: 799, category: "interior" as const, packageTier: "mesh_only" as const, isLatest: false, isActive: true, previewVideoUrl: gd("1-V_JEJtAQvcl6FuldAxpFUFCUV9qwo5Q"), facePngUrl: null, threeDUrl: null, actionOneUrl: null, actionTwoUrl: null, actionThreeUrl: null, fileKeyObj: null, fileKeyFbx: null, fileKeyGlb: null, animIdleUrl: null, animWalkUrl: null, animRunUrl: null, animAttackOneUrl: null, animAttackTwoUrl: null, animDeathUrl: null, animHitUrl: null },
 
   // ══════════════════════════════════════════════════════════════════════
   //  CHARACTERS — CYBORG SERIES (Mid tier — new drop May 2026)
@@ -769,9 +769,9 @@ const products = [
     name:            "Cyborg-01",
     description:     "AI-generated cyborg character with sleek chrome plating and blue LED accents. OBJ + FBX, 4K PBR textures. High-detail surface for close-up renders and game cinematics.",
     price:           3199,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       3199,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -791,9 +791,9 @@ const products = [
     name:            "Cyborg-02",
     description:     "Tactical cyborg unit — reinforced shoulder armor, dual sensor eyes, matte-black finish. OBJ + FBX, 4K PBR textures. Built for military and sci-fi game environments.",
     price:           3199,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       3199,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -813,9 +813,9 @@ const products = [
     name:            "Cyborg-03",
     description:     "Stealth cyborg with angular frame, cloaking panel detail, and red visor. OBJ + FBX, 4K PBR textures. Optimized for infiltration and assassin-class game builds.",
     price:           3199,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       3199,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -835,9 +835,9 @@ const products = [
     name:            "Cyborg-04",
     description:     "Heavy combat cyborg — oversized arms, gatling mount on right shoulder, battle-worn plating. OBJ + FBX, 4K PBR textures. Designed for tank and siege roles in sci-fi games.",
     price:           3199,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       3199,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -857,9 +857,9 @@ const products = [
     name:            "Cyborg-05",
     description:     "Medic cyborg — sleek white-and-gold design with biotech scanner arm and holographic HUD. OBJ + FBX, 4K PBR textures. Support class character for sci-fi RPG and strategy games.",
     price:           3199,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       3199,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -879,9 +879,9 @@ const products = [
     name:            "Cyborg-06",
     description:     "Rogue cyborg — asymmetric design, exposed wiring, cracked faceplate with glowing core. OBJ + FBX, 4K PBR textures. Villain and antagonist archetype for dark sci-fi narratives.",
     price:           3199,
-    priceMesh:       899,
-    priceStandard:   1899,
-    priceFull:       3199,
+
+
+
     category:        "character" as const,
     packageTier:     "full_pack" as const,
     isLatest:        true,
@@ -907,9 +907,9 @@ const products = [
     name:            "Sword-01",
     description:     "Elegant longsword with tapered double-edge blade and ornate crossguard. OBJ + FBX, 4K PBR textures. Classic knight-class weapon for fantasy RPG and action games.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -929,9 +929,9 @@ const products = [
     name:            "Sword-02",
     description:     "Short sword with wide fuller and reinforced tip — designed for fast close-range combat. OBJ + FBX, 4K PBR textures. Great for rogue and duelist character builds.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -951,9 +951,9 @@ const products = [
     name:            "Sword-04",
     description:     "Curved scimitar with engraved blade and jeweled pommel. OBJ + FBX, 4K PBR textures. High visual impact for desert warrior and merchant prince character archetypes.",
     price:           1199,
-    priceMesh:       599,
-    priceStandard:   1199,
-    priceFull:       null,
+
+
+
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
     isLatest:        false,
@@ -980,10 +980,7 @@ async function main() {
       update: p,
       create: { id: seedId, ...p },
     });
-    const tierPrices = p.priceMesh
-      ? `  Mesh ₱${p.priceMesh} | Std ₱${p.priceStandard ?? "-"} | Full ₱${p.priceFull ?? p.price}`
-      : "";
-    console.log(`✓ ${p.name}  ₱${p.price}  [${p.packageTier}]${p.isLatest ? "  ★ Latest" : ""}${tierPrices}`);
+    console.log(`✓ ${p.name}  ₱${p.price}  [${p.packageTier}]${p.isLatest ? "  ★ Latest" : ""}`);
   }
   console.log("\nDone. All products seeded.");
 }
