@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
   const weeks  = getLastNWeeks(6);
 
   // ── Core stats ────────────────────────────────────────────────────
-  const [userCount, productCount, orderCount, revenue, activeUsers, systemCount] =
+  const [userCount, productCount, orderCount, revenue, activeUsers, systemCount, siteVisitCount] =
     await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
@@ -56,6 +56,7 @@ export default async function AdminDashboardPage() {
       prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amountPaid: true } }),
       prisma.user.count({ where: { ownership: { some: {} } } }),
       prisma.system.count(),
+      prisma.siteVisit.count(),
     ]);
 
   // ── All paid orders with date — used to compute monthly/weekly splits ──
@@ -128,7 +129,7 @@ export default async function AdminDashboardPage() {
 
   const stats = {
     visitorsRegistered: userCount,
-    visitors:    userCount * 3,
+    visitors:    siteVisitCount,
     notActive,
     activeUsers,
     totalUsers:  userCount,

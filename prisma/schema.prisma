@@ -222,3 +222,28 @@ model Inquiry {
 
   user User @relation(fields: [userId], references: [id])
 }
+
+// ── Site Visits — one row per unique daily session ─────────────────────────
+// fingerprint: SHA-256 of (IP + UA) — no raw PII stored
+// date: "YYYY-MM-DD" — one record per fingerprint per day
+model SiteVisit {
+  id          String   @id @default(cuid())
+  fingerprint String
+  date        String
+  createdAt   DateTime @default(now())
+
+  @@unique([fingerprint, date])
+}
+
+// ── User Action Logs — audit trail for admin actions ──────────────────────
+model UserActionLog {
+  id            String   @id @default(cuid())
+  action        String   // BAN | UNBAN | DEACTIVATE | ACTIVATE | DELETE
+  targetUserId  String
+  targetEmail   String
+  targetName    String?
+  adminId       String
+  adminEmail    String
+  reason        String?
+  createdAt     DateTime @default(now())
+}
