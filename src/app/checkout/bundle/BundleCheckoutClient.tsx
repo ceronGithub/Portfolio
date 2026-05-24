@@ -1,6 +1,7 @@
 // BundleCheckoutClient.tsx — Bundle checkout UI.
-// Shows all selected assets, bundle discount breakdown, payment method,
-// and place order CTA. Protocol Rule 17 compliant design.
+// Shows all selected assets (with real cuid product IDs), bundle discount breakdown,
+// payment method, and place order CTA. Protocol Rule 17 compliant design.
+// Each item.id is the real product cuid — ready for order creation API.
 
 "use client";
 
@@ -165,15 +166,35 @@ export default function BundleCheckoutClient({
   useEntranceAnimation(leftRef);
   useEntranceAnimation(rightRef);
 
-  // ── Simulate place order ────────────────────────────────────────────────
-  // Replace with actual POST /api/checkout/bundle when payment gateway is ready
-  function handlePlaceOrder() {
+  // ── Place order via API ────────────────────────────────────────────────
+  // When payment gateway is ready, POST to /api/checkout/bundle with:
+  // { items: [{ productId: item.id (real cuid), method: "gcash"|"card"|"bank" }] }
+  async function handlePlaceOrder() {
     if (placing || placed) return;
     setPlacing(true);
-    setTimeout(() => {
+
+    try {
+      // TODO: Wire to real POST /api/checkout/bundle endpoint
+      // const res = await fetch("/api/checkout/bundle", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     items: items.map(item => ({ productId: item.id })), // real cuid
+      //     method,
+      //     total: finalTotal,
+      //   }),
+      // });
+      // if (!res.ok) throw new Error("Order failed");
+
+      // Placeholder: simulate success after delay
+      setTimeout(() => {
+        setPlacing(false);
+        setPlaced(true);
+      }, 1800);
+    } catch (err) {
+      console.error("Order error:", err);
       setPlacing(false);
-      setPlaced(true);
-    }, 1800);
+    }
   }
 
   // ── Success state ───────────────────────────────────────────────────────

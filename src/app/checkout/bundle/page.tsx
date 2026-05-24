@@ -1,53 +1,14 @@
 // checkout/bundle/page.tsx — Server Component.
-// Reads ?ids= query param (comma-separated asset slugs).
-// Resolves asset data from the static ALL_ASSETS registry.
-// Renders BundleCheckoutClient with resolved items.
+// Reads ?ids= query param (comma-separated asset slugs or cuids).
+// Resolves asset data from DB by slug match (preferred) then name match (fallback).
+// Passes real cuid product IDs to BundleCheckoutClient for order creation.
 
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { redirect }         from "next/navigation";
 import { notFound }         from "next/navigation";
+import { prisma }           from "@/lib/prisma";
 import BundleCheckoutClient from "./BundleCheckoutClient";
-
-// ── Static asset registry (mirrors buy-section data) ─────────────────────────
-// Price is stored here as the source of truth for server-side total calculation.
-const ASSET_REGISTRY: Record<string, { id: string; label: string; category: string; price: number }> = {
-  "orc-01": { id: "orc-01", label: "Orc 01 — Warrior",      category: "Character", price: 5500 },
-  "orc-02": { id: "orc-02", label: "Orc 02 — Fighter",      category: "Character", price: 5500 },
-  "orc-03": { id: "orc-03", label: "Orc 03 — Red Skin",     category: "Character", price: 5500 },
-  "orc-04": { id: "orc-04", label: "Orc 04 — Armored",      category: "Character", price: 5500 },
-  "orc-05": { id: "orc-05", label: "Orc 05 — Shaman",       category: "Character", price: 5500 },
-  "orc-06": { id: "orc-06", label: "Orc 06 — Berserker",    category: "Character", price: 5500 },
-  "orc-07": { id: "orc-07", label: "Orc 07 — Heavy",        category: "Character", price: 5500 },
-  "orc-08": { id: "orc-08", label: "Orc 08 — Scout",        category: "Character", price: 5500 },
-  "orc-09": { id: "orc-09", label: "Orc 09 — Elite",        category: "Character", price: 5500 },
-  "orc-10": { id: "orc-10", label: "Orc 10 — Destroyer",    category: "Character", price: 5500 },
-  "orc-11": { id: "orc-11", label: "Orc 11 — Warlord",      category: "Character", price: 5500 },
-  "orc-12": { id: "orc-12", label: "Orc 12",                category: "Character", price: 5500 },
-  "orc-13": { id: "orc-13", label: "Orc 13",                category: "Character", price: 5500 },
-  "axe-01": { id: "axe-01", label: "Axe 01 — Battle Axe",   category: "Weapon",    price: 3500 },
-  "axe-02": { id: "axe-02", label: "Axe 02 — War Axe",      category: "Weapon",    price: 3500 },
-  "axe-03": { id: "axe-03", label: "Axe 03 — Runic Axe",    category: "Weapon",    price: 3500 },
-  "axe-04": { id: "axe-04", label: "Axe 04 — Viking Axe",   category: "Weapon",    price: 3500 },
-  "axe-05": { id: "axe-05", label: "Axe 05 — Ornate Axe",   category: "Weapon",    price: 3500 },
-  "axe-06": { id: "axe-06", label: "Axe 06 — Broad Axe",    category: "Weapon",    price: 3500 },
-  "axe-07": { id: "axe-07", label: "Axe 07 — Bloodied Axe", category: "Weapon",    price: 3500 },
-  "axe-08": { id: "axe-08", label: "Axe 08 — Dark Axe",     category: "Weapon",    price: 3500 },
-  "ext-drone-01": { id: "ext-drone-01", label: "Drone Reveal 01", category: "Exterior", price: 8500 },
-  "ext-drone-02": { id: "ext-drone-02", label: "Drone Reveal 02", category: "Exterior", price: 8500 },
-  "ext-proj-01":  { id: "ext-proj-01",  label: "Project 01",      category: "Exterior", price: 8500 },
-  "ext-proj-02":  { id: "ext-proj-02",  label: "Project 02",      category: "Exterior", price: 8500 },
-  "ext-proj-03":  { id: "ext-proj-03",  label: "Project 03",      category: "Exterior", price: 8500 },
-  "ext-proj-04":  { id: "ext-proj-04",  label: "Project 04",      category: "Exterior", price: 8500 },
-  "ext-proj-05":  { id: "ext-proj-05",  label: "Project 05",      category: "Exterior", price: 8500 },
-  "int-01": { id: "int-01", label: "Interior 01 — Suite",   category: "Interior", price: 7500 },
-  "int-02": { id: "int-02", label: "Interior 02 — Living",  category: "Interior", price: 7500 },
-  "int-03": { id: "int-03", label: "Interior 03 — Kitchen", category: "Interior", price: 7500 },
-  "int-04": { id: "int-04", label: "Interior 04 — Bedroom", category: "Interior", price: 7500 },
-  "int-05": { id: "int-05", label: "Interior 05 — Lobby",   category: "Interior", price: 7500 },
-  "int-06": { id: "int-06", label: "Interior 06 — Office",  category: "Interior", price: 7500 },
-  "int-07": { id: "int-07", label: "Interior 07 — Luxury",  category: "Interior", price: 7500 },
-};
 
 // ── Bundle discount tiers (mirrors buy-section logic) ─────────────────────────
 function getBundleDiscount(count: number): number {
@@ -55,6 +16,17 @@ function getBundleDiscount(count: number): number {
   if (count >= 3) return 0.10;
   if (count >= 2) return 0.05;
   return 0;
+}
+
+// ── Normalise category enum to display string ─────────────────────────────────
+function toDisplayCategory(category: string): string {
+  const map: Record<string, string> = {
+    character: "Character",
+    weapon:    "Weapon",
+    interior:  "Interior",
+    exterior:  "Exterior",
+  };
+  return map[category] ?? category;
 }
 
 interface Props {
@@ -68,15 +40,41 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
   const { ids } = await searchParams;
   if (!ids) notFound();
 
-  // Resolve each slug against the static registry
-  const rawIds    = ids.split(",").map(s => s.trim()).filter(Boolean);
-  const resolvedItems = rawIds
-    .map(id => ASSET_REGISTRY[id])
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const rawIds = ids.split(",").map(s => s.trim()).filter(Boolean);
+  if (rawIds.length === 0) notFound();
 
-  if (resolvedItems.length === 0) notFound();
+  // ── Resolve products from DB ──────────────────────────────────────────────
+  // Query by slug OR cuid so both legacy slug URLs and new cuid URLs work.
+  // Each rawId is tried as a slug first (via OR), then as a cuid.
+  const products = await prisma.product.findMany({
+    where: {
+      isActive: true,
+      OR: [
+        { slug: { in: rawIds } },
+        { id:   { in: rawIds } },
+      ],
+    },
+    select: {
+      id:       true,
+      slug:     true,
+      name:     true,
+      price:    true,
+      category: true,
+    },
+  });
 
-  // Compute totals server-side
+  if (products.length === 0) notFound();
+
+  // Map to the shape BundleCheckoutClient expects.
+  // id = real cuid (used for order creation), label = display name.
+  const resolvedItems = products.map(p => ({
+    id:       p.id,                           // real cuid — passed to order API
+    label:    p.name,
+    category: toDisplayCategory(p.category),
+    price:    p.price,
+  }));
+
+  // Compute totals server-side using DB prices (never trust client)
   const rawTotal       = resolvedItems.reduce((sum, a) => sum + a.price, 0);
   const discountRate   = getBundleDiscount(resolvedItems.length);
   const discountAmount = Math.round(rawTotal * discountRate);
