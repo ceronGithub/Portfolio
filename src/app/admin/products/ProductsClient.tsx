@@ -517,16 +517,27 @@ function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
 }) {
-  const initialDrafts = Object.fromEntries(
+  const buildDrafts = (p: Product) => Object.fromEntries(
     ALL_MEDIA_FIELDS.map(({ field }) => [
       field,
-      (product[field as keyof Product] as string | number | null) != null
-        ? String(product[field as keyof Product]) : ""
+      (p[field as keyof Product] as string | number | null) != null
+        ? String(p[field as keyof Product]) : ""
     ])
   );
-  const [drafts, setDrafts] = useState<Record<string, string>>(initialDrafts);
+
+  const [drafts, setDrafts] = useState<Record<string, string>>(() => buildDrafts(product));
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved,  setSaved]  = useState<Record<string, boolean>>({});
+  const lastSavedField = useRef<{ field: string; value: string } | null>(null);
+
+  // When the product prop updates (after parent state change), sync only the
+  // field that was just saved — preserving all other unsaved draft edits.
+  useEffect(() => {
+    if (!lastSavedField.current) return;
+    const { field, value } = lastSavedField.current;
+    setDrafts(prev => ({ ...prev, [field]: value }));
+    lastSavedField.current = null;
+  }, [product]);
 
   async function handleSaveField(field: string, type?: "url" | "number") {
     const raw   = drafts[field].trim();
@@ -534,6 +545,7 @@ function MediaEditor({ product, onFieldSaved }: {
     setSaving(prev => ({ ...prev, [field]: true }));
     const ok = await patchProductMedia(product.id, field, value);
     if (ok) {
+      lastSavedField.current = { field, value: value ?? "" };
       onFieldSaved(product.id, field, value);
       setSaved(prev => ({ ...prev, [field]: true }));
       setTimeout(() => setSaved(prev => ({ ...prev, [field]: false })), 2200);
@@ -708,7 +720,7 @@ function AddProductForm({ onProductCreated, onClose }: {
 // Each row is expandable to reveal the MediaEditor and isLatest toggle.
 // "Add New Product" button at top opens AddProductForm inline.
 function ProductsSection({
-  products, onToggle, togglingId, onToggleLatest, togglingLatestId, onDelete, deletingId, onProductCreated,
+  products, onToggle, togglingId, onToggleLatest, togglingLatestId, onDelete, deletingId, onProductCreated, onFieldSaved,
 }: {
   products:         Product[];
   onToggle:         (id: string, current: boolean) => void;
@@ -718,6 +730,7 @@ function ProductsSection({
   onDelete:         (id: string, name: string) => void;
   deletingId:       string | null;
   onProductCreated: (p: Product) => void;
+  onFieldSaved:     (id: string, field: string, value: string | null) => void;
 }) {
   const revealRef = useReveal();
   const [expandedRow, setExpandedRow]       = useState<string | null>(null);
@@ -859,7 +872,7 @@ function ProductsSection({
             {/* Expanded media editor row */}
             {expandedRow === p.id && (
               <div className="apMediaEditorWrap">
-                <MediaEditor product={p} onFieldSaved={() => {}} />
+                <MediaEditor product={p} onFieldSaved={onFieldSaved} />
               </div>
             )}
           </div>
@@ -1203,6 +1216,13 @@ export default function ProductsClient({ products, systems }: Props) {
     setDeletingId(null);
   }
 
+  // Update a media field on a product in local state after save
+  function handleFieldSaved(id: string, field: string, value: string | null) {
+    setProductList(prev => prev.map(p =>
+      p.id === id ? { ...p, [field]: value } : p
+    ));
+  }
+
   // Add new product to top of list
   function handleProductCreated(newProduct: Product) {
     setProductList(prev => [newProduct, ...prev]);
@@ -1235,6 +1255,7 @@ export default function ProductsClient({ products, systems }: Props) {
         onDelete={handleDeleteProduct}
         deletingId={deletingId}
         onProductCreated={handleProductCreated}
+        onFieldSaved={handleFieldSaved}
       />
 
       {/* ── Systems Catalog ───────────────────────── */}
