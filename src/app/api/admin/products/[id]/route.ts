@@ -77,3 +77,29 @@ export async function PATCH(
     return NextResponse.json({ error: err?.message ?? "Server error" }, { status: 500 });
   }
 }
+// ── DELETE /api/admin/products/[id] — cascade delete product ─────────────────
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any)?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    // Cascade: remove ownership and orders before deleting product
+    await prisma.ownership.deleteMany({ where: { productId: id } });
+    await prisma.order.deleteMany({ where: { productId: id } });
+    await prisma.product.delete({ where: { id } });
+
+    revalidatePath("/buyer", "layout");
+    return NextResponse.json({ deleted: true });
+
+  } catch (err: any) {
+    console.error("[DELETE /api/admin/products/[id]]", err?.message);
+    return NextResponse.json({ error: err?.message ?? "Server error" }, { status: 500 });
+  }
+}

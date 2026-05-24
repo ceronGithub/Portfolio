@@ -82,6 +82,12 @@ async function toggleProductLatest(id: string, current: boolean): Promise<boolea
   return res.ok;
 }
 
+// Permanently deletes a product and cascades ownership/orders on the server.
+async function deleteProduct(id: string): Promise<boolean> {
+  const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+  return res.ok;
+}
+
 // Updates a single media URL field (or null) on a product.
 async function patchProductMedia(
   id: string,
@@ -710,6 +716,7 @@ function ProductsSection({
   const [productList, setProductList]       = useState<Product[]>(products);
   const [expandedRow, setExpandedRow]       = useState<string | null>(null);
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
+  const [deletingId,     setDeletingId]     = useState<string | null>(null);
   const [showAddForm, setShowAddForm]       = useState(false);
 
   // ── Column filters ────────────────────────────────────────────────
@@ -753,6 +760,16 @@ function ProductsSection({
       });
     }
     setTogglingLatest(null);
+  }
+
+  // Delete product with cascade
+  async function handleDeleteProduct(id: string, name: string) {
+    if (!window.confirm(`Delete "${name}"?\nThis will also remove all associated orders and ownership records.`)) return;
+    setDeletingId(id);
+    const ok = await deleteProduct(id);
+    if (ok) setProductList(prev => prev.filter(p => p.id !== id));
+    else    alert("Failed to delete product. Try again.");
+    setDeletingId(null);
   }
 
   function handleProductCreated(newProduct: Product) {
@@ -920,6 +937,15 @@ function ProductsSection({
                   onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
                 >
                   {expandedRow === p.id ? "▲ Media" : "✎ Media"}
+                </button>
+                <button
+                  className="apActionBtn apActionBtnDelete"
+                  style={{ fontSize: "0.72rem" }}
+                  onClick={() => handleDeleteProduct(p.id, p.name)}
+                  disabled={deletingId === p.id}
+                  title="Delete this product permanently"
+                >
+                  {deletingId === p.id ? "…" : "✕ Delete"}
                 </button>
               </span>
             </div>

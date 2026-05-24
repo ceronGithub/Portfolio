@@ -330,6 +330,50 @@ function ConfirmPopover({ message, danger, withReason, onConfirm, onCancel }: {
 
 // ── Card 1 — All Users ────────────────────────────────────────────────
 
+
+// ── OwnedProductsModal — shows all products owned by a user ──────────────
+function OwnedProductsModal({ user, onClose, onRevoke, revokingKey }: {
+  user: User;
+  onClose: () => void;
+  onRevoke: (userId: string, productId: string) => void;
+  revokingKey: string | null;
+}) {
+  return (
+    <div className="umModalOverlay" onClick={onClose}>
+      <div className="umModalBox" onClick={e => e.stopPropagation()}>
+        <div className="umModalHeader">
+          <div>
+            <p className="umModalEyebrow">Owned Products</p>
+            <h3 className="umModalTitle">{user.name ?? user.email}</h3>
+          </div>
+          <button className="umModalClose" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <div className="umModalBody">
+          {user.ownership.length === 0 ? (
+            <p className="umModalEmpty">This user owns no products.</p>
+          ) : (
+            <ul className="umModalList">
+              {user.ownership.map(o => (
+                <li key={o.productId} className="umModalItem">
+                  <span className="umModalItemName">{o.product.name}</span>
+                  <button
+                    className="umRevokeBtn"
+                    title={`Revoke ${o.product.name}`}
+                    disabled={revokingKey === `${user.id}:${o.productId}`}
+                    onClick={() => onRevoke(user.id, o.productId)}
+                  >
+                    {revokingKey === `${user.id}:${o.productId}` ? "…" : "✕ Revoke"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AllUsersCard({ users, onUnlock, onOwnershipRevoked }: {
   users: User[];
   onUnlock: (user: User) => void;
@@ -337,16 +381,26 @@ function AllUsersCard({ users, onUnlock, onOwnershipRevoked }: {
 }) {
   const revealRef = useReveal();
   const [revokingKey, setRevokingKey] = useState<string | null>(null);
+  const [ownedModalUser, setOwnedModalUser] = useState<User | null>(null);
 
   async function handleRevoke(userId: string, productId: string) {
     const key = `${userId}:${productId}`;
     setRevokingKey(key);
     const ok = await revokeUnlock(userId, productId);
-    if (ok) onOwnershipRevoked(userId, productId);
+    if (ok) {
+      onOwnershipRevoked(userId, productId);
+      // Update modal user state so the list refreshes in-place
+      setOwnedModalUser(prev =>
+        prev?.id === userId
+          ? { ...prev, ownership: prev.ownership.filter(o => o.productId !== productId) }
+          : prev
+      );
+    }
     setRevokingKey(null);
   }
 
   return (
+    <>
     <div className="umCard" ref={revealRef}>
       <div className="umCardHeader">
         <h2 className="umCardTitle">All Registered Users</h2>
@@ -377,20 +431,16 @@ function AllUsersCard({ users, onUnlock, onOwnershipRevoked }: {
             </span>
             <span className="umCell umCellOwned">
               {u.ownership.length === 0
-                ? <em className="umNone">None</em>
-                : u.ownership.map(o => (
-                    <span key={o.productId} className="umOwnedTagRevoke">
-                      <span className="umOwnedTagName">{o.product.name}</span>
-                      <button
-                        className="umRevokeBtn"
-                        title={`Revoke ${o.product.name}`}
-                        disabled={revokingKey === `${u.id}:${o.productId}`}
-                        onClick={() => handleRevoke(u.id, o.productId)}
-                      >
-                        {revokingKey === `${u.id}:${o.productId}` ? "…" : "✕"}
-                      </button>
-                    </span>
-                  ))
+                ? <em className="umNone">—</em>
+                : (
+                  <button
+                    className="umOwnedCountBadge"
+                    onClick={() => setOwnedModalUser(u)}
+                    title={`View ${u.ownership.length} owned product(s)`}
+                  >
+                    {u.ownership.length} owned
+                  </button>
+                )
               }
             </span>
             <span className="umCell">
@@ -407,6 +457,17 @@ function AllUsersCard({ users, onUnlock, onOwnershipRevoked }: {
         ))}
       </div>
     </div>
+
+      {/* ── Owned Products Modal ── */}
+      {ownedModalUser !== null && (
+        <OwnedProductsModal
+          user={ownedModalUser as User}
+          onClose={() => setOwnedModalUser(null)}
+          onRevoke={handleRevoke}
+          revokingKey={revokingKey}
+        />
+      )}
+    </>
   );
 }
 
