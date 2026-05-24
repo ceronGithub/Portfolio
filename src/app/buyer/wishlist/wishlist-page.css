@@ -1,0 +1,249 @@
+/* wishlist-page.css — Standalone /buyer/wishlist page styles */
+
+.wlPage {
+  min-height: 100vh;
+  padding: 2.5rem 2rem 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.wlPageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wlPageHeaderLeft { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.wlPageBackLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  margin-bottom: 0.15rem;
+}
+
+.wlPageBackLink:hover { color: rgba(255,255,255,0.7); }
+
+.wlPageTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.wlPageTitle {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.wlPageCount {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+}
+
+.wlPageSub {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.35);
+  margin: 0;
+}
+
+.wlPageClearBtn {
+  background: transparent;
+  border: 1px solid rgba(252,129,129,0.25);
+  border-radius: 7px;
+  color: rgba(252,129,129,0.6);
+  font-size: 0.78rem;
+  font-family: inherit;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  align-self: flex-start;
+  margin-top: 0.2rem;
+}
+
+.wlPageClearBtn:hover {
+  border-color: rgba(252,129,129,0.5);
+  color: #fc8181;
+  background: rgba(229,62,62,0.06);
+}
+
+/* ── Grid ────────────────────────────────────────────── */
+.wlPageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Skeleton ────────────────────────────────────────── */
+.wlPageSkeleton {
+  height: 220px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  animation: wlSkelPulse 1.6s ease infinite;
+}
+
+@keyframes wlSkelPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* ── Card ────────────────────────────────────────────── */
+.wlPageCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.wlPageCard:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.wlPageCardThumb {
+  height: 120px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wlPageCardBody {
+  padding: 0.85rem 1rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.wlPageCardCategory {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.wlPageCardId {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wlPageCardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem 0.85rem;
+}
+
+.wlPageBuyBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 7px;
+  padding: 0.45rem 0.75rem;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.wlPageBuyBtn:hover { opacity: 0.85; }
+
+.wlPageRemoveBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.wlPageRemoveBtn:hover {
+  border-color: rgba(252,129,129,0.4);
+  color: #fc8181;
+  background: rgba(229,62,62,0.08);
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+.wlPageEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 5rem 1rem;
+  color: rgba(255,255,255,0.2);
+}
+
+.wlPageEmptyTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+}
+
+.wlPageEmptySub {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.25);
+  margin: 0;
+}
+
+.wlPageEmptyBtn {
+  margin-top: 0.5rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wlPageEmptyBtn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .wlPage { padding: 1.5rem 1rem 3rem; }
+  .wlPageTitle { font-size: 1.3rem; }
+  .wlPageGrid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}
