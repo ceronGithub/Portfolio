@@ -100,7 +100,8 @@ model Product {
 model Order {
   id              String      @id @default(cuid())
   userId          String
-  productId       String
+  productId       String?     // nullable — set for 3D asset orders
+  systemId        String?     // nullable — set for System orders
   status          OrderStatus @default(PENDING)
   paymongoOrderId String?
   amountPaid      Int?
@@ -109,8 +110,9 @@ model Order {
   deliveredAt     DateTime?   // Actual delivery timestamp
   createdAt       DateTime    @default(now())
 
-  user    User    @relation(fields: [userId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  product Product? @relation(fields: [productId], references: [id])
+  system  System?  @relation(fields: [systemId], references: [id])
 }
 
 model Ownership {
@@ -145,6 +147,7 @@ model System {
   createdAt    DateTime      @default(now())
 
   addons       SystemAddon[]
+  orders       Order[]
 }
 
 // ── System add-ons ─────────────────────────────────────────────────

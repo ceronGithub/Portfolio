@@ -2,6 +2,7 @@
 // Left: cycling weapon_character MP4 playlist. Right: dark glass form.
 "use client";
 
+import "./register.css";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

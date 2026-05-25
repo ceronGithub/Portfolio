@@ -1,6 +1,6 @@
 // POST /api/checkout/[productId] — Create order + PayMongo payment link.
+// Supports both Product (3D assets) and System catalog items.
 // Returns { checkoutUrl } — client redirects buyer to PayMongo hosted page.
-// On payment success, /api/paymongo/webhook fires and auto-unlocks files.
 import { NextRequest, NextResponse }  from "next/server";
 import { getServerSession }           from "next-auth";
 import { authOptions }                from "@/lib/auth";
@@ -12,16 +12,14 @@ export async function POST(
   { params }: { params: Promise<{ productId: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const userId              = (session.user as any).id as string;
   const { productId }       = await params;
   const body                = await req.json();
   const { method, total, grantedTier } = body;
 
-  // Validate
   if (!productId)
     return NextResponse.json({ error: "productId required" }, { status: 400 });
   if (!["gcash", "card", "bank"].includes(method))
@@ -29,29 +27,47 @@ export async function POST(
   if (typeof total !== "number" || total <= 0)
     return NextResponse.json({ error: "Invalid total" }, { status: 400 });
 
-  // Verify product
+  // ── Resolve item — check Product first, then System ──────────────────────
+  let itemName   = "";
+  let isSystem   = false;
+
   const product = await prisma.product.findUnique({
     where:  { id: productId },
     select: { id: true, price: true, name: true, isActive: true },
   });
-  if (!product || !product.isActive)
-    return NextResponse.json({ error: "Product not found or inactive" }, { status: 404 });
 
-  // Downpayment is 30% of total
+  if (product && product.isActive) {
+    itemName = product.name;
+  } else {
+    const system = await (prisma as any).system.findUnique({
+      where:  { id: productId },
+      select: { id: true, basePrice: true, title: true, isActive: true },
+    });
+    if (!system || !system.isActive)
+      return NextResponse.json({ error: "Product not found or inactive" }, { status: 404 });
+    itemName  = system.title;
+    isSystem  = true;
+  }
+
   const downpayment = Math.round(total * 0.30);
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   try {
-    // Create PENDING order first so we have an orderId for the reference
+    // Create PENDING order — use correct FK field based on type
     const order = await prisma.order.create({
-      data: { userId, productId, status: "PENDING" },
+      data: {
+        userId,
+        ...(isSystem ? { systemId: productId } : { productId }),
+        status:       "PENDING",
+        amountPaid:   downpayment,
+        deliveryNote: `tier:${grantedTier ?? "mesh_only"}`,
+      },
     });
 
     // Create PayMongo payment link
     const link = await createPaymentLink({
       amount:      downpayment,
-      description: `Downpayment — ${product.name}`,
+      description: `Downpayment — ${itemName}`,
       remarks:     `Order ${order.id} · 30% downpayment`,
       referenceId: order.id,
       successUrl:  `${appUrl}/checkout/success?orderId=${order.id}`,
@@ -61,12 +77,7 @@ export async function POST(
     // Store PayMongo link ID on the order
     await prisma.order.update({
       where: { id: order.id },
-      data:  {
-        paymongoOrderId: link.id,
-        amountPaid:      downpayment,
-        // Store buyer's tier selection as a delivery note until webhook fires
-        deliveryNote:    `tier:${grantedTier ?? "mesh_only"}`,
-      },
+      data:  { paymongoOrderId: link.id },
     });
 
     return NextResponse.json({ checkoutUrl: link.checkoutUrl, orderId: order.id }, { status: 201 });
