@@ -1010,3 +1010,90 @@
   vertical-align: middle;
   flex-shrink:   0;
 }
+/* ── PackPickerModal ──────────────────────────────────────────────────── */
+.apModalOverlay {
+  position:       fixed;
+  inset:          0;
+  background:     rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px);
+  z-index:        900;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  padding:        1rem;
+}
+.apModal {
+  background:    #111113;
+  border:        1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding:       2rem;
+  width:         100%;
+  max-width:     480px;
+  display:       flex;
+  flex-direction: column;
+  gap:           1.5rem;
+}
+.apModalHeader { display: flex; flex-direction: column; gap: 0.3rem; }
+.apModalEyebrow {
+  font-size:      0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.35);
+  font-family:    var(--font-mono, monospace);
+}
+.apModalTitle {
+  font-size:   1.1rem;
+  font-weight: 700;
+  color:       #fff;
+  margin:      0;
+}
+.apModalSub {
+  font-size: 0.8rem;
+  color:     rgba(255,255,255,0.45);
+  margin:    0;
+}
+.apPackOptions {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.6rem;
+}
+.apPackOption {
+  background:    rgba(255,255,255,0.03);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding:       0.9rem 1rem;
+  text-align:    left;
+  cursor:        pointer;
+  transition:    background 0.18s ease, border-color 0.18s ease;
+  display:       flex;
+  flex-direction: column;
+  gap:           0.3rem;
+}
+.apPackOption:hover {
+  background:    rgba(255,255,255,0.06);
+  border-color:  rgba(255,255,255,0.18);
+}
+.apPackOptionSelected { /* color overridden inline */ }
+.apPackOptionTop {
+  display:        flex;
+  align-items:    center;
+  justify-content: space-between;
+}
+.apPackOptionLabel {
+  font-size:   0.85rem;
+  font-weight: 600;
+  color:       rgba(255,255,255,0.85);
+  transition:  color 0.18s ease;
+}
+.apPackOptionCheck { font-size: 0.85rem; }
+.apPackOptionDesc {
+  font-size:   0.75rem;
+  color:       rgba(255,255,255,0.4);
+  margin:      0;
+  line-height: 1.5;
+}
+.apModalActions {
+  display:        flex;
+  justify-content: flex-end;
+  gap:            0.6rem;
+}

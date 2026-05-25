@@ -14,7 +14,7 @@ import { sanitize } from "@/lib/utils";
 interface Product {
   id: string; name: string; description: string | null;
   price: number; isActive: boolean; isLatest: boolean;
-  category: string;
+  category: string; packageTier: string;
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
   actionTwoUrl: string | null; actionThreeUrl: string | null;
@@ -72,12 +72,22 @@ async function toggleProductActive(id: string, current: boolean): Promise<boolea
   return res.ok;
 }
 
-// Toggles the isLatest flag on a product.
-async function toggleProductLatest(id: string, current: boolean): Promise<boolean> {
+// Sets isLatest=true on a product AND updates its packageTier in one PATCH call.
+async function setProductLatestWithTier(id: string, tier: string): Promise<boolean> {
   const res = await fetch(`/api/admin/products/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ isLatest: !current }),
+    body: JSON.stringify({ isLatest: true, packageTier: tier }),
+  });
+  return res.ok;
+}
+
+// Clears the isLatest flag on a product (unset latest).
+async function clearProductLatest(id: string): Promise<boolean> {
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ isLatest: false }),
   });
   return res.ok;
 }
@@ -702,6 +712,88 @@ function AddProductForm({ onProductCreated, onClose }: {
   );
 }
 
+// ── PACK_OPTIONS — the 3 tiers admin can feature as "latest" ──────────
+const PACK_OPTIONS = [
+  {
+    tier:     "mesh_only",
+    label:    "Mesh Only",
+    desc:     "OBJ + FBX + 4K PBR textures. No rig, no animations.",
+    color:    "#94a3b8",
+  },
+  {
+    tier:     "standard",
+    label:    "Standard Pack",
+    desc:     "OBJ + FBX + Rig + 5 core animation clips.",
+    color:    "#60a5fa",
+  },
+  {
+    tier:     "full_pack",
+    label:    "Full Pack",
+    desc:     "OBJ + FBX + GLB + Full rig + 7 animations (incl. Death & Hit).",
+    color:    "#4ade80",
+  },
+] as const;
+
+// ── PackPickerModal — shown when admin clicks "Set Latest" ─────────────
+// Admin picks which pack tier to feature, then confirms.
+function PackPickerModal({ productName, onConfirm, onClose }: {
+  productName: string;
+  onConfirm: (tier: string) => void;
+  onClose: () => void;
+}) {
+  const [selected, setSelected] = useState<string>("mesh_only");
+  const [saving,   setSaving]   = useState(false);
+
+  async function handleConfirm() {
+    setSaving(true);
+    await onConfirm(selected);
+    setSaving(false);
+  }
+
+  return (
+    <div className="apModalOverlay" onClick={onClose}>
+      <div className="apModal" onClick={e => e.stopPropagation()}>
+        <div className="apModalHeader">
+          <p className="apModalEyebrow">Set Latest Drop</p>
+          <h3 className="apModalTitle">{productName}</h3>
+          <p className="apModalSub">Choose which pack to feature as the latest drop.</p>
+        </div>
+        <div className="apPackOptions">
+          {PACK_OPTIONS.map(opt => (
+            <button
+              key={opt.tier}
+              className={`apPackOption ${selected === opt.tier ? "apPackOptionSelected" : ""}`}
+              style={selected === opt.tier ? { borderColor: opt.color, background: `${opt.color}14` } : {}}
+              onClick={() => setSelected(opt.tier)}
+            >
+              <div className="apPackOptionTop">
+                <span className="apPackOptionLabel" style={{ color: selected === opt.tier ? opt.color : undefined }}>
+                  {opt.label}
+                </span>
+                {selected === opt.tier && (
+                  <span className="apPackOptionCheck" style={{ color: opt.color }}>✓</span>
+                )}
+              </div>
+              <p className="apPackOptionDesc">{opt.desc}</p>
+            </button>
+          ))}
+        </div>
+        <div className="apModalActions">
+          <button className="apPriceCancelBtn" onClick={onClose}>Cancel</button>
+          <button
+            className="apPriceSaveBtn"
+            onClick={handleConfirm}
+            disabled={saving}
+            style={{ background: "#22c55e", color: "#0d0d0d" }}
+          >
+            {saving ? "Setting…" : "Set as Latest"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── ProductsSection — products table with media editing and add form ────
 // Each row is expandable to reveal the MediaEditor and isLatest toggle.
 // "Add New Product" button at top opens AddProductForm inline.
@@ -716,6 +808,7 @@ function ProductsSection({
   const [productList, setProductList]       = useState<Product[]>(products);
   const [expandedRow, setExpandedRow]       = useState<string | null>(null);
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
+  const [latestModal,    setLatestModal]    = useState<{ id: string; name: string; isLatest: boolean } | null>(null);
   const [deletingId,     setDeletingId]     = useState<string | null>(null);
   const [showAddForm, setShowAddForm]       = useState(false);
 
@@ -746,18 +839,28 @@ function ProductsSection({
     ));
   }
 
-  async function handleToggleLatest(id: string, current: boolean) {
+  async function handleConfirmLatest(tier: string) {
+    if (!latestModal) return;
+    const { id, isLatest } = latestModal;
     setTogglingLatest(id);
-    const ok = await toggleProductLatest(id, current);
-    if (ok) {
-      setProductList(prev => {
-        const target = prev.find(p => p.id === id);
-        return prev.map(p => {
-          if (p.id === id) return { ...p, isLatest: !current };
-          if (!current && p.category === target?.category) return { ...p, isLatest: false };
-          return p;
+    setLatestModal(null);
+
+    if (isLatest) {
+      // Already latest — clicking again just clears it
+      const ok = await clearProductLatest(id);
+      if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isLatest: false } : p));
+    } else {
+      const ok = await setProductLatestWithTier(id, tier);
+      if (ok) {
+        setProductList(prev => {
+          const target = prev.find(p => p.id === id);
+          return prev.map(p => {
+            if (p.id === id) return { ...p, isLatest: true, packageTier: tier };
+            if (target && p.category === target.category) return { ...p, isLatest: false };
+            return p;
+          });
         });
-      });
+      }
     }
     setTogglingLatest(null);
   }
@@ -911,7 +1014,20 @@ function ProductsSection({
                 <button
                   className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}
                   style={{ fontSize: "0.72rem" }}
-                  onClick={() => handleToggleLatest(p.id, p.isLatest)}
+                  onClick={() => {
+                    if (p.isLatest) {
+                      // Already set — one-click to unset, no modal needed
+                      setLatestModal({ id: p.id, name: p.name, isLatest: true });
+                      setTogglingLatest(p.id);
+                      clearProductLatest(p.id).then(ok => {
+                        if (ok) setProductList(prev => prev.map(q => q.id === p.id ? { ...q, isLatest: false } : q));
+                        setTogglingLatest(null);
+                        setLatestModal(null);
+                      });
+                    } else {
+                      setLatestModal({ id: p.id, name: p.name, isLatest: false });
+                    }
+                  }}
                   disabled={togglingLatest === p.id}
                   title="Toggle Latest Drop flag"
                 >
@@ -958,6 +1074,15 @@ function ProductsSection({
           </div>
         ))}
       </div>
+
+      {/* Pack picker modal — shown when admin clicks "Set Latest" */}
+      {latestModal && !latestModal.isLatest && (
+        <PackPickerModal
+          productName={latestModal.name}
+          onConfirm={handleConfirmLatest}
+          onClose={() => setLatestModal(null)}
+        />
+      )}
     </div>
   );
 }

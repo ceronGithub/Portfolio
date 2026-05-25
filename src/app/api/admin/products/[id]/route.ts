@@ -38,10 +38,15 @@ export async function PATCH(
           data:  { isLatest: false },
         });
       }
-      // Set the target
+      // Set the target — also update packageTier if provided in same call
+      const latestData: Record<string, unknown> = { isLatest: body.isLatest };
+      const VALID_TIERS_SET = ["mesh_only", "standard", "full_pack"];
+      if (typeof body.packageTier === "string" && VALID_TIERS_SET.includes(body.packageTier)) {
+        latestData.packageTier = body.packageTier;
+      }
       const updated = await prisma.product.update({
         where: { id },
-        data:  { isLatest: body.isLatest },
+        data:  latestData,
       });
       revalidatePath("/buyer", "layout");
       return NextResponse.json({ product: updated });
@@ -51,14 +56,29 @@ export async function PATCH(
     const MEDIA = [
       "previewVideoUrl", "facePngUrl", "threeDUrl",
       "actionOneUrl", "actionTwoUrl", "actionThreeUrl",
+      "fileKeyObj", "fileKeyFbx", "fileKeyGlb",
+      "animIdleUrl", "animWalkUrl", "animRunUrl",
+      "animAttackOneUrl", "animAttackTwoUrl", "animDeathUrl", "animHitUrl",
     ] as const;
+
+    const TIER_PRICES = ["priceMesh", "priceStandard", "priceFull"] as const;
+    const VALID_TIERS = ["mesh_only", "standard", "full_pack"];
 
     const data: Record<string, unknown> = {};
 
-    if (typeof body.isActive  === "boolean") data.isActive  = body.isActive;
-    if (typeof body.price     === "number")  data.price     = body.price;
-    if (typeof body.name      === "string")  data.name      = body.name.trim();
-    if ("description" in body)               data.description = body.description ?? null;
+    if (typeof body.isActive    === "boolean") data.isActive    = body.isActive;
+    if (typeof body.price       === "number")  data.price       = body.price;
+    if (typeof body.name        === "string")  data.name        = body.name.trim();
+    if ("description" in body)                 data.description = body.description ?? null;
+
+    // packageTier — validates against known enum values
+    if (typeof body.packageTier === "string" && VALID_TIERS.includes(body.packageTier)) {
+      data.packageTier = body.packageTier;
+    }
+
+    for (const field of TIER_PRICES) {
+      if (field in body) data[field] = body[field] !== null ? Number(body[field]) : null;
+    }
 
     for (const field of MEDIA) {
       if (field in body) data[field] = typeof body[field] === "string" ? body[field] : null;
