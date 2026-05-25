@@ -56,21 +56,23 @@ export default async function BuyerPage() {
   // Fallback maps for systems whose video URLs haven't been set in the DB yet.
   // Once admin sets demoVideoUrl / bgVideoUrl via the System Full Editor,
   // the DB value takes precedence and these fallbacks are ignored.
+  // Video URLs migrated to Google Drive (Matthew Studio/videos/).
+  // Format: https://drive.google.com/uc?export=download&id=FILE_ID
   const demoVideoFallbacks: Record<string, string> = {
-    Restaurant: "/videos/restaurant-demo.mp4",
+    Restaurant: "",
   };
 
   const bgVideoFallbacks: Record<string, string> = {
-    Restaurant:    "/videos/restaurant-bg.mp4",
-    Finance:       "/videos/finance-bg.mp4",
-    Booking:       "/videos/booking-bg.mp4",
-    CRM:           "/videos/crm-bg.mp4",
-    Warehouse:     "/videos/warehouse-bg.mp4",
-    "E-commerce":  "/videos/ecommerce-bg.mp4",
-    Education:     "/videos/education-bg.mp4",
-    Inventory:     "/videos/inventory-bg.mp4",
-    Construction:  "/videos/construction-bg.mp4",
-    HR:            "/videos/hr-bg.mp4",
+    Restaurant:    "https://drive.google.com/uc?export=download&id=17x0seirDAhR5DcYKfasH4NkQ28kgoBXH",
+    Finance:       "https://drive.google.com/uc?export=download&id=1I2cLsuCZR-FJfIE0mE6rlmS3oOeCZpZE",
+    Booking:       "https://drive.google.com/uc?export=download&id=1yURLOEx0mV6BXXm02u6zmHG0WDCLuDYT",
+    CRM:           "https://drive.google.com/uc?export=download&id=1FLK2lFf6WRZ3eJi-2SMLAr0llwYoKTB9",
+    Warehouse:     "https://drive.google.com/uc?export=download&id=1hwuP1wh-Ejf6P4RSyvMO1Fu5Vgd9MjyZ",
+    "E-commerce":  "https://drive.google.com/uc?export=download&id=1dj3DsiiB4bSmazvpHQon8ahRoPhZAegi",
+    Education:     "https://drive.google.com/uc?export=download&id=1j4i91U6MQosO0Z04qmW2ROlyiYkd6IvM",
+    Inventory:     "https://drive.google.com/uc?export=download&id=1NHJ7IorWgs_AxzhT1PjTKIu1yUlGS7wb",
+    Construction:  "https://drive.google.com/uc?export=download&id=1FRr9D3Lrgo-RAd_LPRFc26OHlPjkHMwd",
+    HR:            "https://drive.google.com/uc?export=download&id=1CEr8Z0xe4W4k5_Mvxf6r6iAFbiQ989TI",
   };
 
   const items = systems.map((s: any) => ({

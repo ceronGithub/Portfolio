@@ -9,18 +9,19 @@ import { sanitize } from "@/lib/utils";
 import Link from "next/link";
 import "./login.css";
 
+// Video URLs migrated to Google Drive (Matthew Studio/architecture/).
 const ARCH_VIDEOS = [
-  "/architecture/AI_video_prompt_cinematic_motion_202605060923 (1).mp4",
-  "/architecture/AI_video_prompt_cinematic_motion_202605060923 (2).mp4",
-  "/architecture/AI_video_prompt_cinematic_motion_202605060923 (3).mp4",
-  "/architecture/AI_video_prompt_cinematic_motion_202605060923 (4).mp4",
-  "/architecture/AI_video_prompt_cinematic_motion_202605060923.mp4",
-  "/architecture/AI_video_prompt_cinematic_motion_202605060936.mp4",
-  "/architecture/AI_video_prompt_cinematic_motion_202605060939.mp4",
-  "/architecture/Drone_shot_revealing_landscape_202605061517.mp4",
-  "/architecture/Drone_shot_revealing_landscape_202605061518.mp4",
-  "/architecture/project-03.mp4",
-  "/architecture/project-04.mp4",
+  "https://drive.google.com/uc?export=download&id=1YmkTw2uHt9Nnyf7LTFHlPahKp2vnJ0Dx",
+  "https://drive.google.com/uc?export=download&id=1QRDsvYCjQxiduHDF_PI2LnRsNc4ZlC0_",
+  "https://drive.google.com/uc?export=download&id=1Pw-Udf6k6E9Vcvx7NEA9hr86a7xJBAtD",
+  "https://drive.google.com/uc?export=download&id=1a_tBu_aEcAapRlMW3xg6dwCyG-3z3ekV",
+  "https://drive.google.com/uc?export=download&id=1o5Ga7MNvZTJ0gdC1wLi8WghCiNCvFrbO",
+  "https://drive.google.com/uc?export=download&id=1BUDNVIbW0T98TooK7a9bHKZpnq6MMtFG",
+  "https://drive.google.com/uc?export=download&id=1XHplpwMwBNRyBV6r_aozjm1PYWQw6rVn",
+  "https://drive.google.com/uc?export=download&id=1_j8O8hxkIRbfTXgz0SdpuLJCDBOIoeAG",
+  "https://drive.google.com/uc?export=download&id=1npk98zrATBSv5A76iAHGyVbxFq7r9eJN",
+  "https://drive.google.com/uc?export=download&id=1RD9RZ0nmh4RcR6kO10IfVWxhA5i2JYt3",
+  "https://drive.google.com/uc?export=download&id=1b2XXr3ACEvMeZmDluLcDxhUnWfT-d3tq",
 ];
 
 export default function LoginPage() {

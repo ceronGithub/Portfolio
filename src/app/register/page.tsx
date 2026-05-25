@@ -8,14 +8,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { sanitize } from "@/lib/utils";
 
+// Video URLs migrated to Google Drive (Matthew Studio/weapon_character/).
 const WEAPON_VIDEOS = [
-  "/weapon_character/axe-01-animation.mp4",
-  "/weapon_character/axe-02-animation.mp4",
-  "/weapon_character/axe-03-animation.mp4",
-  "/weapon_character/orc-01-animation.mp4",
-  "/weapon_character/orc-02-animation.mp4",
-  "/weapon_character/orc-03-animation.mp4",
-  "/weapon_character/orc-04-animation.mp4",
+  "https://drive.google.com/uc?export=download&id=17NPIb8LFsOXfC3HedYWX-0pmwrkgcWIg",
+  "https://drive.google.com/uc?export=download&id=15nV3VbzAe8zQEETn5sS7phXGhX_KJPqw",
+  "https://drive.google.com/uc?export=download&id=1apKWEuPh56pU93L6Mw5brFuITCX3qMAE",
+  "https://drive.google.com/uc?export=download&id=1AAWF-E19F0UniYRWo8NJF_bDcG2rUPlX",
+  "https://drive.google.com/uc?export=download&id=1xGnuEW5Np50RDuBPpdF2bd7AoVj0u4oh",
+  "https://drive.google.com/uc?export=download&id=1a6rxZ6Z7U4Xbj1j9KOc6yiSOi9rik86w",
+  "https://drive.google.com/uc?export=download&id=1wfa4YZGYBw4lYLB__DSz8djO3ootCJYE",
 ];
 
 export default function RegisterPage() {
