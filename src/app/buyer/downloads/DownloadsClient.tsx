@@ -225,27 +225,29 @@ export default function DownloadsClient({ downloads }: Props) {
               return (
                 <div key={item.id} className="dlRow">
 
-                  <div className="dlRowIcon">{CATEGORY_ICON[cat]}</div>
+                  <div className="dlRowTop">
+                    <div className="dlRowIcon">{CATEGORY_ICON[cat]}</div>
 
-                  <div className="dlRowInfo">
-                    <p className="dlRowName">{item.name}</p>
-                    <p className="dlRowMeta">
-                      <span className="dlRowCat">{cat}</span>
-                      <span className="dlRowDot">·</span>
-                      <span className="dlRowTier">{TIER_LABEL[item.grantedTier] ?? item.grantedTier}</span>
-                      <span className="dlRowDot">·</span>
-                      <span className="dlRowDate">Purchased {formatDate(item.grantedAt)}</span>
-                    </p>
-                    {item.description && (
-                      <p className="dlRowDesc">{item.description}</p>
-                    )}
+                    <div className="dlRowInfo">
+                      <p className="dlRowName">{item.name}</p>
+                      <p className="dlRowMeta">
+                        <span className="dlRowCat">{cat}</span>
+                        <span className="dlRowDot">·</span>
+                        <span className="dlRowTier">{TIER_LABEL[item.grantedTier] ?? item.grantedTier}</span>
+                        <span className="dlRowDot">·</span>
+                        <span className="dlRowDate">Purchased {formatDate(item.grantedAt)}</span>
+                      </p>
+                      {item.description && (
+                        <p className="dlRowDesc">{item.description}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="dlRowFiles">
                     {hasAnyFile ? (
-                      files.map(f => (
+                      files.map((f, fIdx) => (
                         <button
-                          key={f.key}
+                          key={`${f.key}-${fIdx}`}
                           className={`dlFileBtn ${isBusy ? "dlRowBtnBusy" : ""}`}
                           onClick={() => openFileKey(f.key, `${item.name}.${f.ext}`)}
                           disabled={isBusy}
