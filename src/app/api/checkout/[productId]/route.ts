@@ -54,14 +54,27 @@ export async function POST(
 
   try {
     // Create PENDING order — use correct FK field based on type
-    const order = await prisma.order.create({
-      data: {
+    let orderData: any;
+    if (isSystem) {
+      orderData = {
         userId,
-        ...(isSystem ? { systemId: productId } : { productId }),
-        status:       "PENDING",
-        amountPaid:   downpayment,
+        systemId: productId,
+        status: "PENDING",
+        amountPaid: downpayment,
         deliveryNote: `tier:${grantedTier ?? "mesh_only"}`,
-      },
+      };
+    } else {
+      orderData = {
+        userId,
+        productId,
+        status: "PENDING",
+        amountPaid: downpayment,
+        deliveryNote: `tier:${grantedTier ?? "mesh_only"}`,
+      };
+    }
+
+    const order = await prisma.order.create({
+      data: orderData,
     });
 
     // Create PayMongo payment link

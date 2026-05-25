@@ -7,10 +7,10 @@ import "./visitor.css";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
-import { ArchitectureIntroSection, ArchitectureVideosSection } from "./visitor/architecture";
-import { ModelingIntro, ModelingMagazine }                     from "./visitor/modeling";
+import { ArchitectureIntroSection, ArchitectureVideosSection } from "./architecture";
+import { ModelingIntro, ModelingMagazine }                     from "./modeling";
 import { sanitize }       from "@/lib/utils";
-import { useTrackVisit }  from "./visitor/useTrackVisit";
+import { useTrackVisit }  from "./useTrackVisit";
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
 
