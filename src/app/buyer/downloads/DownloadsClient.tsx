@@ -10,16 +10,25 @@ import "./downloads.css";
 import { sanitize } from "@/lib/utils";
 
 interface DownloadItem {
-  id:          string;
-  productId:   string;
-  name:        string;
-  description: string;
-  fileKey:     string | null;  // Admin-attached delivery key (Ownership.fileKey)
-  grantedTier: string;         // mesh_only | standard | full_pack
-  fileKeyObj:  string | null;  // Product .obj mesh
-  fileKeyFbx:  string | null;  // Product .fbx rigged
-  fileKeyGlb:  string | null;  // Product .glb web/AR
-  grantedAt:   string;
+  id:           string;
+  productId:    string;
+  name:         string;
+  description:  string;
+  fileKey:      string | null;  // Admin-attached delivery key (Ownership.fileKey)
+  grantedTier:  string;         // mesh_only | standard | full_pack
+  fileKeyObj:   string | null;  // Product .obj mesh
+  fileKeyFbx:   string | null;  // Product .fbx rigged
+  fileKeyGlb:   string | null;  // Product .glb web/AR
+  animIdleUrl:      string | null;
+  animWalkUrl:      string | null;
+  animRunUrl:       string | null;
+  animAttackOneUrl: string | null;
+  animAttackTwoUrl: string | null;
+  animDeathUrl:     string | null;
+  animHitUrl:       string | null;
+  facePngUrl:       string | null;
+  previewVideoUrl:  string | null;
+  grantedAt:    string;
 }
 
 // Files available per tier
@@ -30,6 +39,9 @@ function getTierFiles(item: DownloadItem): { label: string; key: string; ext: st
   // Delivery package (admin-attached zip) always shown if present
   if (item.fileKey) files.push({ label: "Package", key: item.fileKey, ext: "zip" });
 
+  // PNG preview — all tiers
+  if (item.facePngUrl) files.push({ label: "PNG", key: item.facePngUrl, ext: "png" });
+
   // Mesh files — all tiers
   if (item.fileKeyObj) files.push({ label: "OBJ", key: item.fileKeyObj, ext: "obj" });
   if (item.fileKeyFbx) files.push({ label: "FBX", key: item.fileKeyFbx, ext: "fbx" });
@@ -37,6 +49,25 @@ function getTierFiles(item: DownloadItem): { label: string; key: string; ext: st
   // GLB — standard + full_pack only
   if ((tier === "standard" || tier === "full_pack") && item.fileKeyGlb)
     files.push({ label: "GLB", key: item.fileKeyGlb, ext: "glb" });
+
+  // Preview video (MP4 animation) — standard + full_pack only
+  if ((tier === "standard" || tier === "full_pack") && item.previewVideoUrl)
+    files.push({ label: "Preview MP4", key: item.previewVideoUrl, ext: "mp4" });
+
+  // Core animations — standard + full_pack
+  if (tier === "standard" || tier === "full_pack") {
+    if (item.animIdleUrl)      files.push({ label: "Anim: Idle", key: item.animIdleUrl, ext: "fbx" });
+    if (item.animWalkUrl)      files.push({ label: "Anim: Walk", key: item.animWalkUrl, ext: "fbx" });
+    if (item.animRunUrl)       files.push({ label: "Anim: Run", key: item.animRunUrl, ext: "fbx" });
+    if (item.animAttackOneUrl) files.push({ label: "Anim: Attack 1", key: item.animAttackOneUrl, ext: "fbx" });
+    if (item.animDeathUrl)     files.push({ label: "Anim: Death", key: item.animDeathUrl, ext: "fbx" });
+  }
+
+  // Full pack exclusive animations
+  if (tier === "full_pack") {
+    if (item.animAttackTwoUrl) files.push({ label: "Anim: Attack 2", key: item.animAttackTwoUrl, ext: "fbx" });
+    if (item.animHitUrl)       files.push({ label: "Anim: Hit", key: item.animHitUrl, ext: "fbx" });
+  }
 
   return files;
 }
@@ -100,9 +131,19 @@ export default function DownloadsClient({ downloads }: Props) {
     }
   }
 
-  // Opens a Supabase asset URL directly for a specific file key.
+  // Opens a file URL — supports both Google Drive proxy (/api/drive-video?id=...) and Supabase storage URLs.
   function openFileKey(fileKey: string, filename: string) {
-    const url = `https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/assets/${fileKey}`;
+    let url: string;
+    
+    // Check if it's a Google Drive proxy URL
+    if (fileKey.startsWith("/api/drive-video")) {
+      // Google Drive file — use the proxy URL directly
+      url = fileKey;
+    } else {
+      // Supabase storage key — construct the full URL
+      url = `https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/assets/${fileKey}`;
+    }
+    
     const a   = document.createElement("a");
     a.href     = url;
     a.download = filename;

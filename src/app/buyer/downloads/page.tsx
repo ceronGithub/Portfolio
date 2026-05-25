@@ -21,16 +21,25 @@ export default async function DownloadsPage() {
   });
 
   const downloads = ownerships.map(o => ({
-    id:          o.id,
-    productId:   o.product.id,
-    name:        o.product.name,
-    description: o.product.description ?? "",
-    fileKey:     (o as any).fileKey     ?? null,
-    grantedTier: (o as any).grantedTier ?? "mesh_only",
-    fileKeyObj:  o.product.fileKeyObj   ?? null,
-    fileKeyFbx:  o.product.fileKeyFbx   ?? null,
-    fileKeyGlb:  o.product.fileKeyGlb   ?? null,
-    grantedAt:   o.grantedAt.toISOString(),
+    id:           o.id,
+    productId:    o.product.id,
+    name:         o.product.name,
+    description:  o.product.description ?? "",
+    fileKey:      (o as any).fileKey     ?? null,
+    grantedTier:  (o as any).grantedTier ?? "mesh_only",
+    fileKeyObj:   o.product.fileKeyObj   ?? null,
+    fileKeyFbx:   o.product.fileKeyFbx   ?? null,
+    fileKeyGlb:   o.product.fileKeyGlb   ?? null,
+    animIdleUrl:      o.product.animIdleUrl      ?? null,
+    animWalkUrl:      o.product.animWalkUrl      ?? null,
+    animRunUrl:       o.product.animRunUrl       ?? null,
+    animAttackOneUrl: o.product.animAttackOneUrl ?? null,
+    animAttackTwoUrl: o.product.animAttackTwoUrl ?? null,
+    animDeathUrl:     o.product.animDeathUrl     ?? null,
+    animHitUrl:       o.product.animHitUrl       ?? null,
+    facePngUrl:       o.product.facePngUrl       ?? null,
+    previewVideoUrl:  o.product.previewVideoUrl  ?? null,
+    grantedAt:    o.grantedAt.toISOString(),
   }));
 
   return <DownloadsClient downloads={downloads} />;
