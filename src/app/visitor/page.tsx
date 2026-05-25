@@ -7,9 +7,10 @@ import "./visitor.css";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
-import { ArchitectureIntroSection, ArchitectureVideosSection } from "./architecture";
-import { ModelingIntro, ModelingMagazine } from "./modeling";
-import { sanitize } from "@/lib/utils";
+import { ArchitectureIntroSection, ArchitectureVideosSection } from "./visitor/architecture";
+import { ModelingIntro, ModelingMagazine }                     from "./visitor/modeling";
+import { sanitize }       from "@/lib/utils";
+import { useTrackVisit }  from "./visitor/useTrackVisit";
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
 
@@ -1883,6 +1884,8 @@ function FaqSection() {
 
 /* ─── Page ──────────────────────────────────────────────────────────── */
 export default function VisitorPage() {
+  useTrackVisit();
+
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
