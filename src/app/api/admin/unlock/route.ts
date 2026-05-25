@@ -2,9 +2,10 @@
 // PATCH  /api/admin/unlock — Attaches a fileKey to an existing Ownership record.
 // DELETE /api/admin/unlock — Removes an Ownership record (revoke access).
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getServerSession }          from "next-auth";
+import { authOptions }               from "@/lib/auth";
+import { prisma }                    from "@/lib/prisma";
+import { revalidatePath }            from "next/cache";
 
 // Creates or updates an Ownership record linking a user to a product.
 // Accepts optional fileKey to attach a download file at grant time.
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
     create: { userId, productId, fileKey: fileKey ?? null, grantedTier: tier },
   });
 
+  revalidatePath("/buyer/downloads");
   return NextResponse.json({ ownership });
 }
 
@@ -51,6 +53,7 @@ export async function PATCH(req: NextRequest) {
     data,
   });
 
+  revalidatePath("/buyer/downloads");
   return NextResponse.json({ ownership });
 }
 
@@ -70,5 +73,6 @@ export async function DELETE(req: NextRequest) {
     where: { userId, productId },
   });
 
+  revalidatePath("/buyer/downloads");
   return NextResponse.json({ ok: true });
 }

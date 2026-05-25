@@ -1097,3 +1097,155 @@
   justify-content: flex-end;
   gap:            0.6rem;
 }
+
+/* ── Modal step indicator ─────────────────────────────────────────────── */
+.apModalSteps {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+}
+.apModalStep {
+  font-size:      0.72rem;
+  font-weight:    600;
+  letter-spacing: 0.06em;
+  color:          rgba(255,255,255,0.3);
+  padding:        0.25rem 0.6rem;
+  border-radius:  20px;
+  border:         1px solid rgba(255,255,255,0.08);
+}
+.apModalStepActive {
+  color:        #fff;
+  border-color: rgba(255,255,255,0.25);
+  background:   rgba(255,255,255,0.06);
+}
+.apModalStepDone {
+  color:        #4ade80;
+  border-color: #4ade8044;
+  background:   #4ade8012;
+}
+.apModalStepLine {
+  flex:       1;
+  height:     1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Buyer picker ─────────────────────────────────────────────────────── */
+.apBuyerPicker {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.75rem;
+}
+.apBuyerPackRecap {
+  display:       flex;
+  align-items:   center;
+  gap:           0.5rem;
+  font-size:     0.75rem;
+  border:        1px solid;
+  border-radius: 8px;
+  padding:       0.4rem 0.75rem;
+  background:    rgba(255,255,255,0.03);
+}
+.apBuyerPackRecapLabel {
+  color:   rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+.apBuyerPackRecapName { font-weight: 700; }
+
+.apBuyerSearchWrap {
+  position: relative;
+  display:  flex;
+  align-items: center;
+}
+.apBuyerSearch {
+  width:         100%;
+  background:    rgba(255,255,255,0.04);
+  border:        1px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  padding:       0.5rem 2rem 0.5rem 0.75rem;
+  font-size:     0.8rem;
+  color:         #fff;
+  outline:       none;
+  transition:    border-color 0.18s ease;
+}
+.apBuyerSearch:focus { border-color: rgba(255,255,255,0.25); }
+.apBuyerSearch::placeholder { color: rgba(255,255,255,0.25); }
+
+.apBuyerList {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+  max-height:     240px;
+  overflow-y:     auto;
+  padding-right:  2px;
+}
+.apBuyerList::-webkit-scrollbar { width: 4px; }
+.apBuyerList::-webkit-scrollbar-track { background: transparent; }
+.apBuyerList::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+
+.apBuyerRow {
+  display:       flex;
+  align-items:   center;
+  gap:           0.75rem;
+  padding:       0.6rem 0.75rem;
+  border-radius: 8px;
+  border:        1px solid rgba(255,255,255,0.06);
+  background:    rgba(255,255,255,0.02);
+  cursor:        pointer;
+  text-align:    left;
+  transition:    background 0.15s ease, border-color 0.15s ease;
+  width:         100%;
+}
+.apBuyerRow:hover:not(:disabled) {
+  background:   rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+}
+.apBuyerRowSelected {
+  background:   rgba(34,197,94,0.08) !important;
+  border-color: rgba(34,197,94,0.4)  !important;
+}
+.apBuyerRowBanned { opacity: 0.4; cursor: not-allowed; }
+
+.apBuyerAvatar {
+  width:           32px;
+  height:          32px;
+  border-radius:   50%;
+  background:      rgba(255,255,255,0.08);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       0.8rem;
+  font-weight:     700;
+  color:           rgba(255,255,255,0.7);
+  flex-shrink:     0;
+}
+.apBuyerInfo {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.1rem;
+  flex:           1;
+  min-width:      0;
+}
+.apBuyerName {
+  font-size:     0.82rem;
+  font-weight:   600;
+  color:         rgba(255,255,255,0.88);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+.apBuyerEmail {
+  font-size:     0.7rem;
+  color:         rgba(255,255,255,0.35);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+.apBuyerStatus { flex-shrink: 0; }
+.apBuyerCheck  { color: #4ade80; font-size: 0.9rem; font-weight: 700; }
+.apBuyerLoading,
+.apBuyerEmpty {
+  font-size:  0.78rem;
+  color:      rgba(255,255,255,0.3);
+  padding:    1rem;
+  text-align: center;
+}

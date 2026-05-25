@@ -734,61 +734,225 @@ const PACK_OPTIONS = [
   },
 ] as const;
 
-// ── PackPickerModal — shown when admin clicks "Set Latest" ─────────────
-// Admin picks which pack tier to feature, then confirms.
-function PackPickerModal({ productName, onConfirm, onClose }: {
-  productName: string;
-  onConfirm: (tier: string) => void;
-  onClose: () => void;
-}) {
-  const [selected, setSelected] = useState<string>("mesh_only");
-  const [saving,   setSaving]   = useState(false);
+// ── BuyerAccount — shape returned from GET /api/admin/users ───────────
+interface BuyerAccount {
+  id: string; name: string | null; email: string;
+  isActive: boolean; isBanned: boolean;
+}
 
-  async function handleConfirm() {
+// Grants ownership of a product to a buyer at the chosen tier.
+async function grantProductAccess(userId: string, productId: string, grantedTier: string): Promise<boolean> {
+  const res = await fetch("/api/admin/unlock", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, productId, grantedTier }),
+  });
+  return res.ok;
+}
+
+// ── PackPickerModal — 2-step modal: pick pack → pick buyer → grant ─────
+// Step 1: Admin picks which pack tier (Mesh / Standard / Full Pack).
+// Step 2: Admin picks which buyer account to grant access to.
+function PackPickerModal({ productId, productName, onConfirm, onClose }: {
+  productId:   string;
+  productName: string;
+  onConfirm:   (tier: string) => void;
+  onClose:     () => void;
+}) {
+  const [step,         setStep]         = useState<1 | 2>(1);
+  const [selectedTier, setSelectedTier] = useState<string>("mesh_only");
+  const [buyers,       setBuyers]       = useState<BuyerAccount[]>([]);
+  const [buyerSearch,  setBuyerSearch]  = useState("");
+  const [selectedBuyer,setSelectedBuyer]= useState<BuyerAccount | null>(null);
+  const [loadingBuyers,setLoadingBuyers]= useState(false);
+  const [saving,       setSaving]       = useState(false);
+  const [error,        setError]        = useState("");
+
+  // Fetch buyers when entering step 2.
+  async function goToStep2() {
+    setStep(2);
+    if (buyers.length > 0) return;
+    setLoadingBuyers(true);
+    try {
+      const res  = await fetch("/api/admin/users");
+      const json = await res.json();
+      setBuyers(json.buyers ?? []);
+    } catch {
+      setError("Failed to load buyers.");
+    }
+    setLoadingBuyers(false);
+  }
+
+  async function handleGrant() {
+    if (!selectedBuyer) return;
     setSaving(true);
-    await onConfirm(selected);
+    setError("");
+    const ok = await grantProductAccess(selectedBuyer.id, productId, selectedTier);
+    if (ok) {
+      await onConfirm(selectedTier);
+    } else {
+      setError("Failed to grant access. Try again.");
+    }
     setSaving(false);
   }
+
+  const filteredBuyers = buyers.filter(b => {
+    const q = buyerSearch.toLowerCase();
+    return (
+      (b.name  ?? "").toLowerCase().includes(q) ||
+      b.email.toLowerCase().includes(q)
+    );
+  });
+
+  const chosenPack = PACK_OPTIONS.find(o => o.tier === selectedTier)!;
 
   return (
     <div className="apModalOverlay" onClick={onClose}>
       <div className="apModal" onClick={e => e.stopPropagation()}>
+
+        {/* ── Header ── */}
         <div className="apModalHeader">
-          <p className="apModalEyebrow">Set Latest Drop</p>
+          <p className="apModalEyebrow">
+            {step === 1 ? "Set Latest Drop" : "Grant Access"}
+          </p>
           <h3 className="apModalTitle">{productName}</h3>
-          <p className="apModalSub">Choose which pack to feature as the latest drop.</p>
+          <p className="apModalSub">
+            {step === 1
+              ? "Choose which pack to feature as the latest drop."
+              : "Select the buyer account to grant access."}
+          </p>
         </div>
-        <div className="apPackOptions">
-          {PACK_OPTIONS.map(opt => (
-            <button
-              key={opt.tier}
-              className={`apPackOption ${selected === opt.tier ? "apPackOptionSelected" : ""}`}
-              style={selected === opt.tier ? { borderColor: opt.color, background: `${opt.color}14` } : {}}
-              onClick={() => setSelected(opt.tier)}
-            >
-              <div className="apPackOptionTop">
-                <span className="apPackOptionLabel" style={{ color: selected === opt.tier ? opt.color : undefined }}>
-                  {opt.label}
-                </span>
-                {selected === opt.tier && (
-                  <span className="apPackOptionCheck" style={{ color: opt.color }}>✓</span>
-                )}
-              </div>
-              <p className="apPackOptionDesc">{opt.desc}</p>
-            </button>
-          ))}
+
+        {/* ── Step indicator ── */}
+        <div className="apModalSteps">
+          <span className={`apModalStep ${step === 1 ? "apModalStepActive" : "apModalStepDone"}`}>
+            {step === 1 ? "1" : "✓"} Pack
+          </span>
+          <span className="apModalStepLine" />
+          <span className={`apModalStep ${step === 2 ? "apModalStepActive" : ""}`}>
+            2 Buyer
+          </span>
         </div>
+
+        {/* ── Step 1: Pack picker ── */}
+        {step === 1 && (
+          <div className="apPackOptions">
+            {PACK_OPTIONS.map(opt => (
+              <button
+                key={opt.tier}
+                className={`apPackOption ${selectedTier === opt.tier ? "apPackOptionSelected" : ""}`}
+                style={selectedTier === opt.tier ? { borderColor: opt.color, background: `${opt.color}14` } : {}}
+                onClick={() => setSelectedTier(opt.tier)}
+              >
+                <div className="apPackOptionTop">
+                  <span className="apPackOptionLabel" style={{ color: selectedTier === opt.tier ? opt.color : undefined }}>
+                    {opt.label}
+                  </span>
+                  {selectedTier === opt.tier && (
+                    <span className="apPackOptionCheck" style={{ color: opt.color }}>✓</span>
+                  )}
+                </div>
+                <p className="apPackOptionDesc">{opt.desc}</p>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Step 2: Buyer picker ── */}
+        {step === 2 && (
+          <div className="apBuyerPicker">
+
+            {/* Selected pack recap */}
+            <div className="apBuyerPackRecap" style={{ borderColor: chosenPack.color, color: chosenPack.color }}>
+              <span className="apBuyerPackRecapLabel">Pack:</span>
+              <span className="apBuyerPackRecapName">{chosenPack.label}</span>
+            </div>
+
+            {/* Search */}
+            <div className="apBuyerSearchWrap">
+              <input
+                className="apBuyerSearch"
+                placeholder="Search by name or email…"
+                value={buyerSearch}
+                onChange={e => setBuyerSearch(e.target.value)}
+                autoFocus
+              />
+              {buyerSearch && (
+                <button className="apFilterClear" onClick={() => setBuyerSearch("")}>✕</button>
+              )}
+            </div>
+
+            {/* Buyer list */}
+            <div className="apBuyerList">
+              {loadingBuyers && (
+                <div className="apBuyerLoading">Loading buyers…</div>
+              )}
+              {!loadingBuyers && filteredBuyers.length === 0 && (
+                <div className="apBuyerEmpty">
+                  {buyerSearch ? `No results for "${buyerSearch}"` : "No buyer accounts found."}
+                </div>
+              )}
+              {!loadingBuyers && filteredBuyers.map(b => {
+                const isSelected = selectedBuyer?.id === b.id;
+                const isBanned   = b.isBanned;
+                return (
+                  <button
+                    key={b.id}
+                    className={`apBuyerRow ${isSelected ? "apBuyerRowSelected" : ""} ${isBanned ? "apBuyerRowBanned" : ""}`}
+                    onClick={() => !isBanned && setSelectedBuyer(b)}
+                    disabled={isBanned}
+                    title={isBanned ? "Account is banned" : undefined}
+                  >
+                    <div className="apBuyerAvatar">
+                      {(b.name ?? b.email).charAt(0).toUpperCase()}
+                    </div>
+                    <div className="apBuyerInfo">
+                      <span className="apBuyerName">{b.name ?? "—"}</span>
+                      <span className="apBuyerEmail">{b.email}</span>
+                    </div>
+                    <div className="apBuyerStatus">
+                      {isBanned
+                        ? <span className="apBadge apBadgeInactive">Banned</span>
+                        : isSelected
+                          ? <span className="apBuyerCheck">✓</span>
+                          : null
+                      }
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {error && <p className="apAddAddonError">{error}</p>}
+          </div>
+        )}
+
+        {/* ── Actions ── */}
         <div className="apModalActions">
           <button className="apPriceCancelBtn" onClick={onClose}>Cancel</button>
-          <button
-            className="apPriceSaveBtn"
-            onClick={handleConfirm}
-            disabled={saving}
-            style={{ background: "#22c55e", color: "#0d0d0d" }}
-          >
-            {saving ? "Setting…" : "Set as Latest"}
-          </button>
+          {step === 1 ? (
+            <button
+              className="apPriceSaveBtn"
+              onClick={goToStep2}
+              style={{ background: "#22c55e", color: "#0d0d0d" }}
+            >
+              Next: Choose Buyer →
+            </button>
+          ) : (
+            <>
+              <button className="apPriceCancelBtn" onClick={() => setStep(1)}>← Back</button>
+              <button
+                className="apPriceSaveBtn"
+                onClick={handleGrant}
+                disabled={!selectedBuyer || saving}
+                style={{ background: selectedBuyer ? "#22c55e" : undefined, color: selectedBuyer ? "#0d0d0d" : undefined }}
+              >
+                {saving ? "Granting…" : "Grant Access"}
+              </button>
+            </>
+          )}
         </div>
+
       </div>
     </div>
   );
@@ -1078,6 +1242,7 @@ function ProductsSection({
       {/* Pack picker modal — shown when admin clicks "Set Latest" */}
       {latestModal && !latestModal.isLatest && (
         <PackPickerModal
+          productId={latestModal.id}
           productName={latestModal.name}
           onConfirm={handleConfirmLatest}
           onClose={() => setLatestModal(null)}
