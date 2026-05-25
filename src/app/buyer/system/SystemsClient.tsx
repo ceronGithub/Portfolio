@@ -58,15 +58,14 @@ function InlineCheckout({
   const downpayment = Math.round(totalPrice * 0.30);
   const remainder   = totalPrice - downpayment;
 
-  // ── Submit order — redirects to existing checkout page ───────────────────
-  // Passes total (base + selected addons) as a query param so CheckoutClient
-  // renders the correct price breakdown without a separate DB call.
+  // ── Submit order — creates PayMongo link → redirects buyer ──────────────
   function handlePlaceOrder() {
     if (placing || placed) return;
     setPlacing(true);
     const params = new URLSearchParams({
       method,
-      total: String(totalPrice),
+      total:       String(totalPrice),
+      grantedTier: "mesh_only",  // systems don't have tiers; defaults to mesh_only
     });
     router.push(`/checkout/${item.id}?${params.toString()}`);
   }

@@ -158,7 +158,7 @@ export default function BundleCheckoutClient({
 }: Props) {
   const [method,  setMethod]  = useState<PaymentMethod>("gcash");
   const [placing, setPlacing] = useState(false);
-  const [placed,  setPlaced]  = useState(false);
+  const [error,   setError]   = useState<string | null>(null);
 
   // Entrance animation refs per Rule 17.5
   const leftRef  = useRef<HTMLDivElement>(null);
@@ -166,21 +166,21 @@ export default function BundleCheckoutClient({
   useEntranceAnimation(leftRef);
   useEntranceAnimation(rightRef);
 
-  // ── Place order via API ────────────────────────────────────────────────
-  // POST to /api/checkout/bundle with items and payment method.
-  // Creates Order + Ownership records for each product in the bundle.
+  // ── Place order → get PayMongo URL → redirect ──────────────────────────
   async function handlePlaceOrder() {
-    if (placing || placed) return;
+    if (placing) return;
     setPlacing(true);
+    setError(null);
 
     try {
       const res = await fetch("/api/checkout/bundle", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: items.map(item => ({ productId: item.id, price: item.price })),
+          items:       items.map(item => ({ productId: item.id, price: item.price })),
           method,
-          total: finalTotal,
+          total:       finalTotal,
+          grantedTier: "full_pack",   // bundle buyers always get full_pack
         }),
       });
 
@@ -189,38 +189,16 @@ export default function BundleCheckoutClient({
         throw new Error(err.error ?? "Order failed");
       }
 
-      const data = await res.json();
-      console.log("[Bundle Order Success]", data);
-
-      setPlacing(false);
-      setPlaced(true);
+      const { checkoutUrl } = await res.json();
+      window.location.href = checkoutUrl;
     } catch (err: any) {
-      console.error("[Bundle Order Error]", err?.message);
-      alert(`Order failed: ${err?.message}`);
+      console.error("[BundleCheckout]", err?.message);
+      setError(err?.message ?? "Something went wrong. Please try again.");
       setPlacing(false);
     }
   }
 
-  // ── Success state ───────────────────────────────────────────────────────
-  if (placed) {
-    return (
-      <div className="bundlePage">
-        <div className="bundleSuccess">
-          <div className="bundleSuccessIcon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-          <h2 className="bundleSuccessTitle">Order Placed</h2>
-          <p className="bundleSuccessDesc">
-            Your bundle of <strong>{items.length} asset{items.length > 1 ? "s" : ""}</strong> has been received.
-            You'll be contacted shortly with download instructions.
-          </p>
-          <a href="/buyer" className="bundleSuccessBtn">Back to Shop →</a>
-        </div>
-      </div>
-    );
-  }
+  // ── Success state — handled by /checkout/success page after PayMongo redirect ──
 
   return (
     <div className="bundlePage">
@@ -348,6 +326,11 @@ export default function BundleCheckoutClient({
             <span className="bundleDueAmount">{fmt(finalTotal)}</span>
           </div>
 
+          {/* Error */}
+          {error && (
+            <p className="bundleError">{error}</p>
+          )}
+
           {/* CTA */}
           <button
             className={`bundlePlaceBtn ${placing ? "bundlePlaceBtnLoading" : ""}`}
@@ -355,9 +338,9 @@ export default function BundleCheckoutClient({
             disabled={placing}
           >
             {placing ? (
-              <><span className="bundleBtnSpinner" /> Processing…</>
+              <><span className="bundleBtnSpinner" /> Redirecting to PayMongo…</>
             ) : (
-              <>Place Order — {fmt(finalTotal)}</>
+              <>Pay {fmt(Math.round(finalTotal * 0.30))} Downpayment</>
             )}
           </button>
 

@@ -1,21 +1,23 @@
 // CheckoutClient.tsx — Checkout page UI.
 // Shows product summary, price breakdown (downpayment 30% + remainder),
-// payment method selector (GCash / Credit Card / Bank Transfer),
-// and a place order CTA. No payment gateway — UI only.
+// payment method selector (GCash / Credit Card / Bank Transfer).
+// On Place Order: calls API → gets PayMongo checkoutUrl → redirects buyer.
 
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import "./checkout.css";
 
 type PaymentMethod = "gcash" | "card" | "bank";
 
 interface Props {
   checkoutProductId: string;
-  productName: string;
-  price:       number;
-  description: string;
-  timeline:    string;
+  productName:  string;
+  price:        number;
+  description:  string;
+  timeline:     string;
+  grantedTier?: string;  // tier buyer selected on the product page
 }
 
 function fmt(p: number) {
@@ -28,30 +30,28 @@ export default function CheckoutClient({
   price,
   description,
   timeline,
+  grantedTier = "mesh_only",
 }: Props) {
-  const [method,   setMethod]   = useState<PaymentMethod>("gcash");
-  const [placing,  setPlacing]  = useState(false);
-  const [placed,   setPlaced]   = useState(false);
+  const router = useRouter();
+  const [method,  setMethod]  = useState<PaymentMethod>("gcash");
+  const [placing, setPlacing] = useState(false);
+  const [error,   setError]   = useState<string | null>(null);
 
   // ── Price breakdown ──────────────────────────────────────────────────────
   const downpayment = Math.round(price * 0.30);
   const remainder   = price - downpayment;
 
-  // ── Place order via API ──────────────────────────────────────────────────
-  // POST to /api/checkout/[productId] with payment method and total.
-  // Creates Order + Ownership records.
+  // ── Place order → get PayMongo URL → redirect ────────────────────────────
   async function handlePlaceOrder() {
-    if (placing || placed) return;
+    if (placing) return;
     setPlacing(true);
+    setError(null);
 
     try {
       const res = await fetch(`/api/checkout/${checkoutProductId}`, {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          method,
-          total: price,
-        }),
+        body: JSON.stringify({ method, total: price, grantedTier }),
       });
 
       if (!res.ok) {
@@ -59,35 +59,14 @@ export default function CheckoutClient({
         throw new Error(err.error ?? "Order failed");
       }
 
-      const data = await res.json();
-      console.log("[Single Product Order Success]", data);
-
-      setPlacing(false);
-      setPlaced(true);
+      const { checkoutUrl } = await res.json();
+      // Redirect buyer to PayMongo hosted payment page
+      window.location.href = checkoutUrl;
     } catch (err: any) {
-      console.error("[Single Product Order Error]", err?.message);
-      alert(`Order failed: ${err?.message}`);
+      console.error("[CheckoutClient]", err?.message);
+      setError(err?.message ?? "Something went wrong. Please try again.");
       setPlacing(false);
     }
-  }
-
-  // ── Success state ────────────────────────────────────────────────────────
-  if (placed) {
-    return (
-      <div className="checkoutPage">
-        <div className="checkoutSuccess">
-          <div className="checkoutSuccessIcon">✓</div>
-          <h2 className="checkoutSuccessTitle">Order Placed!</h2>
-          <p className="checkoutSuccessDesc">
-            Your inquiry for <strong>{productName}</strong> has been received.
-            You'll be contacted within 24 hours with downpayment instructions.
-          </p>
-          <a href="/buyer/orders" className="checkoutSuccessBtn">
-            View Order Status →
-          </a>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -195,6 +174,11 @@ export default function CheckoutClient({
             <span className="checkoutDueAmount">{fmt(downpayment)}</span>
           </div>
 
+          {/* Error */}
+          {error && (
+            <p className="checkoutError">{error}</p>
+          )}
+
           {/* CTA */}
           <button
             className={`checkoutPlaceBtn ${placing ? "checkoutPlaceBtnLoading" : ""}`}
@@ -202,9 +186,9 @@ export default function CheckoutClient({
             disabled={placing}
           >
             {placing ? (
-              <><span className="checkoutBtnSpinner" /> Processing…</>
+              <><span className="checkoutBtnSpinner" /> Redirecting to PayMongo…</>
             ) : (
-              <>Place Order — {fmt(downpayment)}</>
+              <>Pay {fmt(downpayment)} via {method === "gcash" ? "GCash" : method === "card" ? "Card" : "Bank Transfer"}</>
             )}
           </button>
 
