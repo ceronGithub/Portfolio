@@ -69,16 +69,6 @@ async function deleteUser(userId: string, reason?: string): Promise<boolean> {
 
 // ── Shared UI atoms ───────────────────────────────────────────────────
 
-// Calls /api/admin/unlock to create an Ownership record without payment.
-async function grantUnlock(userId: string, productId: string): Promise<boolean> {
-  const res = await fetch("/api/admin/unlock", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, productId }),
-  });
-  return res.ok;
-}
-
 // Calls /api/admin/unlock (DELETE) to remove an Ownership record.
 async function revokeUnlock(userId: string, productId: string): Promise<boolean> {
   const res = await fetch("/api/admin/unlock", {
@@ -89,31 +79,45 @@ async function revokeUnlock(userId: string, productId: string): Promise<boolean>
   return res.ok;
 }
 
-// ── ManualUnlockModal — modal to grant a buyer access to a product ────
-// Admin picks a product from a custom dropdown with video preview;
-// calls /api/admin/unlock on confirm.
+// ── PACK_OPTIONS — the 3 tiers admin can grant access for ────────────
+const UM_PACK_OPTIONS = [
+  { tier: "mesh_only", label: "Mesh Only",    desc: "OBJ + FBX + 4K PBR textures. No rig, no animations.", color: "#94a3b8" },
+  { tier: "standard",  label: "Standard Pack", desc: "OBJ + FBX + Rig + 5 core animation clips.",           color: "#60a5fa" },
+  { tier: "full_pack", label: "Full Pack",      desc: "OBJ + FBX + GLB + Full rig + 7 animations (incl. Death & Hit).", color: "#4ade80" },
+] as const;
+
+// ── ManualUnlockModal — 2-step modal: pick product → pick pack tier → grant ─
+// Step 1: Admin picks a product from the custom dropdown with video preview.
+// Step 2: Admin picks which pack tier to grant (Mesh / Standard / Full Pack).
 function ManualUnlockModal({ user, products, onDone, onClose }: {
   user: User;
   products: ProductOption[];
   onDone: (userId: string, productId: string, productName: string) => void;
   onClose: () => void;
 }) {
-  const alreadyOwned  = new Set(user.ownership.map(o => o.productId));
-  const available     = products.filter(p => !alreadyOwned.has(p.id));
+  const alreadyOwned = new Set(user.ownership.map(o => o.productId));
+  const available    = products.filter(p => !alreadyOwned.has(p.id));
 
-  const [selectedProductId, setSelected] = useState(available[0]?.id ?? "");
-  const [dropdownOpen, setDropdownOpen]  = useState(false);
-  const [saving, setSaving]              = useState(false);
-  const [error, setError]                = useState("");
+  const [step,              setStep]         = useState<1 | 2>(1);
+  const [selectedProductId, setSelected]    = useState(available[0]?.id ?? "");
+  const [dropdownOpen,      setDropdownOpen] = useState(false);
+  const [selectedTier,      setSelectedTier] = useState<string>("mesh_only");
+  const [saving,            setSaving]       = useState(false);
+  const [error,             setError]        = useState("");
 
   const selectedProduct = available.find(p => p.id === selectedProductId) ?? null;
+  const chosenPack      = UM_PACK_OPTIONS.find(o => o.tier === selectedTier)!;
 
   async function handleGrant() {
     if (!selectedProductId) return;
     setSaving(true);
     setError("");
-    const ok = await grantUnlock(user.id, selectedProductId);
-    if (ok) {
+    const res = await fetch("/api/admin/unlock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, productId: selectedProductId, grantedTier: selectedTier }),
+    });
+    if (res.ok) {
       const productName = selectedProduct?.name ?? selectedProductId;
       onDone(user.id, selectedProductId, productName);
       onClose();
@@ -172,6 +176,17 @@ function ManualUnlockModal({ user, products, onDone, onClose }: {
           </div>
         </div>
 
+        {/* ── Step indicator ── */}
+        <div className="umUnlockSteps">
+          <span className={`umUnlockStep ${step === 1 ? "umUnlockStepActive" : "umUnlockStepDone"}`}>
+            {step === 1 ? "1" : "✓"} Product
+          </span>
+          <span className="umUnlockStepLine" />
+          <span className={`umUnlockStep ${step === 2 ? "umUnlockStepActive" : ""}`}>
+            2 Pack
+          </span>
+        </div>
+
         {/* ── How-to hint ── */}
         <div className="umUnlockHint">
           <div className="umUnlockHintIcon">
@@ -181,77 +196,122 @@ function ManualUnlockModal({ user, products, onDone, onClose }: {
           </div>
           <div>
             <p className="umUnlockHintTitle">How to grant access</p>
-            <p className="umUnlockHintDesc">Select a product from the dropdown and click "Grant Access" to unlock it for this user.</p>
+            <p className="umUnlockHintDesc">
+              {step === 1
+                ? "Select a product from the dropdown and click \"Next: Choose Pack\"."
+                : "Select the pack tier to grant, then click \"Grant Access\"."}
+            </p>
           </div>
         </div>
 
-        {/* ── Product picker ── */}
-        {available.length === 0 ? (
-          <p className="umUnlockEmpty">User already owns all products.</p>
-        ) : (
-          <>
-            {/* Custom dropdown trigger */}
-            <div className="umProductPicker">
-              <button
-                className="umProductPickerTrigger"
-                onClick={() => setDropdownOpen(prev => !prev)}
-                type="button"
-              >
-                <span className="umProductPickerLabel">
-                  {selectedProduct ? selectedProduct.name : "Select a product"}
-                </span>
-                <svg
-                  className={`umProductPickerChevron${dropdownOpen ? " umProductPickerChevronOpen" : ""}`}
-                  width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5"
+        {/* ── Step 1: Product picker ── */}
+        {step === 1 && (
+          available.length === 0 ? (
+            <p className="umUnlockEmpty">User already owns all products.</p>
+          ) : (
+            <>
+              <div className="umProductPicker">
+                <button
+                  className="umProductPickerTrigger"
+                  onClick={() => setDropdownOpen(prev => !prev)}
+                  type="button"
                 >
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
+                  <span className="umProductPickerLabel">
+                    {selectedProduct ? selectedProduct.name : "Select a product"}
+                  </span>
+                  <svg
+                    className={`umProductPickerChevron${dropdownOpen ? " umProductPickerChevronOpen" : ""}`}
+                    width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.5"
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
 
-              {/* Dropdown list with video previews */}
-              {dropdownOpen && (
-                <div className="umProductDropdown">
-                  {available.map(p => (
-                    <button
-                      key={p.id}
-                      className={`umProductOption${p.id === selectedProductId ? " umProductOptionSelected" : ""}`}
-                      onClick={() => { setSelected(p.id); setDropdownOpen(false); }}
-                      type="button"
-                    >
-                      {/* Video or fallback thumbnail */}
-                      <div className="umProductOptionMedia">
-                        {p.previewVideoUrl ? (
-                          <video
-                            className="umProductOptionVideo"
-                            src={p.previewVideoUrl}
-                            autoPlay muted loop playsInline
-                          />
-                        ) : p.facePngUrl ? (
-                          <img className="umProductOptionVideo" src={p.facePngUrl} alt={p.name} />
-                        ) : (
-                          <div className="umProductOptionNoMedia">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-                            </svg>
-                          </div>
+                {dropdownOpen && (
+                  <div className="umProductDropdown">
+                    {available.map(p => (
+                      <button
+                        key={p.id}
+                        className={`umProductOption${p.id === selectedProductId ? " umProductOptionSelected" : ""}`}
+                        onClick={() => { setSelected(p.id); setDropdownOpen(false); }}
+                        type="button"
+                      >
+                        <div className="umProductOptionMedia">
+                          {p.previewVideoUrl ? (
+                            <video className="umProductOptionVideo" src={p.previewVideoUrl} autoPlay muted loop playsInline />
+                          ) : p.facePngUrl ? (
+                            <img className="umProductOptionVideo" src={p.facePngUrl} alt={p.name} />
+                          ) : (
+                            <div className="umProductOptionNoMedia">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <span className="umProductOptionName">{p.name}</span>
+                        {p.id === selectedProductId && (
+                          <svg className="umProductOptionCheck" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
                         )}
-                      </div>
-                      <span className="umProductOptionName">{p.name}</span>
-                      {p.id === selectedProductId && (
-                        <svg className="umProductOptionCheck" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="umUnlockActions">
+                <button className="umUnlockCancelBtn" onClick={onClose}>Cancel</button>
+                <button
+                  className="umUnlockGrantBtn"
+                  onClick={() => { setDropdownOpen(false); setStep(2); }}
+                  disabled={!selectedProductId}
+                >
+                  Next: Choose Pack →
+                </button>
+              </div>
+            </>
+          )
+        )}
+
+        {/* ── Step 2: Pack tier picker ── */}
+        {step === 2 && (
+          <>
+            {/* Selected product recap */}
+            <div className="umPackProductRecap" style={{ borderColor: chosenPack.color, color: chosenPack.color }}>
+              <span className="umPackProductRecapLabel">Product:</span>
+              <span className="umPackProductRecapName">{selectedProduct?.name}</span>
+            </div>
+
+            {/* Pack options */}
+            <div className="umPackOptions">
+              {UM_PACK_OPTIONS.map(opt => (
+                <button
+                  key={opt.tier}
+                  className={`umPackOption${selectedTier === opt.tier ? " umPackOptionSelected" : ""}`}
+                  style={selectedTier === opt.tier ? { borderColor: opt.color, background: `${opt.color}14` } : {}}
+                  onClick={() => setSelectedTier(opt.tier)}
+                  type="button"
+                >
+                  <div className="umPackOptionTop">
+                    <span className="umPackOptionLabel" style={{ color: selectedTier === opt.tier ? opt.color : undefined }}>
+                      {opt.label}
+                    </span>
+                    {selectedTier === opt.tier && (
+                      <span className="umPackOptionCheck" style={{ color: opt.color }}>✓</span>
+                    )}
+                  </div>
+                  <p className="umPackOptionDesc">{opt.desc}</p>
+                </button>
+              ))}
             </div>
 
             {error && <p className="umUnlockError">{error}</p>}
             <div className="umUnlockActions">
               <button className="umUnlockCancelBtn" onClick={onClose}>Cancel</button>
+              <button className="umUnlockCancelBtn" onClick={() => setStep(1)}>← Back</button>
               <button
                 className="umUnlockGrantBtn"
                 onClick={handleGrant}
@@ -262,12 +322,11 @@ function ManualUnlockModal({ user, products, onDone, onClose }: {
             </div>
           </>
         )}
+
       </div>
     </div>
   );
 }
-
-
 
 function RoleBadge({ role }: { role: string }) {
   return <span className={`umRoleBadge umRoleBadge--${role.toLowerCase()}`}>{role}</span>;

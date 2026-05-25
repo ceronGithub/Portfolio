@@ -776,9 +776,16 @@
 
 /* ── ManualUnlockModal — user info card ──────────────────────── */
 .umUnlockModal {
-  min-width: 340px;
-  max-width: 500px;
+  min-width:    340px;
+  max-width:    500px;
+  max-height:   90vh;
+  overflow-y:   auto;
+  overflow-x:   hidden;
 }
+
+.umUnlockModal::-webkit-scrollbar { width: 4px; }
+.umUnlockModal::-webkit-scrollbar-track { background: transparent; }
+.umUnlockModal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
 
 .umUnlockInfoCard {
   background: rgba(255,255,255,0.04);
@@ -1049,4 +1056,91 @@
   font-size:   0.82rem;
   font-weight: 600;
   color:       #d4d0cb;
+}
+/* ── ManualUnlockModal step indicator ────────────────────────────────── */
+.umUnlockSteps {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  margin:      1rem 0 0.25rem;
+}
+.umUnlockStep {
+  font-size:     0.72rem;
+  font-weight:   600;
+  color:         rgba(255,255,255,0.3);
+  padding:       0.2rem 0.55rem;
+  border-radius: 20px;
+  border:        1px solid rgba(255,255,255,0.08);
+  transition:    color 0.18s ease, border-color 0.18s ease;
+}
+.umUnlockStepActive {
+  color:        #fff;
+  border-color: rgba(255,255,255,0.28);
+}
+.umUnlockStepDone {
+  color:        #4ade80;
+  border-color: rgba(74,222,128,0.35);
+}
+.umUnlockStepLine {
+  flex:             1;
+  height:           1px;
+  background:       rgba(255,255,255,0.08);
+  max-width:        2.5rem;
+}
+
+/* ── Pack product recap strip (Step 2) ───────────────────────────────── */
+.umPackProductRecap {
+  display:       flex;
+  align-items:   center;
+  gap:           0.5rem;
+  padding:       0.45rem 0.75rem;
+  border-radius: 8px;
+  border:        1px solid rgba(255,255,255,0.1);
+  background:    rgba(255,255,255,0.03);
+  font-size:     0.78rem;
+  margin-bottom: 0.25rem;
+}
+.umPackProductRecapLabel {
+  font-weight: 600;
+  opacity:     0.7;
+}
+.umPackProductRecapName {
+  font-weight: 700;
+}
+
+/* ── Pack option cards (Step 2) ──────────────────────────────────────── */
+.umPackOptions {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.5rem;
+  margin-bottom:  0.5rem;
+}
+.umPackOption {
+  width:         100%;
+  text-align:    left;
+  background:    rgba(255,255,255,0.02);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding:       0.75rem 1rem;
+  cursor:        pointer;
+  transition:    background 0.18s ease, border-color 0.18s ease;
+}
+.umPackOption:hover { background: rgba(255,255,255,0.05); }
+.umPackOptionSelected { background: rgba(255,255,255,0.04) !important; }
+.umPackOptionTop {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  margin-bottom:   0.2rem;
+}
+.umPackOptionLabel {
+  font-size:   0.83rem;
+  font-weight: 700;
+  color:       rgba(255,255,255,0.75);
+}
+.umPackOptionCheck { font-size: 0.85rem; font-weight: 700; }
+.umPackOptionDesc {
+  font-size: 0.73rem;
+  color:     rgba(255,255,255,0.35);
+  margin:    0;
 }
