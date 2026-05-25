@@ -109,7 +109,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, results });
 }
 
-// Increase body size limit for large video uploads
-export const config = {
-  api: { bodyParser: false },
-};
+// Max duration and body size for large video uploads
+export const maxDuration = 300;
+export const maxBodySize = "100mb";
