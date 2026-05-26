@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "drive.google.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "9pyiak1lvdjbjlav.public.blob.vercel-storage.com",
+        pathname: "/**",
+      },
     ],
   },
   async headers() {

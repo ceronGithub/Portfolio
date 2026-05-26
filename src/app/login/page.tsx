@@ -169,6 +169,7 @@ export default function LoginPage() {
           className="authVideoBg"
           autoPlay playsInline muted loop={false}
           onEnded={handleVideoEnd}
+          crossOrigin="anonymous"
         />
         <div className="authVideoOverlay" />
         <div className="authVideoGrain" />

@@ -170,6 +170,7 @@ export default function RegisterPage() {
           className="authVideoBg"
           autoPlay playsInline muted loop={false}
           onEnded={handleVideoEnd}
+          crossOrigin="anonymous"
         />
         <div className="authVideoOverlay" />
         <div className="authVideoGrain" />
