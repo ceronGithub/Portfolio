@@ -20,7 +20,7 @@ interface Order {
   estimatedAt:     Date | null;
   userId:          string;
   user:            { name: string | null; email: string };
-  product:         { id: string; name: string };
+  product:         { id: string; name: string } | null;
 }
 
 interface Props { orders: Order[]; }
@@ -76,7 +76,7 @@ async function sendStatusEmail(order: Order, newStatus: OrderStatus): Promise<vo
     EMAILJS_STATUS_TEMPLATE,
     {
       buyer_name:     order.user.name ?? order.user.email,
-      product_name:   order.product.name,
+      product_name:   order.product?.name ?? "N/A",
       status:         STATUS_LABEL[newStatus],
       delivery_note:  order.deliveryNote ?? "No additional notes at this time.",
       estimated_date: estimatedDate,
@@ -448,7 +448,7 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                     <span className="adminOrdersCellNameEmail">{order.user.email}</span>
                   )}
                 </span>
-                <span className="adminOrdersCell adminOrdersCellMuted">{order.product.name}</span>
+                <span className="adminOrdersCell adminOrdersCellMuted">{order.product?.name ?? "—"}</span>
                 <span className="adminOrdersCell">
                   <StatusSelector
                     orderId={order.id}
@@ -490,7 +490,7 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                     estimatedAt={order.estimatedAt}
                     onSaved={handleDeliverySaved}
                   />
-                  {order.status === "DELIVERED" && (
+                  {order.status === "DELIVERED" && order.product && (
                     <FileKeyPanel
                       userId={order.userId}
                       productId={order.product.id}
