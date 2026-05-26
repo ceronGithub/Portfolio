@@ -11,17 +11,17 @@ import "./login.css";
 
 // Video URLs migrated to Google Drive (Matthew Studio/architecture/).
 const ARCH_VIDEOS = [
-  "https://drive.google.com/uc?export=download&id=1YmkTw2uHt9Nnyf7LTFHlPahKp2vnJ0Dx",
-  "https://drive.google.com/uc?export=download&id=1QRDsvYCjQxiduHDF_PI2LnRsNc4ZlC0_",
-  "https://drive.google.com/uc?export=download&id=1Pw-Udf6k6E9Vcvx7NEA9hr86a7xJBAtD",
-  "https://drive.google.com/uc?export=download&id=1a_tBu_aEcAapRlMW3xg6dwCyG-3z3ekV",
-  "https://drive.google.com/uc?export=download&id=1o5Ga7MNvZTJ0gdC1wLi8WghCiNCvFrbO",
-  "https://drive.google.com/uc?export=download&id=1BUDNVIbW0T98TooK7a9bHKZpnq6MMtFG",
-  "https://drive.google.com/uc?export=download&id=1XHplpwMwBNRyBV6r_aozjm1PYWQw6rVn",
-  "https://drive.google.com/uc?export=download&id=1_j8O8hxkIRbfTXgz0SdpuLJCDBOIoeAG",
-  "https://drive.google.com/uc?export=download&id=1npk98zrATBSv5A76iAHGyVbxFq7r9eJN",
-  "https://drive.google.com/uc?export=download&id=1RD9RZ0nmh4RcR6kO10IfVWxhA5i2JYt3",
-  "https://drive.google.com/uc?export=download&id=1b2XXr3ACEvMeZmDluLcDxhUnWfT-d3tq",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(1).mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(2).mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(3).mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(4).mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060936.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060939.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/Drone_shot_revealing_landscape_202605061517.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/Drone_shot_revealing_landscape_202605061518.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/project-03.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/project-04.mp4",
 ];
 
 export default function LoginPage() {

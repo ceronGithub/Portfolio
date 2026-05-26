@@ -19,8 +19,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./architecture-intro-section.css";
 
-const FORWARD_VIDEO    = "https://drive.google.com/uc?export=download&id=1amx1eEXrShXKYGGg8Jo7XdHyP1ab_IdR";
-const REVERSE_VIDEO    = "https://drive.google.com/uc?export=download&id=1_gFPERHXIeBd-xjLWPHgpvWw9aHAK4Rg";
+const FORWARD_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/visitor-architecture-intro.mp4";
+const REVERSE_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/visitor-architecture-intro-reverse.mp4";
 const SCROLL_BUDGET_VH = 4;
 const FADE_START       = 0.85;
 

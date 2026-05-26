@@ -20,8 +20,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./architecture-assets-intro.css";
 
-const FORWARD_VIDEO    = "https://drive.google.com/uc?export=download&id=1qmAXMeCsYqDygAGhmWH4HriGUCLPyPIO";
-const REVERSE_VIDEO    = "https://drive.google.com/uc?export=download&id=1l1NvxvDeyLxlcWXGKGXB7sFF1NKNoD21";
+const FORWARD_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/buyer-architecture-intro.mp4";
+const REVERSE_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/buyer-architecture-intro-reverse.mp4";
 const SCROLL_BUDGET_VH = 4;
 const FADE_START       = 0.85;
 

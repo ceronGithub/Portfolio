@@ -63,16 +63,16 @@ export default async function BuyerPage() {
   };
 
   const bgVideoFallbacks: Record<string, string> = {
-    Restaurant:    "https://drive.google.com/uc?export=download&id=17x0seirDAhR5DcYKfasH4NkQ28kgoBXH",
-    Finance:       "https://drive.google.com/uc?export=download&id=1I2cLsuCZR-FJfIE0mE6rlmS3oOeCZpZE",
-    Booking:       "https://drive.google.com/uc?export=download&id=1yURLOEx0mV6BXXm02u6zmHG0WDCLuDYT",
-    CRM:           "https://drive.google.com/uc?export=download&id=1FLK2lFf6WRZ3eJi-2SMLAr0llwYoKTB9",
-    Warehouse:     "https://drive.google.com/uc?export=download&id=1hwuP1wh-Ejf6P4RSyvMO1Fu5Vgd9MjyZ",
-    "E-commerce":  "https://drive.google.com/uc?export=download&id=1dj3DsiiB4bSmazvpHQon8ahRoPhZAegi",
-    Education:     "https://drive.google.com/uc?export=download&id=1j4i91U6MQosO0Z04qmW2ROlyiYkd6IvM",
-    Inventory:     "https://drive.google.com/uc?export=download&id=1NHJ7IorWgs_AxzhT1PjTKIu1yUlGS7wb",
-    Construction:  "https://drive.google.com/uc?export=download&id=1FRr9D3Lrgo-RAd_LPRFc26OHlPjkHMwd",
-    HR:            "https://drive.google.com/uc?export=download&id=1CEr8Z0xe4W4k5_Mvxf6r6iAFbiQ989TI",
+    Restaurant:    "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/restaurant-bg.mp4",
+    Finance:       "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/finance-bg.mp4",
+    Booking:       "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/booking-bg.mp4",
+    CRM:           "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/crm-bg.mp4",
+    Warehouse:     "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/warehouse-bg.mp4",
+    "E-commerce":  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/ecommerce-bg.mp4",
+    Education:     "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/education-bg.mp4",
+    Inventory:     "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/inventory-bg.mp4",
+    Construction:  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/construction-bg.mp4",
+    HR:            "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/hr-bg.mp4",
   };
 
   const items = systems.map((s: any) => ({

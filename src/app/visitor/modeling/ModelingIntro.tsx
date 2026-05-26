@@ -18,8 +18,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./modeling-intro.css";
 
-const FORWARD_VIDEO    = "/videos/visitor-modeling-intro.mp4";
-const REVERSE_VIDEO    = "/videos/visitor-modeling-intro-reverse.mp4";
+const FORWARD_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/visitor-modeling-intro.mp4";
+const REVERSE_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/visitor-modeling-intro-reverse.mp4";
 const SCROLL_BUDGET_VH = 4;
 const FADE_START       = 0.85;
 
@@ -51,6 +51,8 @@ export default function ModelingIntro() {
   const directionRef  = useRef<"fwd" | "rev">("fwd");
   const velocityRef   = useRef(0);
   const rafRef        = useRef<number | null>(null);
+  // One-time lock — once intro completes, never re-activates on scroll-back.
+  const hasCompletedRef = useRef(false);
 
   const [active, setActive] = useState(false);
   const [done,   setDone]   = useState(false);
@@ -196,6 +198,7 @@ export default function ModelingIntro() {
       const scrolledIn = -rect.top;
 
       if (scrolledIn < 0) {
+        if (hasCompletedRef.current) return;
         setActive(false);
         setDone(false);
         progressRef.current   = 0;
@@ -205,6 +208,7 @@ export default function ModelingIntro() {
       }
 
       if (scrolledIn >= totalH) {
+        hasCompletedRef.current = true;
         setActive(false);
         setDone(true);
         progressRef.current = 1;
@@ -215,8 +219,10 @@ export default function ModelingIntro() {
 
       const p = scrolledIn / totalH;
       progressRef.current = p;
-      setActive(true);
-      setDone(false);
+      if (!hasCompletedRef.current) {
+        setActive(true);
+        setDone(false);
+      }
 
       const exitOpacity = p < FADE_START
         ? 1
