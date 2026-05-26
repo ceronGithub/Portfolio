@@ -12,14 +12,12 @@ import { sanitize } from "@/lib/utils";
 // ── Types ─────────────────────────────────────────────────────────────
 
 interface Product {
-  id: string; name: string; description: string | null;
+  id: string; slug: string | null; name: string; description: string | null;
   price: number; isActive: boolean; isLatest: boolean;
   category: string; packageTier: string;
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
   actionTwoUrl: string | null; actionThreeUrl: string | null;
-  // Tier prices
-  priceMesh:     number | null; priceStandard: number | null; priceFull: number | null;
   // Downloadable mesh files
   fileKeyObj: string | null; fileKeyFbx: string | null; fileKeyGlb: string | null;
   // Animation clips
