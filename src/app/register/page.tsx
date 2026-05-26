@@ -52,19 +52,43 @@ export default function RegisterPage() {
     v.muted = true;
     v.src = WEAPON_VIDEOS[idx];
     v.load();
-    // Use loadeddata — more reliable than canplay across browsers
+    
+    let timeoutId: NodeJS.Timeout;
+    let hasLoaded = false;
+    
     const onReady = () => {
+      hasLoaded = true;
+      clearTimeout(timeoutId);
       v.play()
         .then(() => {
           if (unlockedRef.current) v.muted = false;
         })
         .catch(() => {
-          // Browser blocked autoplay — show overlay as fallback
           setShowSoundOverlay(true);
         });
       v.removeEventListener("loadeddata", onReady);
+      v.removeEventListener("error", onError);
     };
+    
+    const onError = () => {
+      clearTimeout(timeoutId);
+      v.removeEventListener("loadeddata", onReady);
+      v.removeEventListener("error", onError);
+      // Skip to next video on error
+      setVidIdx(cur => randomNext(cur));
+    };
+    
+    // Timeout: if video doesn't load within 5 seconds, skip
+    timeoutId = setTimeout(() => {
+      if (!hasLoaded) {
+        v.removeEventListener("loadeddata", onReady);
+        v.removeEventListener("error", onError);
+        setVidIdx(cur => randomNext(cur));
+      }
+    }, 5000);
+    
     v.addEventListener("loadeddata", onReady);
+    v.addEventListener("error", onError);
   }
 
   /* Unmute helper — used by auto-timer and overlay click */
@@ -171,6 +195,7 @@ export default function RegisterPage() {
           autoPlay playsInline muted loop={false}
           onEnded={handleVideoEnd}
           crossOrigin="anonymous"
+          preload="metadata"
         />
         <div className="authVideoOverlay" />
         <div className="authVideoGrain" />

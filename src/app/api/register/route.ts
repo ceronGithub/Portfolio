@@ -1,10 +1,15 @@
 // POST /api/register
-// Creates a new BUYER user. Validates email uniqueness and hashes password.
+// Creates a new BUYER user in Supabase. Validates email uniqueness and hashes password.
 // Rate limited: max 5 attempts per IP per hour (in-memory, resets on server restart).
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma }   from "@/lib/prisma";
+import { createClient } from "@supabase/supabase-js";
 import bcrypt       from "bcryptjs";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // ── In-memory IP rate limiter ─────────────────────────────────────────────────
 // Stores { count, resetAt } per IP. Resets after 1 hour from first attempt.
@@ -66,16 +71,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "All fields are required." }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const { data: existing } = await supabase
+    .from("User")
+    .select("id")
+    .eq("email", email)
+    .single();
+  
   if (existing) {
     return NextResponse.json({ error: "Email already in use." }, { status: 409 });
   }
 
   const hashed = await bcrypt.hash(password, 10);
 
-  const user = await prisma.user.create({
-    data: { name, email, age, password: hashed, role: "BUYER" },
-  });
+  const { data: user, error } = await supabase
+    .from("User")
+    .insert([{ name, email, age, password: hashed, role: "BUYER", isActive: true, isBanned: false }])
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: "Registration failed." }, { status: 500 });
+  }
 
   return NextResponse.json({ id: user.id, email: user.email });
 }

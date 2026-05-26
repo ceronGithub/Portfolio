@@ -11,17 +11,17 @@ import "./login.css";
 
 // Video URLs migrated to Google Drive (Matthew Studio/architecture/).
 const ARCH_VIDEOS = [
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(1).mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(2).mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(3).mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923%20(4).mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060923.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060936.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/AI_video_prompt_cinematic_motion_202605060939.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/Drone_shot_revealing_landscape_202605061517.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/Drone_shot_revealing_landscape_202605061518.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/project-03.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/project-04.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_1.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_2.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_3.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_4.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_1.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_2.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_3.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_4.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_5.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_6.mp4",
+  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_7.mp4",
 ];
 
 export default function LoginPage() {
@@ -64,19 +64,43 @@ export default function LoginPage() {
     v.muted = true;
     v.src = ARCH_VIDEOS[idx];
     v.load();
-    // Use loadeddata — more reliable than canplay across browsers
+    
+    let timeoutId: NodeJS.Timeout;
+    let hasLoaded = false;
+    
     const onReady = () => {
+      hasLoaded = true;
+      clearTimeout(timeoutId);
       v.play()
         .then(() => {
           if (unlockedRef.current) v.muted = false;
         })
         .catch(() => {
-          // Browser blocked autoplay — show overlay as fallback
           setShowSoundOverlay(true);
         });
       v.removeEventListener("loadeddata", onReady);
+      v.removeEventListener("error", onError);
     };
+    
+    const onError = () => {
+      clearTimeout(timeoutId);
+      v.removeEventListener("loadeddata", onReady);
+      v.removeEventListener("error", onError);
+      // Skip to next video on error
+      setVidIdx(cur => randomNext(cur));
+    };
+    
+    // Timeout: if video doesn't load within 5 seconds, skip
+    timeoutId = setTimeout(() => {
+      if (!hasLoaded) {
+        v.removeEventListener("loadeddata", onReady);
+        v.removeEventListener("error", onError);
+        setVidIdx(cur => randomNext(cur));
+      }
+    }, 5000);
+    
     v.addEventListener("loadeddata", onReady);
+    v.addEventListener("error", onError);
   }
 
   /* Unmute helper — used by auto-timer and overlay click */
@@ -170,6 +194,7 @@ export default function LoginPage() {
           autoPlay playsInline muted loop={false}
           onEnded={handleVideoEnd}
           crossOrigin="anonymous"
+          preload="metadata"
         />
         <div className="authVideoOverlay" />
         <div className="authVideoGrain" />
