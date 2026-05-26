@@ -20,7 +20,7 @@ export default async function DownloadsPage() {
     include: { product: true },
   });
 
-  const downloads = ownerships.map(o => ({
+  const downloads = ownerships.map((o: any) => ({
     id:           o.id,
     productId:    o.product.id,
     name:         o.product.name,

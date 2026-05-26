@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     select: { id: true, name: true, price: true, category: true, previewVideoUrl: true },
   });
 
-  const mapped = products.map(p => ({
+  const mapped = products.map((p: { id: string; name: string; price: number; category: string; previewVideoUrl: string | null }) => ({
     id:             p.id,
     name:           p.name,
     category:       p.category,

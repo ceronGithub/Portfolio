@@ -67,7 +67,7 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
 
   // Map to the shape BundleCheckoutClient expects.
   // id = real cuid (used for order creation), label = display name.
-  const resolvedItems = products.map(p => ({
+  const resolvedItems = products.map((p: { id: string; name: string; category: string; price: number }) => ({
     id:       p.id,                           // real cuid — passed to order API
     label:    p.name,
     category: toDisplayCategory(p.category),
@@ -75,7 +75,7 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
   }));
 
   // Compute totals server-side using DB prices (never trust client)
-  const rawTotal       = resolvedItems.reduce((sum, a) => sum + a.price, 0);
+  const rawTotal       = resolvedItems.reduce((sum: number, a: { price: number }) => sum + a.price, 0);
   const discountRate   = getBundleDiscount(resolvedItems.length);
   const discountAmount = Math.round(rawTotal * discountRate);
   const finalTotal     = rawTotal - discountAmount;

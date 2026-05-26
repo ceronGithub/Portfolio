@@ -79,10 +79,10 @@ export default async function AdminDashboardPage() {
   // ── Monthly revenue — systems ─────────────────────────────────────
   const monthlyRevenueSystems = months.map(m => {
     const total = paidOrders
-      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string | null }) => {
         const d = new Date(o.createdAt);
         return d.getFullYear() === m.year && d.getMonth() + 1 === m.month
-          && productIdIsSystem.get(o.productId) === true;
+          && o.productId != null && productIdIsSystem.get(o.productId) === true;
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
     return { label: m.label, value: Math.round(total / 100) };
@@ -91,10 +91,10 @@ export default async function AdminDashboardPage() {
   // ── Monthly revenue — products ────────────────────────────────────
   const monthlyRevenueProducts = months.map(m => {
     const total = paidOrders
-      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string | null }) => {
         const d = new Date(o.createdAt);
         return d.getFullYear() === m.year && d.getMonth() + 1 === m.month
-          && productIdIsSystem.get(o.productId) !== true;
+          && (o.productId == null || productIdIsSystem.get(o.productId) !== true);
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
     return { label: m.label, value: Math.round(total / 100) };
@@ -103,10 +103,10 @@ export default async function AdminDashboardPage() {
   // ── Weekly revenue — systems ──────────────────────────────────────
   const weeklyRevenueSystems = weeks.map(w => {
     const total = paidOrders
-      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string | null }) => {
         const d = new Date(o.createdAt);
         return d >= w.start && d <= w.end
-          && productIdIsSystem.get(o.productId) === true;
+          && o.productId != null && productIdIsSystem.get(o.productId) === true;
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
     return { label: w.label, value: Math.round(total / 100) };
@@ -115,10 +115,10 @@ export default async function AdminDashboardPage() {
   // ── Weekly revenue — products ─────────────────────────────────────
   const weeklyRevenueProducts = weeks.map(w => {
     const total = paidOrders
-      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string }) => {
+      .filter((o: { amountPaid: number | null; createdAt: Date; productId: string | null }) => {
         const d = new Date(o.createdAt);
         return d >= w.start && d <= w.end
-          && productIdIsSystem.get(o.productId) !== true;
+          && (o.productId == null || productIdIsSystem.get(o.productId) !== true);
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
     return { label: w.label, value: Math.round(total / 100) };

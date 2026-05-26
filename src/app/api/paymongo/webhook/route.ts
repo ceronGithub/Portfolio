@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // Process each order
     await Promise.all(
-      orders.map(async (order) => {
+      orders.map(async (order: { id: string; userId: string; productId: string | null; deliveryNote: string | null }) => {
         // Parse tier from deliveryNote (format: "tier:full_pack")
         const tierMatch  = (order.deliveryNote ?? "").match(/^tier:(.+)$/);
         const grantedTier = tierMatch?.[1] ?? "mesh_only";

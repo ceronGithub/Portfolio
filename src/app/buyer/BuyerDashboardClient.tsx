@@ -48,7 +48,7 @@ interface SystemItem {
 
 interface LatestProduct {
   id: string; name: string; price: number;
-  category: string; previewVideoUrl: string | null; facePngUrl: string | null;
+  category: string; packageTier: string; previewVideoUrl: string | null; facePngUrl: string | null;
 }
 
 interface Props {

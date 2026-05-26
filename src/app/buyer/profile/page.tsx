@@ -42,7 +42,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/login");
 
   // Build order rows from real orders
-  const orderRows = orders.map(o => ({
+  const orderRows = orders.map((o: any) => ({
     id:           o.id,
     productName:  o.product.name,
     amount:       o.amountPaid ?? o.product.price,
@@ -55,10 +55,10 @@ export default async function ProfilePage() {
   }));
 
   // Manually-granted ownerships (no matching order) → synthetic order rows
-  const orderedProductIds = new Set(orders.map(o => o.product.id));
+  const orderedProductIds = new Set(orders.map((o: any) => o.product.id));
   const grantedRows = ownerships
-    .filter(o => !orderedProductIds.has(o.product.id))
-    .map(o => ({
+    .filter((o: any) => !orderedProductIds.has(o.product.id))
+    .map((o: any) => ({
       id:           `grant-${o.productId}`,
       productName:  o.product.name,
       amount:       0,
@@ -81,7 +81,7 @@ export default async function ProfilePage() {
       }}
       orders={[...orderRows, ...grantedRows]}
       ownedCount={ownerships.length}
-      ownedItems={ownerships.map(o => ({
+      ownedItems={ownerships.map((o: any) => ({
         productId:   o.productId,
         productName: o.product.name,
         grantedAt:   o.grantedAt.toISOString(),

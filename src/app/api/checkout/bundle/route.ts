@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   try {
     // Create one Order per product
     const orders = await Promise.all(
-      products.map(p =>
+      products.map((p: { id: string; price: number }) =>
         prisma.order.create({
           data: {
             userId,
