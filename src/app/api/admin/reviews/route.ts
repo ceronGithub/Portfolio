@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/admin/reviews/route.ts — Admin-only: GET all reviews + DELETE by id.
 // GET returns all reviews joined with user + assetId.
 // DELETE requires ?id=<reviewId> query param.

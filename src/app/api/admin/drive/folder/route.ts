@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/google/callback/route.ts
 // Handles Google OAuth2 redirect. Exchanges code for tokens.
 // Stores access + refresh tokens in httpOnly cookies.

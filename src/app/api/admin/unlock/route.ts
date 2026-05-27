@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // POST   /api/admin/unlock — Creates an Ownership record (manual grant).
 // PATCH  /api/admin/unlock — Attaches a fileKey to an existing Ownership record.
 // DELETE /api/admin/unlock — Removes an Ownership record (revoke access).

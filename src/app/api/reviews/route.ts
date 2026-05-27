@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/reviews/route.ts — GET all reviews + POST new review.
 // Uses asset slug IDs (e.g. "orc-01") — no Product table dependency.
 

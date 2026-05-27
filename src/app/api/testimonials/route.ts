@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/testimonials/route.ts — Public GET (approved only) + Public POST (new submission).
 // GET: returns only isApproved=true testimonials for the visitor page carousel.
 // POST: saves a new testimonial with isApproved=false (pending admin review).

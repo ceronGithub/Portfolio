@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/auth/check-status
 // Called client-side on every buyer page load.
 // Returns { banned: true } or { deactivated: true } if the session user

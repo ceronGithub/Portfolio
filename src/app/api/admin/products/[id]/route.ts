@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // PATCH /api/admin/products/[id] — Admin-only product field updater.
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";

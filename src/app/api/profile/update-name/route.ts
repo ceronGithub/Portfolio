@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // PATCH /api/profile/update-name — Update the authenticated user's name.
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";

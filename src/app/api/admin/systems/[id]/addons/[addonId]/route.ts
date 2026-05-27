@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // PATCH /api/admin/systems/[id]/addons/[addonId] — update addon fields.
 // DELETE /api/admin/systems/[id]/addons/[addonId] — delete an addon.
 import { NextRequest, NextResponse } from "next/server";

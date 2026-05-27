@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/inquiry/route.ts — POST custom request inquiry (auth required).
 
 import { NextRequest, NextResponse } from "next/server";

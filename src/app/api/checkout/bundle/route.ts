@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // POST /api/checkout/bundle — Create bundle orders + PayMongo payment link.
 // Returns { checkoutUrl } — client redirects buyer to PayMongo hosted page.
 // On payment success, /api/paymongo/webhook auto-unlocks all products.

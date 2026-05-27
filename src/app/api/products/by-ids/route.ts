@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/products/by-ids?ids=id1,id2,...
 // Returns minimal product data for a set of cuid IDs.
 // Used by CartDrawer to resolve display names, categories, prices, and accent colors.

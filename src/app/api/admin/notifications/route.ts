@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/admin/notifications
 // Admin-only. Returns unread counts for orders, inquiries, reviews, messages.
 // Unread definitions:

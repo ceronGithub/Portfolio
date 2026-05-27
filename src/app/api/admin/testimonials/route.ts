@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/admin/testimonials/route.ts — Admin-only testimonials moderation.
 // GET: all testimonials (approved + pending).
 // PATCH: approve a testimonial by id.

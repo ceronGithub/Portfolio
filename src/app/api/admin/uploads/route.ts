@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/admin/uploads/route.ts
 // POST — receives multipart form data from the admin upload page.
 // Uploads files to Supabase Storage (MP4s marked for Supabase only) and

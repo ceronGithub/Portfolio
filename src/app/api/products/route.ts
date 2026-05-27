@@ -1,103 +1,49 @@
-// GET /api/products?category=character|weapon|interior|exterior[&latest=true]
-// Returns active products filtered by category.
-// GDrive viewer URLs are rewritten to /api/drive-video proxy URLs.
-// New: packageTier, hasObj/hasFbx/hasGlb flags, animCount, animNames returned.
+export const dynamic = 'force-dynamic';
+// GET /api/products/by-ids?ids=id1,id2,...
+// Returns minimal product data for a set of cuid IDs.
+// Used by CartDrawer to resolve display names, categories, prices, and accent colors.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma }                    from "@/lib/prisma";
 
+// Category → accent color mapping (matches ASSET_META in BuyerDashboardClient)
+const CATEGORY_ACCENT: Record<string, string> = {
+  character: "#22c55e",
+  weapon:    "#c9935e",
+  interior:  "#60a5fa",
+  exterior:  "#a78bfa",
+};
+
 function toProxyUrl(raw: string | null): string | null {
   if (!raw) return null;
   if (raw.startsWith("/api/drive-video")) return raw;
-  const matchFile  = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (matchFile)  return `/api/drive-video?id=${matchFile[1]}`;
-  const matchParam = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (matchParam) return `/api/drive-video?id=${matchParam[1]}`;
+  const matchFile = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchFile) return `/api/drive-video?id=${matchFile[1]}`;
   return raw;
 }
 
-const ANIM_KEYS = [
-  { key: "animIdleUrl",      label: "Idle"     },
-  { key: "animWalkUrl",      label: "Walk"     },
-  { key: "animRunUrl",       label: "Run"      },
-  { key: "animAttackOneUrl", label: "Attack 1" },
-  { key: "animAttackTwoUrl", label: "Attack 2" },
-  { key: "animDeathUrl",     label: "Death"    },
-  { key: "animHitUrl",       label: "Hit"      },
-] as const;
-
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const category   = searchParams.get("category");
-  const latestOnly = searchParams.get("latest") === "true";
+  const rawIds = req.nextUrl.searchParams.get("ids") ?? "";
+  const ids    = rawIds.split(",").map(s => s.trim()).filter(Boolean);
 
-  const validCategories = ["character", "weapon", "interior", "exterior"];
-  if (!category || !validCategories.includes(category)) {
-    return NextResponse.json(
-      { error: "Valid category required: character | weapon | interior | exterior" },
-      { status: 400 }
-    );
+  if (ids.length === 0) {
+    return NextResponse.json({ products: [] });
   }
 
   const products = await prisma.product.findMany({
-    where: {
-      category: category as "character" | "weapon" | "interior" | "exterior",
-      isActive: true,
-      ...(latestOnly ? { isLatest: true } : {}),
-    },
-    select: {
-      id:              true,
-      name:            true,
-      price:           true,
-      category:        true,
-      packageTier:     true,
-      isLatest:        true,
-      previewVideoUrl: true,
-      facePngUrl:      true,
-      fileKeyObj:      true,
-      fileKeyFbx:      true,
-      fileKeyGlb:      true,
-      animIdleUrl:     true,
-      animWalkUrl:     true,
-      animRunUrl:      true,
-      animAttackOneUrl: true,
-      animAttackTwoUrl: true,
-      animDeathUrl:    true,
-      animHitUrl:      true,
-      actionOneUrl:    true,
-      actionTwoUrl:    true,
-      actionThreeUrl:  true,
-    },
-    orderBy: { createdAt: "asc" },
+    where:  { id: { in: ids } },
+    select: { id: true, name: true, price: true, category: true, previewVideoUrl: true },
   });
 
-  const mapped = products.map((p: Record<string, any>) => {
-    const animNames = ANIM_KEYS
-      .filter(a => !!p[a.key])
-      .map(a => a.label);
-
-    return {
-      id:             p.id,
-      name:           p.name,
-      price:          p.price,
-      category:       p.category,
-      packageTier:    p.packageTier,
-      isLatest:       p.isLatest,
-      previewVideoUrl: toProxyUrl(p.previewVideoUrl),
-      facePngUrl:     p.facePngUrl,
-      // Format flags — buyer UI uses these for badges
-      hasObj:         !!p.fileKeyObj,
-      hasFbx:         !!p.fileKeyFbx,
-      hasGlb:         !!p.fileKeyGlb,
-      // Animation summary
-      animCount:      animNames.length,
-      animNames,
-      // Legacy
-      actionOneUrl:   toProxyUrl(p.actionOneUrl),
-      actionTwoUrl:   toProxyUrl(p.actionTwoUrl),
-      actionThreeUrl: toProxyUrl(p.actionThreeUrl),
-    };
-  });
+  const mapped = products.map((p: { id: string; name: string; price: number; category: string; previewVideoUrl: string | null }) => ({
+    id:             p.id,
+    name:           p.name,
+    category:       p.category,
+    price:          p.price,
+    priceStr:       "₱" + p.price.toLocaleString("en-PH", { minimumFractionDigits: 0 }),
+    accent:         CATEGORY_ACCENT[p.category] ?? "#888",
+    previewVideoUrl: toProxyUrl(p.previewVideoUrl),
+  }));
 
   return NextResponse.json({ products: mapped });
 }

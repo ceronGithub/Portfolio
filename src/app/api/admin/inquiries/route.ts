@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/admin/inquiries/route.ts — Admin: PATCH inquiry status (custom requests + contact messages).
 // PATCH ?type=custom&id=<id> — update Inquiry status (pending → read → replied)
 // PATCH ?type=contact&id=<id> — update ContactMessage status (new → read → replied)

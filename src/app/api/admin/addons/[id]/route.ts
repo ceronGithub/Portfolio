@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/admin/addons/[id]/route.ts — Admin-only PATCH + DELETE for a SystemAddon by id.
 // PATCH: update label, price, category, or description of any addon directly by its id.
 // DELETE: remove an addon by its id.

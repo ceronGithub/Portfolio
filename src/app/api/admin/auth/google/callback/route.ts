@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/auth/google/callback/route.ts
 // Handles the OAuth2 redirect from Google after admin grants Drive access.
 // Exchanges the authorization code for access + refresh tokens.

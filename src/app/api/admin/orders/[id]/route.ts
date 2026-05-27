@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // PATCH /api/admin/orders/[id] — update status, deliveryNote, estimatedAt
 // Admin-only.
 import { NextRequest, NextResponse } from "next/server";

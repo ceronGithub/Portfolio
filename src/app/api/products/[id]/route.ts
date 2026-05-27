@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // DELETE & PATCH /api/admin/products/[id] — Delete with cascade or update fields.
 // DELETE: Removes product + cascading orders & ownership records.
 // PATCH: Updates product fields (isActive, price, media, etc).

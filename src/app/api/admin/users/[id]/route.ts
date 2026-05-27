@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // PATCH  /api/admin/users/[id] — Ban, unban, deactivate, or activate a user.
 // DELETE /api/admin/users/[id] — Permanently delete a user and all their data.
 // Both write a UserActionLog record for the audit trail.

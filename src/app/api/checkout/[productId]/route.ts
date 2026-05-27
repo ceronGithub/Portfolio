@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // POST /api/checkout/[productId] — Create order + PayMongo payment link.
 // Supports both Product (3D assets) and System catalog items.
 // Returns { checkoutUrl } — client redirects buyer to PayMongo hosted page.

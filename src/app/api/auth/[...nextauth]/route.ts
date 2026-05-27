@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // [...nextauth]/route.ts
 // Next-auth v4 App Router handler.
 // Handler is instantiated HERE directly — not re-exported from lib/auth.

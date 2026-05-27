@@ -1,179 +1,126 @@
-// GET  /api/admin/products?category=... — Returns active products by category.
-// POST /api/admin/products             — Creates a new product (admin only).
+export const dynamic = 'force-dynamic';
+// PATCH /api/admin/products/[id] — Admin-only product field updater.
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 import { revalidatePath }            from "next/cache";
 
-// Force dynamic — reads live DB, must not be cached at build time.
-export const dynamic = "force-dynamic";
-
-function toProxyUrl(raw: string | null): string | null {
-  if (!raw) return null;
-  if (raw.startsWith("/api/drive-video")) return raw;
-  const matchFile  = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (matchFile)  return `/api/drive-video?id=${matchFile[1]}`;
-  const matchParam = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (matchParam) return `/api/drive-video?id=${matchParam[1]}`;
-  return raw;
-}
-
-const ANIM_KEYS = [
-  { key: "animIdleUrl",      label: "Idle"     },
-  { key: "animWalkUrl",      label: "Walk"     },
-  { key: "animRunUrl",       label: "Run"      },
-  { key: "animAttackOneUrl", label: "Attack 1" },
-  { key: "animAttackTwoUrl", label: "Attack 2" },
-  { key: "animDeathUrl",     label: "Death"    },
-  { key: "animHitUrl",       label: "Hit"      },
-] as const;
-
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const category   = searchParams.get("category");
-  const latestOnly = searchParams.get("latest") === "true";
-
-  const validCategories = ["character", "weapon", "interior", "exterior"];
-  if (!category || !validCategories.includes(category)) {
-    return NextResponse.json(
-      { error: "Valid category required: character | weapon | interior | exterior" },
-      { status: 400 }
-    );
-  }
-
-  const products = await prisma.product.findMany({
-    where: {
-      category: category as "character" | "weapon" | "interior" | "exterior",
-      isActive: true,
-      ...(latestOnly ? { isLatest: true } : {}),
-    },
-    select: {
-      id:              true,
-      name:            true,
-      price:           true,
-      category:        true,
-      packageTier:     true,
-      isLatest:        true,
-      previewVideoUrl: true,
-      facePngUrl:      true,
-      fileKeyObj:      true,
-      fileKeyFbx:      true,
-      fileKeyGlb:      true,
-      animIdleUrl:     true,
-      animWalkUrl:     true,
-      animRunUrl:      true,
-      animAttackOneUrl: true,
-      animAttackTwoUrl: true,
-      animDeathUrl:    true,
-      animHitUrl:      true,
-      actionOneUrl:    true,
-      actionTwoUrl:    true,
-      actionThreeUrl:  true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const mapped = products.map((p: Record<string, any>) => {
-    const animNames = ANIM_KEYS
-      .filter(a => !!p[a.key])
-      .map(a => a.label);
-
-    return {
-      id:             p.id,
-      name:           p.name,
-      price:          p.price,
-      category:       p.category,
-      packageTier:    p.packageTier,
-      isLatest:       p.isLatest,
-      previewVideoUrl: toProxyUrl(p.previewVideoUrl),
-      facePngUrl:     p.facePngUrl,
-      // Format flags — buyer UI uses these for badges
-      hasObj:         !!p.fileKeyObj,
-      hasFbx:         !!p.fileKeyFbx,
-      hasGlb:         !!p.fileKeyGlb,
-      // Animation summary
-      animCount:      animNames.length,
-      animNames,
-      // Legacy
-      actionOneUrl:   toProxyUrl(p.actionOneUrl),
-      actionTwoUrl:   toProxyUrl(p.actionTwoUrl),
-      actionThreeUrl: toProxyUrl(p.actionThreeUrl),
-    };
-  });
-
-  return NextResponse.json({ products: mapped });
-}
-// POST /api/admin/products — Create a new product. Admin only.
-// Accepts all product fields; only name, price, category are required.
-export async function POST(req: NextRequest) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { name, price, category, description, isLatest,
-            previewVideoUrl, facePngUrl, threeDUrl,
-            actionOneUrl, actionTwoUrl, actionThreeUrl,
-            fileKeyObj, fileKeyFbx, fileKeyGlb,
-            animIdleUrl, animWalkUrl, animRunUrl,
-            animAttackOneUrl, animAttackTwoUrl, animDeathUrl, animHitUrl,
-          } = body;
+    const { id } = await params;
+    const body   = await req.json();
 
-    if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ error: "name is required" }, { status: 400 });
-    }
-    if (typeof price !== "number" || price < 0) {
-      return NextResponse.json({ error: "price must be a non-negative number" }, { status: 400 });
-    }
-    const validCategories = ["character", "weapon", "interior", "exterior"];
-    if (!category || !validCategories.includes(category)) {
-      return NextResponse.json({ error: "category must be character | weapon | interior | exterior" }, { status: 400 });
-    }
-
-    // If isLatest is true, clear siblings in same category first
-    if (isLatest === true) {
-      await prisma.product.updateMany({
-        where: { category, isLatest: true },
-        data:  { isLatest: false },
+    // ── isLatest toggle ───────────────────────────────────────────────
+    // Only one product per category can be isLatest. When setting true,
+    // first clear all siblings, then set the target. Two plain updates —
+    // no transaction needed since brief inconsistency is acceptable here.
+    if (typeof body.isLatest === "boolean") {
+      if (body.isLatest === true) {
+        // Find the product's category
+        const product = await prisma.product.findUnique({
+          where:  { id },
+          select: { category: true },
+        });
+        if (!product) {
+          return NextResponse.json({ error: "Product not found." }, { status: 404 });
+        }
+        // Clear isLatest on all others in same category
+        await prisma.product.updateMany({
+          where: { category: product.category, id: { not: id } },
+          data:  { isLatest: false },
+        });
+      }
+      // Set the target — also update packageTier if provided in same call
+      const latestData: Record<string, unknown> = { isLatest: body.isLatest };
+      const VALID_TIERS_SET = ["mesh_only", "standard", "full_pack"];
+      if (typeof body.packageTier === "string" && VALID_TIERS_SET.includes(body.packageTier)) {
+        latestData.packageTier = body.packageTier;
+      }
+      const updated = await prisma.product.update({
+        where: { id },
+        data:  latestData,
       });
+      revalidatePath("/buyer", "layout");
+      return NextResponse.json({ product: updated });
     }
 
-    const product = await prisma.product.create({
-      data: {
-        name:            name.trim(),
-        price,
-        category,
-        description:     description?.trim() || null,
-        isLatest:        isLatest === true,
-        isActive:        true,
-        previewVideoUrl: previewVideoUrl?.trim() || null,
-        facePngUrl:      facePngUrl?.trim()      || null,
-        threeDUrl:       threeDUrl?.trim()        || null,
-        actionOneUrl:    actionOneUrl?.trim()     || null,
-        actionTwoUrl:    actionTwoUrl?.trim()     || null,
-        actionThreeUrl:  actionThreeUrl?.trim()   || null,
-        fileKeyObj:      fileKeyObj?.trim()       || null,
-        fileKeyFbx:      fileKeyFbx?.trim()       || null,
-        fileKeyGlb:      fileKeyGlb?.trim()       || null,
-        animIdleUrl:     animIdleUrl?.trim()      || null,
-        animWalkUrl:     animWalkUrl?.trim()       || null,
-        animRunUrl:      animRunUrl?.trim()        || null,
-        animAttackOneUrl: animAttackOneUrl?.trim() || null,
-        animAttackTwoUrl: animAttackTwoUrl?.trim() || null,
-        animDeathUrl:    animDeathUrl?.trim()      || null,
-        animHitUrl:      animHitUrl?.trim()        || null,
-      },
-    });
+    // ── All other field updates ───────────────────────────────────────
+    const MEDIA = [
+      "previewVideoUrl", "facePngUrl", "threeDUrl",
+      "actionOneUrl", "actionTwoUrl", "actionThreeUrl",
+      "fileKeyObj", "fileKeyFbx", "fileKeyGlb",
+      "animIdleUrl", "animWalkUrl", "animRunUrl",
+      "animAttackOneUrl", "animAttackTwoUrl", "animDeathUrl", "animHitUrl",
+    ] as const;
+
+    const TIER_PRICES = ["priceMesh", "priceStandard", "priceFull"] as const;
+    const VALID_TIERS = ["mesh_only", "standard", "full_pack"];
+
+    const data: Record<string, unknown> = {};
+
+    if (typeof body.isActive    === "boolean") data.isActive    = body.isActive;
+    if (typeof body.price       === "number")  data.price       = body.price;
+    if (typeof body.name        === "string")  data.name        = body.name.trim();
+    if ("description" in body)                 data.description = body.description ?? null;
+
+    // packageTier — validates against known enum values
+    if (typeof body.packageTier === "string" && VALID_TIERS.includes(body.packageTier)) {
+      data.packageTier = body.packageTier;
+    }
+
+    for (const field of TIER_PRICES) {
+      if (field in body) data[field] = body[field] !== null ? Number(body[field]) : null;
+    }
+
+    for (const field of MEDIA) {
+      if (field in body) data[field] = typeof body[field] === "string" ? body[field] : null;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update." }, { status: 400 });
+    }
+
+    const updated = await prisma.product.update({ where: { id }, data });
+    revalidatePath("/buyer", "layout");
+    return NextResponse.json({ product: updated });
+
+  } catch (err: any) {
+    console.error("[PATCH /api/admin/products/[id]]", err?.message);
+    return NextResponse.json({ error: err?.message ?? "Server error" }, { status: 500 });
+  }
+}
+// ── DELETE /api/admin/products/[id] — cascade delete product ─────────────────
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any)?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    // Cascade: remove ownership and orders before deleting product
+    await prisma.ownership.deleteMany({ where: { productId: id } });
+    await prisma.order.deleteMany({ where: { productId: id } });
+    await prisma.product.delete({ where: { id } });
 
     revalidatePath("/buyer", "layout");
-    revalidatePath("/admin/products", "layout");
+    return NextResponse.json({ deleted: true });
 
-    return NextResponse.json({ product }, { status: 201 });
   } catch (err: any) {
-    console.error("[POST /api/admin/products]", err?.message);
+    console.error("[DELETE /api/admin/products/[id]]", err?.message);
     return NextResponse.json({ error: err?.message ?? "Server error" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/drive-video/route.ts
 // Proxies Google Drive video files to the browser with proper streaming headers.
 // Usage: /api/drive-video?id=DRIVE_FILE_ID

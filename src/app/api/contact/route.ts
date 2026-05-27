@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // api/contact/route.ts — Save general Get-in-Touch contact form to DB.
 // No auth required — public endpoint. Stores ContactMessage for admin history.
 

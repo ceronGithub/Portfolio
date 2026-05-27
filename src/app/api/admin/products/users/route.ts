@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/admin/users — Returns all BUYER accounts for admin grant modals.
 // Protected: ADMIN only.
 import { NextResponse }    from "next/server";

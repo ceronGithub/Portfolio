@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // POST /api/register
 // Creates a new BUYER user via Prisma. Validates email uniqueness and hashes password.
 // Switched from Supabase client to Prisma to bypass RLS restrictions on the User table.

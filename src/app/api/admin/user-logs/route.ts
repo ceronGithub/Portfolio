@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 // GET /api/admin/user-logs?action=BAN|UNBAN|DEACTIVATE|ACTIVATE|DELETE
 // Admin-only. Returns UserActionLog records newest-first.
 import { NextRequest, NextResponse } from "next/server";
