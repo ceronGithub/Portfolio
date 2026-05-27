@@ -7,13 +7,12 @@ import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
 
-export async function PATCH(req: NextRequest, context: { params: { id: string; addonId: string } }) {
-  const { params } = context;
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string; addonId: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { addonId } = params;
+  const { addonId } = await context.params;
   const body = await req.json();
   const allowed = ["label", "price", "category", "description"];
   const data: Record<string, unknown> = {};
@@ -29,13 +28,12 @@ export async function PATCH(req: NextRequest, context: { params: { id: string; a
   }
 }
 
-export async function DELETE(_req: NextRequest, context: { params: { id: string; addonId: string } }) {
-  const { params } = context;
+export async function DELETE(_req: NextRequest, context: { params: Promise<{ id: string; addonId: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { addonId } = params;
+  const { addonId } = await context.params;
   try {
     await prisma.systemAddon.delete({ where: { id: addonId } });
     return NextResponse.json({ ok: true });

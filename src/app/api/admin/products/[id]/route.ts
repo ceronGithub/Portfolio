@@ -8,7 +8,7 @@ import { revalidatePath }            from "next/cache";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await context.params;
     const body   = await req.json();
 
     // ── isLatest toggle ───────────────────────────────────────────────
@@ -101,7 +101,7 @@ export async function PATCH(
 // ── DELETE /api/admin/products/[id] — cascade delete product ─────────────────
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -109,7 +109,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await context.params;
 
     // Cascade: remove ownership and orders before deleting product
     await prisma.ownership.deleteMany({ where: { productId: id } });
