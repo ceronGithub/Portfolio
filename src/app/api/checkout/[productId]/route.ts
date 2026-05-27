@@ -10,14 +10,14 @@ import { createPaymentLink }          from "@/lib/paymongo";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ productId: string }> }
+  { params }: { params: { productId: string } }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const userId              = (session.user as any).id as string;
-  const { productId }       = await params;
+  const { productId }       = params;
   const body                = await req.json();
   const { method, total, grantedTier } = body;
 

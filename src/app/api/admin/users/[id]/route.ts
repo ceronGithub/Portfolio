@@ -9,7 +9,7 @@ import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 import { revalidatePath }            from "next/cache";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: { id: string } };
 
 // ── Action → enum string mapping ─────────────────────────────────────────────
 const ACTION_ENUM: Record<string, string> = {
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id }    = await params;
+  const { id }    = params;
   const adminId   = (session.user as any).id   as string;
   const adminEmail = session.user?.email ?? "unknown";
 
@@ -80,7 +80,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id }     = await params;
+  const { id }     = params;
   const adminId    = (session.user as any).id   as string;
   const adminEmail = session.user?.email ?? "unknown";
 

@@ -6,14 +6,14 @@ import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
-type Params = { params: Promise<{ id: string; addonId: string }> };
+type Params = { params: { id: string; addonId: string } };
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { addonId } = await params;
+  const { addonId } = params;
   const body = await req.json();
   const allowed = ["label", "price", "category", "description"];
   const data: Record<string, unknown> = {};
@@ -34,7 +34,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!session || (session.user as any)?.role !== "ADMIN")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { addonId } = await params;
+  const { addonId } = params;
   try {
     await prisma.systemAddon.delete({ where: { id: addonId } });
     return NextResponse.json({ ok: true });
