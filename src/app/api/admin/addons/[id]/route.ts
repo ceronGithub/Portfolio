@@ -11,11 +11,15 @@ async function requireAdmin() {
   return session;
 }
 
-export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+// Updates an existing SystemAddon — accepts label, price, category, description fields.
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = await context.params;
+  const { id } = await params;
   const body    = await req.json();
   const allowed = ["label", "price", "category", "description"];
   const data: Record<string, unknown> = {};
@@ -31,11 +35,15 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   }
 }
 
-export async function DELETE(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+// Deletes a SystemAddon by id — admin only.
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = await context.params;
+  const { id } = await params;
   try {
     await prisma.systemAddon.delete({ where: { id } });
     return NextResponse.json({ ok: true });
