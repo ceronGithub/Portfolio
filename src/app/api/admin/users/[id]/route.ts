@@ -9,7 +9,6 @@ import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 import { revalidatePath }            from "next/cache";
 
-type Params = { params: { id: string } };
 
 // ── Action → enum string mapping ─────────────────────────────────────────────
 const ACTION_ENUM: Record<string, string> = {
@@ -19,7 +18,8 @@ const ACTION_ENUM: Record<string, string> = {
   activate:   "ACTIVATE",
 };
 
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -74,7 +74,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any)?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
