@@ -1,13 +1,15 @@
 export const dynamic = 'force-dynamic';
-// GET /api/products/by-ids?ids=id1,id2,...
-// Returns minimal product data for a set of cuid IDs.
-// Used by CartDrawer to resolve display names, categories, prices, and accent colors.
-
+// GET /api/products?category=character|weapon|interior|exterior
+// Returns active products for a given category.
+// Used by AssetBuySection and ArchitectureBuySection to populate the browse modal.
 import { NextRequest, NextResponse } from "next/server";
 import { prisma }                    from "@/lib/prisma";
 
-// Category → accent color mapping (matches ASSET_META in BuyerDashboardClient)
-const CATEGORY_ACCENT: Record<string, string> = {
+const VALID_CATEGORIES = ["weapon", "character", "interior", "exterior"] as const;
+type ValidCategory = typeof VALID_CATEGORIES[number];
+
+// Category → accent color mapping
+const CATEGORY_ACCENT: Record<ValidCategory, string> = {
   character: "#22c55e",
   weapon:    "#c9935e",
   interior:  "#60a5fa",
@@ -23,26 +25,64 @@ function toProxyUrl(raw: string | null): string | null {
 }
 
 export async function GET(req: NextRequest) {
-  const rawIds = req.nextUrl.searchParams.get("ids") ?? "";
-  const ids    = rawIds.split(",").map(s => s.trim()).filter(Boolean);
+  const category = req.nextUrl.searchParams.get("category") ?? "";
 
-  if (ids.length === 0) {
-    return NextResponse.json({ products: [] });
+  if (!VALID_CATEGORIES.includes(category as ValidCategory)) {
+    return NextResponse.json({ error: "Invalid or missing category" }, { status: 400 });
   }
 
   const products = await prisma.product.findMany({
-    where:  { id: { in: ids } },
-    select: { id: true, name: true, price: true, category: true, previewVideoUrl: true },
+    where:   { category: category as ValidCategory, isActive: true },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id:             true,
+      slug:           true,
+      name:           true,
+      price:          true,
+      category:       true,
+      packageTier:    true,
+      previewVideoUrl:true,
+      facePngUrl:     true,
+      fileKeyObj:     true,
+      fileKeyFbx:     true,
+      fileKeyGlb:     true,
+      animIdleUrl:    true,
+      animWalkUrl:    true,
+      animRunUrl:     true,
+      animAttackOneUrl:true,
+      animAttackTwoUrl:true,
+      animDeathUrl:   true,
+      animHitUrl:     true,
+    },
   });
 
-  const mapped = products.map((p: { id: string; name: string; price: number; category: string; previewVideoUrl: string | null }) => ({
+  const mapped = products.map((p: any) => ({
     id:             p.id,
+    slug:           p.slug,
     name:           p.name,
-    category:       p.category,
     price:          p.price,
-    priceStr:       "₱" + p.price.toLocaleString("en-PH", { minimumFractionDigits: 0 }),
-    accent:         CATEGORY_ACCENT[p.category] ?? "#888",
+    category:       p.category,
+    packageTier:    p.packageTier,
+    accent:         CATEGORY_ACCENT[p.category as ValidCategory] ?? "#888",
     previewVideoUrl: toProxyUrl(p.previewVideoUrl),
+    facePngUrl:     p.facePngUrl,
+    hasObj:         !!p.fileKeyObj,
+    hasFbx:         !!p.fileKeyFbx,
+    hasGlb:         !!p.fileKeyGlb,
+    animCount: [
+      p.animIdleUrl, p.animWalkUrl, p.animRunUrl,
+      p.animAttackOneUrl, p.animAttackTwoUrl,
+      p.animDeathUrl, p.animHitUrl,
+    ].filter(Boolean).length,
+    animNames: [
+      p.animIdleUrl      ? "Idle"     : null,
+      p.animWalkUrl      ? "Walk"     : null,
+      p.animRunUrl       ? "Run"      : null,
+      p.animAttackOneUrl ? "Attack 1" : null,
+      p.animAttackTwoUrl ? "Attack 2" : null,
+      p.animDeathUrl     ? "Death"    : null,
+      p.animHitUrl       ? "Hit"      : null,
+    ].filter(Boolean),
   }));
 
   return NextResponse.json({ products: mapped });

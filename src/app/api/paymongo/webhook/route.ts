@@ -2,18 +2,18 @@
 // On link.payment.paid:
 //   1. Finds all orders with matching paymongoOrderId (link ID)
 //   2. Updates each order status to PAID
-//   3. Upserts Ownership with grantedTier from the order's deliveryNote
+//   3. Upserts Ownership ONLY for product orders (productId non-null)
+//      System orders (systemId set, productId null) are skipped — no Ownership row needed.
 //   4. Revalidates /buyer/downloads and /buyer/orders
 import { NextRequest, NextResponse } from "next/server";
 import { prisma }                    from "@/lib/prisma";
 import { verifyWebhookSignature }    from "@/lib/paymongo";
 import { revalidatePath }            from "next/cache";
 
-// PayMongo requires raw body for signature verification
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const rawBody  = await req.text();
+  const rawBody   = await req.text();
   const sigHeader = req.headers.get("paymongo-signature") ?? "";
 
   // Verify signature (skip in dev if secret not set)
@@ -55,9 +55,13 @@ export async function POST(req: NextRequest) {
 
     // Process each order
     await Promise.all(
-      orders.map(async (order: { id: string; userId: string; productId: string | null; deliveryNote: string | null }) => {
+      orders.map(async (order: {
+        id: string; userId: string;
+        productId: string | null; systemId: string | null;
+        deliveryNote: string | null;
+      }) => {
         // Parse tier from deliveryNote (format: "tier:full_pack")
-        const tierMatch  = (order.deliveryNote ?? "").match(/^tier:(.+)$/);
+        const tierMatch   = (order.deliveryNote ?? "").match(/^tier:(.+)$/);
         const grantedTier = tierMatch?.[1] ?? "mesh_only";
 
         // Mark order as PAID
@@ -66,16 +70,22 @@ export async function POST(req: NextRequest) {
           data:  { status: "PAID" },
         });
 
-        // Auto-unlock: upsert Ownership with buyer's chosen tier
-        await (prisma.ownership as any).upsert({
-          where:  { userId_productId: { userId: order.userId, productId: order.productId } },
-          update: { grantedTier },
-          create: { userId: order.userId, productId: order.productId, grantedTier },
-        });
-
-        console.log(
-          `[PayMongo Webhook] Unlocked product ${order.productId} for user ${order.userId} at tier ${grantedTier}`
-        );
+        // Auto-unlock Ownership ONLY for product orders (not system orders)
+        // System orders have productId = null — no Ownership row exists for systems.
+        if (order.productId) {
+          await (prisma.ownership as any).upsert({
+            where:  { userId_productId: { userId: order.userId, productId: order.productId } },
+            update: { grantedTier },
+            create: { userId: order.userId, productId: order.productId, grantedTier },
+          });
+          console.log(
+            `[PayMongo Webhook] Unlocked product ${order.productId} for user ${order.userId} at tier ${grantedTier}`
+          );
+        } else {
+          console.log(
+            `[PayMongo Webhook] System order ${order.id} marked PAID — no Ownership row needed`
+          );
+        }
       })
     );
 
