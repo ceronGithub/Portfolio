@@ -148,6 +148,16 @@ function IconOrders({ size = 22 }: { size?: number }) {
   );
 }
 
+// Clock / pending icon — used in buyer navbar for /buyer/pending-payments
+function IconPending({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
 /* ── NotifBadge — red dot with count on admin nav item ────────────────── */
 function NotifBadge({ count }: { count: number }) {
   if (count === 0) return null;
@@ -233,13 +243,14 @@ export default function Navbar() {
 
   /* ── Nav items — context-aware ──────────────────────────────────── */
 
-  // Buyer on /buyer pages: Dash + Downloads + Orders + Profile + Sign Out
+  // Buyer on /buyer pages: Dash + Downloads + Orders + Pending Payments + Profile + Sign Out
   const buyerItems: NavItem[] = [
-    { label: "Dash",      href: "/buyer",           icon: <IconDashboard /> },
-    { label: "Downloads", href: "/buyer/downloads", icon: <IconDownload />  },
-    { label: "Orders",    href: "/buyer/orders",    icon: <IconOrders />    },
-    { label: "Profile",   href: "/buyer/profile",   icon: <IconAbout />     },
-    { label: "Sign Out",  href: "#",                icon: <IconSignOut />,  signOut: true },
+    { label: "Dash",              href: "/buyer",                  icon: <IconDashboard /> },
+    { label: "Downloads",         href: "/buyer/downloads",        icon: <IconDownload />  },
+    { label: "Orders",            href: "/buyer/orders",           icon: <IconOrders />    },
+    { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />   },
+    { label: "Profile",           href: "/buyer/profile",          icon: <IconAbout />     },
+    { label: "Sign Out",          href: "#",                       icon: <IconSignOut />,  signOut: true },
   ];
 
   // Admin on /admin pages: Overview, Users, Products, Orders, Theme toggle, Sign Out

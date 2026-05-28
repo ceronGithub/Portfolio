@@ -1,0 +1,264 @@
+/* pending-payments.css — Pending payments page UI.
+   Rule 17: Typography (Jakarta), layered translucency, SVG icons, cards, animations */
+
+.pendingPaymentsPage {
+  min-height:      100vh;
+  background:      #09090b;
+  padding:         6rem 1.5rem 4rem;
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: center;
+}
+
+.pendingPaymentsContainer {
+  width:     100%;
+  max-width: 800px;
+}
+
+/* ── Header ── */
+.pendingPaymentsHeader {
+  margin-bottom: 2.5rem;
+}
+
+.pendingPaymentsTitle {
+  font-family:   var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:     clamp(1.75rem, 4.5vw, 2.5rem);
+  font-weight:   700;
+  color:         rgba(255, 255, 255, 0.88);
+  margin:        0 0 0.5rem;
+  letter-spacing: -0.015em;
+}
+
+.pendingPaymentsSubtitle {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   0.95rem;
+  font-weight: 500;
+  color:       rgba(255, 255, 255, 0.45);
+  margin:      0;
+  line-height: 1.6;
+}
+
+/* ── Empty state ── */
+.pendingPaymentsEmpty {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  gap:            1.5rem;
+  padding:        6rem 2rem;
+  background:     rgba(255, 255, 255, 0.02);
+  border:         1px solid rgba(255, 255, 255, 0.06);
+  border-radius:  12px;
+}
+
+.pendingPaymentsEmpty svg {
+  color: rgba(255, 255, 255, 0.22);
+  opacity: 0.6;
+}
+
+.pendingPaymentsEmptyText {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   1rem;
+  color:       rgba(255, 255, 255, 0.35);
+  margin:      0;
+  font-weight: 500;
+}
+
+/* ── List ── */
+.pendingPaymentsList {
+  display:        flex;
+  flex-direction: column;
+  gap:            1rem;
+}
+
+.pendingPaymentRow {
+  display:         grid;
+  grid-template-columns: 1fr auto;
+  gap:             1.5rem;
+  align-items:     center;
+  padding:         1.5rem;
+  background:      rgba(255, 255, 255, 0.05);
+  border:          1px solid rgba(255, 255, 255, 0.1);
+  border-radius:   10px;
+  transition:      all 0.2s ease;
+}
+
+.pendingPaymentRow:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pendingPaymentRowOverdue {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ── Left: Icon + Info ── */
+.pendingPaymentLeft {
+  display: flex;
+  gap:     1rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.pendingPaymentIcon {
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
+  width:        40px;
+  height:       40px;
+  min-width:    40px;
+  background:   rgba(255, 255, 255, 0.06);
+  border:       1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  flex-shrink:  0;
+}
+
+.pendingPaymentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.pendingPaymentProductName {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   1rem;
+  font-weight: 600;
+  color:       rgba(255, 255, 255, 0.88);
+  margin:      0 0 0.25rem;
+  overflow:    text-overflow;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pendingPaymentCategory {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   0.8rem;
+  font-weight: 500;
+  color:       rgba(255, 255, 255, 0.45);
+  margin:      0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pendingPaymentDate {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   0.85rem;
+  color:       rgba(255, 255, 255, 0.35);
+  margin:      0;
+  line-height: 1.5;
+}
+
+/* ── Right: Amount + Status + Action ── */
+.pendingPaymentRight {
+  display:        flex;
+  flex-direction: column;
+  align-items:    flex-end;
+  gap:            0.75rem;
+  text-align:     right;
+}
+
+.pendingPaymentAmount {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pendingPaymentAmountLabel {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   0.75rem;
+  font-weight: 600;
+  color:       rgba(255, 255, 255, 0.35);
+  margin:      0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pendingPaymentAmountValue {
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:   1.5rem;
+  font-weight: 700;
+  color:       rgba(255, 255, 255, 0.88);
+  margin:      0;
+  letter-spacing: -0.01em;
+}
+
+/* ── Badge ── */
+.pendingPaymentBadgeOverdue {
+  display:       inline-block;
+  padding:       0.35rem 0.8rem;
+  background:    rgba(239, 68, 68, 0.15);
+  border:        1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  font-family:   var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:     0.75rem;
+  font-weight:   600;
+  color:         rgba(239, 68, 68, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Button ── */
+.pendingPaymentRetryBtn {
+  padding:        0.6rem 1.2rem;
+  background:     rgba(34, 197, 94, 0.1);
+  border:         1px solid rgba(34, 197, 94, 0.3);
+  border-radius:  8px;
+  font-family:    var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-size:      0.9rem;
+  font-weight:    600;
+  color:          rgba(34, 197, 94, 0.9);
+  cursor:         pointer;
+  transition:     all 0.2s ease;
+  white-space:    nowrap;
+}
+
+.pendingPaymentRetryBtn:hover:not(:disabled) {
+  background:     rgba(34, 197, 94, 0.15);
+  border-color:   rgba(34, 197, 94, 0.4);
+}
+
+.pendingPaymentRetryBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.pendingPaymentRetryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pendingPaymentRetryBtnLoading::after {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-left: 0.5rem;
+  background: rgba(34, 197, 94, 0.9);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .pendingPaymentsPage {
+    padding: 5rem 1rem 3rem;
+  }
+
+  .pendingPaymentRow {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pendingPaymentRight {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .pendingPaymentAmountValue {
+    font-size: 1.25rem;
+  }
+}
