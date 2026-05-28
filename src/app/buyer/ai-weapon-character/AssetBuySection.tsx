@@ -679,9 +679,9 @@ export default function AssetBuySection({
                     showToast("No items selected. Browse and select assets first.", "warning");
                     return;
                   }
-                  // Pass ids + tiers to checkout
-                  const params = cartEntries.map(e => `${e.asset.id}:${e.tier}`).join(",");
-                  window.location.href = `/checkout/bundle?items=${params}`;
+                  // Pass product IDs to /checkout/bundle — server validates prices
+                  const ids = cartEntries.map(e => e.asset.id).join(",");
+                  window.location.href = `/checkout/bundle?ids=${ids}`;
                 }}
               >
                 {cartEntries.length > 0
