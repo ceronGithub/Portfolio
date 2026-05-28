@@ -138,7 +138,7 @@ export default function CustomRequestBuilder() {
           <p className="crbSuccessDesc">
             Your custom {form.assetType?.toLowerCase()} request has been received.
             {estimate && <> Estimated quote: <strong>{fmt(estimate)}</strong>.</>}
-            {" "}I'll reply within 24 hours.
+            {" "}I'll review it and reply within 24 hours with a final quote. <strong>No payment needed yet</strong> — you'll only be asked to pay after we agree on scope and final price.
           </p>
           <button className="crbSuccessReset" onClick={reset}>Submit another</button>
         </div>

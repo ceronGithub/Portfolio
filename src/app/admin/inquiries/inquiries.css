@@ -118,7 +118,7 @@
 .adminInquiriesTableHeaderCustom,
 .adminInquiriesTableRowCustom {
   display: grid;
-  grid-template-columns: 180px 110px 1fr 90px 90px 105px 120px;
+  grid-template-columns: 160px 100px 1fr 80px 110px 80px 95px 120px;
   gap: 0.75rem;
   padding: 0.8rem 1.25rem;
   align-items: center;
@@ -285,4 +285,69 @@
 .adminShellDark .adminInquiriesTabActive {
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.12);
+}
+/* ── Admin Quote Editor ───────────────────────────────────────────── */
+/* Inline editable field for admin to set/update official quote price. */
+
+.adminInquiriesQuoteBtn {
+  font-family:    'Plus Jakarta Sans', sans-serif;
+  font-size:      0.75rem;
+  font-weight:    500;
+  color:          var(--sidebar-text, #aaa);
+  background:     transparent;
+  border:         1px dashed var(--sidebar-border, #ddd);
+  border-radius:  6px;
+  padding:        0.25rem 0.6rem;
+  cursor:         pointer;
+  transition:     all 0.18s ease;
+  white-space:    nowrap;
+}
+
+.adminInquiriesQuoteBtn:hover {
+  border-color:   #a78bfa;
+  color:          #a78bfa;
+}
+
+.adminInquiriesQuoteBtnSet {
+  font-weight:    700;
+  color:          #a78bfa;
+  border-style:   solid;
+  border-color:   rgba(167,139,250,0.35);
+  background:     rgba(167,139,250,0.06);
+}
+
+.adminInquiriesQuoteBtnSet:hover {
+  background:     rgba(167,139,250,0.1);
+  border-color:   rgba(167,139,250,0.5);
+}
+
+.adminInquiriesQuoteEditor {
+  display:     flex;
+  align-items: center;
+  gap:         0.2rem;
+  background:  var(--sidebar-bg, #fff);
+  border:      1px solid #a78bfa;
+  border-radius: 6px;
+  padding:     0.2rem 0.5rem;
+}
+
+.adminInquiriesQuoteCurrency {
+  font-size:   0.72rem;
+  font-weight: 700;
+  color:       #a78bfa;
+}
+
+.adminInquiriesQuoteInput {
+  width:       70px;
+  border:      none;
+  background:  transparent;
+  font-size:   0.78rem;
+  font-weight: 700;
+  color:       var(--sidebar-text, #333);
+  outline:     none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.adminShellDark .adminInquiriesQuoteInput {
+  color: rgba(255,255,255,0.8);
 }

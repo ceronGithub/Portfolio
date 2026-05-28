@@ -27,6 +27,7 @@ import NewArchitectureSection    from "./architecture-assets/NewArchitectureSect
 import ArchitectureBuySection    from "./architecture-assets/ArchitectureBuySection";
 import ReviewSection             from "./reviews/ReviewSection";
 import CustomRequestBuilder      from "./custom-request/CustomRequestBuilder";
+import RequestTracker            from "./custom-request/RequestTracker";
 import "./wishlist/wishlist-panel.css";
 import "./cart/cart-drawer.css";
 import "./buyer-dashboard-client.css";
@@ -323,6 +324,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       {/* ── Contact ── */}
       <InquirySection />
       <CustomRequestBuilder />
+      <RequestTracker />
 
       {/* ── Floating Recently Viewed Button + Popup ── */}
       {recentItems.length > 0 && (

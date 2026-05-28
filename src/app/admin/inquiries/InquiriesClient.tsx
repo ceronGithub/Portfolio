@@ -1,6 +1,7 @@
 // admin/inquiries/InquiriesClient.tsx — Inquiries admin UI.
 // Two tabs: Custom Requests + Contact Messages.
-// Each row shows date, type, description/message, estimated quote, status badge + status changer.
+// Custom Requests: status pipeline (pending → read → quoted → replied) + editable adminQuote field.
+// Contact Messages: status (new → read → replied).
 
 "use client";
 
@@ -18,6 +19,7 @@ type CustomRequest = {
   reference:      string | null;
   deliverySpeed:  string;
   estimatedQuote: number | null;
+  adminQuote:     number | null;
   status:         string;
   createdAt:      string;
   buyerName:      string;
@@ -48,12 +50,13 @@ function fmt(p: number) {
 
 // ── Status badge + dropdown ───────────────────────────────────────────────────
 
-const CUSTOM_STATUSES  = ["pending", "read", "replied"] as const;
+const CUSTOM_STATUSES  = ["pending", "read", "quoted", "replied"] as const;
 const CONTACT_STATUSES = ["new", "read", "replied"] as const;
 
 function statusColor(s: string) {
   if (s === "pending" || s === "new") return { color: "#d69e2e", bg: "#d69e2e1a", border: "#d69e2e44" };
   if (s === "read")    return { color: "#7eb8d4", bg: "#7eb8d41a", border: "#7eb8d444" };
+  if (s === "quoted")  return { color: "#a78bfa", bg: "#a78bfa1a", border: "#a78bfa44" };
   if (s === "replied") return { color: "#38a169", bg: "#38a1691a", border: "#38a16944" };
   return { color: "#888", bg: "#8881a", border: "#88888844" };
 }
@@ -98,6 +101,74 @@ function StatusBadge({ status, id, type, onUpdate }: {
   );
 }
 
+// ── AdminQuote inline editor ───────────────────────────────────────────────────
+// Allows admin to set or update the official quoted price at any time.
+// Clicking the value makes it editable; press Enter or blur to save.
+
+function AdminQuoteEditor({ inquiryId, currentQuote, onSave }: {
+  inquiryId:    string;
+  currentQuote: number | null;
+  onSave:       (id: string, newQuote: number | null) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(currentQuote ? String(currentQuote) : "");
+  const [saving,    setSaving]     = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    const parsedQuote = inputValue.trim() === "" ? null : parseInt(inputValue.replace(/[^0-9]/g, ""), 10);
+    try {
+      const res = await fetch(`/api/admin/inquiries?id=${inquiryId}&type=custom`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ adminQuote: parsedQuote }),
+      });
+      if (res.ok) {
+        onSave(inquiryId, parsedQuote);
+        setInputValue(parsedQuote ? String(parsedQuote) : "");
+      }
+    } finally {
+      setSaving(false);
+      setIsEditing(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") handleSave();
+    if (e.key === "Escape") setIsEditing(false);
+  }
+
+  if (isEditing) {
+    return (
+      <div className="adminInquiriesQuoteEditor">
+        <span className="adminInquiriesQuoteCurrency">₱</span>
+        <input
+          className="adminInquiriesQuoteInput"
+          type="text"
+          inputMode="numeric"
+          autoFocus
+          value={inputValue}
+          disabled={saving}
+          onChange={e => setInputValue(e.target.value.replace(/[^0-9]/g, ""))}
+          onBlur={handleSave}
+          onKeyDown={handleKeyDown}
+          placeholder="0"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      className={`adminInquiriesQuoteBtn ${currentQuote ? "adminInquiriesQuoteBtnSet" : ""}`}
+      onClick={() => setIsEditing(true)}
+      title="Click to set official quote"
+    >
+      {currentQuote ? fmt(currentQuote) : "Set quote"}
+    </button>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function InquiriesClient({
@@ -118,6 +189,11 @@ export default function InquiriesClient({
 
   function updateContactStatus(id: string, newStatus: string) {
     setContactMessages(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
+  }
+
+  // ── Admin quote update handler ──────────────────────────────────────────
+  function updateAdminQuote(id: string, newQuote: number | null) {
+    setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, adminQuote: newQuote } : r));
   }
 
   const pendingCount = customRequests.filter(r => r.status === "pending").length;
@@ -163,7 +239,8 @@ export default function InquiriesClient({
               <span>Buyer</span>
               <span>Asset Type</span>
               <span>Description</span>
-              <span>Quote</span>
+              <span>Est. Quote</span>
+              <span>Official Quote</span>
               <span>Speed</span>
               <span>Date</span>
               <span>Status</span>
@@ -179,6 +256,11 @@ export default function InquiriesClient({
                 <span className="adminInquiriesQuote">
                   {r.estimatedQuote ? fmt(r.estimatedQuote) : "—"}
                 </span>
+                <AdminQuoteEditor
+                  inquiryId={r.id}
+                  currentQuote={r.adminQuote}
+                  onSave={updateAdminQuote}
+                />
                 <span className="adminInquiriesSpeed">{r.deliverySpeed}</span>
                 <span className="adminInquiriesDate">{formatDate(r.createdAt)}</span>
                 <StatusBadge
