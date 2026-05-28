@@ -158,6 +158,15 @@ function IconPending({ size = 22 }: { size?: number }) {
   );
 }
 
+// Wrench / maintenance icon — used in buyer navbar for /buyer/maintenance
+function IconMaintenance({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </svg>
+  );
+}
+
 /* ── NotifBadge — red dot with count on admin nav item ────────────────── */
 function NotifBadge({ count }: { count: number }) {
   if (count === 0) return null;
@@ -248,8 +257,9 @@ export default function Navbar() {
     { label: "Dash",              href: "/buyer",                  icon: <IconDashboard /> },
     { label: "Downloads",         href: "/buyer/downloads",        icon: <IconDownload />  },
     { label: "Orders",            href: "/buyer/orders",           icon: <IconOrders />    },
-    { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />   },
-    { label: "Profile",           href: "/buyer/profile",          icon: <IconAbout />     },
+    { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />      },
+    { label: "Maintenance",       href: "/buyer/maintenance",      icon: <IconMaintenance /> },
+    { label: "Profile",           href: "/buyer/profile",          icon: <IconAbout />        },
     { label: "Sign Out",          href: "#",                       icon: <IconSignOut />,  signOut: true },
   ];
 
@@ -263,7 +273,8 @@ export default function Navbar() {
     )},
     { label: "Users",         href: "/admin/users",         icon: <IconAbout />    },
     { label: "Products",      href: "/admin/products",      icon: <IconSystems />  },
-    { label: "Orders",        href: "/admin/orders",        icon: <IconPricing />  },
+    { label: "Orders",        href: "/admin/orders",        icon: <IconPricing />      },
+    { label: "Maintenance",   href: "/admin/maintenance",   icon: <IconMaintenance /> },
     { label: "Reviews",       href: "/admin/reviews",       icon: <IconAbout />    },
     { label: "Testimonials",  href: "/admin/testimonials",  icon: <IconSystems />  },
     { label: "Inquiries",     href: "/admin/inquiries",     icon: <IconPricing />  },

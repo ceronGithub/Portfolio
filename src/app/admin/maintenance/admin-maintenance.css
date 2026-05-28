@@ -1,0 +1,466 @@
+/* admin-maintenance.css — Admin Maintenance Management styles.
+   Matches the dark admin shell design language. */
+
+/* ═══════════════════════════════════════
+   PAGE LAYOUT
+═══════════════════════════════════════ */
+.amPage {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #0a0a0b;
+  color: #f0ede8;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.amHeader {
+  margin-bottom: 2rem;
+}
+
+.amEyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin: 0 0 0.4rem;
+}
+
+.amTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #f0ede8;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.amCount {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.3);
+  margin: 0.25rem 0 0;
+}
+
+/* ═══════════════════════════════════════
+   TWO-COLUMN LAYOUT
+═══════════════════════════════════════ */
+.amLayout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .amLayout { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════
+   CLIENT LIST (LEFT)
+═══════════════════════════════════════ */
+.amClientList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 75vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.amClientList::-webkit-scrollbar       { width: 4px; }
+.amClientList::-webkit-scrollbar-track { background: transparent; }
+.amClientList::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+.amClientCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.amClientCard:hover  { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); }
+.amClientCard.active { border-color: #22c55e; background: rgba(34,197,94,0.05); }
+
+.amClientName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f0ede8;
+  margin: 0 0 0.2rem;
+}
+
+.amClientEmail {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  margin: 0 0 0.5rem;
+}
+
+.amClientMeta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.amPkgBadge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+}
+
+.amStatBadge {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.25);
+}
+
+/* ═══════════════════════════════════════
+   CLIENT DETAIL (RIGHT)
+═══════════════════════════════════════ */
+.amDetail {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.75rem;
+}
+
+.amDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.amDetailName {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #f0ede8;
+  margin: 0 0 0.2rem;
+}
+
+.amDetailEmail {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.3);
+  margin: 0;
+}
+
+.amDetailPkg {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 99px;
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+  white-space: nowrap;
+}
+
+/* Tabs */
+.amTabs {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.25rem;
+}
+
+.amTab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  padding: 0.5rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.amTab.active {
+  background: rgba(255,255,255,0.07);
+  color: #f0ede8;
+}
+
+/* ═══════════════════════════════════════
+   ADD TASK FORM
+═══════════════════════════════════════ */
+.amAddTask {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.amAddTaskTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  margin: 0;
+}
+
+.amInput {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: #f0ede8;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s;
+  resize: vertical;
+}
+
+.amInput::placeholder { color: rgba(255,255,255,0.2); }
+.amInput:focus        { border-color: rgba(255,255,255,0.18); }
+
+.amInputRow {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.amInputRow .amInput { flex: 1; }
+
+.amSelectInput {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: #f0ede8;
+  outline: none;
+  cursor: pointer;
+}
+
+.amSelectInput option { background: #1a1a1b; }
+
+.amAddBtn {
+  background: #22c55e;
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  width: fit-content;
+  transition: opacity 0.2s;
+}
+
+.amAddBtn:hover    { opacity: 0.85; }
+.amAddBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════
+   TASK CARDS
+═══════════════════════════════════════ */
+.amTaskList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.amTaskCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.amTaskDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.amTaskDot.PENDING     { background: rgba(255,255,255,0.2); }
+.amTaskDot.IN_PROGRESS { background: #f59e0b; }
+.amTaskDot.DONE        { background: #22c55e; }
+
+.amTaskBody { flex: 1; min-width: 0; }
+
+.amTaskTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f0ede8;
+  margin: 0 0 0.2rem;
+}
+
+.amTaskDesc {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  margin: 0 0 0.4rem;
+}
+
+.amTaskActions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.amStatusBtn {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.amStatusBtn:hover        { border-color: rgba(255,255,255,0.25); color: #f0ede8; }
+.amStatusBtn.current      { background: rgba(255,255,255,0.08); color: #f0ede8; border-color: rgba(255,255,255,0.2); }
+.amStatusBtn.deleteBtn    { color: rgba(239,68,68,0.6); border-color: rgba(239,68,68,0.2); }
+.amStatusBtn.deleteBtn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+/* ═══════════════════════════════════════
+   BUG CLASSIFY
+═══════════════════════════════════════ */
+.amBugCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.amBugHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.amBugTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f0ede8;
+  margin: 0;
+}
+
+.amBugDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  margin: 0 0 0.65rem;
+  line-height: 1.5;
+}
+
+.amBugControls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.amBugBtn {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.amBugBtn:hover    { border-color: rgba(255,255,255,0.25); color: #f0ede8; }
+.amBugBtn.selected { background: rgba(255,255,255,0.08); color: #f0ede8; border-color: rgba(255,255,255,0.2); }
+.amBugBtn.minor    { color: #22c55e; border-color: rgba(34,197,94,0.3); }
+.amBugBtn.moderate { color: #f59e0b; border-color: rgba(245,158,11,0.3); }
+.amBugBtn.critical { color: #ef4444; border-color: rgba(239,68,68,0.3); }
+.amBugBtn.extra    { color: #ef4444; border-color: rgba(239,68,68,0.3); }
+
+.amNoteInput {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  color: #f0ede8;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  margin-top: 0.5rem;
+}
+
+.amNoteInput::placeholder { color: rgba(255,255,255,0.2); }
+
+/* ═══════════════════════════════════════
+   VC SCHEDULE
+═══════════════════════════════════════ */
+.amVCCard {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.amVCDate  { font-size: 0.875rem; font-weight: 600; color: #f0ede8; margin: 0 0 0.2rem; }
+.amVCMeta  { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 0 0 0.65rem; }
+
+/* ═══════════════════════════════════════
+   EMPTY + ERROR
+═══════════════════════════════════════ */
+.amEmpty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: rgba(255,255,255,0.2);
+  font-size: 0.82rem;
+}
+
+.amError {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin-bottom: 0.75rem;
+}
+
+.amNoSelect {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: rgba(255,255,255,0.2);
+  font-size: 0.85rem;
+}

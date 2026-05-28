@@ -52,7 +52,8 @@ model User {
   orders    Order[]
   ownership Ownership[]
   reviews   Review[]
-  inquiries Inquiry[]
+  inquiries          Inquiry[]
+  maintenanceOrders  MaintenanceOrder[]
 }
 model Product {
   id                String          @id @default(cuid())
@@ -251,4 +252,80 @@ model UserActionLog {
   adminEmail    String
   reason        String?
   createdAt     DateTime @default(now())
+}
+
+// ── Maintenance & Support ──────────────────────────────────────────────────
+
+// One active order per buyer at a time. package = BASIC | PRIORITY | FULL.
+model MaintenanceOrder {
+  id             String   @id @default(cuid())
+  userId         String
+  package        String                         // BASIC | PRIORITY | FULL
+  status         String   @default("ACTIVE")   // ACTIVE | EXPIRED | CANCELLED
+  bugsUsed       Int      @default(0)
+  revisionsUsed  Int      @default(0)
+  startedAt      DateTime @default(now())
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  user        User              @relation(fields: [userId], references: [id])
+  vcSchedules VCSchedule[]
+  bugReports  BugReport[]
+  tasks       MaintenanceTask[]
+
+  @@index([userId])
+}
+
+// VC call request — buyer or admin can initiate.
+model VCSchedule {
+  id                 String   @id @default(cuid())
+  maintenanceOrderId String
+  initiator          String                        // BUYER | ADMIN
+  buyerName          String
+  buyerPhone         String
+  preferredDate      DateTime
+  confirmedDate      DateTime?
+  status             String   @default("PENDING") // PENDING | CONFIRMED | DONE | CANCELLED
+  adminNote          String?
+  createdAt          DateTime @default(now())
+
+  order MaintenanceOrder @relation(fields: [maintenanceOrderId], references: [id])
+
+  @@index([maintenanceOrderId])
+}
+
+// Bug report submitted by buyer. Admin classifies and resolves.
+model BugReport {
+  id                 String    @id @default(cuid())
+  maintenanceOrderId String
+  title              String
+  description        String
+  category           String?                        // MINOR | MODERATE | CRITICAL
+  status             String    @default("SUBMITTED") // SUBMITTED | REVIEWING | IN_PROGRESS | RESOLVED | EXTRA_CHARGE
+  adminNote          String?
+  isExtraCharge      Boolean   @default(false)
+  extraChargeAmount  Int?
+  resolvedAt         DateTime?
+  createdAt          DateTime  @default(now())
+
+  order MaintenanceOrder @relation(fields: [maintenanceOrderId], references: [id])
+
+  @@index([maintenanceOrderId])
+}
+
+// Task added by admin for the client (revision, fix, other).
+model MaintenanceTask {
+  id                 String    @id @default(cuid())
+  maintenanceOrderId String
+  title              String
+  description        String?
+  type               String    @default("OTHER")    // REVISION | FIX | OTHER
+  status             String    @default("PENDING")  // PENDING | IN_PROGRESS | DONE
+  completedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  order MaintenanceOrder @relation(fields: [maintenanceOrderId], references: [id])
+
+  @@index([maintenanceOrderId])
 }

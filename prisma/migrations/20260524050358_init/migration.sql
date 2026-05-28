@@ -167,6 +167,7 @@ CREATE TABLE "Inquiry" (
     "reference" TEXT,
     "deliverySpeed" TEXT NOT NULL,
     "estimatedQuote" INTEGER,
+    "adminQuote" INTEGER,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
