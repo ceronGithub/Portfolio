@@ -125,6 +125,37 @@ function daysSince(isoStr: string): number {
   return Math.floor((now - created) / (1000 * 60 * 60 * 24));
 }
 
+/**
+ * Calculate hours elapsed since order creation
+ */
+function hoursSince(isoStr: string): number {
+  const created = new Date(isoStr).getTime();
+  const now = Date.now();
+  return (now - created) / (1000 * 60 * 60);
+}
+
+/**
+ * PayMongo payment links expire after 24 hours.
+ * Returns true if the link is no longer usable.
+ */
+function isLinkExpired(isoStr: string): boolean {
+  return hoursSince(isoStr) >= 24;
+}
+
+/**
+ * Returns a human-readable label showing how much time is left on the payment link,
+ * or a notice that it has expired.
+ */
+function linkAvailabilityLabel(isoStr: string): string {
+  const elapsed = hoursSince(isoStr);
+  if (elapsed >= 24) return "Payment link expired";
+  const hoursLeft = Math.floor(24 - elapsed);
+  const minutesLeft = Math.floor(((24 - elapsed) - hoursLeft) * 60);
+  if (hoursLeft === 0) return `Link expires in ${minutesLeft}m`;
+  if (minutesLeft === 0) return `Link expires in ${hoursLeft}h`;
+  return `Link expires in ${hoursLeft}h ${minutesLeft}m`;
+}
+
 export default function PendingPaymentsClient({ orders }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -174,13 +205,15 @@ export default function PendingPaymentsClient({ orders }: Props) {
         ) : (
           <div className="pendingPaymentsList">
             {orders.map(order => {
-              const days = daysSince(order.createdAt);
+              const days      = daysSince(order.createdAt);
               const isOverdue = days > 7;
+              const expired   = isLinkExpired(order.createdAt);
+              const linkLabel = linkAvailabilityLabel(order.createdAt);
 
               return (
                 <div
                   key={order.id}
-                  className={`pendingPaymentRow ${isOverdue ? "pendingPaymentRowOverdue" : ""}`}
+                  className={`pendingPaymentRow ${isOverdue ? "pendingPaymentRowOverdue" : ""} ${expired ? "pendingPaymentRowExpired" : ""}`}
                 >
                   {/* Icon + Product Info */}
                   <div className="pendingPaymentLeft">
@@ -198,6 +231,9 @@ export default function PendingPaymentsClient({ orders }: Props) {
                       <p className="pendingPaymentDate">
                         Order placed {formatDate(order.createdAt)} ({days} day{days !== 1 ? "s" : ""} ago)
                       </p>
+                      <p className={`pendingPaymentLinkStatus ${expired ? "pendingPaymentLinkStatusExpired" : "pendingPaymentLinkStatusActive"}`}>
+                        {linkLabel}
+                      </p>
                     </div>
                   </div>
 
@@ -208,16 +244,25 @@ export default function PendingPaymentsClient({ orders }: Props) {
                       <p className="pendingPaymentAmountValue">{fmt(order.amount)}</p>
                     </div>
 
-                    {isOverdue && (
+                    {expired && (
+                      <div className="pendingPaymentBadgeExpired">Link Expired</div>
+                    )}
+
+                    {!expired && isOverdue && (
                       <div className="pendingPaymentBadgeOverdue">7+ days</div>
                     )}
 
                     <button
-                      className={`pendingPaymentRetryBtn ${loadingId === order.id ? "pendingPaymentRetryBtnLoading" : ""}`}
+                      className={`pendingPaymentRetryBtn ${expired ? "pendingPaymentRetryBtnExpired" : ""} ${loadingId === order.id ? "pendingPaymentRetryBtnLoading" : ""}`}
                       onClick={() => handleRetryPayment(order)}
-                      disabled={loadingId !== null}
+                      disabled={loadingId !== null || expired}
+                      title={expired ? "This payment link has expired. Please contact support." : undefined}
                     >
-                      {loadingId === order.id ? "Processing…" : "Retry Payment"}
+                      {expired
+                        ? "Link Expired"
+                        : loadingId === order.id
+                        ? "Processing…"
+                        : "Retry Payment"}
                     </button>
                   </div>
                 </div>
