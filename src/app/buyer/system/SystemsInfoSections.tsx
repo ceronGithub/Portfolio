@@ -305,112 +305,6 @@ function ConfidenceSection() {
   );
 }
 
-/* ─── Maintenance & Support ──────────────────────────────────────────── */
-const SUPPORT_TIERS = [
-  {
-    name: "Basic",
-    duration: "₱4,500 / month",
-    accent: "#7dc9a0",
-    perks: [
-      "Bug fixing & minor revisions",
-      "Email support (48hr response)",
-      "Monthly system health check",
-      "Uptime monitoring",
-    ],
-  },
-  {
-    name: "Priority Support",
-    duration: "₱8,500 / month",
-    accent: "#7eb8d4",
-    perks: [
-      "Everything in Basic",
-      "Priority response (24hrs)",
-      "Security patches & updates",
-      "Performance monitoring",
-      "Database backups",
-    ],
-  },
-  {
-    name: "Full Maintenance",
-    duration: "₱15,000 / month",
-    accent: "#c4b5fd",
-    perks: [
-      "Everything in Priority",
-      "Server monitoring & auto-backups",
-      "Minor feature updates (up to 8hrs/month)",
-      "Monthly performance report",
-      "Dedicated support channel",
-    ],
-  },
-];
-
-function SupportSection() {
-  return (
-    <section className="sysInfoSection sysInfoSectionSupport">
-      <div className="sysInfoInner">
-        <p className="sysInfoLabel">After Delivery</p>
-        <h2 className="sysInfoTitle">Maintenance &amp; Support</h2>
-        <p className="sysInfoSub">
-          Delivery is not the end. Keep your system running at peak performance after launch.
-        </p>
-
-        <div className="sysInfoTierGrid">
-          {SUPPORT_TIERS.map((tier, i) => (
-            <div
-              key={tier.name}
-              className={`sysInfoTierCard${i === 2 ? " sysInfoTierCardHighlight" : ""}`}
-              style={{ "--mt-color": tier.accent } as React.CSSProperties}
-            >
-              <div className="sysInfoTierHeader">
-                <span className="sysInfoTierLabel" style={{ color: tier.accent }}>{tier.name}</span>
-                <div className="sysInfoTierPrice">
-                  <span className="sysInfoTierAmount">{tier.duration.split(" /")[0]}</span>
-                  <span className="sysInfoTierPeriod">/month</span>
-                </div>
-              </div>
-              <ul className="sysInfoTierPerks">
-                {tier.perks.map(perk => (
-                  <li key={perk} className="sysInfoTierPerk">
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <path d="M1 7l3.5 3.5L12 2" stroke={tier.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {perk}
-                  </li>
-                ))}
-              </ul>
-              <button
-                className="sysInfoTierBtn"
-                style={{
-                  background:  i === 3 ? "#c4b5fd" : "#22c55e",
-                  borderColor: i === 3 ? "#c4b5fd" : "#22c55e",
-                  color:       "#000",
-                }}
-                onClick={() => {
-                  document.querySelector(".iqSection")?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Get Started
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="sysInfoTierNote">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            <line x1="12" y1="9" x2="12" y2="13" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round"/>
-            <line x1="12" y1="17" x2="12.01" y2="17" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round"/>
-          </svg>
-          <span>
-            Maintenance does <strong>not</strong> include major new features.{" "}
-            <strong>New features are scoped and quoted separately as a new project.</strong>
-          </span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─── FAQ ─────────────────────────────────────────────────────────────── */
 const FAQ_ITEMS = [
   {
@@ -576,7 +470,6 @@ export default function SystemsInfoSections() {
       <CompareSection />
       <CostSection />
       <ConfidenceSection />
-      <SupportSection />
       <FaqSection />
     </div>
   );

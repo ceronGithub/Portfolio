@@ -153,6 +153,19 @@ function PackageSelection() {
           );
         })}
       </div>
+
+      {/* Disclaimer */}
+      <div className="mxDisclaimer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          <line x1="12" y1="9" x2="12" y2="13" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round"/>
+          <line x1="12" y1="17" x2="12.01" y2="17" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round"/>
+        </svg>
+        <span>
+          Maintenance does <strong>not</strong> include major new features.{" "}
+          <strong>New features are scoped and quoted separately as a new project.</strong>
+        </span>
+      </div>
     </>
   );
 }
