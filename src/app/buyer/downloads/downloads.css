@@ -459,3 +459,17 @@
   color: rgba(255,255,255,0.25);
   margin: 0.15rem 0 0;
 }
+/* ── Scrollable downloads list — all 4 tabs ── */
+/* dlList is shared across Characters, Weapons, Architecture, Systems. */
+/* Scrolls when items exceed ~4 rows visible (~520px).                 */
+.dlList {
+  max-height:      520px;
+  overflow-y:      auto;
+  padding-right:   4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34,197,94,0.2) transparent;
+}
+
+.dlList::-webkit-scrollbar       { width: 3px; }
+.dlList::-webkit-scrollbar-thumb { background: rgba(34,197,94,0.2); border-radius: 2px; }
+.dlList::-webkit-scrollbar-thumb:hover { background: rgba(34,197,94,0.4); }

@@ -244,3 +244,18 @@
   .dtStageNode  { width: 22px; height: 22px; }
   .dtOrder      { padding: 1.1rem; }
 }
+
+/* ── Scrollable Delivery Tracker list ── */
+/* dtList scrolls vertically when more than ~2 cards are present.   */
+/* max-height set to ~2 card heights (approx 420px) so buyer always */
+/* sees a hint that more items exist below.                          */
+.dtList {
+  max-height:      420px;
+  overflow-y:      auto;
+  padding-right:   4px;
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e1e transparent;
+}
+
+.dtList::-webkit-scrollbar       { width: 3px; }
+.dtList::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 2px; }

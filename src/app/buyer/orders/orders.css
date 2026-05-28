@@ -338,3 +338,17 @@
   color:       rgba(255,255,255,0.15);
   margin:      0;
 }
+
+/* ── Scrollable orders list ── */
+/* ohList scrolls when orders exceed ~3 cards visible.              */
+/* max-height ~3 cards (~630px). Thin custom scrollbar.             */
+.ohList {
+  max-height:      630px;
+  overflow-y:      auto;
+  padding-right:   4px;
+  scrollbar-width: thin;
+  scrollbar-color: #1e1e1e transparent;
+}
+
+.ohList::-webkit-scrollbar       { width: 3px; }
+.ohList::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 2px; }
