@@ -673,3 +673,78 @@
   opacity: 0.5;
   cursor:  not-allowed;
 }
+
+/* ── Hero password row ── */
+.profilePasswordRow {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.35rem;
+  margin-bottom:  0.5rem;
+}
+
+.profilePasswordDisplay {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+}
+
+.profilePasswordDots {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.9rem;
+  letter-spacing: 0.15em;
+  color:          rgba(255,255,255,0.25);
+}
+
+.profilePwToggleHero {
+  position: static;
+  color:    rgba(255,255,255,0.22);
+  transition: color 0.18s ease;
+}
+
+.profilePwToggleHero:hover {
+  color: rgba(255,255,255,0.5);
+}
+
+.profilePwEditBtn {
+  padding: 0.2rem 0.3rem;
+}
+
+/* Hero edit form */
+.profilePasswordHeroEdit {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.5rem;
+  animation:      profileFadeIn 0.2s ease;
+}
+
+.profilePwHeroFields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 220px;
+}
+
+.profilePwHeroInput {
+  width:         100%;
+  background:    rgba(255,255,255,0.05);
+  border:        1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color:         rgba(255,255,255,0.88);
+  font-family:   'Plus Jakarta Sans', sans-serif;
+  font-size:     0.82rem;
+  padding:       0.45rem 2.4rem 0.45rem 0.75rem;
+  outline:       none;
+  transition:    border-color 0.18s ease;
+}
+
+.profilePwHeroInput:focus {
+  border-color: rgba(201,163,110,0.5);
+}
+
+.profilePwHeroActions {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+}

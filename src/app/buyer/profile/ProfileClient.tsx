@@ -86,6 +86,9 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
 
   // Password section state
   const [showPassword,   setShowPassword]   = useState(false);
+  // Hero password row — show/hide the masked dots
+  const [showHeroPw,     setShowHeroPw]     = useState(false);
+  const [editingPw,      setEditingPw]      = useState(false);
   const [currentPw,      setCurrentPw]      = useState("");
   const [newPw,          setNewPw]          = useState("");
   const [confirmPw,      setConfirmPw]      = useState("");
@@ -198,7 +201,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
         setCurrentPw("");
         setNewPw("");
         setConfirmPw("");
-        setShowPassword(false);
+        setEditingPw(false);
         setTimeout(() => setPwMsg(""), 3000);
       } else {
         setPwError(data.error ?? "Failed to update password");
@@ -287,6 +290,86 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
           {emailMsg   && <span className="profileSaveMsg">{emailMsg}</span>}
         </div>
 
+        {/* Masked password row */}
+        <div className="profilePasswordRow">
+          {editingPw ? (
+            <div className="profilePasswordHeroEdit">
+              {/* Current */}
+              <div className="profilePwHeroFields">
+                <div className="profilePwInputWrap">
+                  <input
+                    className="profilePwHeroInput"
+                    type={showCurrentPw ? "text" : "password"}
+                    value={currentPw}
+                    onChange={e => setCurrentPw(e.target.value)}
+                    placeholder="Current password"
+                    autoComplete="current-password"
+                  />
+                  <button className="profilePwToggle" onClick={() => setShowCurrentPw(p => !p)} type="button">
+                    {showCurrentPw
+                      ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    }
+                  </button>
+                </div>
+                <div className="profilePwInputWrap">
+                  <input
+                    className="profilePwHeroInput"
+                    type={showNewPw ? "text" : "password"}
+                    value={newPw}
+                    onChange={e => setNewPw(e.target.value)}
+                    placeholder="New password (min 8)"
+                    autoComplete="new-password"
+                  />
+                  <button className="profilePwToggle" onClick={() => setShowNewPw(p => !p)} type="button">
+                    {showNewPw
+                      ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    }
+                  </button>
+                </div>
+                <div className="profilePwInputWrap">
+                  <input
+                    className="profilePwHeroInput"
+                    type={showConfirmPw ? "text" : "password"}
+                    value={confirmPw}
+                    onChange={e => setConfirmPw(e.target.value)}
+                    placeholder="Confirm new password"
+                    autoComplete="new-password"
+                  />
+                  <button className="profilePwToggle" onClick={() => setShowConfirmPw(p => !p)} type="button">
+                    {showConfirmPw
+                      ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    }
+                  </button>
+                </div>
+              </div>
+              {pwError   && <span className="profileEmailError">{pwError}</span>}
+              {pwMsg     && <span className="profileSaveMsg">{pwMsg}</span>}
+              <div className="profilePwHeroActions">
+                <button className="profileNameSaveBtn" onClick={() => { savePassword(); setEditingPw(false); }} disabled={savingPw}>
+                  {savingPw ? "…" : "Save"}
+                </button>
+                <button className="profileNameCancelBtn" onClick={() => { setEditingPw(false); setPwError(""); setCurrentPw(""); setNewPw(""); setConfirmPw(""); }}>✕</button>
+              </div>
+            </div>
+          ) : (
+            <div className="profilePasswordDisplay">
+              <span className="profilePasswordDots">••••••••</span>
+              <button className="profileEmailBtn profilePwEditBtn" onClick={() => { setEditingPw(true); setPwError(""); setPwMsg(""); }} title="Update password">
+                <span className="profileEmailEditIcon">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          )}
+          {pwMsg && !editingPw && <span className="profileSaveMsg">{pwMsg}</span>}
+        </div>
+
         <div className="profileRoleBadge">{user.role}</div>
       </div>
 
@@ -333,96 +416,6 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
           }))}
         />
       )}
-
-      {/* ── Password Section ── */}
-      <div className="profileSection profilePasswordSection">
-        <div className="profileSectionHeader profilePasswordHeader" onClick={() => setShowPassword(p => !p)}>
-          <p className="profileSectionLabel">Password</p>
-          <span className={`profilePasswordChevron ${showPassword ? "profilePasswordChevronOpen" : ""}`}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </span>
-        </div>
-
-        {showPassword && (
-          <div className="profilePasswordForm">
-            {/* Current password */}
-            <div className="profilePwField">
-              <label className="profilePwLabel">Current Password</label>
-              <div className="profilePwInputWrap">
-                <input
-                  className="profilePwInput"
-                  type={showCurrentPw ? "text" : "password"}
-                  value={currentPw}
-                  onChange={e => setCurrentPw(e.target.value)}
-                  placeholder="Enter current password"
-                  autoComplete="current-password"
-                />
-                <button className="profilePwToggle" onClick={() => setShowCurrentPw(p => !p)} type="button">
-                  {showCurrentPw
-                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  }
-                </button>
-              </div>
-            </div>
-
-            {/* New password */}
-            <div className="profilePwField">
-              <label className="profilePwLabel">New Password</label>
-              <div className="profilePwInputWrap">
-                <input
-                  className="profilePwInput"
-                  type={showNewPw ? "text" : "password"}
-                  value={newPw}
-                  onChange={e => setNewPw(e.target.value)}
-                  placeholder="Min. 8 characters"
-                  autoComplete="new-password"
-                />
-                <button className="profilePwToggle" onClick={() => setShowNewPw(p => !p)} type="button">
-                  {showNewPw
-                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  }
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm new password */}
-            <div className="profilePwField">
-              <label className="profilePwLabel">Confirm New Password</label>
-              <div className="profilePwInputWrap">
-                <input
-                  className="profilePwInput"
-                  type={showConfirmPw ? "text" : "password"}
-                  value={confirmPw}
-                  onChange={e => setConfirmPw(e.target.value)}
-                  placeholder="Re-enter new password"
-                  autoComplete="new-password"
-                />
-                <button className="profilePwToggle" onClick={() => setShowConfirmPw(p => !p)} type="button">
-                  {showConfirmPw
-                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  }
-                </button>
-              </div>
-            </div>
-
-            {pwError && <p className="profilePwError">{pwError}</p>}
-            {pwMsg   && <p className="profilePwSuccess">{pwMsg}</p>}
-
-            <button
-              className="profilePwSaveBtn"
-              onClick={savePassword}
-              disabled={savingPw}
-            >
-              {savingPw ? "Updating…" : "Update Password"}
-            </button>
-          </div>
-        )}
-      </div>
 
       {/* ── Order History ── */}
       <div className="profileSection">
