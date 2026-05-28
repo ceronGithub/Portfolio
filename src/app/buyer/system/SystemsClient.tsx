@@ -477,11 +477,17 @@ export default function SystemsClient({ items, wishlistIds, onToggleWishlist }: 
   const GAP    = 28;
   const total  = items.length;
 
+  // ResizeObserver keeps vpWidth accurate on every layout change — fixes inconsistent centering.
   useEffect(() => {
-    const update = () => { if (vpRef.current) setVpWidth(vpRef.current.offsetWidth); };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    const el = vpRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const width = entries[0]?.contentRect.width;
+      if (width) setVpWidth(width);
+    });
+    ro.observe(el);
+    setVpWidth(el.offsetWidth);
+    return () => ro.disconnect();
   }, []);
 
   const clamp = useCallback((i: number) => Math.max(0, Math.min(i, total - 1)), [total]);
