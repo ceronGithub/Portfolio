@@ -94,6 +94,22 @@ export default function CheckoutSuccessPage() {
           >
             View Order Status
           </Link>
+          <Link
+            href="/buyer/dashboard"
+            style={{
+              display: "block",
+              padding: "0.85rem 1.5rem",
+              background: "rgba(255,255,255,0.05)",
+              color: "rgba(255,255,255,0.7)",
+              borderRadius: "10px",
+              fontWeight: 500,
+              fontSize: "0.9rem",
+              textDecoration: "none",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            Go to Dashboard
+          </Link>
         </div>
       </div>
     </div>
