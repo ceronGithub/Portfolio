@@ -34,7 +34,6 @@ export async function POST(req: NextRequest) {
   if (products.length !== productIds.length)
     return NextResponse.json({ error: "One or more products not found or inactive" }, { status: 404 });
 
-  const downpayment = Math.round(total * 0.30);
   const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const tier        = grantedTier ?? "mesh_only";
 
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
             userId,
             productId:    p.id,
             status:       "PENDING",
-            amountPaid:   Math.round((p.price / total) * downpayment),
+            amountPaid:   p.price,
             deliveryNote: `tier:${tier}`,
           },
         })
@@ -59,8 +58,8 @@ export async function POST(req: NextRequest) {
     const allOrderIds    = orders.map(o => o.id).join(",");
 
     const link = await createPaymentLink({
-      amount:      downpayment,
-      description: `Bundle Downpayment — ${products.length} items`,
+      amount:      total,
+      description: `Bundle Purchase — ${products.length} items`,
       remarks:     `Orders: ${allOrderIds}`,
       referenceId: primaryOrderId,
       successUrl:  `${appUrl}/checkout/success?bundle=1&orders=${encodeURIComponent(allOrderIds)}`,

@@ -340,7 +340,7 @@ export default function BundleCheckoutClient({
             {placing ? (
               <><span className="bundleBtnSpinner" /> Redirecting to PayMongo…</>
             ) : (
-              <>Pay {fmt(Math.round(finalTotal * 0.30))} Downpayment</>
+              <>Pay {fmt(finalTotal)} Now</>
             )}
           </button>
 

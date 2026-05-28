@@ -37,10 +37,20 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
-  const { ids } = await searchParams;
-  if (!ids) notFound();
+  const params = await searchParams;
+  let rawIds: string[] = [];
 
-  const rawIds = ids.split(",").map(s => s.trim()).filter(Boolean);
+  // Support both ?ids= (new format) and ?items= (old format with id:tier tuples)
+  if (params.ids) {
+    rawIds = params.ids.split(",").map(s => s.trim()).filter(Boolean);
+  } else if ((params as any).items) {
+    // Old format: ?items=id1:tier1,id2:tier2 — extract just the IDs
+    rawIds = (params as any).items
+      .split(",")
+      .map((s: string) => s.trim().split(":")[0])
+      .filter(Boolean);
+  }
+
   if (rawIds.length === 0) notFound();
 
   // ── Resolve products from DB ──────────────────────────────────────────────

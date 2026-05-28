@@ -1,14 +1,12 @@
 /* bundle-checkout.css — Bundle checkout page UI.
    Protocol Rule 17 compliant:
-   17.1 Typography hierarchy (Syne + DM Mono, 3+ sizes per section)
+   17.1 Typography hierarchy (Plus Jakarta Sans, 3+ sizes per section)
    17.2 Layered translucency surfaces, near-black bg, single accent
    17.3 SVG inline icons only — zero emoji in UI chrome
    17.4 Elevated cards with border + layered bg + smooth hover
    17.5 Entrance animations via IntersectionObserver .isVisible class
    17.6 Hover states, focus-visible, will-change, responsive
    17.7 No box-shadow depth, no !important, no flat fills */
-
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
 /* ── Design tokens ── */
 :root {
@@ -25,15 +23,13 @@
   --accent-amber:  #c9935e;
   --accent-blue:   #60a5fa;
   --accent-purple: #a78bfa;
-  --font-display:  'Syne', sans-serif;
-  --font-mono:     'DM Mono', monospace;
 }
 
 /* ── Page shell ── */
 .bundlePage {
   min-height:      100vh;
   background:      var(--bg-base);
-  font-family:     var(--font-display);
+  font-family:     var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
   padding:         7rem 1.5rem 6rem;
   display:         flex;
   align-items:     flex-start;
