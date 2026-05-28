@@ -1,12 +1,11 @@
+github & deployment
 developerceron
-github
-supabase
 
 ceroncalsena
 gdrive
+supabase : xFdC9ZnXKyGv3xsH
 
 paymongo
 ceroncalsena
 whsk_nz5ztkMwoWibiJBsVWSA3ikq
-
 needed DTI

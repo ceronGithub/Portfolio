@@ -158,37 +158,37 @@ function CompareSection() {
 /* ─── What Drives Cost ───────────────────────────────────────────────── */
 const COST_FACTORS = [
   {
-    icon: "⚙️",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     title: "Complexity of Logic",
     body:
       "The more conditional rules, roles, workflows, and business logic your system needs, the longer it takes to build correctly and securely.",
   },
   {
-    icon: "🔌",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="18" r="2.5" stroke="currentColor" strokeWidth="1.5"/><path d="M8.5 11L15.5 7M8.5 13L15.5 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     title: "Third-Party Integrations",
     body:
       "Connecting to payment gateways, SMS APIs, email services, government systems, or external databases adds scoping and testing time.",
   },
   {
-    icon: "👥",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     title: "Number of User Roles",
     body:
       "Each distinct account type — admin, staff, client, driver — requires its own views, permissions, and logic. More roles, more work.",
   },
   {
-    icon: "📊",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M8 17v-4M12 17v-8M16 17v-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     title: "Reporting & Analytics",
     body:
       "Dashboards with real-time charts, exportable reports, and filtered views require significant backend and frontend investment.",
   },
   {
-    icon: "📱",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M9 7h6M9 11h6M9 15h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     title: "Mobile Responsiveness",
     body:
       "A system designed to work perfectly on phones and tablets requires additional layout work and cross-device testing.",
   },
   {
-    icon: "🔒",
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     title: "Security Requirements",
     body:
       "Role-based access control, audit logs, encryption at rest, and two-factor authentication all add meaningful development scope.",
@@ -446,7 +446,7 @@ const FAQ_ITEMS = [
   {
     question: "What tech stack do you use?",
     answer:
-      "Primarily Next.js / React for the frontend, Node.js or C# for the backend, and PostgreSQL or MySQL for the database — chosen based on what fits your project best.",
+      "Back-End: PHP (Laravel), C# (.NET MVC). Front-End: JavaScript, Bootstrap, Sass, Flexbox, CSS Grid. Databases: MySQL, MariaDB, Supabase, Firebase, MongoDB Atlas. APIs & Integration: REST APIs, Postman, OAuth 2.0, JSON/XML, third-party integrations (Gmail, Anthropic, OpenAI, Google APIs), webhooks. AI & Automation: Claude Sonnet/Haiku, OpenAI GPT-4, Google Gemini, LLM Prompt Engineering, AI Video & Image (ElevenLabs, Suno, Hailuo AI, Whisk). Desktop: C# Windows Forms (WFA). Google Workspace: Calendar, Sheets, Drive, Docs. Tools: Git, VS Code, Visual Studio, Postman, Asana, GitLab, MS Office. Dev Environment: Laragon, XAMPP. AI-assisted workflow: React + Node.js, React + Three.js, React + Next.js.",
   },
   {
     question: "How do I get started?",
