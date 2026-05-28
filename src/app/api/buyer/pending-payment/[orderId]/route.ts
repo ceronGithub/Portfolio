@@ -59,9 +59,17 @@ export async function GET(
 
     // Retrieve payment link from PayMongo using order ID
     const link = await getPaymentLink(order.paymongoOrderId);
+    const checkoutUrl = link?.attributes?.checkout_url as string | undefined;
+
+    if (!checkoutUrl) {
+      return NextResponse.json(
+        { error: "Payment link is no longer available" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
-      checkoutUrl: link.checkoutUrl,
+      checkoutUrl,
       orderId: order.id,
       amount: order.amountPaid,
     });
