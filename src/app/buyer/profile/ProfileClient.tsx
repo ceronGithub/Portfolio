@@ -69,12 +69,32 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 export default function ProfileClient({ user, orders, ownedCount, ownedItems }: Props) {
-  const [name,    setName]    = useState(user.name);
-  const [editing, setEditing] = useState(false);
-  const [editVal, setEditVal] = useState(user.name);
-  const [saving,  setSaving]  = useState(false);
-  const [saveMsg, setSaveMsg] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const [name,         setName]         = useState(user.name);
+  const [editing,      setEditing]      = useState(false);
+  const [editVal,      setEditVal]      = useState(user.name);
+  const [saving,       setSaving]       = useState(false);
+  const [saveMsg,      setSaveMsg]      = useState("");
+  const [mounted,      setMounted]      = useState(false);
+
+  // Email editing state
+  const [email,        setEmail]        = useState(user.email);
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [emailVal,     setEmailVal]     = useState(user.email);
+  const [savingEmail,  setSavingEmail]  = useState(false);
+  const [emailMsg,     setEmailMsg]     = useState("");
+  const [emailError,   setEmailError]   = useState("");
+
+  // Password section state
+  const [showPassword,   setShowPassword]   = useState(false);
+  const [currentPw,      setCurrentPw]      = useState("");
+  const [newPw,          setNewPw]          = useState("");
+  const [confirmPw,      setConfirmPw]      = useState("");
+  const [showCurrentPw,  setShowCurrentPw]  = useState(false);
+  const [showNewPw,      setShowNewPw]      = useState(false);
+  const [showConfirmPw,  setShowConfirmPw]  = useState(false);
+  const [savingPw,       setSavingPw]       = useState(false);
+  const [pwMsg,          setPwMsg]          = useState("");
+  const [pwError,        setPwError]        = useState("");
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
@@ -97,7 +117,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
     setSaving(true);
     try {
       const res = await fetch("/api/profile/update-name", {
-        method:  "POST",
+        method:  "PATCH",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ name: editVal.trim() }),
       });
@@ -109,6 +129,82 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
     } finally {
       setSaving(false);
       setEditing(false);
+    }
+  }
+
+  /**
+   * Save updated email — validates format client-side, then calls PATCH /api/profile/update-email
+   */
+  async function saveEmail() {
+    const trimmed = emailVal.trim().toLowerCase();
+    if (!trimmed || trimmed === email) { setEditingEmail(false); return; }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      setEmailError("Invalid email format");
+      return;
+    }
+
+    setSavingEmail(true);
+    setEmailError("");
+    try {
+      const res  = await fetch("/api/profile/update-email", {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email: trimmed }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEmail(trimmed);
+        setEmailMsg("Email updated");
+        setEditingEmail(false);
+        setTimeout(() => setEmailMsg(""), 2500);
+      } else {
+        setEmailError(data.error ?? "Failed to update email");
+      }
+    } finally {
+      setSavingEmail(false);
+    }
+  }
+
+  /**
+   * Save new password — validates match + length, then calls PATCH /api/profile/update-password
+   */
+  async function savePassword() {
+    setPwError("");
+    if (!currentPw || !newPw || !confirmPw) {
+      setPwError("All fields are required");
+      return;
+    }
+    if (newPw.length < 8) {
+      setPwError("New password must be at least 8 characters");
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setPwError("Passwords do not match");
+      return;
+    }
+
+    setSavingPw(true);
+    try {
+      const res  = await fetch("/api/profile/update-password", {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPwMsg("Password updated");
+        setCurrentPw("");
+        setNewPw("");
+        setConfirmPw("");
+        setShowPassword(false);
+        setTimeout(() => setPwMsg(""), 3000);
+      } else {
+        setPwError(data.error ?? "Failed to update password");
+      }
+    } finally {
+      setSavingPw(false);
     }
   }
 
@@ -155,7 +251,42 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
           {saveMsg && <span className="profileSaveMsg">{saveMsg}</span>}
         </div>
 
-        <p className="profileEmail">{user.email}</p>
+        {/* Editable email row */}
+        <div className="profileEmailRow">
+          {editingEmail ? (
+            <div className="profileEmailEdit">
+              <input
+                className="profileEmailInput"
+                type="email"
+                value={emailVal}
+                onChange={e => { setEmailVal(e.target.value); setEmailError(""); }}
+                onKeyDown={e => {
+                  if (e.key === "Enter")  saveEmail();
+                  if (e.key === "Escape") { setEditingEmail(false); setEmailError(""); }
+                }}
+                autoFocus
+                maxLength={120}
+              />
+              <button className="profileNameSaveBtn" onClick={saveEmail} disabled={savingEmail}>
+                {savingEmail ? "…" : "Save"}
+              </button>
+              <button className="profileNameCancelBtn" onClick={() => { setEditingEmail(false); setEmailError(""); }}>✕</button>
+            </div>
+          ) : (
+            <button className="profileEmailBtn" onClick={() => { setEmailVal(email); setEditingEmail(true); }}>
+              <p className="profileEmail">{email}</p>
+              <span className="profileEmailEditIcon">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </span>
+            </button>
+          )}
+          {emailError && <span className="profileEmailError">{emailError}</span>}
+          {emailMsg   && <span className="profileSaveMsg">{emailMsg}</span>}
+        </div>
+
         <div className="profileRoleBadge">{user.role}</div>
       </div>
 
@@ -202,6 +333,96 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
           }))}
         />
       )}
+
+      {/* ── Password Section ── */}
+      <div className="profileSection profilePasswordSection">
+        <div className="profileSectionHeader profilePasswordHeader" onClick={() => setShowPassword(p => !p)}>
+          <p className="profileSectionLabel">Password</p>
+          <span className={`profilePasswordChevron ${showPassword ? "profilePasswordChevronOpen" : ""}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </span>
+        </div>
+
+        {showPassword && (
+          <div className="profilePasswordForm">
+            {/* Current password */}
+            <div className="profilePwField">
+              <label className="profilePwLabel">Current Password</label>
+              <div className="profilePwInputWrap">
+                <input
+                  className="profilePwInput"
+                  type={showCurrentPw ? "text" : "password"}
+                  value={currentPw}
+                  onChange={e => setCurrentPw(e.target.value)}
+                  placeholder="Enter current password"
+                  autoComplete="current-password"
+                />
+                <button className="profilePwToggle" onClick={() => setShowCurrentPw(p => !p)} type="button">
+                  {showCurrentPw
+                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            {/* New password */}
+            <div className="profilePwField">
+              <label className="profilePwLabel">New Password</label>
+              <div className="profilePwInputWrap">
+                <input
+                  className="profilePwInput"
+                  type={showNewPw ? "text" : "password"}
+                  value={newPw}
+                  onChange={e => setNewPw(e.target.value)}
+                  placeholder="Min. 8 characters"
+                  autoComplete="new-password"
+                />
+                <button className="profilePwToggle" onClick={() => setShowNewPw(p => !p)} type="button">
+                  {showNewPw
+                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm new password */}
+            <div className="profilePwField">
+              <label className="profilePwLabel">Confirm New Password</label>
+              <div className="profilePwInputWrap">
+                <input
+                  className="profilePwInput"
+                  type={showConfirmPw ? "text" : "password"}
+                  value={confirmPw}
+                  onChange={e => setConfirmPw(e.target.value)}
+                  placeholder="Re-enter new password"
+                  autoComplete="new-password"
+                />
+                <button className="profilePwToggle" onClick={() => setShowConfirmPw(p => !p)} type="button">
+                  {showConfirmPw
+                    ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            {pwError && <p className="profilePwError">{pwError}</p>}
+            {pwMsg   && <p className="profilePwSuccess">{pwMsg}</p>}
+
+            <button
+              className="profilePwSaveBtn"
+              onClick={savePassword}
+              disabled={savingPw}
+            >
+              {savingPw ? "Updating…" : "Update Password"}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* ── Order History ── */}
       <div className="profileSection">
