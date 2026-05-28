@@ -394,7 +394,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1W1eHcST6_noKH3VCygvpKz-JFZkCF6Su"),
     facePngUrl:      gimg("1uRu_SW840F9l8UqHlLYh85d60z91qQWM"),
@@ -623,7 +623,7 @@ const products = [
 
     category:        "weapon" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1tqcYpL3wqMpomBiXOo_N6yDwspdEgmWu"),
     facePngUrl:      null,
@@ -774,7 +774,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1_0nDq8ZV_p77DunIBBUqNShtd7sPUaM3"),
     facePngUrl:      gimg("1z_tv87eXQ3VpPBDts-pemYTYc0IVp2CW"),
@@ -796,7 +796,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1XoKJxcm-L7UXQXvXFkF18Gfrn032i1Qt"),
     facePngUrl:      gimg("1EdznDR_XhYWhEdoHrvm9Pj6inU3kXLj_"),
@@ -818,7 +818,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1MeLcVZHKHlmgxqa_bNZnkGFymEkyj3mo"),
     facePngUrl:      gimg("172xNVeWgDKRBgKjYwqDvP1ZcHR-I6qr9"),
@@ -840,7 +840,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1u5a6AfT-k9iL1s4IsGGj1W_lsAULBQTv"),
     facePngUrl:      gimg("1mG-1wnFRDtfG0kD7C9ycGYW6KzToWO7J"),
@@ -862,7 +862,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1Heyn0W6pJdiCHMsEzxGyW05afKmQ1dql"),
     facePngUrl:      gimg("1Sifbx4X931_lee8vd4uVg8x0LzXmL7Gm"),
@@ -884,7 +884,7 @@ const products = [
 
     category:        "character" as const,
     packageTier:     "full_pack" as const,
-    isLatest:        true,
+    isLatest:        false,
     isActive:        true,
     previewVideoUrl: gd("1bJgokl67ZfUQmn8JGoS5mU1EzjZ-MSbk"),
     facePngUrl:      gimg("1bthqtLgJXwuJ7ADX14m1ZSdN850Sfnmy"),
