@@ -1,11 +1,18 @@
 export const dynamic = "force-dynamic";
 // GET /api/systems — Returns full system data for the visitor page.
+// displayStatus is read via raw SQL to survive stale Prisma client after migrations.
 
 import { NextResponse } from "next/server";
 import { prisma }       from "@/lib/prisma";
 
 export async function GET() {
   try {
+    // Read displayStatus via raw SQL — survives stale Prisma client
+    const rawStatuses = await prisma.$queryRaw<{ id: string; displayStatus: string }[]>`
+      SELECT id, "displayStatus" FROM "System" WHERE "isActive" = true
+    `;
+    const statusMap = new Map(rawStatuses.map((r: { id: string; displayStatus: string }) => [r.id, r.displayStatus ?? "visible"]));
+
     const systems = await prisma.system.findMany({
       where:   { isActive: true },
       orderBy: { createdAt: "asc" },
@@ -34,7 +41,13 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ systems });
+    // Merge: raw SQL displayStatus takes priority over Prisma ORM result
+    const merged = systems.map((s: typeof systems[number]) => ({
+      ...s,
+      displayStatus: statusMap.get(s.id) ?? s.displayStatus ?? "visible",
+    }));
+
+    return NextResponse.json({ systems: merged });
   } catch (err) {
     console.error("[GET /api/systems]", err);
     return NextResponse.json({ systems: [] });

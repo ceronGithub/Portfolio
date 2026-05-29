@@ -1836,29 +1836,32 @@
 
 /* Tag */
 .vSysCardTag {
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.35rem;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.45rem;
   display: block;
 }
 
 /* Title */
 .vSysCardTitle {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  margin-bottom: 0.5rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f0ede8;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin-bottom: 0.6rem;
 }
 
 /* Description — brighter so it reads */
 .vSysCardDesc {
-  font-size: 0.83rem;
-  color: rgba(255, 255, 255, 0.52);
-  line-height: 1.65;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.6;
   margin-bottom: 0.85rem;
 }
 

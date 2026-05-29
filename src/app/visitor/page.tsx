@@ -449,7 +449,7 @@ function SystemsCarousel() {
 
   useEffect(() => {
     // Fetch full system data from DB — price, features, addons, displayStatus all live
-    fetch("/api/systems")
+    fetch("/api/systems", { cache: "no-store" })
       .then(r => r.json())
       .then(data => {
         const rows: VisitorSystemEntry[] = data.systems ?? [];
