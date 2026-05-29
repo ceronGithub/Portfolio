@@ -3979,6 +3979,57 @@
   flex-shrink: 0;
 }
 
+/* ── Card: Payment Terms (matches buyer design) ──────────────────── */
+.vSysCardTermsRow {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0;
+  padding:         0.75rem 1.75rem;
+  border-top:      1px solid rgba(255,255,255,0.04);
+}
+
+.vSysCardTerm {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            2px;
+  flex:           1;
+}
+
+.vSysCardTermNum {
+  font-family: 'Instrument Serif', serif;
+  font-size:   1.1rem;
+  line-height: 1;
+}
+
+.vSysCardTermLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      8px;
+  color:          rgba(255,255,255,0.22);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vSysCardTermDivider {
+  width:      1px;
+  height:     24px;
+  background: rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.vSysCardPolicy {
+  display:     flex;
+  align-items: flex-start;
+  gap:         6px;
+  padding:     0 1.75rem 1.25rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   8px;
+  color:       rgba(255,255,255,0.18);
+  letter-spacing: 0.05em;
+  line-height: 1.55;
+}
+
 /* ── 3D Weapon Models Section ──────────────────────────────────────── */
 
 .vWeaponSection {
@@ -4999,13 +5050,16 @@
 }
 
 .vSysCardLockedFooterLabel {
+  display:      block;
   font-family:  'Syne', sans-serif;
   font-size:    0.78rem;
   font-weight:  700;
   letter-spacing: -0.01em;
+  margin-bottom: 0.15rem;
 }
 
 .vSysCardLockedFooterSub {
+  display:     block;
   font-family: 'DM Mono', monospace;
   font-size:   0.58rem;
   color:       rgba(255, 255, 255, 0.28);
