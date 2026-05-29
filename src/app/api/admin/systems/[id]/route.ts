@@ -1,7 +1,10 @@
 export const dynamic = 'force-dynamic';
-// PATCH /api/admin/systems/[id] — Update system fields (basePrice, title, description, etc.)
-// DELETE /api/admin/systems/[id] — Deactivate or delete a system.
+// PATCH /api/admin/systems/[id] — Update system fields.
+// DELETE /api/admin/systems/[id] — Remove a system.
 // Admin-only.
+// Uses $executeRaw for displayStatus updates so it works even when
+// the Prisma generated client is stale (pre-generate after migration).
+
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
@@ -29,7 +32,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     if (key in body) data[key] = body[key];
   }
 
-  // Validate displayStatus value — reject unknown values before hitting the DB
+  // Validate displayStatus value
   if ("displayStatus" in data && !VALID_DISPLAY_STATUSES.includes(data.displayStatus as string)) {
     return NextResponse.json({ error: "Invalid displayStatus value" }, { status: 400 });
   }
@@ -37,12 +40,29 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   if (Object.keys(data).length === 0)
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
 
+  // Pull displayStatus out separately — handle via raw SQL to survive stale Prisma client
+  const { displayStatus, ...prismaData } = data;
+
   try {
-    const system = await prisma.system.update({ where: { id }, data });
-    return NextResponse.json({ system });
+    // 1. Update all non-displayStatus fields via Prisma ORM
+    if (Object.keys(prismaData).length > 0) {
+      await prisma.system.update({ where: { id }, data: prismaData });
+    }
+
+    // 2. Update displayStatus via raw SQL — works regardless of Prisma client generation state
+    if (displayStatus !== undefined) {
+      await prisma.$executeRaw`
+        UPDATE "System"
+        SET    "displayStatus" = ${displayStatus as string}
+        WHERE  id = ${id}
+      `;
+    }
+
+    const updated = await prisma.system.findUnique({ where: { id } });
+    return NextResponse.json({ system: updated });
   } catch (err) {
     console.error("[PATCH /api/admin/systems]", err);
-    return NextResponse.json({ error: "Update failed. The displayStatus column may not be migrated yet — run the pending migration." }, { status: 500 });
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
 
