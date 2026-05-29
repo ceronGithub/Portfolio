@@ -79,8 +79,9 @@ export async function POST(
     });
 
     // Create PayMongo payment link
+    // downpayment is in centavos; createPaymentLink expects PHP (it multiplies by 100 internally)
     const link = await createPaymentLink({
-      amount:      downpayment,
+      amount:      downpayment / 100,
       description: `Downpayment — ${itemName}`,
       remarks:     `Order ${order.id} · 30% downpayment`,
       referenceId: order.id,

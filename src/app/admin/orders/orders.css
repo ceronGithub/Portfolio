@@ -116,7 +116,7 @@
   background: var(--sidebar-bg, #fff);
   border: 1px solid var(--sidebar-border, #e8e4de);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .adminOrdersTableHeader {
@@ -125,6 +125,7 @@
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid var(--sidebar-border, #e8e4de);
   background: var(--nav-active-bg, #f5f4f1);
+  border-radius: 14px 14px 0 0;
 }
 
 .adminOrdersTableHeader span {

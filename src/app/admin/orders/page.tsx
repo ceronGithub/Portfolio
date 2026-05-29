@@ -16,7 +16,7 @@ export default async function AdminOrdersPage() {
 
   const adminName = session.user?.name ?? session.user?.email ?? "Admin";
 
-  // Fetch all orders newest-first, with user and product details
+  // Fetch all orders newest-first, with user, product, and system details
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     select: {
@@ -30,6 +30,7 @@ export default async function AdminOrdersPage() {
       userId:          true,
       user:    { select: { name: true, email: true } },
       product: { select: { id: true, name: true } },
+      system:  { select: { id: true, title: true } },
     },
   });
 

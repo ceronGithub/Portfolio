@@ -36,9 +36,14 @@ export async function POST(req: NextRequest) {
   const eventType = event?.data?.attributes?.type;
   console.log("[PayMongo Webhook] Event:", eventType);
 
-  // ── link.payment.paid ────────────────────────────────────────────────────
-  if (eventType === "link.payment.paid") {
-    const linkId = event?.data?.attributes?.data?.id as string | undefined;
+  // ── link.payment.paid / payment.paid ────────────────────────────────────
+  // PayMongo may send either event type depending on API version and webhook config.
+  if (eventType === "link.payment.paid" || eventType === "payment.paid") {
+    // linkId may be at different paths depending on event type
+    const linkId: string | undefined =
+      event?.data?.attributes?.data?.id ??
+      event?.data?.attributes?.data?.attributes?.links?.[0] ??
+      event?.data?.attributes?.payment?.links?.[0]?.href?.split("/").pop();
     if (!linkId) {
       return NextResponse.json({ error: "No link ID in event" }, { status: 400 });
     }
@@ -89,15 +94,18 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    revalidatePath("/buyer/downloads", "layout");
-    revalidatePath("/buyer/orders",    "layout");
+    revalidatePath("/buyer/downloads",  "layout");
+    revalidatePath("/buyer/orders",     "layout");
+    revalidatePath("/admin/orders",     "layout");
 
     return NextResponse.json({ ok: true, unlocked: orders.length });
   }
 
-  // ── link.payment.failed ──────────────────────────────────────────────────
-  if (eventType === "link.payment.failed") {
-    const linkId = event?.data?.attributes?.data?.id as string | undefined;
+  // ── link.payment.failed / payment.failed ────────────────────────────────
+  if (eventType === "link.payment.failed" || eventType === "payment.failed") {
+    const linkId: string | undefined =
+      event?.data?.attributes?.data?.id ??
+      event?.data?.attributes?.payment?.links?.[0]?.href?.split("/").pop();
     if (linkId) {
       await prisma.order.updateMany({
         where: { paymongoOrderId: linkId },

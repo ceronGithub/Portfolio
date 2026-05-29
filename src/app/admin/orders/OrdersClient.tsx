@@ -21,6 +21,7 @@ interface Order {
   userId:          string;
   user:            { name: string | null; email: string };
   product:         { id: string; name: string } | null;
+  system:          { id: string; title: string } | null;
 }
 
 interface Props { orders: Order[]; }
@@ -448,7 +449,9 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                     <span className="adminOrdersCellNameEmail">{order.user.email}</span>
                   )}
                 </span>
-                <span className="adminOrdersCell adminOrdersCellMuted">{order.product?.name ?? "—"}</span>
+                <span className="adminOrdersCell adminOrdersCellMuted">
+                  {order.product?.name ?? order.system?.title ?? "—"}
+                </span>
                 <span className="adminOrdersCell">
                   <StatusSelector
                     orderId={order.id}
@@ -490,10 +493,10 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                     estimatedAt={order.estimatedAt}
                     onSaved={handleDeliverySaved}
                   />
-                  {order.status === "DELIVERED" && order.product && (
+                  {order.status === "DELIVERED" && (order.product || order.system) && (
                     <FileKeyPanel
                       userId={order.userId}
-                      productId={order.product.id}
+                      productId={order.product?.id ?? order.system?.id ?? ""}
                       onSaved={() => showToast("✓ File key attached. Buyer can now download.", "ok")}
                     />
                   )}
