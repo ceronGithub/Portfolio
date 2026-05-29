@@ -24,10 +24,11 @@ const REVERSE_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.co
 const SCROLL_BUDGET_VH = 4;
 const FADE_START       = 0.85;
 
-const RATE_GAIN      = 3.0;
-const RATE_MIN       = 0.07;
-const RATE_MAX       = 4.0;
-const HOLD_THRESHOLD = 0.03;
+const RATE_GAIN      = 1.8;   // was 3.0 — less aggressive, smoother catch-up
+const RATE_MIN       = 0.05;
+const RATE_MAX       = 3.0;   // was 4.0
+const HOLD_THRESHOLD = 0.08;  // was 0.03 — wider dead-zone stops pause/play chatter
+const LERP_FACTOR    = 0.12;  // smooth target time toward scroll position
 
 // Zoom config
 const SCALE_FWD_START = 1.0;
@@ -48,7 +49,8 @@ export default function ArchitectureIntroSection() {
   const overlayRef    = useRef<HTMLDivElement>(null);
   const lineRefs      = useRef<(HTMLParagraphElement | null)[]>([]);
   const progressRef   = useRef(0);
-  const targetTimeRef = useRef(0);
+  const targetTimeRef = useRef(0);   // raw scroll-driven target
+  const smoothTimeRef = useRef(0);   // lerped — what the rAF loop actually uses
   const directionRef  = useRef<"fwd" | "rev">("fwd");
   const velocityRef   = useRef(0);       // scroll deltaY — positive = down, negative = up
   const rafRef        = useRef<number | null>(null);
@@ -102,7 +104,9 @@ export default function ArchitectureIntroSection() {
       const revDur = rev.duration;
       if (!fwdDur || !isFinite(fwdDur) || !revDur || !isFinite(revDur)) return;
 
-      const target  = targetTimeRef.current;
+      // ── Lerp smoothTimeRef toward targetTimeRef ───────────────────────
+      smoothTimeRef.current += (targetTimeRef.current - smoothTimeRef.current) * LERP_FACTOR;
+      const target  = smoothTimeRef.current;
       const p       = progressRef.current;
       // ── Direction determined by scroll velocity, not per-tick delta ──
       // velocityRef is written by the wheel/scroll handler.

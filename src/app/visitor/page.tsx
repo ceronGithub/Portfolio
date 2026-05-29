@@ -1568,7 +1568,6 @@ export default function VisitorPage() {
                 { feature: "Dedicated project manager", us: true,  agency: true,  template: false },
                 { feature: "Ready in 2–6 weeks",        us: true,  agency: false, template: true  },
                 { feature: "Scalable architecture",     us: true,  agency: true,  template: false },
-                { feature: "BIR / PH compliance built-in", us: true, agency: false, template: false },
               ].map((row, i) => (
                 <div key={row.feature} className={"vCompareRow" + (i % 2 === 0 ? " vCompareRowAlt" : "")}>
                   <div className="vCompareCell vCompareFeatureCol">
