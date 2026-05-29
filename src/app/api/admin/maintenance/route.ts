@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
-// POST /api/admin/maintenance/[orderId]/tasks — Admin adds a task for a client.
-// GET  /api/admin/maintenance/[orderId]/tasks — Returns all tasks for that order.
+// GET /api/admin/maintenance — Returns all maintenance orders with user info.
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
@@ -12,44 +11,21 @@ async function requireAdmin() {
   return session;
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ orderId: string }> }
-) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { orderId } = await params;
-  const body        = await req.json();
-  const { title, description, type } = body;
-
-  if (!title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
-
-  const task = await prisma.maintenanceTask.create({
-    data: {
-      maintenanceOrderId: orderId,
-      title,
-      description: description ?? null,
-      type:        type ?? "OTHER",
-    },
-  });
-
-  return NextResponse.json({ task });
-}
-
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ orderId: string }> }
+  _req: NextRequest
 ) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { orderId } = await params;
-
-  const tasks = await prisma.maintenanceTask.findMany({
-    where:   { maintenanceOrderId: orderId },
+  const orders = await prisma.maintenanceOrder.findMany({
+    include: {
+      user:       { select: { id: true, name: true, email: true } },
+      tasks:      true,
+      bugReports: true,
+      vcSchedules: true,
+    },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ tasks });
+  return NextResponse.json({ orders });
 }
