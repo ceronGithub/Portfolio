@@ -7,6 +7,8 @@ import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
+const VALID_DISPLAY_STATUSES = ["visible", "coming_soon", "ongoing", "hidden"];
+
 // ── PATCH — update system fields ──────────────────────────────────────────────
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -27,14 +29,20 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     if (key in body) data[key] = body[key];
   }
 
+  // Validate displayStatus value — reject unknown values before hitting the DB
+  if ("displayStatus" in data && !VALID_DISPLAY_STATUSES.includes(data.displayStatus as string)) {
+    return NextResponse.json({ error: "Invalid displayStatus value" }, { status: 400 });
+  }
+
   if (Object.keys(data).length === 0)
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
 
   try {
     const system = await prisma.system.update({ where: { id }, data });
     return NextResponse.json({ system });
-  } catch {
-    return NextResponse.json({ error: "System not found" }, { status: 404 });
+  } catch (err) {
+    console.error("[PATCH /api/admin/systems]", err);
+    return NextResponse.json({ error: "Update failed. The displayStatus column may not be migrated yet — run the pending migration." }, { status: 500 });
   }
 }
 

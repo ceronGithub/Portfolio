@@ -27,7 +27,7 @@ export default async function BuyerPage() {
 
   const [systems, ownerships, latestProducts] = await Promise.all([
     prisma.system.findMany({
-      where:   { isActive: true, NOT: { displayStatus: "hidden" } },
+      where:   { isActive: true },
       orderBy: { createdAt: "asc" },
       include: { addons: { orderBy: [{ category: "asc" }, { label: "asc" }] } },
     }),
@@ -87,7 +87,8 @@ export default async function BuyerPage() {
     demoVideoUrl:  s.demoVideoUrl ?? demoVideoFallbacks[s.tag] ?? null,
     bgVideoUrl:    s.bgVideoUrl   ?? bgVideoFallbacks[s.tag]   ?? null,
     owned:         ownedSet.has(s.id),
-    displayStatus: s.displayStatus ?? "visible",
+    // displayStatus — safe fallback to "visible" if migration hasn't run yet
+    displayStatus: (s as any).displayStatus ?? "visible",
     addons:        s.addons.map((a: any) => ({
       id:       a.id,
       label:    a.label,
@@ -96,7 +97,8 @@ export default async function BuyerPage() {
       category: a.category,
       weeks:    0,
     })),
-  }));
+  // Filter hidden systems in JS — safe even before migration (field won't exist = treated as visible)
+  })).filter((item) => item.displayStatus !== "hidden");
 
   // Pass all owned IDs (system + asset) to the client
   const ownedAssetIds  = ownedProductIds;
