@@ -454,6 +454,9 @@ function SystemsCarousel() {
       .then(data => {
         const rows: VisitorSystemEntry[] = data.systems ?? [];
 
+        // Set carousel systems state — was missing, causing empty carousel + no displayStatus
+        setDbSystems(rows);
+
 
 
         // Build configurator modal data from DB addons
@@ -627,74 +630,77 @@ function SystemsCarousel() {
                   ))}
                 </ul>
 
-                {/* Locked placeholder — shown instead of nothing when coming_soon or ongoing */}
-                {isLocked && (
-                  <div className="vSysCardLockedPreview" style={{ borderColor: s.accent + "22" }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={s.accent} strokeWidth="1.2" strokeLinecap="round" opacity="0.4">
-                      {isComingSoon
-                        ? <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>
-                        : <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>
-                      }
-                    </svg>
-                    <p className="vSysCardLockedLabel" style={{ color: s.accent + "99" }}>
-                      {isComingSoon ? "Launching soon" : "Currently in development"}
-                    </p>
+                {/* ── Locked footer — replaces pricing + button when coming_soon or ongoing ── */}
+                {isLocked ? (
+                  <div className="vSysCardLockedFooter" style={{ borderColor: s.accent + "28" }}>
+                    <div className="vSysCardLockedFooterIcon" style={{ color: s.accent }}>
+                      {isComingSoon ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div className="vSysCardLockedFooterText">
+                      <span className="vSysCardLockedFooterLabel" style={{ color: s.accent }}>
+                        {isComingSoon ? "Launching Soon" : "Currently in Development"}
+                      </span>
+                      <span className="vSysCardLockedFooterSub">
+                        {isComingSoon ? "Pricing will be available upon launch." : "This system is being actively built. Check back soon."}
+                      </span>
+                    </div>
                   </div>
+                ) : (
+                  <>
+                    <div className="vSysCardFooter">
+                      <div className="vSysCardPriceBlock">
+                        <span className="vSysCardPriceLabel">Starts at</span>
+                        <span className="vSysCardPrice" style={{ color: s.accent }}>{"₱" + s.basePrice.toLocaleString("en-PH")}</span>
+                      </div>
+                      <button
+                        className="vSystemBtn vSystemBtnGreen"
+                        onClick={(e) => { e.stopPropagation(); openModal(s); }}
+                      >
+                        Configure →
+                      </button>
+                    </div>
+                    <div className="vSysCardIncluded">
+                      <div className="vSysCardIncludedItem">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Domain deployment included
+                      </div>
+                      <div className="vSysCardIncludedItem">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Responsive design included
+                      </div>
+                    </div>
+                    <div className="vSysCardTermsRow">
+                      <div className="vSysCardTerm">
+                        <span className="vSysCardTermNum" style={{ color: s.accent }}>30%</span>
+                        <span className="vSysCardTermLabel">downpayment to start</span>
+                      </div>
+                      <div className="vSysCardTermDivider" />
+                      <div className="vSysCardTerm">
+                        <span className="vSysCardTermNum" style={{ color: s.accent }}>70%</span>
+                        <span className="vSysCardTermLabel">on final delivery</span>
+                      </div>
+                      <div className="vSysCardTermDivider" />
+                      <div className="vSysCardTerm">
+                        <span className="vSysCardTermNum" style={{ color: s.accent }}>100%</span>
+                        <span className="vSysCardTermLabel">source code yours</span>
+                      </div>
+                    </div>
+                    <div className="vSysCardPolicy">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Live demo provided. Full access granted only upon complete payment.
+                    </div>
+                  </>
                 )}
-                {/* Price + Configure button */}
-                <div className="vSysCardFooter">
-                  <div className="vSysCardPriceBlock">
-                    <span className="vSysCardPriceLabel">Starts at</span>
-                    <span className="vSysCardPrice" style={{ color: s.accent }}>{"₱" + s.basePrice.toLocaleString("en-PH")}</span>
-                  </div>
-                  {isLocked ? (
-                    <span className="vSystemBtn vSystemBtnLocked">
-                      {isComingSoon ? "Coming Soon" : "In Development"}
-                    </span>
-                  ) : (
-                  <button
-                    className="vSystemBtn vSystemBtnGreen"
-                    onClick={(e) => { e.stopPropagation(); openModal(s); }}
-                  >
-                    Configure →
-                  </button>
-                  )}
-                </div>
-                {/* Always included */}
-                <div className="vSysCardIncluded">
-                  <div className="vSysCardIncludedItem">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    Domain deployment included
-                  </div>
-                  <div className="vSysCardIncludedItem">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    Responsive design included
-                  </div>
-                </div>
-                {/* Payment terms */}
-                <div className="vSysCardTermsRow">
-                  <div className="vSysCardTerm">
-                    <span className="vSysCardTermNum" style={{ color: s.accent }}>30%</span>
-                    <span className="vSysCardTermLabel">downpayment to start</span>
-                  </div>
-                  <div className="vSysCardTermDivider" />
-                  <div className="vSysCardTerm">
-                    <span className="vSysCardTermNum" style={{ color: s.accent }}>70%</span>
-                    <span className="vSysCardTermLabel">on final delivery</span>
-                  </div>
-                  <div className="vSysCardTermDivider" />
-                  <div className="vSysCardTerm">
-                    <span className="vSysCardTermNum" style={{ color: s.accent }}>100%</span>
-                    <span className="vSysCardTermLabel">source code yours</span>
-                  </div>
-                </div>
-                <div className="vSysCardPolicy">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Live demo provided. Full access granted only upon complete payment.
-                </div>
-              </div>
               );
             })}
           </div>

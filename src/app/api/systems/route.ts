@@ -36,13 +36,17 @@ export async function GET() {
       },
     });
 
-    // Attach displayStatus via raw SQL — safe even with stale Prisma client
-    const statusRows = await prisma.$queryRaw<{ id: string; displayStatus: string }[]>`
-      SELECT id, COALESCE("displayStatus", 'visible') AS "displayStatus"
-      FROM   "System"
-      WHERE  "isActive" = true
-    `;
-    const statusMap = new Map(statusRows.map(r => [r.id, r.displayStatus]));
+    // Attach displayStatus via $queryRawUnsafe — more reliable than tagged $queryRaw
+    // which silently returns empty array without parameters in some Prisma versions.
+    let statusMap = new Map<string, string>();
+    try {
+      const statusRows = await prisma.$queryRawUnsafe<{ id: string; ds: string }[]>(
+        `SELECT id, COALESCE("displayStatus", 'visible') AS ds FROM "System" WHERE "isActive" = true`
+      );
+      statusMap = new Map(statusRows.map(r => [r.id, r.ds]));
+    } catch {
+      // Pre-migration fallback — all systems default to visible
+    }
 
     const result = systems.map((s: any) => ({
       ...s,

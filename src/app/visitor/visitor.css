@@ -4941,3 +4941,70 @@
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 0.8; }
 }
+
+/* ── Watermark overlay — full card cover for locked systems ── */
+.vSysCardWatermarkOverlay {
+  position:        absolute;
+  inset:           0;
+  z-index:         10;
+  border-radius:   inherit;
+  background:      rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  pointer-events:  none;
+}
+
+.vSysCardWatermarkStamp {
+  font-family:    'DM Mono', monospace;
+  font-size:      1.05rem;
+  font-weight:    500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding:        0.55rem 1.4rem;
+  border:         1.5px solid currentColor;
+  border-radius:  6px;
+  opacity:        0.72;
+  transform:      rotate(-18deg);
+  white-space:    nowrap;
+  user-select:    none;
+}
+
+/* ── Locked footer box — replaces pricing + button for coming_soon / ongoing ── */
+.vSysCardLockedFooter {
+  margin-top:     auto;
+  display:        flex;
+  align-items:    flex-start;
+  gap:            0.75rem;
+  padding:        0.9rem 1rem;
+  border:         1px solid;
+  border-radius:  10px;
+  background:     rgba(255, 255, 255, 0.03);
+}
+
+.vSysCardLockedFooterIcon {
+  flex-shrink: 0;
+  margin-top:  0.1rem;
+  opacity:     0.7;
+}
+
+.vSysCardLockedFooterText {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+}
+
+.vSysCardLockedFooterLabel {
+  font-family:  'Syne', sans-serif;
+  font-size:    0.78rem;
+  font-weight:  700;
+  letter-spacing: -0.01em;
+}
+
+.vSysCardLockedFooterSub {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.58rem;
+  color:       rgba(255, 255, 255, 0.28);
+  line-height: 1.5;
+}
