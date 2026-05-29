@@ -274,3 +274,45 @@
   background:   rgba(167,139,250,0.16);
   border-color: rgba(167,139,250,0.4);
 }
+/* ══════════════════════════════════════
+   Floating Request Tracker Button
+   Sits above the recently viewed button (bottom: 12.5rem)
+   ══════════════════════════════════════ */
+
+.buyerTrackerFloatBtn {
+  position:        fixed;
+  bottom:          12.5rem;
+  right:           2rem;
+  z-index:         350;
+  width:           52px;
+  height:          52px;
+  border-radius:   50%;
+  background:      #111;
+  border:          1px solid #2a2a2a;
+  color:           #888;
+  cursor:          pointer;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      background 0.22s, color 0.22s, border-color 0.22s, transform 0.18s;
+  box-shadow:      0 4px 24px rgba(0,0,0,0.55);
+}
+
+.buyerTrackerFloatBtn:hover {
+  background:   #1a1a1a;
+  color:        #f59e0b;
+  border-color: rgba(245,158,11,0.35);
+  transform:    translateY(-2px);
+}
+
+.buyerTrackerFloatDot {
+  position:       absolute;
+  top:            -3px;
+  right:          -3px;
+  width:          10px;
+  height:         10px;
+  border-radius:  50%;
+  background:     #f59e0b;
+  border:         2px solid #0a0a0a;
+  pointer-events: none;
+}

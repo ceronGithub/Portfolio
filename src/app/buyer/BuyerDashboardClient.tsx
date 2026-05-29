@@ -27,7 +27,7 @@ import NewArchitectureSection    from "./architecture-assets/NewArchitectureSect
 import ArchitectureBuySection    from "./architecture-assets/ArchitectureBuySection";
 import ReviewSection             from "./reviews/ReviewSection";
 import CustomRequestBuilder      from "./custom-request/CustomRequestBuilder";
-import RequestTracker            from "./custom-request/RequestTracker";
+import RequestTrackerModal       from "./custom-request/RequestTrackerModal";
 import "./wishlist/wishlist-panel.css";
 import "./cart/cart-drawer.css";
 import "./buyer-dashboard-client.css";
@@ -45,6 +45,7 @@ interface SystemItem {
   features: string[];
   demoVideoUrl: string | null; bgVideoUrl: string | null;
   owned: boolean; addons: AddonItem[];
+  displayStatus: string;
 }
 
 interface LatestProduct {
@@ -151,8 +152,9 @@ function buildWishlistEntries(
 export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
   const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
   const { cartIds, addToCart, removeFromCart, clearCart, hydrated: cartHydrated } = useCart();
-  const [wishlistOpen, setWishlistOpen] = useState(false);
-  const [cartOpen,     setCartOpen]     = useState(false);
+  const [wishlistOpen,       setWishlistOpen]       = useState(false);
+  const [cartOpen,           setCartOpen]           = useState(false);
+  const [requestTrackerOpen, setRequestTrackerOpen] = useState(false);
 
   const ownedSet = useMemo(() => new Set(ownedAssetIds), [ownedAssetIds]);
 
@@ -324,7 +326,24 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       {/* ── Contact ── */}
       <InquirySection />
       <CustomRequestBuilder />
-      <RequestTracker />
+
+      {/* ── Floating Request Tracker Button ── */}
+      <button
+        className="buyerTrackerFloatBtn"
+        onClick={() => setRequestTrackerOpen(true)}
+        aria-label="Open request tracker"
+        title="Request Tracker"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        <span className="buyerTrackerFloatDot" />
+      </button>
+
+      {/* ── Request Tracker Modal ── */}
+      {requestTrackerOpen && (
+        <RequestTrackerModal onClose={() => setRequestTrackerOpen(false)} />
+      )}
 
       {/* ── Floating Recently Viewed Button + Popup ── */}
       {recentItems.length > 0 && (

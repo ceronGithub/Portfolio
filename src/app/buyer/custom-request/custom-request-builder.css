@@ -603,3 +603,62 @@
   .crbHeader { flex-direction: column; gap: 0.5rem; }
   .crbSub    { text-align: left; max-width: 100%; }
 }
+/* ── Pack selector grid ── */
+.crbPackGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.crbPackBtn {
+  display:       flex;
+  flex-direction: column;
+  gap:           0.25rem;
+  padding:       0.85rem 1.1rem;
+  background:    #0d0d0d;
+  border:        1px solid #1e1e1e;
+  border-radius: 10px;
+  text-align:    left;
+  cursor:        pointer;
+  transition:    border-color 0.18s, background 0.18s;
+}
+
+.crbPackBtn:hover {
+  border-color: #2a2a2a;
+  background:   #111;
+}
+
+.crbPackBtnActive {
+  /* border-color and background set via inline style with accent color */
+}
+
+.crbPackBtnLabel {
+  font-family:  "Syne", sans-serif;
+  font-size:    0.82rem;
+  font-weight:  700;
+  color:        rgba(255,255,255,0.85);
+  transition:   color 0.18s;
+}
+
+.crbPackBtnDesc {
+  font-family: "DM Mono", monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.5;
+}
+
+.crbPackBtnPrice {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.72rem;
+  font-weight:    500;
+  color:          rgba(255,255,255,0.45);
+  margin-top:     0.15rem;
+  transition:     color 0.18s;
+}
+
+/* ── Type button grid — expand to 4 cols for more types ── */
+.crbTypeGrid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap:                   0.75rem;
+}

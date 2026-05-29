@@ -1153,7 +1153,32 @@ const CATEGORY_COLORS: Record<string, string> = {
 function SystemsCarousel() {
   const [current, setCurrent] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
-  const total = systems.length;
+
+  // Admin-controlled display status per system tag — fetched from DB on mount
+  const [displayStatuses, setDisplayStatuses] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/systems")
+      .then(r => r.json())
+      .then(data => {
+        const map: Record<string, string> = {};
+        (data.systems ?? []).forEach((s: { tag: string; displayStatus: string }) => {
+          map[s.tag] = s.displayStatus;
+        });
+        setDisplayStatuses(map);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Filter out hidden systems based on admin display status
+  const visibleSystems = systems.filter(s => {
+    const status = displayStatuses[s.tag];
+    // While statuses are loading (empty map), show all — avoids flash of empty carousel
+    if (!status) return true;
+    return status !== "hidden";
+  });
+
+  const total = visibleSystems.length;
 
   /* ── Modal state ─────────────────────────────────────────────────── */
   const [modalSys,  setModalSys]  = useState<ConfigSystem | null>(null);
@@ -1239,19 +1264,34 @@ function SystemsCarousel() {
       <div className="vSysCarouselWrap">
         <div className="vSysCarouselViewport">
           <div className="vSysCarouselTrack" ref={trackRef}>
-            {systems.map((s, i) => (
+            {visibleSystems.map((s, i) => {
+              const displayStatus  = displayStatuses[s.tag] ?? "visible";
+              const isComingSoon   = displayStatus === "coming_soon";
+              const isOngoing      = displayStatus === "ongoing";
+              const isLocked       = isComingSoon || isOngoing;
+              return (
               <div
                 key={s.tag}
-                className={"vSysCarouselCard" + (i === current ? " vSysCarouselCardActive" : "")}
+                className={"vSysCarouselCard" + (i === current ? " vSysCarouselCardActive" : "") + (isLocked ? " vSysCarouselCardLocked" : "")}
                 onClick={() => goTo(i)}
                 style={{ "--acc": s.accent } as React.CSSProperties}
               >
                 {/* Top row */}
                 <div className="vSysCardTopRow">
                   <span className="vSysCardNum">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="vSysCardDeployBadge" style={{ color: s.accent, borderColor: s.accent + "40", background: s.accent + "12" }}>
-                    {s.deploy}
-                  </span>
+                  <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                    {isComingSoon && (
+                      <span className="vSysCardStatusBadge vSysCardStatusBadgeComingSoon">Coming Soon</span>
+                    )}
+                    {isOngoing && (
+                      <span className="vSysCardStatusBadge vSysCardStatusBadgeOngoing">In Development</span>
+                    )}
+                    {!isLocked && (
+                      <span className="vSysCardDeployBadge" style={{ color: s.accent, borderColor: s.accent + "40", background: s.accent + "12" }}>
+                        {s.deploy}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="vSysCardRule" />
                 <span className="vSysCardTag" style={{ color: s.accent }}>{s.tag}</span>
@@ -1277,12 +1317,18 @@ function SystemsCarousel() {
                     <span className="vSysCardPriceLabel">Starts at</span>
                     <span className="vSysCardPrice" style={{ color: s.accent }}>{s.price}</span>
                   </div>
+                  {isLocked ? (
+                    <span className="vSystemBtn vSystemBtnLocked">
+                      {isComingSoon ? "Coming Soon" : "In Development"}
+                    </span>
+                  ) : (
                   <button
                     className="vSystemBtn vSystemBtnGreen"
                     onClick={(e) => { e.stopPropagation(); openModal(s); }}
                   >
                     Configure →
                   </button>
+                  )}
                 </div>
                 {/* Always included */}
                 <div className="vSysCardIncluded">
@@ -1319,7 +1365,8 @@ function SystemsCarousel() {
                   Live demo provided. Full access granted only upon complete payment.
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -1328,7 +1375,7 @@ function SystemsCarousel() {
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
           <div className="vSysCarouselDots">
-            {systems.map((s, i) => (
+            {visibleSystems.map((s, i) => (
               <button
                 key={i}
                 className={"vSysCarouselDot" + (i === current ? " vSysCarouselDotActive" : "")}
@@ -1885,13 +1932,6 @@ function FaqSection() {
 /* ─── Page ──────────────────────────────────────────────────────────── */
 export default function VisitorPage() {
   useTrackVisit();
-
-  // Disable right-click context menu globally on visitor page
-  useEffect(() => {
-    const blockContextMenu = (e: MouseEvent) => e.preventDefault();
-    document.addEventListener("contextmenu", blockContextMenu);
-    return () => document.removeEventListener("contextmenu", blockContextMenu);
-  }, []);
 
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });

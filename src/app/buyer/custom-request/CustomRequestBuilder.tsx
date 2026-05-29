@@ -1,5 +1,7 @@
 // CustomRequestBuilder.tsx — Multi-step custom project request form.
 // Step 1: Asset type  Step 2: Style details  Step 3: Delivery  Step 4: Confirm
+// Asset types: Character, Weapon, Interior, Exterior, AI Animation, System, Other
+// Character & Weapon use pack tiers instead of poly budget / animation count.
 
 "use client";
 
@@ -7,21 +9,35 @@ import { useState } from "react";
 import "./custom-request-builder.css";
 import { sanitize } from "@/lib/utils";
 
-type AssetType     = "Character" | "Weapon" | "System" | "Other";
-type PolyBudget    = "Low (game-ready)" | "Mid (cinematic)" | "High (hero asset)";
+// ── Types ────────────────────────────────────────────────────────────────────
+
+type AssetType     = "Character" | "Weapon" | "Interior" | "Exterior" | "AI Animation" | "System" | "Other";
 type DeliverySpeed = "Standard" | "Rush" | "Urgent";
 
-interface FormState {
-  assetType:     AssetType | "";
-  description:   string;
-  animCount:     number;
-  polyBudget:    PolyBudget | "";
-  reference:     string;
-  deliverySpeed: DeliverySpeed | "";
-}
+// ── Character packs ───────────────────────────────────────────────────────────
+// Mesh-only → Rigged → Rigged + Animations (same tiers as the shop)
+type CharacterPack = "Mesh Only" | "Rigged" | "Rigged + Animations";
+const CHARACTER_PACKS: { key: CharacterPack; label: string; desc: string; price: number }[] = [
+  { key: "Mesh Only",           label: "Mesh Only",           desc: "Game-ready mesh, UV-unwrapped, textured",   price: 3500  },
+  { key: "Rigged",              label: "Rigged",              desc: "Full rig — ready for animation pipeline",   price: 5500  },
+  { key: "Rigged + Animations", label: "Rigged + Animations", desc: "Rig + base animation set (idle, walk, run)", price: 8500 },
+];
 
-const BASE_PRICE: Record<AssetType, number> = {
-  Character: 5500, Weapon: 3500, System: 33000, Other: 8000,
+// ── Weapon packs ──────────────────────────────────────────────────────────────
+type WeaponPack = "Mesh Only" | "Textured" | "Textured + FX";
+const WEAPON_PACKS: { key: WeaponPack; label: string; desc: string; price: number }[] = [
+  { key: "Mesh Only",    label: "Mesh Only",    desc: "Clean low-poly mesh, game-ready topology",      price: 2000  },
+  { key: "Textured",     label: "Textured",     desc: "PBR textures — albedo, normal, roughness/metal", price: 3500 },
+  { key: "Textured + FX", label: "Textured + FX", desc: "Full textures + particle/shader FX set",      price: 5500 },
+];
+
+// ── Base prices (for Interior, Exterior, AI Animation, System, Other) ─────────
+const BASE_PRICE: Partial<Record<AssetType, number>> = {
+  Interior:      9500,
+  Exterior:      12000,
+  "AI Animation": 7500,
+  System:        33000,
+  Other:         8000,
 };
 
 const SPEED_MULTIPLIER: Record<DeliverySpeed, number> = {
@@ -32,21 +48,47 @@ const SPEED_DELIVERY: Record<DeliverySpeed, string> = {
   Standard: "4–6 weeks", Rush: "2–3 weeks", Urgent: "1–2 weeks",
 };
 
-const ANIM_PRICE_PER_EXTRA = 800;
+// ── Form state ────────────────────────────────────────────────────────────────
+
+interface FormState {
+  assetType:       AssetType | "";
+  description:     string;
+  characterPack:   CharacterPack | "";
+  weaponPack:      WeaponPack   | "";
+  reference:       string;
+  deliverySpeed:   DeliverySpeed | "";
+}
+
+// ── Price calculator ──────────────────────────────────────────────────────────
 
 function calcEstimate(form: FormState): number | null {
   if (!form.assetType || !form.deliverySpeed) return null;
-  const base      = BASE_PRICE[form.assetType as AssetType];
-  const animExtra = Math.max(0, form.animCount - 3) * ANIM_PRICE_PER_EXTRA;
-  const speedMult = SPEED_MULTIPLIER[form.deliverySpeed as DeliverySpeed];
-  return Math.round((base + animExtra) * speedMult);
+
+  let base = 0;
+
+  if (form.assetType === "Character") {
+    if (!form.characterPack) return null;
+    const pack = CHARACTER_PACKS.find(p => p.key === form.characterPack);
+    if (!pack) return null;
+    base = pack.price;
+  } else if (form.assetType === "Weapon") {
+    if (!form.weaponPack) return null;
+    const pack = WEAPON_PACKS.find(p => p.key === form.weaponPack);
+    if (!pack) return null;
+    base = pack.price;
+  } else {
+    base = BASE_PRICE[form.assetType] ?? 8000;
+  }
+
+  return Math.round(base * SPEED_MULTIPLIER[form.deliverySpeed as DeliverySpeed]);
 }
 
 function fmt(p: number) {
   return "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
 }
 
-// ── SVG icon set — monochrome line art ────────────────────────────────────
+// ── SVG icon set ──────────────────────────────────────────────────────────────
+
 const ICONS: Record<AssetType, React.ReactNode> = {
   Character: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -56,6 +98,22 @@ const ICONS: Record<AssetType, React.ReactNode> = {
   Weapon: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="3" y1="21" x2="21" y2="3"/><path d="M15 3h6v6"/><path d="M3 15l3 3"/>
+    </svg>
+  ),
+  Interior: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
+  Exterior: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="9" x2="21" y2="9"/>
+    </svg>
+  ),
+  "AI Animation": (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="5 3 19 12 5 21 5 3"/>
+      <path d="M19 3v18"/>
     </svg>
   ),
   System: (
@@ -70,6 +128,8 @@ const ICONS: Record<AssetType, React.ReactNode> = {
   ),
 };
 
+// ── Step indicator ────────────────────────────────────────────────────────────
+
 const STEPS = ["Asset Type", "Details", "Delivery", "Confirm"];
 
 function StepIndicator({ current }: { current: number }) {
@@ -82,17 +142,77 @@ function StepIndicator({ current }: { current: number }) {
   );
 }
 
-// ── Main export ────────────────────────────────────────────────────────────
+// ── Pack selector — reused for Character and Weapon ───────────────────────────
+
+function PackSelector<T extends string>({
+  packs, selected, onSelect, accent,
+}: {
+  packs:    { key: T; label: string; desc: string; price: number }[];
+  selected: T | "";
+  onSelect: (key: T) => void;
+  accent:   string;
+}) {
+  return (
+    <div className="crbPackGrid">
+      {packs.map(pack => {
+        const isActive = selected === pack.key;
+        return (
+          <button
+            key={pack.key}
+            className={`crbPackBtn ${isActive ? "crbPackBtnActive" : ""}`}
+            style={isActive ? { borderColor: accent + "66", background: accent + "10" } : {}}
+            onClick={() => onSelect(pack.key)}
+          >
+            <span className="crbPackBtnLabel" style={isActive ? { color: accent } : {}}>{pack.label}</span>
+            <span className="crbPackBtnDesc">{pack.desc}</span>
+            <span className="crbPackBtnPrice" style={isActive ? { color: accent } : {}}>{fmt(pack.price)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Asset type accent colors ──────────────────────────────────────────────────
+
+const ASSET_ACCENT: Record<AssetType, string> = {
+  Character:      "#22c55e",
+  Weapon:         "#c9935e",
+  Interior:       "#60a5fa",
+  Exterior:       "#a78bfa",
+  "AI Animation": "#f472b6",
+  System:         "#67e8f9",
+  Other:          "#888",
+};
+
+const ASSET_BASE_DISPLAY: Partial<Record<AssetType, string>> = {
+  Interior:      "from ₱9,500",
+  Exterior:      "from ₱12,000",
+  "AI Animation": "from ₱7,500",
+  System:        "from ₱33,000",
+};
+
+// ── Main export ───────────────────────────────────────────────────────────────
+
 export default function CustomRequestBuilder() {
   const [step,       setStep]       = useState(0);
   const [form,       setForm]       = useState<FormState>({
-    assetType: "", description: "", animCount: 3, polyBudget: "", reference: "", deliverySpeed: "",
+    assetType: "", description: "", characterPack: "", weaponPack: "", reference: "", deliverySpeed: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted,  setSubmitted]  = useState(false);
   const [submitErr,  setSubmitErr]  = useState("");
 
   const estimate = calcEstimate(form);
+  const accent   = form.assetType ? ASSET_ACCENT[form.assetType as AssetType] : "#888";
+
+  // ── Determine if Step 1 (details) is complete enough to advance ────────────
+  function isDetailsComplete(): boolean {
+    if (!form.description) return false;
+    if (form.assetType === "Character" && !form.characterPack) return false;
+    if (form.assetType === "Weapon"    && !form.weaponPack)    return false;
+    return true;
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -104,9 +224,9 @@ export default function CustomRequestBuilder() {
         body:    JSON.stringify({
           assetType:      form.assetType,
           description:    form.description,
-          animCount:      form.animCount,
-          polyBudget:     form.polyBudget || null,
-          reference:      form.reference  || null,
+          characterPack:  form.characterPack  || null,
+          weaponPack:     form.weaponPack      || null,
+          reference:      form.reference       || null,
           deliverySpeed:  form.deliverySpeed,
           estimatedQuote: estimate,
         }),
@@ -126,7 +246,7 @@ export default function CustomRequestBuilder() {
 
   function reset() {
     setSubmitted(false); setStep(0);
-    setForm({ assetType: "", description: "", animCount: 3, polyBudget: "", reference: "", deliverySpeed: "" });
+    setForm({ assetType: "", description: "", characterPack: "", weaponPack: "", reference: "", deliverySpeed: "" });
   }
 
   if (submitted) {
@@ -179,21 +299,28 @@ export default function CustomRequestBuilder() {
           <div className="crbCard">
             <StepIndicator current={step} />
 
-            {/* Step 0 — Asset type */}
+            {/* ── Step 0 — Asset type ── */}
             {step === 0 && (
               <div className="crbStep">
                 <p className="crbStepTitle">What are you looking for?</p>
                 <div className="crbTypeGrid">
-                  {(["Character", "Weapon", "System", "Other"] as AssetType[]).map(t => (
+                  {(["Character", "Weapon", "Interior", "Exterior", "AI Animation", "System", "Other"] as AssetType[]).map(t => (
                     <button
                       key={t}
                       className={`crbTypeBtn ${form.assetType === t ? "crbTypeBtnActive" : ""}`}
-                      onClick={() => setForm(f => ({ ...f, assetType: t }))}
+                      style={form.assetType === t ? { borderColor: ASSET_ACCENT[t] + "66", background: ASSET_ACCENT[t] + "10" } : {}}
+                      onClick={() => setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "" }))}
                     >
-                      <span className="crbTypeBtnIcon">{ICONS[t]}</span>
+                      <span className="crbTypeBtnIcon" style={form.assetType === t ? { color: ASSET_ACCENT[t] } : {}}>{ICONS[t]}</span>
                       <span className="crbTypeBtnLabel">{t}</span>
-                      {t !== "Other" && (
-                        <span className="crbTypeBtnBase">from {fmt(BASE_PRICE[t])}</span>
+                      {ASSET_BASE_DISPLAY[t] && (
+                        <span className="crbTypeBtnBase">{ASSET_BASE_DISPLAY[t]}</span>
+                      )}
+                      {t === "Character" && (
+                        <span className="crbTypeBtnBase">from {fmt(CHARACTER_PACKS[0].price)}</span>
+                      )}
+                      {t === "Weapon" && (
+                        <span className="crbTypeBtnBase">from {fmt(WEAPON_PACKS[0].price)}</span>
                       )}
                     </button>
                   ))}
@@ -211,10 +338,36 @@ export default function CustomRequestBuilder() {
               </div>
             )}
 
-            {/* Step 1 — Details */}
+            {/* ── Step 1 — Details ── */}
             {step === 1 && (
               <div className="crbStep">
                 <p className="crbStepTitle">Describe your {form.assetType?.toLowerCase()}</p>
+
+                {/* Character packs */}
+                {form.assetType === "Character" && (
+                  <div className="crbField">
+                    <label className="crbLabel">Character Pack</label>
+                    <PackSelector<CharacterPack>
+                      packs={CHARACTER_PACKS}
+                      selected={form.characterPack}
+                      onSelect={key => setForm(f => ({ ...f, characterPack: key }))}
+                      accent={accent}
+                    />
+                  </div>
+                )}
+
+                {/* Weapon packs */}
+                {form.assetType === "Weapon" && (
+                  <div className="crbField">
+                    <label className="crbLabel">Weapon Pack</label>
+                    <PackSelector<WeaponPack>
+                      packs={WEAPON_PACKS}
+                      selected={form.weaponPack}
+                      onSelect={key => setForm(f => ({ ...f, weaponPack: key }))}
+                      accent={accent}
+                    />
+                  </div>
+                )}
 
                 <div className="crbField">
                   <label className="crbLabel">Description</label>
@@ -228,37 +381,6 @@ export default function CustomRequestBuilder() {
                   />
                   <span className="crbCharCount">{form.description.length}/600</span>
                 </div>
-
-                {(form.assetType === "Character" || form.assetType === "Weapon") && (
-                  <>
-                    <div className="crbField">
-                      <label className="crbLabel">
-                        Animations
-                        <span className="crbLabelNote"> — 3 base, +{fmt(ANIM_PRICE_PER_EXTRA)} each extra</span>
-                      </label>
-                      <div className="crbCounterRow">
-                        <button className="crbCounterBtn" onClick={() => setForm(f => ({ ...f, animCount: Math.max(1, f.animCount - 1) }))}>−</button>
-                        <span className="crbCounterVal">{form.animCount}</span>
-                        <button className="crbCounterBtn" onClick={() => setForm(f => ({ ...f, animCount: Math.min(20, f.animCount + 1) }))}>+</button>
-                      </div>
-                    </div>
-
-                    <div className="crbField">
-                      <label className="crbLabel">Poly budget</label>
-                      <div className="crbPolyRow">
-                        {(["Low (game-ready)", "Mid (cinematic)", "High (hero asset)"] as PolyBudget[]).map(p => (
-                          <button
-                            key={p}
-                            className={`crbPolyBtn ${form.polyBudget === p ? "crbPolyBtnActive" : ""}`}
-                            onClick={() => setForm(f => ({ ...f, polyBudget: p }))}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
 
                 <div className="crbField">
                   <label className="crbLabel">Reference link <span className="crbLabelNote">(optional)</span></label>
@@ -274,9 +396,9 @@ export default function CustomRequestBuilder() {
                 <div className="crbNavRow">
                   <button className="crbBackBtn" onClick={() => setStep(0)}>← Back</button>
                   <button
-                    className={`crbNextBtn ${!form.description ? "crbNextBtnDisabled" : ""}`}
-                    onClick={() => form.description && setStep(2)}
-                    disabled={!form.description}
+                    className={`crbNextBtn ${!isDetailsComplete() ? "crbNextBtnDisabled" : ""}`}
+                    onClick={() => isDetailsComplete() && setStep(2)}
+                    disabled={!isDetailsComplete()}
                   >
                     Next →
                   </button>
@@ -284,15 +406,30 @@ export default function CustomRequestBuilder() {
               </div>
             )}
 
-            {/* Step 2 — Delivery speed */}
+            {/* ── Step 2 — Delivery speed ── */}
             {step === 2 && (
               <div className="crbStep">
                 <p className="crbStepTitle">How fast do you need it?</p>
                 <div className="crbSpeedGrid">
                   {(["Standard", "Rush", "Urgent"] as DeliverySpeed[]).map(speed => {
-                    const base  = form.assetType ? BASE_PRICE[form.assetType as AssetType] : 0;
-                    const extra = Math.max(0, form.animCount - 3) * ANIM_PRICE_PER_EXTRA;
-                    const total = Math.round((base + extra) * SPEED_MULTIPLIER[speed]);
+                    const total = estimate !== null
+                      ? Math.round(
+                          (estimate / SPEED_MULTIPLIER[form.deliverySpeed as DeliverySpeed || "Standard"]) *
+                          SPEED_MULTIPLIER[speed]
+                        )
+                      : null;
+                    // Compute base for display regardless of current speed selection
+                    let baseForSpeed = 0;
+                    if (form.assetType === "Character") {
+                      const pack = CHARACTER_PACKS.find(p => p.key === form.characterPack);
+                      baseForSpeed = pack?.price ?? 0;
+                    } else if (form.assetType === "Weapon") {
+                      const pack = WEAPON_PACKS.find(p => p.key === form.weaponPack);
+                      baseForSpeed = pack?.price ?? 0;
+                    } else {
+                      baseForSpeed = BASE_PRICE[form.assetType as AssetType] ?? 8000;
+                    }
+                    const displayTotal = Math.round(baseForSpeed * SPEED_MULTIPLIER[speed]);
                     return (
                       <button
                         key={speed}
@@ -310,7 +447,7 @@ export default function CustomRequestBuilder() {
                         </span>
                         <span className="crbSpeedBtnLabel">{speed}</span>
                         <span className="crbSpeedBtnDelivery">{SPEED_DELIVERY[speed]}</span>
-                        <span className="crbSpeedBtnPrice">{form.assetType ? fmt(total) : "—"}</span>
+                        <span className="crbSpeedBtnPrice">{baseForSpeed > 0 ? fmt(displayTotal) : "—"}</span>
                         {speed !== "Standard" && (
                           <span className="crbSpeedBtnSurcharge">+{Math.round((SPEED_MULTIPLIER[speed] - 1) * 100)}% surcharge</span>
                         )}
@@ -331,7 +468,7 @@ export default function CustomRequestBuilder() {
               </div>
             )}
 
-            {/* Step 3 — Confirm */}
+            {/* ── Step 3 — Confirm ── */}
             {step === 3 && (
               <div className="crbStep">
                 <p className="crbStepTitle">Review your request</p>
@@ -340,20 +477,20 @@ export default function CustomRequestBuilder() {
                   <div className="crbSummaryRow">
                     <span>Type</span><span>{form.assetType}</span>
                   </div>
+                  {form.assetType === "Character" && form.characterPack && (
+                    <div className="crbSummaryRow">
+                      <span>Pack</span><span>{form.characterPack}</span>
+                    </div>
+                  )}
+                  {form.assetType === "Weapon" && form.weaponPack && (
+                    <div className="crbSummaryRow">
+                      <span>Pack</span><span>{form.weaponPack}</span>
+                    </div>
+                  )}
                   <div className="crbSummaryRow">
                     <span>Description</span>
                     <span className="crbSummaryDesc">{form.description}</span>
                   </div>
-                  {(form.assetType === "Character" || form.assetType === "Weapon") && (
-                    <>
-                      <div className="crbSummaryRow">
-                        <span>Animations</span><span>{form.animCount}</span>
-                      </div>
-                      <div className="crbSummaryRow">
-                        <span>Poly budget</span><span>{form.polyBudget || "—"}</span>
-                      </div>
-                    </>
-                  )}
                   {form.reference && (
                     <div className="crbSummaryRow">
                       <span>Reference</span><span className="crbSummaryRef">{form.reference}</span>

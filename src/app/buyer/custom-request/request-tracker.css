@@ -426,3 +426,33 @@
   .rtQuoteRow     { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .rtQuoteDivider { width: 100%; height: 1px; margin: 0; }
 }
+
+/* ── Empty state ── */
+.rtEmpty {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.65rem;
+  padding:        3rem 1rem;
+  text-align:     center;
+}
+
+.rtEmptyIcon {
+  color:   rgba(255,255,255,0.15);
+  margin-bottom: 0.25rem;
+}
+
+.rtEmptyTitle {
+  font-family:  "Syne", sans-serif;
+  font-size:    0.9rem;
+  font-weight:  700;
+  color:        rgba(255,255,255,0.4);
+  margin:       0;
+}
+
+.rtEmptyDesc {
+  font-family: "DM Mono", monospace;
+  font-size:   0.65rem;
+  color:       rgba(255,255,255,0.2);
+  margin:      0;
+}

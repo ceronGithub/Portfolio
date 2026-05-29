@@ -1277,3 +1277,45 @@
   background: #1a1a1a;
   color:      #fff;
 }
+/* ── Display status selector ── */
+.apDisplayStatusRow {
+  display:               grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:                   0.5rem;
+}
+
+@media (max-width: 700px) {
+  .apDisplayStatusRow { grid-template-columns: repeat(2, 1fr); }
+}
+
+.apDisplayStatusBtn {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.2rem;
+  padding:        0.6rem 0.7rem;
+  background:     #0d0d0d;
+  border:         1px solid #1e1e1e;
+  border-radius:  8px;
+  text-align:     left;
+  cursor:         pointer;
+  transition:     border-color 0.15s, background 0.15s, color 0.15s;
+  color:          rgba(255,255,255,0.5);
+}
+
+.apDisplayStatusBtn:hover {
+  border-color: #2a2a2a;
+  background:   #111;
+}
+
+.apDisplayStatusLabel {
+  font-family: "Syne", sans-serif;
+  font-size:   0.72rem;
+  font-weight: 700;
+}
+
+.apDisplayStatusDesc {
+  font-family: "DM Mono", monospace;
+  font-size:   0.52rem;
+  opacity:     0.65;
+  line-height: 1.4;
+}

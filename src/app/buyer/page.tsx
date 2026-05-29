@@ -27,7 +27,7 @@ export default async function BuyerPage() {
 
   const [systems, ownerships, latestProducts] = await Promise.all([
     prisma.system.findMany({
-      where:   { isActive: true },
+      where:   { isActive: true, NOT: { displayStatus: "hidden" } },
       orderBy: { createdAt: "asc" },
       include: { addons: { orderBy: [{ category: "asc" }, { label: "asc" }] } },
     }),
@@ -76,18 +76,19 @@ export default async function BuyerPage() {
   };
 
   const items = systems.map((s: any) => ({
-    id:           s.id,
-    name:         s.title,
-    tag:          s.tag,
-    accent:       s.accent,
-    description:  s.description ?? "",
-    basePrice:    s.basePrice,
-    timeline:     s.timeline ?? "",
-    features:     s.features ?? [],
-    demoVideoUrl: s.demoVideoUrl ?? demoVideoFallbacks[s.tag] ?? null,
-    bgVideoUrl:   s.bgVideoUrl   ?? bgVideoFallbacks[s.tag]   ?? null,
-    owned:        ownedSet.has(s.id),
-    addons:       s.addons.map((a: any) => ({
+    id:            s.id,
+    name:          s.title,
+    tag:           s.tag,
+    accent:        s.accent,
+    description:   s.description ?? "",
+    basePrice:     s.basePrice,
+    timeline:      s.timeline ?? "",
+    features:      s.features ?? [],
+    demoVideoUrl:  s.demoVideoUrl ?? demoVideoFallbacks[s.tag] ?? null,
+    bgVideoUrl:    s.bgVideoUrl   ?? bgVideoFallbacks[s.tag]   ?? null,
+    owned:         ownedSet.has(s.id),
+    displayStatus: s.displayStatus ?? "visible",
+    addons:        s.addons.map((a: any) => ({
       id:       a.id,
       label:    a.label,
       desc:     a.description ?? "",

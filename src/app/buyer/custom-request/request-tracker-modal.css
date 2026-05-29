@@ -1,0 +1,124 @@
+/* request-tracker-modal.css — Modal overlay wrapper for Request Tracker FAB */
+
+/* ── Overlay ── */
+.rtModalOverlay {
+  position:        fixed;
+  inset:           0;
+  z-index:         500;
+  background:      rgba(0, 0, 0, 0.80);
+  backdrop-filter: blur(6px);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1.5rem;
+  animation:       rtModalFadeIn 0.2s ease;
+}
+
+@keyframes rtModalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Panel ── */
+.rtModalPanel {
+  width:            100%;
+  max-width:        780px;
+  max-height:       88vh;
+  background:       #0a0a0a;
+  border:           1px solid #1e1e1e;
+  border-radius:    20px;
+  display:          flex;
+  flex-direction:   column;
+  overflow:         hidden;
+  box-shadow:       0 32px 80px rgba(0, 0, 0, 0.8);
+  animation:        rtModalSlideIn 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes rtModalSlideIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+/* ── Header ── */
+.rtModalHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         1.4rem 1.75rem 1.2rem;
+  border-bottom:   1px solid #1a1a1a;
+  flex-shrink:     0;
+}
+
+.rtModalHeaderLeft {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+}
+
+.rtModalEyebrow {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  font-weight:    500;
+  color:          #a78bfa;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin:         0;
+}
+
+.rtModalTitle {
+  font-family:    'Syne', sans-serif;
+  font-size:      1.15rem;
+  font-weight:    800;
+  color:          rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.02em;
+  margin:         0;
+}
+
+.rtModalClose {
+  width:           36px;
+  height:          36px;
+  border-radius:   50%;
+  background:      #141414;
+  border:          1px solid #2a2a2a;
+  color:           rgba(255, 255, 255, 0.4);
+  cursor:          pointer;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      background 0.18s, color 0.18s, border-color 0.18s;
+  flex-shrink:     0;
+}
+
+.rtModalClose:hover {
+  background:    #1e1e1e;
+  color:         rgba(255, 255, 255, 0.85);
+  border-color:  #3a3a3a;
+}
+
+/* ── Body — scrollable ── */
+.rtModalBody {
+  overflow-y:      auto;
+  flex:            1;
+  padding:         1.5rem 1.75rem 1.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.rtModalBody::-webkit-scrollbar       { width: 4px; }
+.rtModalBody::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+/* ── When rendered inside modal, strip section wrapper padding ── */
+.rtModalBody .rtSection {
+  padding:    0;
+  background: transparent;
+  border-top: none;
+}
+
+.rtModalBody .rtInner {
+  max-width: 100%;
+  gap:       1.5rem;
+}
+
+.rtModalBody .rtHeader {
+  display: none; /* Header is shown in the modal header above */
+}

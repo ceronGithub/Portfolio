@@ -19,7 +19,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   const ALLOWED = [
     "basePrice", "title", "description", "accent",
     "timeline", "deploy", "features", "isActive",
-    "bgVideoUrl", "demoVideoUrl",
+    "bgVideoUrl", "demoVideoUrl", "displayStatus",
   ];
 
   const data: Record<string, unknown> = {};

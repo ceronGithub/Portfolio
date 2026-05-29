@@ -20,6 +20,7 @@ interface SystemItem {
   description: string; basePrice: number; timeline: string;
   features: string[];
   demoVideoUrl: string | null; bgVideoUrl: string | null; owned: boolean; addons: AddonItem[];
+  displayStatus: string; // "visible" | "coming_soon" | "ongoing" | "hidden"
 }
 interface Props {
   items: SystemItem[];
@@ -323,9 +324,14 @@ function SystemCard({
   onClick: () => void; onPreviewClick: () => void;
   isWishlisted?: boolean; onToggleWishlist?: (id: string) => void;
 }) {
+  // displayStatus controls what's shown on the card
+  const isComingSoon = item.displayStatus === "coming_soon";
+  const isOngoing    = item.displayStatus === "ongoing";
+  const isLocked     = isComingSoon || isOngoing; // disable buy/configure when locked
+
   return (
     <div
-      className={"vSysCarouselCard" + (isActive ? " vSysCarouselCardActive" : "")}
+      className={"vSysCarouselCard" + (isActive ? " vSysCarouselCardActive" : "") + (isLocked ? " vSysCarouselCardLocked" : "")}
       style={{ "--acc": item.accent } as React.CSSProperties}
       onClick={() => !isActive && onClick()}
     >
@@ -337,7 +343,7 @@ function SystemCard({
             <span className="vSysCardNum">{String(index + 1).padStart(2, "0")}</span>
             <div className="vSysCardTopRight">
               {/* Wishlist heart */}
-              {onToggleWishlist && (
+              {onToggleWishlist && !isLocked && (
                 <button
                   className={"vSysCardWishlistBtn" + (isWishlisted ? " vSysCardWishlistBtnActive" : "")}
                   onClick={e => { e.stopPropagation(); onToggleWishlist(item.id); }}
@@ -349,12 +355,21 @@ function SystemCard({
                   </svg>
                 </button>
               )}
-              <span
-                className="vSysCardDeployBadge"
-                style={{ color: item.accent, borderColor: item.accent + "44", background: item.accent + "12" }}
-              >
-                WEB / IIS
-              </span>
+              {/* displayStatus badge */}
+              {isComingSoon && (
+                <span className="vSysCardStatusBadge vSysCardStatusBadgeComingSoon">Coming Soon</span>
+              )}
+              {isOngoing && (
+                <span className="vSysCardStatusBadge vSysCardStatusBadgeOngoing">In Development</span>
+              )}
+              {!isLocked && (
+                <span
+                  className="vSysCardDeployBadge"
+                  style={{ color: item.accent, borderColor: item.accent + "44", background: item.accent + "12" }}
+                >
+                  WEB / IIS
+                </span>
+              )}
             </div>
           </div>
 
@@ -384,25 +399,42 @@ function SystemCard({
           )}
         </div>
 
-        {/* Browser preview mockup */}
-        <div className="vSysCardPreview" onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}>
-          <div className="vSysCardPreviewBg" />
-          <div className="vSysCardPreviewGrid" />
-          <div className="vSysCardBrowserBar">
-            <div className="vSysCardBrowserDot" style={{ background: "#ff5f57" }} />
-            <div className="vSysCardBrowserDot" style={{ background: "#febc2e" }} />
-            <div className="vSysCardBrowserDot" style={{ background: "#28c840" }} />
-          </div>
-          <div className="vSysCardPreviewScan" />
-          <div className="vSysCardPreviewCenter">
-            <div className="vSysCardPlayBtn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={item.accent} strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3" fill={item.accent} stroke="none"/>
-              </svg>
+        {/* Browser preview mockup — hidden when locked */}
+        {!isLocked && (
+          <div className="vSysCardPreview" onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}>
+            <div className="vSysCardPreviewBg" />
+            <div className="vSysCardPreviewGrid" />
+            <div className="vSysCardBrowserBar">
+              <div className="vSysCardBrowserDot" style={{ background: "#ff5f57" }} />
+              <div className="vSysCardBrowserDot" style={{ background: "#febc2e" }} />
+              <div className="vSysCardBrowserDot" style={{ background: "#28c840" }} />
             </div>
-            <span className="vSysCardPreviewLabel">Watch Live Preview</span>
+            <div className="vSysCardPreviewScan" />
+            <div className="vSysCardPreviewCenter">
+              <div className="vSysCardPlayBtn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={item.accent} strokeWidth="2">
+                  <polygon points="5 3 19 12 5 21 5 3" fill={item.accent} stroke="none"/>
+                </svg>
+              </div>
+              <span className="vSysCardPreviewLabel">Watch Live Preview</span>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Locked placeholder — shown instead of preview when coming_soon or ongoing */}
+        {isLocked && (
+          <div className="vSysCardLockedPreview" style={{ borderColor: item.accent + "22" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={item.accent} strokeWidth="1.2" strokeLinecap="round" opacity="0.4">
+              {isComingSoon
+                ? <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>
+                : <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>
+              }
+            </svg>
+            <p className="vSysCardLockedLabel" style={{ color: item.accent + "99" }}>
+              {isComingSoon ? "Launching soon" : "Currently in development"}
+            </p>
+          </div>
+        )}
 
         {/* Price + buttons */}
         <div className="vSysCardFooter">
@@ -412,51 +444,63 @@ function SystemCard({
             <span className="vSysCardPriceSub">one-time license</span>
           </div>
           <div className="vSysCardBtns">
-            <button
-              className="vSystemBtn vSystemBtnGhost"
-              onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}
-            >
-              Configure
-            </button>
-            {item.owned ? (
-              <span className="vSystemBtn vSystemBtnOwned">✓ Owned</span>
+            {isLocked ? (
+              <span className="vSystemBtn vSystemBtnLocked">
+                {isComingSoon ? "Coming Soon" : "In Development"}
+              </span>
             ) : (
-              <button
-                className="vSystemBtn vSystemBtnGreen"
-                style={{ background: item.accent }}
-                onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}
-              >
-                Buy Now →
-              </button>
+              <>
+                <button
+                  className="vSystemBtn vSystemBtnGhost"
+                  onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}
+                >
+                  Configure
+                </button>
+                {item.owned ? (
+                  <span className="vSystemBtn vSystemBtnOwned">✓ Owned</span>
+                ) : (
+                  <button
+                    className="vSystemBtn vSystemBtnGreen"
+                    style={{ background: item.accent }}
+                    onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}
+                  >
+                    Buy Now →
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
 
-        {/* Payment terms */}
-        <div className="vSysCardTermsRow">
-          <div className="vSysCardTerm">
-            <span className="vSysCardTermNum" style={{ color: item.accent }}>30%</span>
-            <span className="vSysCardTermLabel">downpayment</span>
+        {/* Payment terms — only show when purchasable */}
+        {!isLocked && (
+          <div className="vSysCardTermsRow">
+            <div className="vSysCardTerm">
+              <span className="vSysCardTermNum" style={{ color: item.accent }}>30%</span>
+              <span className="vSysCardTermLabel">downpayment</span>
+            </div>
+            <div className="vSysCardTermDivider" />
+            <div className="vSysCardTerm">
+              <span className="vSysCardTermNum" style={{ color: item.accent }}>70%</span>
+              <span className="vSysCardTermLabel">on delivery</span>
+            </div>
+            <div className="vSysCardTermDivider" />
+            <div className="vSysCardTerm">
+              <span className="vSysCardTermNum" style={{ color: item.accent }}>100%</span>
+              <span className="vSysCardTermLabel">source code</span>
+            </div>
           </div>
-          <div className="vSysCardTermDivider" />
-          <div className="vSysCardTerm">
-            <span className="vSysCardTermNum" style={{ color: item.accent }}>70%</span>
-            <span className="vSysCardTermLabel">on delivery</span>
-          </div>
-          <div className="vSysCardTermDivider" />
-          <div className="vSysCardTerm">
-            <span className="vSysCardTermNum" style={{ color: item.accent }}>100%</span>
-            <span className="vSysCardTermLabel">source code</span>
-          </div>
-        </div>
+        )}
 
         {/* Policy */}
-        <div className="vSysCardPolicy">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          Live demo access granted before purchase. Full source code ownership transferred upon completion.
-        </div>
+        {!isLocked && (
+          <div className="vSysCardPolicy">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Live demo access granted before purchase. Full source code ownership transferred upon completion.
+          </div>
+        )}
 
       </div>
     </div>

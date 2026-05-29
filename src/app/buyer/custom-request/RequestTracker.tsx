@@ -190,7 +190,12 @@ function RequestCard({ request }: { request: TrackedRequest }) {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function RequestTracker() {
+interface RequestTrackerProps {
+  // When true, strips the outer section wrapper (rendered inside a modal instead)
+  isModal?: boolean;
+}
+
+export default function RequestTracker({ isModal = false }: RequestTrackerProps) {
   const [requests,   setRequests]   = useState<TrackedRequest[]>([]);
   const [isLoading,  setIsLoading]  = useState(true);
   const [fetchError, setFetchError] = useState("");
@@ -213,14 +218,14 @@ export default function RequestTracker() {
     loadRequests();
   }, []);
 
-  // Don't render the section at all if no requests and not loading
-  if (!isLoading && requests.length === 0 && !fetchError) return null;
+  // Don't render the section at all if no requests and not loading (only in standalone section mode)
+  if (!isModal && !isLoading && requests.length === 0 && !fetchError) return null;
 
-  return (
-    <section className="rtSection">
-      <div className="rtInner">
-
-        {/* Header */}
+  // Content block — shared between section and modal rendering
+  const content = (
+    <>
+      {/* Header — hidden when rendered inside modal (modal has its own header) */}
+      {!isModal && (
         <div className="rtHeader">
           <div className="rtHeaderLeft">
             <p className="rtEyebrow">Your Submissions</p>
@@ -230,25 +235,43 @@ export default function RequestTracker() {
             Track the status of your custom requests in real time.
           </p>
         </div>
+      )}
 
-        {/* Content */}
-        {isLoading ? (
-          <div className="rtSkeletonList">
-            {[1, 2].map(n => (
-              <div key={n} className="rtSkeleton" />
-            ))}
-          </div>
-        ) : fetchError ? (
-          <div className="rtError">{fetchError}</div>
-        ) : (
-          <div className="rtList">
-            {requests.map(request => (
-              <RequestCard key={request.id} request={request} />
-            ))}
-          </div>
-        )}
+      {/* Content */}
+      {isLoading ? (
+        <div className="rtSkeletonList">
+          {[1, 2].map(n => (
+            <div key={n} className="rtSkeleton" />
+          ))}
+        </div>
+      ) : fetchError ? (
+        <div className="rtError">{fetchError}</div>
+      ) : requests.length === 0 ? (
+        <div className="rtEmpty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="rtEmptyIcon">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <p className="rtEmptyTitle">No requests yet</p>
+          <p className="rtEmptyDesc">Submit a custom request below and track it here.</p>
+        </div>
+      ) : (
+        <div className="rtList">
+          {requests.map(request => (
+            <RequestCard key={request.id} request={request} />
+          ))}
+        </div>
+      )}
+    </>
+  );
 
-      </div>
+  // When rendered inside modal — no outer section wrapper
+  if (isModal) {
+    return <div className="rtInner">{content}</div>;
+  }
+
+  return (
+    <section className="rtSection">
+      <div className="rtInner">{content}</div>
     </section>
   );
 }

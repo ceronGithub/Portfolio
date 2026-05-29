@@ -133,19 +133,22 @@ model Ownership {
 // Stores all 10 systems with base pricing, features, and metadata.
 
 model System {
-  id           String        @id @default(cuid())
-  tag          String        @unique  // "HR", "Construction", etc.
-  title        String
-  basePrice    Int                    // in PHP (e.g. 33000)
-  accent       String                 // hex color
-  timeline     String
-  deploy       String
-  description  String
-  features     String[]               // base feature list
-  bgVideoUrl   String?                // background video for buyer UI
-  demoVideoUrl String?                // demo video shown in Configure modal
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
+  id            String        @id @default(cuid())
+  tag           String        @unique  // "HR", "Construction", etc.
+  title         String
+  basePrice     Int                    // in PHP (e.g. 33000)
+  accent        String                 // hex color
+  timeline      String
+  deploy        String
+  description   String
+  features      String[]               // base feature list
+  bgVideoUrl    String?                // background video for buyer UI
+  demoVideoUrl  String?                // demo video shown in Configure modal
+  isActive      Boolean       @default(true)
+  // Admin-controlled display status for buyer + visitor views
+  // visible = normal | coming_soon = locked badge | ongoing = in-dev badge | hidden = not shown at all
+  displayStatus String        @default("visible")
+  createdAt     DateTime      @default(now())
 
   addons       SystemAddon[]
   orders       Order[]

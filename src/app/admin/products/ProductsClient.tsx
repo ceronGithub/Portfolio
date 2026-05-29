@@ -37,6 +37,7 @@ interface System {
   accent: string; timeline: string; deploy: string;
   description: string; features: string[]; isActive: boolean;
   bgVideoUrl: string | null; demoVideoUrl: string | null;
+  displayStatus: string;
   addons: Addon[];
 }
 
@@ -148,6 +149,7 @@ async function updateSystemFields(
     title: string; description: string; accent: string;
     timeline: string; deploy: string; features: string[];
     bgVideoUrl: string | null; demoVideoUrl: string | null;
+    displayStatus: string;
   }>
 ): Promise<boolean> {
   const res = await fetch(`/api/admin/systems/${id}`, {
@@ -993,6 +995,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
   const [features, setFeatures]     = useState((system.features ?? []).join("\n"));
   const [bgVideoUrl, setBgVideo]    = useState(system.bgVideoUrl ?? "");
   const [demoVideoUrl, setDemoVideo]= useState(system.demoVideoUrl ?? "");
+  const [displayStatus, setDisplayStatus] = useState(system.displayStatus ?? "visible");
   const [saving, setSaving]         = useState(false);
   const [saved, setSaved]           = useState(false);
   const [error, setError]           = useState("");
@@ -1003,25 +1006,27 @@ function SystemFullEditor({ system, accent, onSaved }: {
     setError("");
     const featuresList = features.split("\n").map(f => f.trim()).filter(Boolean);
     const ok = await updateSystemFields(system.id, {
-      title:        title.trim(),
-      description:  description.trim(),
-      accent:       accentVal.trim(),
-      timeline:     timeline.trim(),
-      deploy:       deploy.trim(),
-      features:     featuresList,
-      bgVideoUrl:   bgVideoUrl.trim() || null,
-      demoVideoUrl: demoVideoUrl.trim() || null,
+      title:         title.trim(),
+      description:   description.trim(),
+      accent:        accentVal.trim(),
+      timeline:      timeline.trim(),
+      deploy:        deploy.trim(),
+      features:      featuresList,
+      bgVideoUrl:    bgVideoUrl.trim() || null,
+      demoVideoUrl:  demoVideoUrl.trim() || null,
+      displayStatus: displayStatus,
     });
     if (ok) {
       onSaved({
-        title:        title.trim(),
-        description:  description.trim(),
-        accent:       accentVal.trim(),
-        timeline:     timeline.trim(),
-        deploy:       deploy.trim(),
-        features:     featuresList,
-        bgVideoUrl:   bgVideoUrl.trim() || null,
-        demoVideoUrl: demoVideoUrl.trim() || null,
+        title:         title.trim(),
+        description:   description.trim(),
+        accent:        accentVal.trim(),
+        timeline:      timeline.trim(),
+        deploy:        deploy.trim(),
+        features:      featuresList,
+        bgVideoUrl:    bgVideoUrl.trim() || null,
+        demoVideoUrl:  demoVideoUrl.trim() || null,
+        displayStatus: displayStatus,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -1038,7 +1043,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
 
         <div className="apSystemEditorField apSystemEditorFieldFull">
           <label className="apMediaLabel">Title</label>
-          <input className="apMediaInput" value={title} onChange={e => setTitle(sanitize(e.target.value))} />
+          <input className="apMediaInput" value={title} onChange={e => setTitle(e.target.value)} />
         </div>
 
         <div className="apSystemEditorField">
@@ -1061,12 +1066,12 @@ function SystemFullEditor({ system, accent, onSaved }: {
 
         <div className="apSystemEditorField">
           <label className="apMediaLabel">Timeline (e.g. 4–6 weeks)</label>
-          <input className="apMediaInput" value={timeline} onChange={e => setTimeline(sanitize(e.target.value))} />
+          <input className="apMediaInput" value={timeline} onChange={e => setTimeline(e.target.value)} />
         </div>
 
         <div className="apSystemEditorField">
           <label className="apMediaLabel">Deploy (e.g. Cloud / On-premise)</label>
-          <input className="apMediaInput" value={deploy} onChange={e => setDeploy(sanitize(e.target.value))} />
+          <input className="apMediaInput" value={deploy} onChange={e => setDeploy(e.target.value)} />
         </div>
 
         <div className="apSystemEditorField apSystemEditorFieldFull">
@@ -1075,7 +1080,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
             className="apMediaInput apSystemEditorTextarea"
             rows={3}
             value={description}
-            onChange={e => setDesc(sanitize(e.target.value))}
+            onChange={e => setDesc(e.target.value)}
           />
         </div>
 
@@ -1086,7 +1091,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
             rows={5}
             placeholder={"Feature A\nFeature B\nFeature C"}
             value={features}
-            onChange={e => setFeatures(sanitize(e.target.value))}
+            onChange={e => setFeatures(e.target.value)}
           />
         </div>
 
@@ -1108,6 +1113,35 @@ function SystemFullEditor({ system, accent, onSaved }: {
             value={demoVideoUrl}
             onChange={e => setDemoVideo(e.target.value)}
           />
+        </div>
+
+        {/* Display status — controls buyer + visitor visibility */}
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Display Status</label>
+          <div className="apDisplayStatusRow">
+            {(["visible", "coming_soon", "ongoing", "hidden"] as const).map(status => {
+              const labelMap: Record<string, { label: string; color: string; desc: string }> = {
+                visible:     { label: "Visible",        color: "#22c55e", desc: "Normal — fully purchasable" },
+                coming_soon: { label: "Coming Soon",    color: "#f59e0b", desc: "Shows badge, locks buy/configure" },
+                ongoing:     { label: "In Development", color: "#60a5fa", desc: "Shows badge, locks buy/configure" },
+                hidden:      { label: "Hidden",         color: "#888",    desc: "Not shown on buyer or visitor" },
+              };
+              const info    = labelMap[status];
+              const isActive = displayStatus === status;
+              return (
+                <button
+                  key={status}
+                  className={"apDisplayStatusBtn" + (isActive ? " apDisplayStatusBtnActive" : "")}
+                  style={isActive ? { borderColor: info.color + "66", background: info.color + "12", color: info.color } : {}}
+                  onClick={() => setDisplayStatus(status)}
+                  type="button"
+                >
+                  <span className="apDisplayStatusLabel">{info.label}</span>
+                  <span className="apDisplayStatusDesc">{info.desc}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
       </div>
