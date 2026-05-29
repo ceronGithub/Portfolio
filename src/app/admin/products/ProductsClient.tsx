@@ -7,23 +7,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { sanitize } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
 interface Product {
-  id: string; slug: string | null; name: string; description: string | null;
+  id: string; name: string; description: string | null;
   price: number; isActive: boolean; isLatest: boolean;
-  category: string; packageTier: string;
+  category: string;
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
   actionTwoUrl: string | null; actionThreeUrl: string | null;
-  // Downloadable mesh files
-  fileKeyObj: string | null; fileKeyFbx: string | null; fileKeyGlb: string | null;
-  // Animation clips
-  animIdleUrl: string | null; animWalkUrl: string | null; animRunUrl: string | null;
-  animAttackOneUrl: string | null; animAttackTwoUrl: string | null;
-  animDeathUrl: string | null; animHitUrl: string | null;
   createdAt: Date;
 }
 
@@ -37,7 +30,6 @@ interface System {
   accent: string; timeline: string; deploy: string;
   description: string; features: string[]; isActive: boolean;
   bgVideoUrl: string | null; demoVideoUrl: string | null;
-  displayStatus: string;
   addons: Addon[];
 }
 
@@ -71,30 +63,16 @@ async function toggleProductActive(id: string, current: boolean): Promise<boolea
   return res.ok;
 }
 
-// Sets isLatest=true on a product AND updates its packageTier in one PATCH call.
-async function setProductLatestWithTier(id: string, tier: string): Promise<boolean> {
+// Toggles the isLatest flag on a product.
+async function toggleProductLatest(id: string, current: boolean): Promise<string | null> {
   const res = await fetch(`/api/admin/products/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ isLatest: true, packageTier: tier }),
+    body: JSON.stringify({ isLatest: !current }),
   });
-  return res.ok;
-}
-
-// Clears the isLatest flag on a product (unset latest).
-async function clearProductLatest(id: string): Promise<boolean> {
-  const res = await fetch(`/api/admin/products/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ isLatest: false }),
-  });
-  return res.ok;
-}
-
-// Permanently deletes a product and cascades ownership/orders on the server.
-async function deleteProduct(id: string): Promise<boolean> {
-  const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
-  return res.ok;
+  if (res.ok) return null;
+  const b = await res.json().catch(() => ({}));
+  return b.error ?? `HTTP ${res.status}`;
 }
 
 // Updates a single media URL field (or null) on a product.
@@ -117,11 +95,6 @@ async function createProduct(data: {
   description?: string; isLatest?: boolean;
   previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
   actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
-  priceMesh?: number | null; priceStandard?: number | null; priceFull?: number | null;
-  fileKeyObj?: string | null; fileKeyFbx?: string | null; fileKeyGlb?: string | null;
-  animIdleUrl?: string | null; animWalkUrl?: string | null; animRunUrl?: string | null;
-  animAttackOneUrl?: string | null; animAttackTwoUrl?: string | null;
-  animDeathUrl?: string | null; animHitUrl?: string | null;
 }): Promise<Product | null> {
   const res = await fetch("/api/admin/products", {
     method: "POST",
@@ -149,7 +122,6 @@ async function updateSystemFields(
     title: string; description: string; accent: string;
     timeline: string; deploy: string; features: string[];
     bgVideoUrl: string | null; demoVideoUrl: string | null;
-    displayStatus: string;
   }>
 ): Promise<boolean> {
   const res = await fetch(`/api/admin/systems/${id}`, {
@@ -288,7 +260,7 @@ function SystemBasePriceEditor({ systemId, initialPrice, accent }: {
           className="apPriceInput"
           type="number" min="0"
           value={draft}
-          onChange={e => setDraft(sanitize(e.target.value))}
+          onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
           autoFocus
           style={{ borderColor: accent }}
@@ -346,7 +318,7 @@ function AddonPriceEditor({ addon, accent, onUpdated }: {
           className="apPriceInput apPriceInputSmall"
           type="number" min="0"
           value={draft}
-          onChange={e => setDraft(sanitize(e.target.value))}
+          onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
           autoFocus
           style={{ borderColor: accent }}
@@ -426,7 +398,7 @@ function AddAddonForm({ systemId, accent, onAdded }: {
           className="apAddAddonInput"
           placeholder="Label (e.g. AI Chatbot)"
           value={label}
-          onChange={e => setLabel(sanitize(e.target.value))}
+          onChange={e => setLabel(e.target.value)}
         />
         <input
           className="apAddAddonInput"
@@ -461,84 +433,33 @@ function AddAddonForm({ systemId, accent, onAdded }: {
   );
 }
 
-// ── MEDIA_FIELD_GROUPS — grouped editable fields per product ──────────────
-const MEDIA_FIELD_GROUPS: {
-  group:  string;
-  color:  string;
-  fields: { field: string; label: string; type?: "url" | "number"; placeholder?: string }[];
-}[] = [
-  {
-    group: "Preview",
-    color: "#6c8af5",
-    fields: [
-      { field: "previewVideoUrl", label: "Preview Video URL",   placeholder: "GDrive /api/drive-video?id=…" },
-      { field: "facePngUrl",      label: "Face PNG URL",        placeholder: "Image URL or Supabase path" },
-      { field: "threeDUrl",       label: "3D Viewer URL",       placeholder: "Architecture only" },
-    ],
-  },
-  {
-    group: "Tier Prices",
-    color: "#fbbf24",
-    fields: [
-      { field: "priceMesh",     label: "Mesh Only Price (₱)",     type: "number" as const, placeholder: "e.g. 699" },
-      { field: "priceStandard", label: "Standard Pack Price (₱)", type: "number" as const, placeholder: "e.g. 1499" },
-      { field: "priceFull",     label: "Full Pack Price (₱)",     type: "number" as const, placeholder: "Characters only — leave blank for weapons" },
-    ],
-  },
-  {
-    group: "Downloadable Files",
-    color: "#34d399",
-    fields: [
-      { field: "fileKeyObj", label: "OBJ File Key (Supabase)", placeholder: "assets/characters/orc-01.obj" },
-      { field: "fileKeyFbx", label: "FBX File Key (Supabase)", placeholder: "assets/characters/orc-01.fbx" },
-      { field: "fileKeyGlb", label: "GLB File Key (Supabase)", placeholder: "Full Pack only — assets/characters/orc-01.glb" },
-    ],
-  },
-  {
-    group: "Animations",
-    color: "#a78bfa",
-    fields: [
-      { field: "animIdleUrl",      label: "Idle",         placeholder: "Supabase key or URL" },
-      { field: "animWalkUrl",      label: "Walk",         placeholder: "Supabase key or URL" },
-      { field: "animRunUrl",       label: "Run",          placeholder: "Supabase key or URL" },
-      { field: "animAttackOneUrl", label: "Attack 1",     placeholder: "Supabase key or URL" },
-      { field: "animAttackTwoUrl", label: "Attack 2",     placeholder: "Full Pack only" },
-      { field: "animDeathUrl",     label: "Death",        placeholder: "Supabase key or URL" },
-      { field: "animHitUrl",       label: "Hit / Flinch", placeholder: "Full Pack only" },
-    ],
-  },
-  {
-    group: "Legacy Action Slots",
-    color: "#94a3b8",
-    fields: [
-      { field: "actionOneUrl",   label: "Action 1 URL" },
-      { field: "actionTwoUrl",   label: "Action 2 URL" },
-      { field: "actionThreeUrl", label: "Action 3 URL" },
-    ],
-  },
+// ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
+// Used by MediaEditor to render one inline editor row per field.
+const MEDIA_FIELDS: { field: string; label: string }[] = [
+  { field: "previewVideoUrl", label: "Preview Video URL" },
+  { field: "facePngUrl",      label: "Face PNG URL"       },
+  { field: "threeDUrl",       label: "3D Model URL"       },
+  { field: "actionOneUrl",    label: "Action 1 URL"       },
+  { field: "actionTwoUrl",    label: "Action 2 URL"       },
+  { field: "actionThreeUrl",  label: "Action 3 URL"       },
 ];
 
-const ALL_MEDIA_FIELDS = MEDIA_FIELD_GROUPS.flatMap(g => g.fields);
-
-// ── MediaEditor ─────────────────────────────────────────────────────────────
+// ── MediaEditor — inline URL editor for all media fields of one product ──
+// Rendered inside an expandable row. Each field shows a text input with
+// Save / Clear buttons that PATCH only the changed field immediately.
 function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
 }) {
   const initialDrafts = Object.fromEntries(
-    ALL_MEDIA_FIELDS.map(({ field }) => [
-      field,
-      (product[field as keyof Product] as string | number | null) != null
-        ? String(product[field as keyof Product]) : ""
-    ])
+    MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
   );
-  const [drafts, setDrafts] = useState<Record<string, string>>(initialDrafts);
-  const [saving, setSaving] = useState<Record<string, boolean>>({});
-  const [saved,  setSaved]  = useState<Record<string, boolean>>({});
+  const [drafts, setDrafts]   = useState<Record<string, string>>(initialDrafts);
+  const [saving, setSaving]   = useState<Record<string, boolean>>({});
+  const [saved, setSaved]     = useState<Record<string, boolean>>({});
 
-  async function handleSaveField(field: string, type?: "url" | "number") {
-    const raw   = drafts[field].trim();
-    const value = raw === "" ? null : type === "number" ? String(parseInt(raw, 10)) : raw;
+  async function handleSaveField(field: string) {
+    const value = drafts[field].trim() || null;
     setSaving(prev => ({ ...prev, [field]: true }));
     const ok = await patchProductMedia(product.id, field, value);
     if (ok) {
@@ -551,49 +472,36 @@ function MediaEditor({ product, onFieldSaved }: {
 
   return (
     <div className="apMediaEditor">
-      {MEDIA_FIELD_GROUPS.map(({ group, color, fields }) => (
-        <div key={group} className="apMediaGroup">
-          <div className="apMediaGroupHeader" style={{ borderLeftColor: color }}>
-            <span className="apMediaGroupLabel">{group}</span>
-          </div>
-          {fields.map(({ field, label, type, placeholder }) => {
-            const currentVal = (product[field as keyof Product] as string | number | null);
-            const isFilled   = currentVal !== null && currentVal !== "" && currentVal !== undefined;
-            return (
-              <div key={field} className={`apMediaRow${isFilled ? " apMediaRowFilled" : ""}`}>
-                <span className="apMediaLabel">
-                  {label}
-                  {isFilled && <span className="apMediaFilledDot" />}
-                </span>
-                <input
-                  className="apMediaInput"
-                  type={type === "number" ? "number" : "text"}
-                  placeholder={placeholder ?? "Paste URL or leave empty to clear"}
-                  value={drafts[field]}
-                  onChange={e => setDrafts(prev => ({ ...prev, [field]: sanitize(e.target.value) }))}
-                  onKeyDown={e => { if (e.key === "Enter") handleSaveField(field, type); }}
-                />
-                <button
-                  className="apPriceSaveBtn"
-                  onClick={() => handleSaveField(field, type)}
-                  disabled={saving[field]}
-                >
-                  {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
-                </button>
-                <button
-                  className="apPriceCancelBtn"
-                  onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field, type); }}
-                  title="Clear this field"
-                >✕</button>
-              </div>
-            );
-          })}
+      {MEDIA_FIELDS.map(({ field, label }) => (
+        <div key={field} className="apMediaRow">
+          <span className="apMediaLabel">{label}</span>
+          <input
+            className="apMediaInput"
+            type="text"
+            placeholder="Paste URL or leave empty to clear"
+            value={drafts[field]}
+            onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
+            onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
+          />
+          <button
+            className="apPriceSaveBtn"
+            onClick={() => handleSaveField(field)}
+            disabled={saving[field]}
+          >
+            {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
+          </button>
+          <button
+            className="apPriceCancelBtn"
+            onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field); }}
+            title="Clear this URL"
+          >
+            ✕
+          </button>
         </div>
       ))}
     </div>
   );
 }
-
 
 // ── AddProductForm — create a new product from the Admin UI ───────────────
 // Shown when the admin clicks "Add New Product" at the top of the table.
@@ -650,7 +558,7 @@ function AddProductForm({ onProductCreated, onClose }: {
       <div className="apAddProductGrid">
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Name *</label>
-          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(sanitize(e.target.value))} />
+          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Price (₱) *</label>
@@ -667,7 +575,7 @@ function AddProductForm({ onProductCreated, onClose }: {
         </div>
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Description</label>
-          <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(sanitize(e.target.value))} />
+          <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
         </div>
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Preview Video URL</label>
@@ -723,32 +631,16 @@ function ProductsSection({
   togglingId: string | null;
 }) {
   const revealRef = useReveal();
-  const [productList, setProductList]       = useState<Product[]>(products);
-  const [expandedRow, setExpandedRow]       = useState<string | null>(null);
+  const [productList, setProductList]     = useState<Product[]>(products);
+  const [expandedRow, setExpandedRow]     = useState<string | null>(null);
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
-  const [deletingId,     setDeletingId]     = useState<string | null>(null);
-  const [showAddForm, setShowAddForm]       = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: "ok"|"err" }|null>(null);
+  const [showAddForm, setShowAddForm]     = useState(false);
 
-  // ── Column filters ────────────────────────────────────────────────
-  const [filterName,     setFilterName]     = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterPrice,    setFilterPrice]    = useState("");
-  const [filterLatest,   setFilterLatest]   = useState<"" | "latest" | "not">(""); 
-  const [filterStatus,   setFilterStatus]   = useState<"" | "active" | "inactive">("");
-
-  // Derives the visible list by applying all active column filters.
-  const filteredList = productList.filter(p => {
-    if (filterName     && !p.name.toLowerCase().includes(filterName.toLowerCase())) return false;
-    if (filterCategory && p.category.toLowerCase() !== filterCategory.toLowerCase()) return false;
-    if (filterPrice    && !String(p.price).includes(filterPrice)) return false;
-    if (filterLatest   === "latest"   && !p.isLatest)  return false;
-    if (filterLatest   === "not"      && p.isLatest)   return false;
-    if (filterStatus   === "active"   && !p.isActive)  return false;
-    if (filterStatus   === "inactive" && p.isActive)   return false;
-    return true;
-  });
-
-  const uniqueCategories = [...new Set(productList.map(p => p.category))].sort();
+  function showToast(msg: string, type: "ok"|"err") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  }
 
   function handleFieldSaved(productId: string, field: string, value: string | null) {
     setProductList(prev => prev.map(p =>
@@ -756,52 +648,49 @@ function ProductsSection({
     ));
   }
 
-  // Toggles isLatest on a product directly — no modal.
-  async function handleToggleLatest(id: string, currentIsLatest: boolean) {
+  async function handleToggleLatest(id: string, current: boolean) {
     setTogglingLatest(id);
-    if (currentIsLatest) {
-      const ok = await clearProductLatest(id);
-      if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isLatest: false } : p));
-    } else {
-      const ok = await setProductLatestWithTier(id, "mesh_only");
-      if (ok) {
+    try {
+      const err = await toggleProductLatest(id, current);
+      if (!err) {
         setProductList(prev => {
           const target = prev.find(p => p.id === id);
           return prev.map(p => {
-            if (p.id === id) return { ...p, isLatest: true };
-            if (target && p.category === target.category) return { ...p, isLatest: false };
+            if (p.id === id) return { ...p, isLatest: !current };
+            if (!current && p.category === target?.category) return { ...p, isLatest: false };
             return p;
           });
         });
+        showToast(!current ? "✦ Set as Latest Drop." : "Unset Latest Drop.", "ok");
+      } else {
+        showToast(`Failed: ${err}`, "err");
       }
+    } finally {
+      setTogglingLatest(null);
     }
-    setTogglingLatest(null);
-  }
-
-  // Delete product with cascade
-  async function handleDeleteProduct(id: string, name: string) {
-    if (!window.confirm(`Delete "${name}"?\nThis will also remove all associated orders and ownership records.`)) return;
-    setDeletingId(id);
-    const ok = await deleteProduct(id);
-    if (ok) setProductList(prev => prev.filter(p => p.id !== id));
-    else    alert("Failed to delete product. Try again.");
-    setDeletingId(null);
   }
 
   function handleProductCreated(newProduct: Product) {
     setProductList(prev => [newProduct, ...prev]);
   }
 
-  const hasActiveFilters = filterName || filterCategory || filterPrice || filterLatest || filterStatus;
-
   return (
     <div className="apCard apReveal" ref={revealRef}>
+      {toast && (
+        <div style={{
+          position:"fixed",bottom:"1.5rem",right:"1.5rem",zIndex:9999,
+          background:toast.type==="ok"?"#22c55e":"#ef4444",
+          color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",
+          fontWeight:700,fontSize:"0.85rem",
+          boxShadow:"0 4px 24px rgba(0,0,0,0.4)",pointerEvents:"none",
+        }}>{toast.msg}</div>
+      )}
       <div className="apCardHeader">
         <div>
           <h2 className="apCardTitle">Products</h2>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span className="apCardBadge">{filteredList.length}{hasActiveFilters ? ` / ${productList.length}` : ""}</span>
+          <span className="apCardBadge">{productList.length}</span>
           <button
             className="apPriceSaveBtn"
             onClick={() => setShowAddForm(prev => !prev)}
@@ -821,103 +710,21 @@ function ProductsSection({
       )}
 
       <div className="apTable">
-        {/* ── Column headers ── */}
         <div className="apTableHead apGrid--productsV2">
           <span>Name</span><span>Category</span><span>Price</span>
-          <span>Latest</span><span>Status</span><span>Actions</span>
+          <span>Latest</span><span>Actions</span>
         </div>
-
-        {/* ── Column filter row ── */}
-        <div className="apFilterRow apGrid--productsV2">
-          {/* Name filter */}
-          <div className="apFilterCell">
-            <input
-              className="apFilterInput"
-              placeholder="Filter name…"
-              value={filterName}
-              onChange={e => setFilterName(sanitize(e.target.value))}
-            />
-            {filterName && <button className="apFilterClear" onClick={() => setFilterName("")}>✕</button>}
-          </div>
-
-          {/* Category filter */}
-          <div className="apFilterCell">
-            <select
-              className="apFilterSelect"
-              value={filterCategory}
-              onChange={e => setFilterCategory(e.target.value)}
-            >
-              <option value="">All</option>
-              {uniqueCategories.map(c => (
-                <option key={c} value={c} style={{ textTransform: "capitalize" }}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Price filter */}
-          <div className="apFilterCell">
-            <input
-              className="apFilterInput"
-              placeholder="Filter price…"
-              value={filterPrice}
-              onChange={e => setFilterPrice(sanitize(e.target.value))}
-            />
-            {filterPrice && <button className="apFilterClear" onClick={() => setFilterPrice("")}>✕</button>}
-          </div>
-
-          {/* Latest filter */}
-          <div className="apFilterCell">
-            <select
-              className="apFilterSelect"
-              value={filterLatest}
-              onChange={e => setFilterLatest(e.target.value as "" | "latest" | "not")}
-            >
-              <option value="">All</option>
-              <option value="latest">Latest</option>
-              <option value="not">Not Latest</option>
-            </select>
-          </div>
-
-          {/* Status filter */}
-          <div className="apFilterCell">
-            <select
-              className="apFilterSelect"
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value as "" | "active" | "inactive")}
-            >
-              <option value="">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-
-          {/* Clear all filters */}
-          <div className="apFilterCell">
-            {hasActiveFilters && (
-              <button
-                className="apFilterClearAll"
-                onClick={() => {
-                  setFilterName(""); setFilterCategory("");
-                  setFilterPrice(""); setFilterLatest(""); setFilterStatus("");
-                }}
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-        </div>
-
-        {filteredList.length === 0 && (
+        {productList.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
               <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
             </svg>
-            <p className="apEmptyTitle">{hasActiveFilters ? "No products match" : "No products yet"}</p>
-            <p className="apEmptyHint">{hasActiveFilters ? "Try adjusting your filters." : "Click \"Add New Product\" above to create one."}</p>
+            <p className="apEmptyTitle">No products yet</p>
+            <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
           </div>
         )}
-        {filteredList.map(p => (
+        {productList.map(p => (
           <div key={p.id}>
             <div className="apTableRow apGrid--productsV2">
               <span className="apCell apCellName">{p.name}</span>
@@ -934,18 +741,22 @@ function ProductsSection({
                   {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
                 </button>
               </span>
-              <span className="apCell">
-                <span className={`apBadge ${p.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
-                  {p.isActive ? "Active" : "Inactive"}
-                </span>
-              </span>
-              <span className="apCell" style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+              <span className="apCell" style={{ display:"flex",gap:"0.4rem",flexWrap:"wrap",alignItems:"center" }}>
                 <button
-                  className={`apActionBtn ${p.isActive ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
-                  onClick={() => onToggle(p.id, p.isActive)}
-                  disabled={togglingId === p.id}
+                  className="apActionBtn apActionBtnActivate"
+                  onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
+                  disabled={togglingId === p.id || p.isActive}
+                  style={{ opacity: p.isActive ? 0.28 : 1 }}
                 >
-                  {togglingId === p.id ? "…" : p.isActive ? "Deactivate" : "Activate"}
+                  {togglingId === p.id && !p.isActive ? "…" : "Activate"}
+                </button>
+                <button
+                  className="apActionBtn apActionBtnDeactivate"
+                  onClick={() => { if (p.isActive) onToggle(p.id, p.isActive); }}
+                  disabled={togglingId === p.id || !p.isActive}
+                  style={{ opacity: !p.isActive ? 0.28 : 1 }}
+                >
+                  {togglingId === p.id && p.isActive ? "…" : "Deactivate"}
                 </button>
                 <button
                   className={`apActionBtn ${expandedRow === p.id ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
@@ -953,15 +764,6 @@ function ProductsSection({
                   onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
                 >
                   {expandedRow === p.id ? "▲ Media" : "✎ Media"}
-                </button>
-                <button
-                  className="apActionBtn apActionBtnDelete"
-                  style={{ fontSize: "0.72rem" }}
-                  onClick={() => handleDeleteProduct(p.id, p.name)}
-                  disabled={deletingId === p.id}
-                  title="Delete this product permanently"
-                >
-                  {deletingId === p.id ? "…" : "✕ Delete"}
                 </button>
               </span>
             </div>
@@ -995,7 +797,6 @@ function SystemFullEditor({ system, accent, onSaved }: {
   const [features, setFeatures]     = useState((system.features ?? []).join("\n"));
   const [bgVideoUrl, setBgVideo]    = useState(system.bgVideoUrl ?? "");
   const [demoVideoUrl, setDemoVideo]= useState(system.demoVideoUrl ?? "");
-  const [displayStatus, setDisplayStatus] = useState(system.displayStatus ?? "visible");
   const [saving, setSaving]         = useState(false);
   const [saved, setSaved]           = useState(false);
   const [error, setError]           = useState("");
@@ -1006,27 +807,25 @@ function SystemFullEditor({ system, accent, onSaved }: {
     setError("");
     const featuresList = features.split("\n").map(f => f.trim()).filter(Boolean);
     const ok = await updateSystemFields(system.id, {
-      title:         title.trim(),
-      description:   description.trim(),
-      accent:        accentVal.trim(),
-      timeline:      timeline.trim(),
-      deploy:        deploy.trim(),
-      features:      featuresList,
-      bgVideoUrl:    bgVideoUrl.trim() || null,
-      demoVideoUrl:  demoVideoUrl.trim() || null,
-      displayStatus: displayStatus,
+      title:        title.trim(),
+      description:  description.trim(),
+      accent:       accentVal.trim(),
+      timeline:     timeline.trim(),
+      deploy:       deploy.trim(),
+      features:     featuresList,
+      bgVideoUrl:   bgVideoUrl.trim() || null,
+      demoVideoUrl: demoVideoUrl.trim() || null,
     });
     if (ok) {
       onSaved({
-        title:         title.trim(),
-        description:   description.trim(),
-        accent:        accentVal.trim(),
-        timeline:      timeline.trim(),
-        deploy:        deploy.trim(),
-        features:      featuresList,
-        bgVideoUrl:    bgVideoUrl.trim() || null,
-        demoVideoUrl:  demoVideoUrl.trim() || null,
-        displayStatus: displayStatus,
+        title:        title.trim(),
+        description:  description.trim(),
+        accent:       accentVal.trim(),
+        timeline:     timeline.trim(),
+        deploy:       deploy.trim(),
+        features:     featuresList,
+        bgVideoUrl:   bgVideoUrl.trim() || null,
+        demoVideoUrl: demoVideoUrl.trim() || null,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -1106,42 +905,22 @@ function SystemFullEditor({ system, accent, onSaved }: {
         </div>
 
         <div className="apSystemEditorField apSystemEditorFieldFull">
-          <label className="apMediaLabel">Demo Video URL (#10)</label>
+          <label className="apMediaLabel">Demo Video — Google Drive Link</label>
           <input
             className="apMediaInput"
-            placeholder="Paste URL or leave empty — buyer sees 'Demo coming soon'"
+            placeholder="Paste Google Drive share link (e.g. drive.google.com/file/d/…/view)"
             value={demoVideoUrl}
             onChange={e => setDemoVideo(e.target.value)}
+            onBlur={async () => {
+              // Auto-save the demo URL on blur — no need to click Save Changes
+              const trimmed = demoVideoUrl.trim() || null;
+              if (trimmed === (system.demoVideoUrl ?? null)) return; // unchanged — skip
+              await updateSystemFields(system.id, { demoVideoUrl: trimmed });
+            }}
           />
-        </div>
-
-        {/* Display status — controls buyer + visitor visibility */}
-        <div className="apSystemEditorField apSystemEditorFieldFull">
-          <label className="apMediaLabel">Display Status</label>
-          <div className="apDisplayStatusRow">
-            {(["visible", "coming_soon", "ongoing", "hidden"] as const).map(status => {
-              const labelMap: Record<string, { label: string; color: string; desc: string }> = {
-                visible:     { label: "Visible",        color: "#22c55e", desc: "Normal — fully purchasable" },
-                coming_soon: { label: "Coming Soon",    color: "#f59e0b", desc: "Shows badge, locks buy/configure" },
-                ongoing:     { label: "In Development", color: "#60a5fa", desc: "Shows badge, locks buy/configure" },
-                hidden:      { label: "Hidden",         color: "#888",    desc: "Not shown on buyer or visitor" },
-              };
-              const info    = labelMap[status];
-              const isActive = displayStatus === status;
-              return (
-                <button
-                  key={status}
-                  className={"apDisplayStatusBtn" + (isActive ? " apDisplayStatusBtnActive" : "")}
-                  style={isActive ? { borderColor: info.color + "66", background: info.color + "12", color: info.color } : {}}
-                  onClick={() => setDisplayStatus(status)}
-                  type="button"
-                >
-                  <span className="apDisplayStatusLabel">{info.label}</span>
-                  <span className="apDisplayStatusDesc">{info.desc}</span>
-                </button>
-              );
-            })}
-          </div>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", color: "rgba(255,255,255,0.25)", margin: "4px 0 0", letterSpacing: "0.04em" }}>
+            Accepts any GDrive share link — auto-converted to embed format. Auto-saves when you leave the field.
+          </p>
         </div>
 
       </div>

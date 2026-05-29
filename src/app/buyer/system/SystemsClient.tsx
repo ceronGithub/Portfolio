@@ -148,6 +148,28 @@ function InlineCheckout({
   );
 }
 
+/* ─── buildDriveEmbedUrl ─────────────────────────────────────────────────
+   Converts any Google Drive share/view link into the /preview embed format.
+   Handles: /file/d/FILE_ID/view, /file/d/FILE_ID/edit, open?id=FILE_ID,
+   and already-converted /preview links. Returns the original URL unchanged
+   if no Drive file ID can be extracted.
+─────────────────────────────────────────────────────────────────────── */
+function buildDriveEmbedUrl(url: string): string {
+  // Already a /preview URL — return as-is
+  if (url.includes("drive.google.com/file/d/") && url.includes("/preview")) return url;
+
+  // Extract file ID from /file/d/FILE_ID/...
+  const filePathMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (filePathMatch) return `https://drive.google.com/file/d/${filePathMatch[1]}/preview`;
+
+  // Extract file ID from open?id=FILE_ID
+  const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (openIdMatch) return `https://drive.google.com/file/d/${openIdMatch[1]}/preview`;
+
+  // Fallback — return original URL unchanged
+  return url;
+}
+
 /* ─── Demo Modal ─────────────────────────────────────────────────────── */
 function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void }) {
   const grouped = groupBy(item.addons, "category");
@@ -209,7 +231,13 @@ function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void })
               <p className="demoModalSectionLabel">Walkthrough Video</p>
               <div className="demoModalVideoWrap">
                 {item.demoVideoUrl ? (
-                  <video src={item.demoVideoUrl} controls autoPlay className="demoModalVideo" />
+                  <iframe
+                    src={buildDriveEmbedUrl(item.demoVideoUrl)}
+                    className="demoModalDriveEmbed"
+                    allow="autoplay"
+                    allowFullScreen
+                    title={`${item.name} demo`}
+                  />
                 ) : (
                   <div className="demoModalPlaceholder">
                     <span className="demoModalPlaceholderIcon">🎬</span>
@@ -218,6 +246,23 @@ function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void })
                   </div>
                 )}
               </div>
+              {/* Watch on Drive fallback — shown only when a demo URL exists */}
+              {item.demoVideoUrl && (
+                <a
+                  href={item.demoVideoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="demoModalDriveLink"
+                  style={{ borderColor: item.accent + "44", color: item.accent }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                  Watch on Google Drive
+                </a>
+              )}
 
               {/* Live price + delivery */}
               <div className="demoModalMeta">
