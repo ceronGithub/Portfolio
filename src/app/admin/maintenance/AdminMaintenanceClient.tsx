@@ -53,6 +53,7 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
   const [type, setType]           = useState("OTHER");
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
+  const [formOpen, setFormOpen]   = useState(false);
   // Edit state: taskId → { title, description, type }
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -114,23 +115,7 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
 
   return (
     <>
-      <div className="amAddTask">
-        <p className="amAddTaskTitle">Add Task for Client</p>
-        <input className="amInput" placeholder="Task title" value={title} onChange={e => setTitle(e.target.value)} />
-        <textarea className="amInput" rows={2} placeholder="Description (optional)" value={desc} onChange={e => setDesc(e.target.value)} />
-        <div className="amInputRow">
-          <select className="amSelectInput" value={type} onChange={e => setType(e.target.value)}>
-            <option value="REVISION">Revision</option>
-            <option value="FIX">Fix</option>
-            <option value="OTHER">Other</option>
-          </select>
-          <button className="amAddBtn" onClick={addTask} disabled={loading}>
-            {loading ? "Adding…" : "+ Add Task"}
-          </button>
-        </div>
-        {error && <div className="amError">{error}</div>}
-      </div>
-
+      {/* Task list always visible at top */}
       {!tasks.length
         ? <div className="amEmpty">No tasks logged yet.</div>
         : <div className="amTaskList amScrollPane">
@@ -190,6 +175,31 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
           ))}
         </div>
       }
+
+      {/* Collapsible add-task form — toggled by button */}
+      <div className="amAddTaskToggleRow">
+        <button className="amAddTaskToggle" onClick={() => setFormOpen(p => !p)}>
+          {formOpen ? "✕ Cancel" : "+ Add Task"}
+        </button>
+      </div>
+
+      {formOpen && (
+        <div className="amAddTask">
+          <input className="amInput" placeholder="Task title" value={title} onChange={e => setTitle(e.target.value)} />
+          <textarea className="amInput" rows={2} placeholder="Description (optional)" value={desc} onChange={e => setDesc(e.target.value)} />
+          <div className="amInputRow">
+            <select className="amSelectInput" value={type} onChange={e => setType(e.target.value)}>
+              <option value="REVISION">Revision</option>
+              <option value="FIX">Fix</option>
+              <option value="OTHER">Other</option>
+            </select>
+            <button className="amAddBtn" onClick={addTask} disabled={loading}>
+              {loading ? "Adding…" : "Save Task"}
+            </button>
+          </div>
+          {error && <div className="amError">{error}</div>}
+        </div>
+      )}
     </>
   );
 }
