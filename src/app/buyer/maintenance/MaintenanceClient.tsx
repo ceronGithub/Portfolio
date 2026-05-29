@@ -3,7 +3,7 @@
 // Shows package selection if no active order, or the full maintenance portal.
 // Tabs: Tasks | Bug Reports | VC Schedule
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./maintenance.css";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -213,7 +213,7 @@ function BugsTab({ bugReports, bugLimit, bugsUsed }: { bugReports: BugReport[]; 
       });
       const data = await res.json();
       if (res.ok) {
-        setBugs(prev => [data.bugReport, ...prev]);
+        if (data.bugReport) setBugs(prev => [data.bugReport, ...prev]);
         setUsed(prev => prev + 1);
         setTitle(""); setDesc("");
       } else setError(data.error ?? "Something went wrong.");
@@ -248,7 +248,7 @@ function BugsTab({ bugReports, bugLimit, bugsUsed }: { bugReports: BugReport[]; 
       )}
       {!bugs.length
         ? <div className="mxEmpty">No bug reports submitted yet.</div>
-        : bugs.map(b => (
+        : bugs.filter(b => b?.id).map(b => (
           <div key={b.id} className="mxBugCard">
             <div className="mxBugHeader">
               <p className="mxBugTitle">{b.title}</p>
@@ -273,31 +273,112 @@ function BugsTab({ bugReports, bugLimit, bugsUsed }: { bugReports: BugReport[]; 
 }
 
 // ── VC Schedule Tab ───────────────────────────────────────────────────────────
+// Custom calendar: month view → select day → pick available hourly time slot.
+// Fetches booked slots from DB on mount and on month change; grays out occupied hours.
+
+const VC_HOURS = [8,9,10,11,12,13,14,15,16,17]; // 8 AM – 5 PM
+
+function fmtHour(h: number) {
+  if (h === 12) return "12:00 PM";
+  return h < 12 ? `${h}:00 AM` : `${h - 12}:00 PM`;
+}
+
+function sameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth()    === b.getMonth()    &&
+         a.getDate()     === b.getDate();
+}
+
 function VCTab({ vcSchedules, pkg }: { vcSchedules: VCSchedule[]; pkg: Pkg }) {
-  const [name, setName]         = useState("");
-  const [phone, setPhone]       = useState("");
-  const [date, setDate]         = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
-  const [schedules, setSchedules] = useState(vcSchedules);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const [name, setName]           = useState("");
+  const [phone, setPhone]         = useState("");
+  const [viewYear, setViewYear]   = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
+  const [bookedSlots, setBookedSlots]   = useState<Date[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submitting, setSubmitting]     = useState(false);
+  const [error, setError]               = useState("");
+  const [schedules, setSchedules]       = useState(vcSchedules);
+
+  // Fetch booked slots whenever the viewed month changes
+  const fetchBookedSlots = useCallback(async () => {
+    setLoadingSlots(true);
+    try {
+      const res  = await fetch("/api/maintenance/vc/booked-slots");
+      const data = await res.json();
+      if (res.ok) setBookedSlots((data.bookedSlots ?? []).map((s: { date: string }) => new Date(s.date)));
+    } catch { /* fail silently */ }
+    finally { setLoadingSlots(false); }
+  }, []);
+
+  useEffect(() => { fetchBookedSlots(); }, [fetchBookedSlots]);
+
+  // Check if a given day+hour is already booked
+  function isHourBooked(day: Date, hour: number) {
+    return bookedSlots.some(b => sameDay(b, day) && b.getHours() === hour);
+  }
+
+  // Check if a day has all slots fully booked
+  function isDayFullyBooked(day: Date) {
+    return VC_HOURS.every(h => isHourBooked(day, h));
+  }
+
+  // Build calendar grid for viewed month
+  function buildCalendarDays() {
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const cells: (Date | null)[] = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(viewYear, viewMonth, d));
+    return cells;
+  }
+
+  function prevMonth() {
+    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
+    else setViewMonth(m => m - 1);
+    setSelectedDay(null); setSelectedHour(null);
+  }
+
+  function nextMonth() {
+    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
+    else setViewMonth(m => m + 1);
+    setSelectedDay(null); setSelectedHour(null);
+  }
 
   async function submit() {
-    if (!name.trim() || !phone.trim() || !date) { setError("All fields are required."); return; }
-    setLoading(true); setError("");
+    if (!name.trim() || !phone.trim() || !selectedDay || selectedHour === null) {
+      setError("All fields are required."); return;
+    }
+    const preferredDate = new Date(selectedDay);
+    preferredDate.setHours(selectedHour, 0, 0, 0);
+
+    setSubmitting(true); setError("");
     try {
       const res = await fetch("/api/maintenance/vc", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyerName: name, buyerPhone: phone, preferredDate: date }),
+        body: JSON.stringify({ buyerName: name, buyerPhone: phone, preferredDate: preferredDate.toISOString() }),
       });
       const data = await res.json();
       if (res.ok) {
         setSchedules(prev => [data.schedule, ...prev]);
-        setName(""); setPhone(""); setDate("");
+        // Mark the slot as booked immediately in local state
+        setBookedSlots(prev => [...prev, preferredDate]);
+        setName(""); setPhone(""); setSelectedDay(null); setSelectedHour(null);
       } else setError(data.error ?? "Something went wrong.");
     } catch { setError("Network error."); }
-    finally { setLoading(false); }
+    finally { setSubmitting(false); }
   }
+
+  const MONTH_NAMES = ["January","February","March","April","May","June",
+                       "July","August","September","October","November","December"];
+  const DAY_LABELS  = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const calDays     = buildCalendarDays();
 
   return (
     <>
@@ -311,21 +392,91 @@ function VCTab({ vcSchedules, pkg }: { vcSchedules: VCSchedule[]; pkg: Pkg }) {
           className="mxInput" placeholder="Phone number"
           value={phone} onChange={e => setPhone(e.target.value)}
         />
-        <input
-          className="mxInput" type="datetime-local"
-          value={date} onChange={e => setDate(e.target.value)}
-        />
+
+        {/* ── Custom Calendar ── */}
+        <div className="mxCalendar">
+          <div className="mxCalHeader">
+            <button className="mxCalNav" onClick={prevMonth}>‹</button>
+            <span className="mxCalMonth">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+            <button className="mxCalNav" onClick={nextMonth}>›</button>
+          </div>
+
+          <div className="mxCalGrid">
+            {DAY_LABELS.map(d => (
+              <div key={d} className="mxCalDayLabel">{d}</div>
+            ))}
+            {calDays.map((day, i) => {
+              if (!day) return <div key={`empty-${i}`} />;
+              const isPast      = day < today;
+              const isFullyBooked = !isPast && isDayFullyBooked(day);
+              const isSelected  = selectedDay ? sameDay(day, selectedDay) : false;
+              const isToday     = sameDay(day, new Date());
+              let cls = "mxCalDay";
+              if (isPast)        cls += " past";
+              else if (isFullyBooked) cls += " fullyBooked";
+              else if (isSelected)    cls += " selected";
+              else if (isToday)       cls += " today";
+              return (
+                <button
+                  key={day.toISOString()}
+                  className={cls}
+                  disabled={isPast || isFullyBooked || loadingSlots}
+                  onClick={() => { setSelectedDay(day); setSelectedHour(null); }}
+                >
+                  {day.getDate()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Time Slot Picker ── */}
+        {selectedDay && (
+          <div className="mxTimeSlots">
+            <p className="mxTimeSlotsTitle">
+              Available times — {selectedDay.toLocaleDateString("en-PH", { weekday: "short", month: "short", day: "numeric" })}
+            </p>
+            <div className="mxTimeGrid">
+              {VC_HOURS.map(h => {
+                const booked   = isHourBooked(selectedDay, h);
+                const isChosen = selectedHour === h;
+                return (
+                  <button
+                    key={h}
+                    className={`mxTimeSlot${booked ? " booked" : ""}${isChosen ? " chosen" : ""}`}
+                    disabled={booked}
+                    onClick={() => setSelectedHour(h)}
+                  >
+                    {fmtHour(h)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {selectedDay && selectedHour !== null && (
+          <p className="mxSelectedSummary">
+            📅 {selectedDay.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })} at {fmtHour(selectedHour)}
+          </p>
+        )}
+
         <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.25)", margin: 0 }}>
           Package: <strong style={{ color: "rgba(255,255,255,0.5)" }}>{PKG_CONFIG[pkg].name}</strong>
         </p>
         {error && <div className="mxError">{error}</div>}
-        <button className="mxSubmitBtn" onClick={submit} disabled={loading}>
-          {loading ? "Scheduling…" : "Request Call"}
+        <button
+          className="mxSubmitBtn"
+          onClick={submit}
+          disabled={submitting || !selectedDay || selectedHour === null}
+        >
+          {submitting ? "Scheduling…" : "Request Call"}
         </button>
       </div>
+
       {!schedules.length
         ? <div className="mxEmpty">No VC calls scheduled yet.</div>
-        : schedules.map(s => (
+        : schedules.filter(s => s?.id).map(s => (
           <div key={s.id} className="mxVCCard">
             <div className="mxVCInfo">
               <p className="mxVCDate">

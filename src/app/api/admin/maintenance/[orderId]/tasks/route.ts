@@ -25,14 +25,23 @@ export async function POST(
 
   if (!title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
 
-  const task = await prisma.maintenanceTask.create({
-    data: {
-      maintenanceOrderId: orderId,
-      title,
-      description: description ?? null,
-      type:        type ?? "OTHER",
-    },
-  });
+  // Create task and increment revisionsUsed if type is REVISION
+  const [task] = await prisma.$transaction([
+    prisma.maintenanceTask.create({
+      data: {
+        maintenanceOrderId: orderId,
+        title,
+        description: description ?? null,
+        type:        type ?? "OTHER",
+      },
+    }),
+    ...(type === "REVISION"
+      ? [prisma.maintenanceOrder.update({
+          where: { id: orderId },
+          data:  { revisionsUsed: { increment: 1 } },
+        })]
+      : []),
+  ]);
 
   return NextResponse.json({ task });
 }
