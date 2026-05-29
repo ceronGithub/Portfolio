@@ -565,7 +565,7 @@ function ClientDetail({ order }: { order: Order }) {
             orderId={order.id}
             initSchedules={order.vcSchedules}
             buyerName={order.user.name}
-            buyerPhone=""
+            buyerPhone={order.vcSchedules[0]?.buyerPhone ?? ""}
           />
         )}
       </div>
