@@ -1,8 +1,8 @@
 /* architecture-intro-section.css
-   Fixed-overlay scroll-jack pattern.
-   Sentinel div holds scroll budget. Fixed panel covers viewport while active.
-   Next section (ArchitectureVideosSection) must have z-index >= 51 to render
-   above this overlay during the exit fade.
+   Apple-style frame-sequence scrubber.
+   Phase 1: Canvas draws WebP frames as scroll progresses.
+   Phase 2: Apple word-reveal on black panel.
+   Sentinel div holds total scroll budget. Fixed overlays cover viewport while active.
 */
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Mono:wght@300;400&display=swap");
 
@@ -10,11 +10,11 @@
 .archIntroSentinel {
   position: relative;
   width: 100%;
-  background: #0d0c0b; /* matches page background — no seam */
-  /* height is set inline: SCROLL_BUDGET_VH * 100vh */
+  background: #0d0c0b;
+  /* height set inline: SCROLL_BUDGET_VH × 100vh */
 }
 
-/* ── Fixed overlay ────────────────────────────────────────────────────── */
+/* ── Fixed overlay — Phase 1 ─────────────────────────────────────────── */
 .archIntroFixed {
   position: fixed;
   inset: 0;
@@ -24,39 +24,53 @@
   opacity: 0;
   pointer-events: none;
   overflow: hidden;
-  transition:
-    opacity 0.2s ease,
-    visibility 0s 0.2s;
 }
 
 .archIntroFixedActive {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transition:
-    opacity 0.2s ease,
-    visibility 0s 0s;
 }
 
-/* Overlay is fully hidden once done — JS already drove opacity to 0 */
+/* Fully hidden once scroll exits — JS drives opacity to 0 before this fires */
 .archIntroFixedDone {
   visibility: hidden;
   pointer-events: none;
-  transition: none;
 }
 
-/* ── Fullscreen scrubbed video ────────────────────────────────────────── */
-.archIntroVideoBg {
+/* ── Canvas — fullscreen frame display ───────────────────────────────── */
+/* Replaces <video>. drawFrame() writes pixels here every rAF tick.
+   object-fit: cover equivalent is handled in drawFrame() itself.        */
+.archIntroCanvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: 1;
   display: block;
+  z-index: 1;
   will-change: transform;
-  transform-origin: center center;
+}
+
+/* ── Preload progress bar ─────────────────────────────────────────────── */
+/* Thin amber line at bottom — fades out when loadProgress reaches 1.
+   Transition on opacity so it disappears smoothly.                       */
+.archIntroPreloadBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.archIntroPreloadFill {
+  height: 100%;
+  background: rgba(201, 163, 110, 0.7);
+  transition: width 0.15s linear;
+  will-change: width;
 }
 
 /* ── Dark scrim ───────────────────────────────────────────────────────── */
@@ -135,6 +149,68 @@
   );
 }
 
+/* ── Phase 2: Apple word-reveal overlay ──────────────────────────────── */
+/* Same fixed-overlay pattern. Black panel, no canvas.
+   Opacity driven entirely by JS — no CSS transition here.                */
+.archAppleOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #000;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8%;
+}
+
+.archAppleOverlayActive {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.archAppleOverlayDone {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Eyebrow label ───────────────────────────────────────────────────── */
+.archAppleEyebrow {
+  font-family: "DM Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: rgba(201, 163, 110, 0.55);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin: 0 0 2.5rem 0;
+  text-align: center;
+}
+
+/* ── Statement block ─────────────────────────────────────────────────── */
+/* Base color = dim state. Each word span is lit individually by JS.      */
+.archAppleStatement {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.3;
+  text-align: center;
+  max-width: 900px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Individual word span ────────────────────────────────────────────── */
+.archAppleWord {
+  display: inline;
+  will-change: color;
+  white-space: pre-wrap;
+}
+
 /* ── Mobile ───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .archIntroLine {
@@ -142,5 +218,12 @@
   }
   .archIntroTickerWrap {
     top: 1.5rem;
+  }
+  .archAppleStatement {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+    max-width: 90vw;
+  }
+  .archAppleOverlay {
+    padding: 0 6%;
   }
 }
