@@ -4,6 +4,7 @@
 // Tabs: Tasks | Bug Reports | VC Schedule
 
 import { useState, useEffect, useCallback } from "react";
+import { sanitize }                          from "@/lib/utils";
 import "./maintenance.css";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -228,12 +229,12 @@ function BugsTab({ bugReports, bugLimit, bugsUsed }: { bugReports: BugReport[]; 
           <p className="mxBugFormTitle">Report a Bug ({used}/{bugLimit} used)</p>
           <input
             className="mxInput" placeholder="Bug title — brief description"
-            value={title} onChange={e => setTitle(e.target.value)}
+            value={title} onChange={e => setTitle(sanitize(e.target.value))}
           />
           <textarea
             className="mxInput" rows={3}
             placeholder="Describe the issue in detail — what happened, when, what page/feature?"
-            value={desc} onChange={e => setDesc(e.target.value)}
+            value={desc} onChange={e => setDesc(sanitize(e.target.value))}
           />
           {error && <div className="mxError">{error}</div>}
           <button className="mxSubmitBtn" onClick={submit} disabled={loading}>
@@ -386,11 +387,11 @@ function VCTab({ vcSchedules, pkg }: { vcSchedules: VCSchedule[]; pkg: Pkg }) {
         <p className="mxVCFormTitle">Schedule a VC Call</p>
         <input
           className="mxInput" placeholder="Your name"
-          value={name} onChange={e => setName(e.target.value)}
+          value={name} onChange={e => setName(sanitize(e.target.value))}
         />
         <input
           className="mxInput" placeholder="Phone number"
-          value={phone} onChange={e => setPhone(e.target.value)}
+          value={phone} onChange={e => setPhone(sanitize(e.target.value))}
         />
 
         {/* ── Custom Calendar ── */}

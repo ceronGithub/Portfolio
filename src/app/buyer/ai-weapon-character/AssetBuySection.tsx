@@ -6,8 +6,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useToast }  from "../shared/useToast";
-import ToastStack    from "../shared/ToastStack";
+import { sanitize }    from "@/lib/utils";
+import { useToast }    from "../shared/useToast";
+import ToastStack      from "../shared/ToastStack";
 import "./asset-buy-section.css";
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -726,7 +727,7 @@ export default function AssetBuySection({
             <div className="assetModalControls">
               <div className="assetModalSearchWrap">
                 <input className="assetModalSearch" type="text" placeholder="Search assets…"
-                  value={browseSearch} onChange={e => setBrowseSearch(e.target.value)} />
+                  value={browseSearch} onChange={e => setBrowseSearch(sanitize(e.target.value))} />
                 {browseSearch && <button className="assetModalSearchClear" onClick={() => setBrowseSearch("")}>✕</button>}
               </div>
               <select className="assetModalSort" value={browseSort}

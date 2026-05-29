@@ -262,7 +262,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
                 className="profileEmailInput"
                 type="email"
                 value={emailVal}
-                onChange={e => { setEmailVal(e.target.value); setEmailError(""); }}
+                onChange={e => { setEmailVal(sanitize(e.target.value)); setEmailError(""); }}
                 onKeyDown={e => {
                   if (e.key === "Enter")  saveEmail();
                   if (e.key === "Escape") { setEditingEmail(false); setEmailError(""); }
@@ -301,7 +301,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
                     className="profilePwHeroInput"
                     type={showCurrentPw ? "text" : "password"}
                     value={currentPw}
-                    onChange={e => setCurrentPw(e.target.value)}
+                    onChange={e => setCurrentPw(sanitize(e.target.value))}
                     placeholder="Current password"
                     autoComplete="current-password"
                   />
@@ -317,7 +317,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
                     className="profilePwHeroInput"
                     type={showNewPw ? "text" : "password"}
                     value={newPw}
-                    onChange={e => setNewPw(e.target.value)}
+                    onChange={e => setNewPw(sanitize(e.target.value))}
                     placeholder="New password (min 8)"
                     autoComplete="new-password"
                   />
@@ -333,7 +333,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
                     className="profilePwHeroInput"
                     type={showConfirmPw ? "text" : "password"}
                     value={confirmPw}
-                    onChange={e => setConfirmPw(e.target.value)}
+                    onChange={e => setConfirmPw(sanitize(e.target.value))}
                     placeholder="Confirm new password"
                     autoComplete="new-password"
                   />

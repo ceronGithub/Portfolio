@@ -1038,7 +1038,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
 
         <div className="apSystemEditorField apSystemEditorFieldFull">
           <label className="apMediaLabel">Title</label>
-          <input className="apMediaInput" value={title} onChange={e => setTitle(e.target.value)} />
+          <input className="apMediaInput" value={title} onChange={e => setTitle(sanitize(e.target.value))} />
         </div>
 
         <div className="apSystemEditorField">
@@ -1061,12 +1061,12 @@ function SystemFullEditor({ system, accent, onSaved }: {
 
         <div className="apSystemEditorField">
           <label className="apMediaLabel">Timeline (e.g. 4–6 weeks)</label>
-          <input className="apMediaInput" value={timeline} onChange={e => setTimeline(e.target.value)} />
+          <input className="apMediaInput" value={timeline} onChange={e => setTimeline(sanitize(e.target.value))} />
         </div>
 
         <div className="apSystemEditorField">
           <label className="apMediaLabel">Deploy (e.g. Cloud / On-premise)</label>
-          <input className="apMediaInput" value={deploy} onChange={e => setDeploy(e.target.value)} />
+          <input className="apMediaInput" value={deploy} onChange={e => setDeploy(sanitize(e.target.value))} />
         </div>
 
         <div className="apSystemEditorField apSystemEditorFieldFull">
@@ -1075,7 +1075,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
             className="apMediaInput apSystemEditorTextarea"
             rows={3}
             value={description}
-            onChange={e => setDesc(e.target.value)}
+            onChange={e => setDesc(sanitize(e.target.value))}
           />
         </div>
 
@@ -1086,7 +1086,7 @@ function SystemFullEditor({ system, accent, onSaved }: {
             rows={5}
             placeholder={"Feature A\nFeature B\nFeature C"}
             value={features}
-            onChange={e => setFeatures(e.target.value)}
+            onChange={e => setFeatures(sanitize(e.target.value))}
           />
         </div>
 

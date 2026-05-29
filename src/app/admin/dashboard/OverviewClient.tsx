@@ -18,12 +18,16 @@ interface Stats {
   productCount: number; orderCount: number; systemCount: number;
 }
 
+interface ConversionFunnel { visits: number; registered: number; paid: number; }
+
 interface OverviewClientProps {
   stats: Stats;
   monthlyRevenueSystems:  RevenuePoint[];
   monthlyRevenueProducts: RevenuePoint[];
   weeklyRevenueSystems:   RevenuePoint[];
   weeklyRevenueProducts:  RevenuePoint[];
+  dailySiteVisits:        RevenuePoint[];
+  conversionFunnel:       ConversionFunnel;
 }
 
 // ── Color tokens ───────────────────────────────────────────────────────────
@@ -307,12 +311,200 @@ function NotifFeed({ counts }: { counts: ReturnType<typeof useAdminNotifications
   );
 }
 
+// ── LineChart — SVG line chart for daily site visits ──────────────────────
+// Renders a smooth polyline with area fill, Y-grid, X labels.
+function LineChart({
+  data, color, title, subtitle,
+}: {
+  data: RevenuePoint[]; color: string; title: string; subtitle: string;
+}) {
+  const revealRef    = useReveal();
+  const chartHeight  = 120;
+  const paddingLeft  = 38;
+  const paddingRight = 8;
+  const pointGap     = 36;
+  const totalWidth   = paddingLeft + (data.length - 1) * pointGap + paddingRight;
+  const maxValue     = Math.max(...data.map(d => d.value), 1);
+  const gridStep     = Math.ceil(maxValue / 4) || 1;
+  const gridValues   = [0, gridStep, gridStep * 2, gridStep * 3, gridStep * 4]
+    .filter(v => v <= maxValue * 1.2);
+  const hasData      = data.some(d => d.value > 0);
+
+  // Convert data points to SVG coordinates
+  const points = data.map((d, i) => ({
+    x: paddingLeft + i * pointGap,
+    y: chartHeight - (d.value / (gridStep * 4)) * chartHeight,
+    value: d.value,
+    label: d.label,
+  }));
+
+  const polylinePoints = points.map(p => `${p.x},${p.y}`).join(" ");
+  const areaPoints = [
+    `${points[0].x},${chartHeight}`,
+    ...points.map(p => `${p.x},${p.y}`),
+    `${points[points.length - 1].x},${chartHeight}`,
+  ].join(" ");
+
+  // Only show every 3rd label to avoid crowding
+  const showLabel = (i: number) => i % 3 === 0 || i === data.length - 1;
+
+  return (
+    <div className="ovChartCard ovReveal" ref={revealRef}>
+      <div className="ovChartCardHeader">
+        <div>
+          <p className="ovChartCardTitle">{title}</p>
+          <p className="ovChartCardSub">{subtitle}</p>
+        </div>
+        <div className="ovChartColorDot" style={{ background: color }} />
+      </div>
+
+      <AnalyticsBar data={data} color={color} />
+
+      {!hasData ? (
+        <div className="ovChartEmpty">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M3 3v18h18" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M7 16l4-4 4 4 4-6" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="ovChartEmptyText">No visit data yet</span>
+        </div>
+      ) : (
+        <div className="ovChartSvgWrap">
+          <svg viewBox={`0 0 ${totalWidth} ${chartHeight + 44}`} className="ovBarSvg">
+            <defs>
+              <linearGradient id="lineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor={color} stopOpacity="0.22" />
+                <stop offset="100%" stopColor={color} stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            {/* Y-grid */}
+            {gridValues.map(gridValue => {
+              const yPos = chartHeight - (gridValue / (gridStep * 4)) * chartHeight;
+              return (
+                <g key={gridValue}>
+                  <line x1={paddingLeft} y1={yPos} x2={totalWidth} y2={yPos}
+                    stroke={COLOR_GRID} strokeWidth="1" />
+                  <text x={paddingLeft - 6} y={yPos + 3.5}
+                    textAnchor="end" fill={COLOR_LABEL} fontSize="7.5">
+                    {gridValue}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Area fill */}
+            <polygon points={areaPoints} fill="url(#lineAreaGrad)" />
+
+            {/* Line */}
+            <polyline points={polylinePoints}
+              fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+            {/* Data points */}
+            {points.map((p, i) => (
+              <g key={i}>
+                <circle cx={p.x} cy={p.y} r="3" fill={color} opacity={p.value > 0 ? 0.9 : 0.2} />
+                {p.value > 0 && (
+                  <text x={p.x} y={p.y - 7}
+                    textAnchor="middle" fill={COLOR_VALUE} fontSize="7.5" fontWeight="600">
+                    {p.value}
+                  </text>
+                )}
+                {showLabel(i) && (
+                  <text x={p.x} y={chartHeight + 17}
+                    textAnchor="middle" fill={COLOR_LABEL} fontSize="8">
+                    {p.label}
+                  </text>
+                )}
+              </g>
+            ))}
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ConversionFunnelCard — visits → registered → paid funnel ──────────────
+// Shows 3 stages with bar widths proportional to count, drop-off % between stages.
+function ConversionFunnelCard({ funnel }: { funnel: ConversionFunnel }) {
+  const revealRef = useReveal();
+  const stages = [
+    { label: "Site Visits",   value: funnel.visits,     color: "#60a5fa" },
+    { label: "Registered",    value: funnel.registered, color: "#a78bfa" },
+    { label: "Paid Orders",   value: funnel.paid,       color: "#34d399" },
+  ];
+  const maxValue = Math.max(funnel.visits, 1);
+
+  return (
+    <div className="ovChartCard ovFunnelCard ovReveal" ref={revealRef}>
+      <div className="ovChartCardHeader">
+        <div>
+          <p className="ovChartCardTitle">Conversion Funnel</p>
+          <p className="ovChartCardSub">Visits → Registered → Paid</p>
+        </div>
+        <div className="ovChartColorDot" style={{ background: "#34d399" }} />
+      </div>
+
+      <div className="ovFunnelBody">
+        {stages.map((stage, i) => {
+          const widthPct  = maxValue > 0 ? (stage.value / maxValue) * 100 : 0;
+          const prevValue = i > 0 ? stages[i - 1].value : null;
+          const dropOff   = prevValue != null && prevValue > 0
+            ? Math.round(((prevValue - stage.value) / prevValue) * 100)
+            : null;
+
+          return (
+            <div key={stage.label} className="ovFunnelRow">
+              {dropOff !== null && (
+                <div className="ovFunnelDropOff">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M5 1v8M2 6l3 3 3-3" stroke="rgba(255,255,255,0.2)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="ovFunnelDropLabel">−{dropOff}% drop-off</span>
+                </div>
+              )}
+              <div className="ovFunnelStage">
+                <div className="ovFunnelBarWrap">
+                  <div
+                    className="ovFunnelBar"
+                    style={{ width: `${widthPct}%`, background: stage.color }}
+                  />
+                </div>
+                <div className="ovFunnelMeta">
+                  <span className="ovFunnelLabel">{stage.label}</span>
+                  <span className="ovFunnelValue" style={{ color: stage.color }}>
+                    {stage.value.toLocaleString("en-PH")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Conversion rate summary */}
+        <div className="ovFunnelRate">
+          <span className="ovFunnelRateLabel">Overall conversion</span>
+          <span className="ovFunnelRateValue" style={{ color: "#34d399" }}>
+            {funnel.visits > 0
+              ? `${((funnel.paid / funnel.visits) * 100).toFixed(1)}%`
+              : "—"
+            }
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OverviewClient({
   stats,
   monthlyRevenueSystems,
   monthlyRevenueProducts,
   weeklyRevenueSystems,
   weeklyRevenueProducts,
+  dailySiteVisits,
+  conversionFunnel,
 }: OverviewClientProps) {
   const headerRef = useReveal();
   const notif = useAdminNotifications(true);
@@ -414,6 +606,33 @@ export default function OverviewClient({
         <div className="ovLegendItem">
           <div className="ovLegendDot" style={{ background: COLOR_PRODUCTS }} />
           <span>Products</span>
+        </div>
+      </div>
+
+      {/* ── Site visits trend — last 14 days ──────────────────────── */}
+      <div className="ovChartSection">
+        <div className="ovChartSectionHeader">
+          <span className="ovChartSectionEyebrow">Traffic</span>
+          <h2 className="ovChartSectionTitle">Site visits — last 14 days</h2>
+        </div>
+        <div className="ovChartGrid ovChartGridSingle">
+          <LineChart
+            data={dailySiteVisits}
+            color="#60a5fa"
+            title="Daily Unique Visitors"
+            subtitle="Fingerprinted by IP + UA"
+          />
+        </div>
+      </div>
+
+      {/* ── Conversion funnel ─────────────────────────────────────── */}
+      <div className="ovChartSection">
+        <div className="ovChartSectionHeader">
+          <span className="ovChartSectionEyebrow">Funnel</span>
+          <h2 className="ovChartSectionTitle">Visitor → Buyer conversion</h2>
+        </div>
+        <div className="ovChartGrid ovChartGridSingle">
+          <ConversionFunnelCard funnel={conversionFunnel} />
         </div>
       </div>
 

@@ -160,6 +160,42 @@ export default function DownloadsClient({ downloads }: Props) {
           <p className="dlEyebrow">Your Library</p>
           <h1 className="dlTitle">Downloads</h1>
           <p className="dlSub">{downloads.length} asset{downloads.length !== 1 ? "s" : ""} · Lifetime access</p>
+
+          {/* ── Grant history summary strip ── */}
+          {downloads.length > 0 && (
+            <div className="dlHistoryStrip">
+              <div className="dlHistoryStat">
+                <span className="dlHistoryValue">{downloads.length}</span>
+                <span className="dlHistoryLabel">Assets owned</span>
+              </div>
+              <div className="dlHistoryDivider" />
+              <div className="dlHistoryStat">
+                <span className="dlHistoryValue">
+                  {downloads.filter(d => d.grantedTier === "full_pack").length}
+                </span>
+                <span className="dlHistoryLabel">Full Pack</span>
+              </div>
+              <div className="dlHistoryDivider" />
+              <div className="dlHistoryStat">
+                <span className="dlHistoryValue">
+                  {downloads.filter(d => d.grantedTier === "standard").length}
+                </span>
+                <span className="dlHistoryLabel">Standard</span>
+              </div>
+              <div className="dlHistoryDivider" />
+              <div className="dlHistoryStat">
+                <span className="dlHistoryValue">
+                  {formatDate(downloads[downloads.length - 1].grantedAt)}
+                </span>
+                <span className="dlHistoryLabel">First purchase</span>
+              </div>
+              <div className="dlHistoryDivider" />
+              <div className="dlHistoryStat">
+                <span className="dlHistoryValue">{formatDate(downloads[0].grantedAt)}</span>
+                <span className="dlHistoryLabel">Latest purchase</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -127,6 +127,39 @@ export default async function AdminDashboardPage() {
   const totalRevenue = (revenue._sum.amountPaid ?? 0) / 100;
   const notActive    = userCount - activeUsers;
 
+  // ── Site visit trend — daily unique visits for last 14 days ──────
+  // SiteVisit.date is stored as "YYYY-MM-DD" string — group by that field.
+  const fourteenDaysAgo = new Date(Date.now() - 13 * 24 * 60 * 60 * 1000);
+  const rawVisits = await prisma.siteVisit.findMany({
+    where:  { createdAt: { gte: fourteenDaysAgo } },
+    select: { date: true },
+  });
+
+  // Build array of last 14 day labels
+  const dailyVisitMap = new Map<string, number>();
+  for (let i = 13; i >= 0; i--) {
+    const d   = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    dailyVisitMap.set(key, 0);
+  }
+  for (const v of rawVisits) {
+    if (dailyVisitMap.has(v.date)) dailyVisitMap.set(v.date, (dailyVisitMap.get(v.date) ?? 0) + 1);
+  }
+  const dailySiteVisits: { label: string; value: number }[] = [];
+  for (const [dateStr, count] of dailyVisitMap.entries()) {
+    const d = new Date(dateStr + "T00:00:00");
+    const label = d.toLocaleDateString("en-PH", { month: "short", day: "numeric" });
+    dailySiteVisits.push({ label, value: count });
+  }
+
+  // ── Conversion funnel — visits → registered → paid ────────────────
+  const totalPaidUsers = await prisma.user.count({ where: { orders: { some: { status: "PAID" } } } });
+  const conversionFunnel = {
+    visits:     siteVisitCount,
+    registered: userCount,
+    paid:       totalPaidUsers,
+  };
+
   const stats = {
     visitorsRegistered: userCount,
     visitors:    siteVisitCount,
@@ -147,6 +180,8 @@ export default async function AdminDashboardPage() {
         monthlyRevenueProducts={monthlyRevenueProducts}
         weeklyRevenueSystems={weeklyRevenueSystems}
         weeklyRevenueProducts={weeklyRevenueProducts}
+        dailySiteVisits={dailySiteVisits}
+        conversionFunnel={conversionFunnel}
       />
     </AdminShell>
   );

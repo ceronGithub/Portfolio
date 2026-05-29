@@ -7,6 +7,7 @@
 //            update VC schedule status.
 
 import { useState, useEffect, useCallback } from "react";
+import { sanitize }                          from "@/lib/utils";
 import "./admin-maintenance.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -129,13 +130,13 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
                     <input
                       className="amInput"
                       value={editTitle}
-                      onChange={e => setEditTitle(e.target.value)}
+                      onChange={e => setEditTitle(sanitize(e.target.value))}
                     />
                     <textarea
                       className="amInput"
                       rows={2}
                       value={editDesc}
-                      onChange={e => setEditDesc(e.target.value)}
+                      onChange={e => setEditDesc(sanitize(e.target.value))}
                     />
                     <div className="amTaskActions">
                       <select className="amSelectInput" value={editType} onChange={e => setEditType(e.target.value)}>
@@ -185,8 +186,8 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
 
       {formOpen && (
         <div className="amAddTask">
-          <input className="amInput" placeholder="Task title" value={title} onChange={e => setTitle(e.target.value)} />
-          <textarea className="amInput" rows={2} placeholder="Description (optional)" value={desc} onChange={e => setDesc(e.target.value)} />
+          <input className="amInput" placeholder="Task title" value={title} onChange={e => setTitle(sanitize(e.target.value))} />
+          <textarea className="amInput" rows={2} placeholder="Description (optional)" value={desc} onChange={e => setDesc(sanitize(e.target.value))} />
           <div className="amInputRow">
             <select className="amSelectInput" value={type} onChange={e => setType(e.target.value)}>
               <option value="REVISION">Revision</option>
@@ -284,7 +285,7 @@ function BugsTab({ orderId, initBugs }: { orderId: string; initBugs: BugReport[]
             className="amNoteInput"
             placeholder="Admin note (visible to buyer)…"
             value={notes[b.id] ?? (b.adminNote || "")}
-            onChange={e => setNotes(p => ({ ...p, [b.id]: e.target.value }))}
+            onChange={e => setNotes(p => ({ ...p, [b.id]: sanitize(e.target.value) }))}
             onBlur={() => {
               if (notes[b.id] !== undefined) updateBug(b.id, { adminNote: notes[b.id] });
             }}
@@ -428,8 +429,8 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
       {/* Admin schedule form with custom calendar */}
       <div className="amAddTask">
         <p className="amAddTaskTitle">Schedule a Call for Client</p>
-        <input className="amInput" placeholder="Client name"   value={name}  onChange={e => setName(e.target.value)} />
-        <input className="amInput" placeholder="Phone number"  value={phone} onChange={e => setPhone(e.target.value)} />
+        <input className="amInput" placeholder="Client name"   value={name}  onChange={e => setName(sanitize(e.target.value))} />
+        <input className="amInput" placeholder="Phone number"  value={phone} onChange={e => setPhone(sanitize(e.target.value))} />
 
         {/* ── Custom Calendar ── */}
         <div className="amCalendar">
@@ -499,7 +500,7 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
           </p>
         )}
 
-        <input className="amInput" placeholder="Note to client (optional)" value={note} onChange={e => setNote(e.target.value)} />
+        <input className="amInput" placeholder="Note to client (optional)" value={note} onChange={e => setNote(sanitize(e.target.value))} />
         {error && <div className="amError">{error}</div>}
         <button
           className="amAddBtn"

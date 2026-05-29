@@ -2,6 +2,7 @@
 // buyer/layout.tsx — wraps all /buyer/* pages.
 // On every page navigation, polls /api/auth/check-status.
 // If the account is banned or deactivated, forces signOut immediately.
+// Also disables right-click context menu across all buyer pages.
 import { useEffect }    from "react";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname }  from "next/navigation";
@@ -9,6 +10,13 @@ import { usePathname }  from "next/navigation";
 export default function BuyerLayout({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
   const pathname   = usePathname();
+
+  // Disable right-click context menu on all buyer pages
+  useEffect(() => {
+    const blockContextMenu = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener("contextmenu", blockContextMenu);
+    return () => document.removeEventListener("contextmenu", blockContextMenu);
+  }, []);
 
   useEffect(() => {
     // Only run when session is active

@@ -30,6 +30,13 @@ export default function AdminShell({ children, adminName }: Props) {
     };
   }, []);
 
+  // Disable right-click context menu on all admin pages
+  useEffect(() => {
+    const blockContextMenu = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener("contextmenu", blockContextMenu);
+    return () => document.removeEventListener("contextmenu", blockContextMenu);
+  }, []);
+
   return (
     <div className={`adminShell adminShellNoSidebar${isDark ? " adminShellDark" : ""}`}>
       <main className="adminMain adminMainFull">

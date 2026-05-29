@@ -7,8 +7,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useToast }  from "../shared/useToast";
-import ToastStack    from "../shared/ToastStack";
+import { sanitize }    from "@/lib/utils";
+import { useToast }    from "../shared/useToast";
+import ToastStack      from "../shared/ToastStack";
 import "./architecture-buy-section.css";
 
 interface ArchAssetItem {
@@ -259,7 +260,7 @@ export default function ArchitectureBuySection({
                   type="text"
                   placeholder="Search assets…"
                   value={browseSearch}
-                  onChange={e => setBrowseSearch(e.target.value)}
+                  onChange={e => setBrowseSearch(sanitize(e.target.value))}
                 />
                 {browseSearch && (
                   <button className="archModalSearchClear" onClick={() => setBrowseSearch("")}>✕</button>

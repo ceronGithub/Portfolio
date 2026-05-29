@@ -5,7 +5,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useAdminNotifications } from "@/app/admin/hooks/useAdminNotifications";
+import { useAdminNotifications }  from "@/app/admin/hooks/useAdminNotifications";
+import { useBuyerNotifications }  from "@/app/buyer/hooks/useBuyerNotifications";
 
 /* ── SVG icons ─────────────────────────────────────────────────────── */
 
@@ -231,8 +232,9 @@ export default function Navbar() {
   const isOnBuyer   = pathname.startsWith("/buyer") || pathname.startsWith("/checkout");
   const isOnAdmin   = pathname.startsWith("/admin");
 
-  // Notification counts — polled every 30 s when on admin pages
-  const notif = useAdminNotifications(isAdmin && isOnAdmin);
+  // Notification counts — polled every 30 s when on admin or buyer pages
+  const notif       = useAdminNotifications(isAdmin && isOnAdmin);
+  const buyerNotif  = useBuyerNotifications(!isAdmin && isOnBuyer);
 
   /* ── Admin theme state — synced with localStorage "adminTheme" ──── */
   const [isDark, setIsDark] = useState(false);
@@ -254,7 +256,12 @@ export default function Navbar() {
 
   // Buyer on /buyer pages: Dash + Downloads + Orders + Pending Payments + Profile + Sign Out
   const buyerItems: NavItem[] = [
-    { label: "Dash",              href: "/buyer",                  icon: <IconDashboard /> },
+    { label: "Dash", href: "/buyer", icon: (
+      <span style={{ position: "relative", display: "inline-flex" }}>
+        <IconDashboard />
+        <NotifBadge count={buyerNotif.total} />
+      </span>
+    )},
     { label: "Downloads",         href: "/buyer/downloads",        icon: <IconDownload />  },
     { label: "Orders",            href: "/buyer/orders",           icon: <IconOrders />    },
     { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />      },
