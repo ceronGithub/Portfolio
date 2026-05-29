@@ -3,9 +3,10 @@
 // Left: scrollable client list. Right: selected client detail with tabs.
 // Admin can: add tasks, update task status, delete tasks,
 //            classify bugs, set bug status, flag extra charge,
+//            schedule VC calls (custom calendar, booked slots hidden),
 //            update VC schedule status.
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./admin-maintenance.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -284,40 +285,125 @@ function BugsTab({ orderId, initBugs }: { orderId: string; initBugs: BugReport[]
 }
 
 // ── VC Tab ────────────────────────────────────────────────────────────────────
+// Custom calendar with booked-slot awareness for the admin.
+// Fetches occupied slots from /api/admin/maintenance/vc/booked-slots and grays
+// out any hour already taken — prevents double-booking.
+
+const VC_HOURS = [8,9,10,11,12,13,14,15,16,17]; // 8 AM – 5 PM
+
+function fmtHour(h: number) {
+  if (h === 12) return "12:00 PM";
+  return h < 12 ? `${h}:00 AM` : `${h - 12}:00 PM`;
+}
+
+function sameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth()    === b.getMonth()    &&
+         a.getDate()     === b.getDate();
+}
+
+const MONTH_NAMES = ["January","February","March","April","May","June",
+                     "July","August","September","October","November","December"];
+const DAY_LABELS  = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+
 function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: defaultPhone }: {
   orderId: string; initSchedules: VCSchedule[]; buyerName: string; buyerPhone: string;
 }) {
-  const [schedules, setSchedules] = useState(initSchedules);
-  const [name, setName]           = useState(defaultName);
-  const [phone, setPhone]         = useState(defaultPhone);
-  const [date, setDate]           = useState("");
-  const [note, setNote]           = useState("");
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const [schedules, setSchedules]       = useState(initSchedules);
+  const [name, setName]                 = useState(defaultName);
+  const [phone, setPhone]               = useState(defaultPhone);
+  const [note, setNote]                 = useState("");
+  const [viewYear, setViewYear]         = useState(today.getFullYear());
+  const [viewMonth, setViewMonth]       = useState(today.getMonth());
+  const [selectedDay, setSelectedDay]   = useState<Date | null>(null);
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
+  const [bookedSlots, setBookedSlots]   = useState<Date[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState("");
+
+  // Fetch all occupied slots from the admin endpoint
+  const fetchBookedSlots = useCallback(async () => {
+    setLoadingSlots(true);
+    try {
+      const res  = await fetch("/api/admin/maintenance/vc/booked-slots");
+      const data = await res.json();
+      if (res.ok) setBookedSlots((data.bookedSlots ?? []).map((s: { date: string }) => new Date(s.date)));
+    } catch { /* fail silently */ }
+    finally { setLoadingSlots(false); }
+  }, []);
+
+  useEffect(() => { fetchBookedSlots(); }, [fetchBookedSlots]);
+
+  // Returns true if the given day+hour combination is already taken
+  function isHourBooked(day: Date, hour: number) {
+    return bookedSlots.some(b => sameDay(b, day) && b.getHours() === hour);
+  }
+
+  // Returns true when every hour on a day is occupied — used to dim the calendar cell
+  function isDayFullyBooked(day: Date) {
+    return VC_HOURS.every(h => isHourBooked(day, h));
+  }
+
+  // Build 7-column grid cells for the current viewed month
+  function buildCalendarDays() {
+    const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const cells: (Date | null)[] = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(viewYear, viewMonth, d));
+    return cells;
+  }
+
+  function prevMonth() {
+    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
+    else setViewMonth(m => m - 1);
+    setSelectedDay(null); setSelectedHour(null);
+  }
+
+  function nextMonth() {
+    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
+    else setViewMonth(m => m + 1);
+    setSelectedDay(null); setSelectedHour(null);
+  }
 
   async function scheduleCall() {
-    if (!name.trim() || !phone.trim() || !date) { setError("Name, phone, and date are required."); return; }
+    if (!name.trim() || !phone.trim() || !selectedDay || selectedHour === null) {
+      setError("Name, phone, and date/time are required."); return;
+    }
+    const preferredDate = new Date(selectedDay);
+    preferredDate.setHours(selectedHour, 0, 0, 0);
+
     setLoading(true); setError("");
     try {
       const res = await fetch(`/api/admin/maintenance/${orderId}/vc`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyerName: name, buyerPhone: phone, preferredDate: new Date(date).toISOString(), adminNote: note }),
+        body: JSON.stringify({
+          buyerName: name, buyerPhone: phone,
+          preferredDate: preferredDate.toISOString(),
+          adminNote: note,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
         setSchedules(p => [data.vc, ...p]);
-        setDate(""); setNote("");
+        // Immediately reflect the new booking in local state
+        setBookedSlots(p => [...p, preferredDate]);
+        setNote(""); setSelectedDay(null); setSelectedHour(null);
       } else setError(data.error ?? "Failed to schedule call.");
     } catch { setError("Network error."); }
     finally { setLoading(false); }
   }
 
-  async function updateVC(vcId: string, data: Record<string, unknown>) {
+  async function updateVC(vcId: string, patch: Record<string, unknown>) {
     const res = await fetch(`/api/admin/maintenance/${orderId}/vc/${vcId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(patch),
     });
     if (res.ok) {
       const d = await res.json();
@@ -325,17 +411,92 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
     }
   }
 
+  const calDays = buildCalendarDays();
+
   return (
     <>
-      {/* Admin schedule form */}
+      {/* Admin schedule form with custom calendar */}
       <div className="amAddTask">
         <p className="amAddTaskTitle">Schedule a Call for Client</p>
-        <input className="amInput" placeholder="Client name" value={name} onChange={e => setName(e.target.value)} />
-        <input className="amInput" placeholder="Phone number" value={phone} onChange={e => setPhone(e.target.value)} />
-        <input className="amInput" type="datetime-local" value={date} onChange={e => setDate(e.target.value)} />
+        <input className="amInput" placeholder="Client name"   value={name}  onChange={e => setName(e.target.value)} />
+        <input className="amInput" placeholder="Phone number"  value={phone} onChange={e => setPhone(e.target.value)} />
+
+        {/* ── Custom Calendar ── */}
+        <div className="amCalendar">
+          <div className="amCalHeader">
+            <button className="amCalNav" onClick={prevMonth}>‹</button>
+            <span className="amCalMonth">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+            <button className="amCalNav" onClick={nextMonth}>›</button>
+          </div>
+
+          <div className="amCalGrid">
+            {DAY_LABELS.map(d => (
+              <div key={d} className="amCalDayLabel">{d}</div>
+            ))}
+            {calDays.map((day, i) => {
+              if (!day) return <div key={`empty-${i}`} />;
+              const isPast          = day < today;
+              const isFullyBooked   = !isPast && isDayFullyBooked(day);
+              const isSelected      = selectedDay ? sameDay(day, selectedDay) : false;
+              const isToday         = sameDay(day, new Date());
+              let cls = "amCalDay";
+              if (isPast)           cls += " past";
+              else if (isFullyBooked) cls += " fullyBooked";
+              else if (isSelected)  cls += " selected";
+              else if (isToday)     cls += " today";
+              return (
+                <button
+                  key={day.toISOString()}
+                  className={cls}
+                  disabled={isPast || isFullyBooked || loadingSlots}
+                  onClick={() => { setSelectedDay(day); setSelectedHour(null); }}
+                >
+                  {day.getDate()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Time Slot Picker — shown after a day is selected ── */}
+        {selectedDay && (
+          <div className="amTimeSlots">
+            <p className="amTimeSlotsTitle">
+              Available times — {selectedDay.toLocaleDateString("en-PH", { weekday: "short", month: "short", day: "numeric" })}
+            </p>
+            <div className="amTimeGrid">
+              {VC_HOURS.map(h => {
+                const booked   = isHourBooked(selectedDay, h);
+                const isChosen = selectedHour === h;
+                return (
+                  <button
+                    key={h}
+                    className={`amTimeSlot${booked ? " booked" : ""}${isChosen ? " chosen" : ""}`}
+                    disabled={booked}
+                    onClick={() => setSelectedHour(h)}
+                  >
+                    {fmtHour(h)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {selectedDay && selectedHour !== null && (
+          <p className="amSelectedSummary">
+            📅 {selectedDay.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })} at {fmtHour(selectedHour)}
+          </p>
+        )}
+
         <input className="amInput" placeholder="Note to client (optional)" value={note} onChange={e => setNote(e.target.value)} />
         {error && <div className="amError">{error}</div>}
-        <button className="amAddBtn" style={{ alignSelf: "flex-start" }} onClick={scheduleCall} disabled={loading}>
+        <button
+          className="amAddBtn"
+          style={{ alignSelf: "flex-start" }}
+          onClick={scheduleCall}
+          disabled={loading || !selectedDay || selectedHour === null}
+        >
           {loading ? "Scheduling…" : "+ Schedule Call"}
         </button>
       </div>

@@ -1,22 +1,21 @@
 export const dynamic = 'force-dynamic';
-// GET /api/maintenance/vc/booked-slots
+// GET /api/admin/maintenance/vc/booked-slots
 // Returns all booked preferredDate hours (PENDING or CONFIRMED) across all buyers.
-// Used by the custom VC calendar to gray out unavailable time slots.
+// Used by the admin custom VC calendar to gray out unavailable time slots.
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 
-async function requireBuyer() {
+async function requireAdmin() {
   const session = await getServerSession(authOptions);
-  const userId  = (session?.user as any)?.id;
-  if (!session || !userId) return null;
-  return { session, userId };
+  if (!session || (session.user as any)?.role !== "ADMIN") return null;
+  return session;
 }
 
 export async function GET(_req: NextRequest) {
-  const auth = await requireBuyer();
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Fetch all VC schedules that are still active (not done/cancelled)
   const schedules = await prisma.vCSchedule.findMany({
