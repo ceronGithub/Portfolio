@@ -453,6 +453,7 @@ function SystemsCarousel() {
       .then(r => r.json())
       .then(data => {
         const rows: VisitorSystemEntry[] = data.systems ?? [];
+        console.log("[SystemsCarousel] systems:", rows.map(s => ({ tag: s.tag, displayStatus: s.displayStatus })));
 
         // Set carousel systems state — was missing, causing empty carousel + no displayStatus
         setDbSystems(rows);
@@ -701,6 +702,7 @@ function SystemsCarousel() {
                     </div>
                   </>
                 )}
+              </div>
               );
             })}
           </div>
