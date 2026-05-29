@@ -1,63 +1,150 @@
 // ArchitectureAssetsIntro — Buyer > Architecture scroll-jacked intro.
-// EXACT mirror of visitor/architecture/ArchitectureIntroSection.
-// Only differences: video paths (buyer-*), CSS prefix (archAssets*), component name.
+// Apple-style frame sequence scrubber. No <video> tags.
 //
-// SCROLL DOWN → variable-rate forward play() on forwardVid
-//   playbackRate = clamp(RATE_MIN, 1 + diff×RATE_GAIN, RATE_MAX)
-//   No seeks — decoder never interrupted.
+// HOW IT WORKS (identical to ArchitectureIntroSection on visitor):
+//   1. On mount, preload all WebP frames into Image objects.
+//   2. On scroll, map progress → frame index.
+//   3. Draw the current frame onto a <canvas> element — instant, no decoder lag.
+//   4. Zero seeking artifacts — frame swap is synchronous pixel copy.
+//   5. Works perfectly on iOS Safari where video currentTime seeking breaks.
 //
-// SCROLL UP → variable-rate forward play() on reverseVid
-//   reverseVid = original played backwards, all-keyframe encode (-g 1).
-//   Mirror position: revTarget = revDur - forwardTarget.
-//   Direction determined by scroll velocity (deltaY), NOT per-tick target delta.
-//   This prevents the fwd/rev flip that causes jumpiness on slow scroll.
-//   One clean seek on direction change, then pure playbackRate from there.
+// FRAME HOSTING:
+//   Desktop: /frames/buyer/arch-intro/desktop/frame-XXXX.webp  (1280x720)
+//   Mobile:  /frames/buyer/arch-intro/mobile/frame-XXXX.webp   (640x360)
+//   Served from /public/ — Next.js static files, no Blob needed.
 //
-// EXIT: last 15% of scroll progress fades overlay opacity 1→0 via DOM.
+// PRELOAD STRATEGY:
+//   - First 12 frames load immediately (above-the-fold priority).
+//   - Remaining frames load in background after first batch completes.
+//   - Canvas draws whichever frame is loaded; falls back to last loaded frame.
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import "./architecture-assets-intro.css";
 
-const FORWARD_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/buyer-architecture-intro.mp4";
-const REVERSE_VIDEO    = "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/buyer-architecture-intro-reverse.mp4";
+// ── Config ────────────────────────────────────────────────────────────────────
+const FRAME_BASE_URL   = "/frames/buyer/arch-intro";
+const TOTAL_FRAMES     = 192;
+const PRIORITY_BATCH   = 12;
 const SCROLL_BUDGET_VH = 4;
-const FADE_START       = 0.85;
+const FADE_START       = 0.85; // overlay starts fading at 85% scroll progress
 
-const RATE_GAIN      = 3.0;
-const RATE_MIN       = 0.07;
-const RATE_MAX       = 4.0;
-const HOLD_THRESHOLD = 0.03;
-
-// Zoom config
-const SCALE_FWD_START = 1.0;
-const SCALE_FWD_END   = 1.08;
-const SCALE_REV_START = 1.08;
-const SCALE_REV_END   = 1.18;
-
+// ── Slogan lines ──────────────────────────────────────────────────────────────
 const TAGLINES = [
   "Photorealistic architecture,",
   "interior and exterior —",
   "ready for your next project.",
 ];
 
+// ── Frame URL builder — 4-digit zero-padded ──────────────────────────────────
+function buildFrameUrl(index: number, isMobile: boolean): string {
+  const tier   = isMobile ? "mobile" : "desktop";
+  const padded = String(index + 1).padStart(4, "0");
+  return `${FRAME_BASE_URL}/${tier}/frame-${padded}.webp`;
+}
+
 export default function ArchitectureAssetsIntro() {
-  const sentinelRef   = useRef<HTMLDivElement>(null);
-  const fwdVideoRef   = useRef<HTMLVideoElement>(null);
-  const revVideoRef   = useRef<HTMLVideoElement>(null);
-  const overlayRef    = useRef<HTMLDivElement>(null);
-  const lineRefs      = useRef<(HTMLParagraphElement | null)[]>([]);
-  const progressRef   = useRef(0);
-  const targetTimeRef = useRef(0);
-  const directionRef  = useRef<"fwd" | "rev">("fwd");
-  const velocityRef   = useRef(0);       // scroll deltaY — positive = down, negative = up
-  const rafRef        = useRef<number | null>(null);
+  const sentinelRef    = useRef<HTMLDivElement>(null);
+  const canvasRef      = useRef<HTMLCanvasElement>(null);
+  const overlayRef     = useRef<HTMLDivElement>(null);
+  const lineRefs       = useRef<(HTMLParagraphElement | null)[]>([]);
 
-  const [active, setActive] = useState(false);
-  const [done,   setDone]   = useState(false);
+  const framesRef      = useRef<(HTMLImageElement | null)[]>(Array(TOTAL_FRAMES).fill(null));
+  const loadedCountRef = useRef(0);
+  const progressRef    = useRef(0);
+  const rafRef         = useRef<number | null>(null);
+  const isMobileRef    = useRef(false);
 
-  // ── Slogan: direct DOM writes ─────────────────────────────────────────
+  const [active,       setActive]       = useState(false);
+  const [done,         setDone]         = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
+
+  // ── Draw frame at index onto canvas ─────────────────────────────────────────
+  const drawFrame = useCallback((index: number): void => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const targetIndex = Math.max(0, Math.min(TOTAL_FRAMES - 1, index));
+    const frames      = framesRef.current;
+
+    // Walk backwards from target to find the nearest loaded frame
+    let frameToUse: HTMLImageElement | null = null;
+    for (let i = targetIndex; i >= 0; i--) {
+      if (frames[i]?.complete && frames[i]!.naturalWidth > 0) {
+        frameToUse = frames[i];
+        break;
+      }
+    }
+    if (!frameToUse) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Cover fit — same as object-fit: cover
+    const cw      = canvas.width;
+    const ch      = canvas.height;
+    const fw      = frameToUse.naturalWidth;
+    const fh      = frameToUse.naturalHeight;
+    const scale   = Math.max(cw / fw, ch / fh);
+    const drawW   = fw * scale;
+    const drawH   = fh * scale;
+    const offsetX = (cw - drawW) / 2;
+    const offsetY = (ch - drawH) / 2;
+    ctx.drawImage(frameToUse, offsetX, offsetY, drawW, drawH);
+  }, []);
+
+  // ── Preload all frames ────────────────────────────────────────────────────────
+  useEffect(() => {
+    isMobileRef.current = window.innerWidth < 768;
+
+    function loadFrame(index: number): Promise<void> {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src   = buildFrameUrl(index, isMobileRef.current);
+        img.onload = () => {
+          framesRef.current[index] = img;
+          loadedCountRef.current++;
+          setLoadProgress(loadedCountRef.current / TOTAL_FRAMES);
+          const currentTarget = Math.floor(progressRef.current * TOTAL_FRAMES);
+          if (Math.abs(index - currentTarget) <= 2) drawFrame(index);
+          resolve();
+        };
+        img.onerror = () => resolve();
+      });
+    }
+
+    async function preloadAll(): Promise<void> {
+      const priority = Array.from({ length: PRIORITY_BATCH }, (_, i) => loadFrame(i));
+      await Promise.all(priority);
+      drawFrame(0);
+      for (let i = PRIORITY_BATCH; i < TOTAL_FRAMES; i++) {
+        loadFrame(i);
+        if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    preloadAll();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawFrame]);
+
+  // ── Resize canvas to match device pixel ratio ─────────────────────────────────
+  useEffect(() => {
+    function resizeCanvas(): void {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      canvas.width        = window.innerWidth  * window.devicePixelRatio;
+      canvas.height       = window.innerHeight * window.devicePixelRatio;
+      canvas.style.width  = "100%";
+      canvas.style.height = "100%";
+      drawFrame(Math.floor(progressRef.current * TOTAL_FRAMES));
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [drawFrame]);
+
+  // ── Slogan: direct DOM writes ────────────────────────────────────────────────
   function applySlogan(p: number): void {
     const ca = Math.max(0, Math.sin(p * Math.PI) * 2.5);
     lineRefs.current.forEach((el: HTMLParagraphElement | null, i: number) => {
@@ -78,131 +165,24 @@ export default function ArchitectureAssetsIntro() {
     });
   }
 
-  // ── rAF loop ──────────────────────────────────────────────────────────
+  // ── rAF loop ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const fwd = fwdVideoRef.current;
-    const rev = revVideoRef.current;
-    if (!fwd || !rev) return;
-
-    [fwd, rev].forEach(v => {
-      v.muted       = true;
-      v.playsInline = true;
-      v.preload     = "auto";
-      v.loop        = false;
-    });
-
-    // Initial state — fwd visible, rev hidden
-    fwd.style.opacity = "1";
-    rev.style.opacity = "0";
-
-    function loop() {
+    function loop(): void {
       rafRef.current = requestAnimationFrame(loop);
-      if (!fwd || !rev) return;
-
-      const fwdDur = fwd.duration;
-      const revDur = rev.duration;
-      if (!fwdDur || !isFinite(fwdDur) || !revDur || !isFinite(revDur)) return;
-
-      const target  = targetTimeRef.current;
-      const p       = progressRef.current;
-
-      // ── Direction determined by scroll velocity, not per-tick delta ──
-      // velocityRef is written by the wheel/scroll handler.
-      // When velocity is near 0 (user stopped), keep current direction.
-      const vel = velocityRef.current;
-      const newDir: "fwd" | "rev" = vel > 0.001
-        ? "fwd"
-        : vel < -0.001
-          ? "rev"
-          : directionRef.current; // hold last direction when stopped
-
-      // ── Direction change — one clean seek, then pure playbackRate ────
-      if (newDir !== directionRef.current) {
-        directionRef.current = newDir;
-        if (newDir === "fwd") {
-          rev.pause();
-          rev.style.opacity = "0";
-          fwd.style.opacity = "1";
-          // Snap fwd to current progress position
-          fwd.currentTime = Math.max(0, Math.min(fwdDur, target));
-        } else {
-          fwd.pause();
-          fwd.style.opacity = "0";
-          rev.style.opacity = "1";
-          // Snap rev to mirror position — all-keyframe so instant
-          rev.currentTime = Math.max(0, Math.min(revDur, revDur - target));
-        }
-      }
-
-      // ── Drive active video with playbackRate only ────────────────────
-      if (directionRef.current === "fwd") {
-        const diff = target - fwd.currentTime;
-        if (Math.abs(diff) < HOLD_THRESHOLD) {
-          if (!fwd.paused) fwd.pause();
-        } else {
-          const rate = Math.min(RATE_MAX, Math.max(RATE_MIN, 1 + Math.abs(diff) * RATE_GAIN));
-          if (fwd.paused) fwd.play().catch(() => {});
-          fwd.playbackRate = rate;
-        }
-        fwd.style.opacity = "1";
-        rev.style.opacity = "0";
-
-      } else {
-        // reverse — drive revVid toward its mirror target
-        const revTarget = Math.max(0, Math.min(revDur, revDur - target));
-        const diff      = revTarget - rev.currentTime;
-        if (Math.abs(diff) < HOLD_THRESHOLD) {
-          if (!rev.paused) rev.pause();
-        } else {
-          const rate = Math.min(RATE_MAX, Math.max(RATE_MIN, 1 + Math.abs(diff) * RATE_GAIN));
-          if (rev.paused) rev.play().catch(() => {});
-          rev.playbackRate = rate;
-        }
-        fwd.style.opacity = "0";
-        rev.style.opacity = "1";
-      }
-
-      // ── Zoom scale ───────────────────────────────────────────────────
-      const fwdScale = SCALE_FWD_START + (SCALE_FWD_END - SCALE_FWD_START) * p;
-      const revScale = SCALE_REV_START + (SCALE_REV_END - SCALE_REV_START) * (1 - p);
-      fwd.style.transform = `scale(${fwdScale}) translateZ(0)`;
-      rev.style.transform = `scale(${revScale}) translateZ(0)`;
-
+      const p          = progressRef.current;
+      const frameIndex = Math.floor(p * (TOTAL_FRAMES - 1));
+      drawFrame(frameIndex);
       applySlogan(p);
     }
-
     rafRef.current = requestAnimationFrame(loop);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [drawFrame]);
 
-  // ── Wheel handler — captures velocity for direction detection ─────────
-  // wheel deltaY is reliable and available before scroll fires.
-  // Decays toward 0 on scroll end — direction holds last value when idle.
-  useEffect(() => {
-    let decayTimer: ReturnType<typeof setTimeout> | null = null;
-
-    function onWheel(e: WheelEvent): void {
-      velocityRef.current = e.deltaY;
-      // Reset velocity after 120ms of no wheel events
-      if (decayTimer) clearTimeout(decayTimer);
-      decayTimer = setTimeout(() => { velocityRef.current = 0; }, 120);
-    }
-
-    window.addEventListener("wheel", onWheel, { passive: true });
-    return () => {
-      window.removeEventListener("wheel", onWheel);
-      if (decayTimer) clearTimeout(decayTimer);
-    };
-  }, []);
-
-  // ── Scroll → targetTime + overlay opacity ────────────────────────────
+  // ── Scroll → progress + overlay opacity ──────────────────────────────────────
   useEffect(() => {
     function onScroll(): void {
       const sentinel = sentinelRef.current;
-      const fwd      = fwdVideoRef.current;
       if (!sentinel) return;
 
       const rect       = sentinel.getBoundingClientRect();
@@ -212,17 +192,14 @@ export default function ArchitectureAssetsIntro() {
       if (scrolledIn < 0) {
         setActive(false);
         setDone(false);
-        progressRef.current   = 0;
-        targetTimeRef.current = 0;
+        progressRef.current = 0;
         if (overlayRef.current) overlayRef.current.style.opacity = "0";
         return;
       }
-
       if (scrolledIn >= totalH) {
         setActive(false);
         setDone(true);
         progressRef.current = 1;
-        if (fwd?.duration) targetTimeRef.current = fwd.duration;
         if (overlayRef.current) overlayRef.current.style.opacity = "0";
         return;
       }
@@ -232,14 +209,11 @@ export default function ArchitectureAssetsIntro() {
       setActive(true);
       setDone(false);
 
+      // Fade overlay out during last 15% of scroll
       const exitOpacity = p < FADE_START
         ? 1
         : Math.max(0, 1 - (p - FADE_START) / (1 - FADE_START));
       if (overlayRef.current) overlayRef.current.style.opacity = String(exitOpacity);
-
-      if (fwd?.duration && isFinite(fwd.duration)) {
-        targetTimeRef.current = p * fwd.duration;
-      }
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -263,22 +237,23 @@ export default function ArchitectureAssetsIntro() {
           (done   ? " archAssetsIntroFixedDone"   : "")
         }
       >
-        <video
-          ref={fwdVideoRef}
-          src={FORWARD_VIDEO}
-          className="archAssetsVideoBg"
-          muted
-          playsInline
-          preload="auto"
+        <canvas
+          ref={canvasRef}
+          className="archAssetsIntroCanvas"
+          aria-hidden="true"
         />
-        <video
-          ref={revVideoRef}
-          src={REVERSE_VIDEO}
-          className="archAssetsVideoBg"
-          muted
-          playsInline
-          preload="auto"
-        />
+
+        {/* Preload progress bar — fades out when all frames loaded */}
+        <div
+          className="archAssetsIntroPreloadBar"
+          style={{ opacity: loadProgress >= 1 ? 0 : 1 }}
+        >
+          <div
+            className="archAssetsIntroPreloadFill"
+            style={{ width: `${loadProgress * 100}%` }}
+          />
+        </div>
+
         <div className="archAssetsScrim" />
         <div className="archAssetsTickerWrap">
           <p className="archAssetsTicker">
