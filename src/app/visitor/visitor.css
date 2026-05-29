@@ -4882,6 +4882,29 @@
   border-color: rgba(96,165,250,0.28);
 }
 .vSysCarouselCardLocked { opacity: 0.82; }
+
+/* ── Locked preview placeholder (coming_soon / ongoing) ── */
+.vSysCardLockedPreview {
+  margin:          0.85rem 1rem;
+  border-radius:   10px;
+  border:          1px solid #1a1a1a;
+  background:      #0a0a0a;
+  height:          100px;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.5rem;
+}
+
+.vSysCardLockedLabel {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin:         0;
+}
+
 .vSystemBtnLocked {
   display:        inline-flex;
   align-items:    center;

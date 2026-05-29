@@ -98,7 +98,7 @@ export default async function BuyerPage() {
       weeks:    0,
     })),
   // Filter hidden systems in JS — safe even before migration (field won't exist = treated as visible)
-  })).filter((item) => item.displayStatus !== "hidden");
+  })).filter((item: { displayStatus: string }) => item.displayStatus !== "hidden");
 
   // Pass all owned IDs (system + asset) to the client
   const ownedAssetIds  = ownedProductIds;

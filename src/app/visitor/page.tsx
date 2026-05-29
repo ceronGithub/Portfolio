@@ -1311,6 +1311,21 @@ function SystemsCarousel() {
                     </li>
                   ))}
                 </ul>
+
+                {/* Locked placeholder — shown instead of nothing when coming_soon or ongoing */}
+                {isLocked && (
+                  <div className="vSysCardLockedPreview" style={{ borderColor: s.accent + "22" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={s.accent} strokeWidth="1.2" strokeLinecap="round" opacity="0.4">
+                      {isComingSoon
+                        ? <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>
+                        : <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>
+                      }
+                    </svg>
+                    <p className="vSysCardLockedLabel" style={{ color: s.accent + "99" }}>
+                      {isComingSoon ? "Launching soon" : "Currently in development"}
+                    </p>
+                  </div>
+                )}
                 {/* Price + Configure button */}
                 <div className="vSysCardFooter">
                   <div className="vSysCardPriceBlock">
