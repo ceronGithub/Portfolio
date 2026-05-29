@@ -46,12 +46,17 @@ function fmtTime(d: string) {
 
 // ── Tasks Tab ─────────────────────────────────────────────────────────────────
 function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }) {
-  const [tasks, setTasks]     = useState(initTasks);
-  const [title, setTitle]     = useState("");
-  const [desc, setDesc]       = useState("");
-  const [type, setType]       = useState("OTHER");
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [tasks, setTasks]         = useState(initTasks);
+  const [title, setTitle]         = useState("");
+  const [desc, setDesc]           = useState("");
+  const [type, setType]           = useState("OTHER");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
+  // Edit state: taskId → { title, description, type }
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDesc, setEditDesc]   = useState("");
+  const [editType, setEditType]   = useState("OTHER");
 
   async function addTask() {
     if (!title.trim()) { setError("Title is required."); return; }
@@ -81,9 +86,29 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
     }
   }
 
+  async function saveEdit(taskId: string) {
+    const res = await fetch(`/api/admin/maintenance/${orderId}/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editTitle, description: editDesc, type: editType }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setTasks(p => p.map(t => t.id === taskId ? data.task : t));
+      setEditingId(null);
+    }
+  }
+
   async function deleteTask(taskId: string) {
     const res = await fetch(`/api/admin/maintenance/${orderId}/tasks/${taskId}`, { method: "DELETE" });
     if (res.ok) setTasks(p => p.filter(t => t.id !== taskId));
+  }
+
+  function startEdit(t: Task) {
+    setEditingId(t.id);
+    setEditTitle(t.title);
+    setEditDesc(t.description ?? "");
+    setEditType(t.type);
   }
 
   return (
@@ -107,28 +132,58 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
 
       {!tasks.length
         ? <div className="amEmpty">No tasks logged yet.</div>
-        : <div className="amTaskList">
+        : <div className="amTaskList amScrollPane">
           {tasks.map(t => (
             <div key={t.id} className="amTaskCard">
               <div className={`amTaskDot ${t.status}`} />
               <div className="amTaskBody">
-                <p className="amTaskTitle">{t.title}</p>
-                {t.description && <p className="amTaskDesc">{t.description}</p>}
-                <div className="amTaskActions">
-                  {(["PENDING", "IN_PROGRESS", "DONE"] as const).map(s => (
-                    <button
-                      key={s}
-                      className={`amStatusBtn${t.status === s ? " current" : ""}`}
-                      onClick={() => updateStatus(t.id, s)}
-                    >
-                      {s.replace("_", " ")}
-                    </button>
-                  ))}
-                  <button className="amStatusBtn deleteBtn" onClick={() => deleteTask(t.id)}>Delete</button>
-                  <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.2)", marginLeft: "auto" }}>
-                    {fmt(t.createdAt)}
-                  </span>
-                </div>
+                {editingId === t.id ? (
+                  // ── Inline Edit Form ──
+                  <>
+                    <input
+                      className="amInput"
+                      value={editTitle}
+                      onChange={e => setEditTitle(e.target.value)}
+                    />
+                    <textarea
+                      className="amInput"
+                      rows={2}
+                      value={editDesc}
+                      onChange={e => setEditDesc(e.target.value)}
+                    />
+                    <div className="amTaskActions">
+                      <select className="amSelectInput" value={editType} onChange={e => setEditType(e.target.value)}>
+                        <option value="REVISION">Revision</option>
+                        <option value="FIX">Fix</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                      <button className="amAddBtn" onClick={() => saveEdit(t.id)}>Save</button>
+                      <button className="amStatusBtn" onClick={() => setEditingId(null)}>Cancel</button>
+                    </div>
+                  </>
+                ) : (
+                  // ── Read View ──
+                  <>
+                    <p className="amTaskTitle">{t.title}</p>
+                    {t.description && <p className="amTaskDesc">{t.description}</p>}
+                    <div className="amTaskActions">
+                      {(["PENDING", "IN_PROGRESS", "DONE"] as const).map(s => (
+                        <button
+                          key={s}
+                          className={`amStatusBtn${t.status === s ? " current" : ""}`}
+                          onClick={() => updateStatus(t.id, s)}
+                        >
+                          {s.replace("_", " ")}
+                        </button>
+                      ))}
+                      <button className="amStatusBtn editBtn" onClick={() => startEdit(t)}>Edit</button>
+                      <button className="amStatusBtn deleteBtn" onClick={() => deleteTask(t.id)}>Delete</button>
+                      <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.2)", marginLeft: "auto" }}>
+                        {fmt(t.createdAt)}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ))}
@@ -158,7 +213,7 @@ function BugsTab({ orderId, initBugs }: { orderId: string; initBugs: BugReport[]
   if (!bugs.length) return <div className="amEmpty">No bug reports submitted yet.</div>;
 
   return (
-    <>
+    <div className="amScrollPane">
       {bugs.map(b => (
         <div key={b.id} className="amBugCard">
           <div className="amBugHeader">
@@ -224,14 +279,39 @@ function BugsTab({ orderId, initBugs }: { orderId: string; initBugs: BugReport[]
             }}
           />
         </div>
-      ))}
-    </>
+      ))}\n    </div>
   );
 }
 
 // ── VC Tab ────────────────────────────────────────────────────────────────────
-function VCTab({ orderId, initSchedules }: { orderId: string; initSchedules: VCSchedule[] }) {
+function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: defaultPhone }: {
+  orderId: string; initSchedules: VCSchedule[]; buyerName: string; buyerPhone: string;
+}) {
   const [schedules, setSchedules] = useState(initSchedules);
+  const [name, setName]           = useState(defaultName);
+  const [phone, setPhone]         = useState(defaultPhone);
+  const [date, setDate]           = useState("");
+  const [note, setNote]           = useState("");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
+
+  async function scheduleCall() {
+    if (!name.trim() || !phone.trim() || !date) { setError("Name, phone, and date are required."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(`/api/admin/maintenance/${orderId}/vc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ buyerName: name, buyerPhone: phone, preferredDate: new Date(date).toISOString(), adminNote: note }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSchedules(p => [data.vc, ...p]);
+        setDate(""); setNote("");
+      } else setError(data.error ?? "Failed to schedule call.");
+    } catch { setError("Network error."); }
+    finally { setLoading(false); }
+  }
 
   async function updateVC(vcId: string, data: Record<string, unknown>) {
     const res = await fetch(`/api/admin/maintenance/${orderId}/vc/${vcId}`, {
@@ -245,31 +325,47 @@ function VCTab({ orderId, initSchedules }: { orderId: string; initSchedules: VCS
     }
   }
 
-  if (!schedules.length) return <div className="amEmpty">No VC calls scheduled yet.</div>;
-
   return (
     <>
-      {schedules.map(s => (
-        <div key={s.id} className="amVCCard">
-          <p className="amVCDate">
-            {s.confirmedDate ? `Confirmed: ${fmtTime(s.confirmedDate)}` : `Requested: ${fmtTime(s.preferredDate)}`}
-          </p>
-          <p className="amVCMeta">
-            {s.buyerName} · {s.buyerPhone} · {s.initiator === "ADMIN" ? "Admin initiated" : "Buyer initiated"}
-          </p>
-          <div className="amBugControls">
-            {(["CONFIRMED", "DONE", "CANCELLED"] as const).map(st => (
-              <button
-                key={st}
-                className={`amBugBtn${s.status === st ? " selected" : ""}`}
-                onClick={() => updateVC(s.id, { status: st })}
-              >
-                {st}
-              </button>
-            ))}
-          </div>
+      {/* Admin schedule form */}
+      <div className="amAddTask">
+        <p className="amAddTaskTitle">Schedule a Call for Client</p>
+        <input className="amInput" placeholder="Client name" value={name} onChange={e => setName(e.target.value)} />
+        <input className="amInput" placeholder="Phone number" value={phone} onChange={e => setPhone(e.target.value)} />
+        <input className="amInput" type="datetime-local" value={date} onChange={e => setDate(e.target.value)} />
+        <input className="amInput" placeholder="Note to client (optional)" value={note} onChange={e => setNote(e.target.value)} />
+        {error && <div className="amError">{error}</div>}
+        <button className="amAddBtn" style={{ alignSelf: "flex-start" }} onClick={scheduleCall} disabled={loading}>
+          {loading ? "Scheduling…" : "+ Schedule Call"}
+        </button>
+      </div>
+
+      {!schedules.length
+        ? <div className="amEmpty">No VC calls scheduled yet.</div>
+        : <div className="amScrollPane">
+          {schedules.map(s => (
+            <div key={s.id} className="amVCCard">
+              <p className="amVCDate">
+                {s.confirmedDate ? `Confirmed: ${fmtTime(s.confirmedDate)}` : `Requested: ${fmtTime(s.preferredDate)}`}
+              </p>
+              <p className="amVCMeta">
+                {s.buyerName} · {s.buyerPhone} · {s.initiator === "ADMIN" ? "Admin initiated" : "Buyer initiated"}
+              </p>
+              <div className="amBugControls">
+                {(["CONFIRMED", "DONE", "CANCELLED"] as const).map(st => (
+                  <button
+                    key={st}
+                    className={`amBugBtn${s.status === st ? " selected" : ""}`}
+                    onClick={() => updateVC(s.id, { status: st })}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      }
     </>
   );
 }
@@ -300,9 +396,18 @@ function ClientDetail({ order }: { order: Order }) {
         </button>
       </div>
 
-      {tab === "tasks" && <TasksTab orderId={order.id} initTasks={order.tasks} />}
-      {tab === "bugs"  && <BugsTab  orderId={order.id} initBugs={order.bugReports} />}
-      {tab === "vc"    && <VCTab    orderId={order.id} initSchedules={order.vcSchedules} />}
+      <div className="amDetailContent">
+        {tab === "tasks" && <TasksTab orderId={order.id} initTasks={order.tasks} />}
+        {tab === "bugs"  && <BugsTab  orderId={order.id} initBugs={order.bugReports} />}
+        {tab === "vc"    && (
+          <VCTab
+            orderId={order.id}
+            initSchedules={order.vcSchedules}
+            buyerName={order.user.name}
+            buyerPhone=""
+          />
+        )}
+      </div>
     </div>
   );
 }

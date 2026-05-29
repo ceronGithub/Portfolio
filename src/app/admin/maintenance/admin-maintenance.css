@@ -343,6 +343,32 @@
 .amStatusBtn.current      { background: rgba(255,255,255,0.08); color: #f0ede8; border-color: rgba(255,255,255,0.2); }
 .amStatusBtn.deleteBtn    { color: rgba(239,68,68,0.6); border-color: rgba(239,68,68,0.2); }
 .amStatusBtn.deleteBtn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+.amStatusBtn.editBtn      { color: rgba(99,102,241,0.7); border-color: rgba(99,102,241,0.2); }
+.amStatusBtn.editBtn:hover { background: rgba(99,102,241,0.1); color: #818cf8; }
+
+/* ═══════════════════════════════════════
+   SCROLL PANE — shared tab content scroll
+═══════════════════════════════════════ */
+.amScrollPane {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.amScrollPane::-webkit-scrollbar       { width: 4px; }
+.amScrollPane::-webkit-scrollbar-track { background: transparent; }
+.amScrollPane::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+/* ═══════════════════════════════════════
+   DETAIL CONTENT — scrollable right panel
+═══════════════════════════════════════ */
+.amDetailContent {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.amDetailContent::-webkit-scrollbar       { width: 4px; }
+.amDetailContent::-webkit-scrollbar-track { background: transparent; }
+.amDetailContent::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
 
 /* ═══════════════════════════════════════
    BUG CLASSIFY
