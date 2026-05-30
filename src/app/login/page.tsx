@@ -144,8 +144,8 @@ export default function LoginPage() {
 
   /* On mount: always play slide 0 first */
   useEffect(() => {
-    setVidIdx(0);
-    playIdx(0);
+    const t = setTimeout(() => { setVidIdx(0); playIdx(0); }, 0);
+    return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -192,10 +192,9 @@ export default function LoginPage() {
         <video
           ref={videoRef}
           className="authVideoBg"
-          autoPlay playsInline muted loop={false}
+          playsInline muted loop={false}
           onEnded={handleVideoEnd}
-          crossOrigin="anonymous"
-          preload="metadata"
+          preload="auto"
         />
         <div className="authVideoOverlay" />
         <div className="authVideoGrain" />

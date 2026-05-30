@@ -17,10 +17,6 @@ const WEAPON_VIDEOS = [
   `${R2}/character/orc-01-animation.mp4`,
   `${R2}/character/orc-02-animation.mp4`,
   `${R2}/character/orc-03-animation.mp4`,
-  `${R2}/character/orc-04-animation.mp4`,
-  `${R2}/character/orc-05-animation.mp4`,
-  `${R2}/character/orc-06-animation.mp4`,
-  `${R2}/character/orc-07-animation.mp4`,
 ];
 
 export default function RegisterPage() {
@@ -135,8 +131,8 @@ export default function RegisterPage() {
 
   /* On mount: always play slide 0 first */
   useEffect(() => {
-    setVidIdx(0);
-    playIdx(0);
+    const t = setTimeout(() => { setVidIdx(0); playIdx(0); }, 0);
+    return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -196,10 +192,9 @@ export default function RegisterPage() {
         <video
           ref={videoRef}
           className="authVideoBg"
-          autoPlay playsInline muted loop={false}
+          playsInline muted loop={false}
           onEnded={handleVideoEnd}
-          crossOrigin="anonymous"
-          preload="metadata"
+          preload="auto"
         />
         <div className="authVideoOverlay" />
         <div className="authVideoGrain" />
