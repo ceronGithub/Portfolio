@@ -1343,16 +1343,20 @@
 .apFileDestSelect {
   font-family:      'DM Mono', monospace;
   font-size:        0.68rem;
-  background:       rgba(255,255,255,0.05);
+  background:       #1a1a1a;
   border:           1px solid rgba(255,255,255,0.1);
   border-radius:    6px;
-  color:            rgba(255,255,255,0.7);
+  color:            rgba(255,255,255,0.85);
   padding:          0.3rem 0.5rem;
   cursor:           pointer;
   outline:          none;
   transition:       border-color 0.15s;
 }
 .apFileDestSelect:focus { border-color: #c9a96e; }
+.apFileDestSelect option {
+  background: #1a1a1a;
+  color:      #fff;
+}
 
 .apFilePickBtn {
   font-family:   'DM Mono', monospace;
@@ -1387,3 +1391,126 @@
   color:       #f87171;
   margin:      0.2rem 0 0;
 }
+
+/* ── Products filter bar ─────────────────────────────────────────────── */
+.apProductFilterBar {
+  display:   flex;
+  gap:       0.5rem;
+  padding:   0.75rem 0;
+  flex-wrap: wrap;
+}
+
+.apProductFilterInput {
+  flex:          1;
+  min-width:     160px;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.75rem;
+  background:    rgba(255,255,255,0.05);
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color:         rgba(255,255,255,0.8);
+  padding:       0.4rem 0.75rem;
+  outline:       none;
+  transition:    border-color 0.15s;
+}
+.apProductFilterInput:focus  { border-color: #c9a96e; }
+.apProductFilterInput::placeholder { color: rgba(255,255,255,0.3); }
+
+.apProductFilterSelect {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.75rem;
+  background:    #1a1a1a;
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color:         rgba(255,255,255,0.8);
+  padding:       0.4rem 0.75rem;
+  cursor:        pointer;
+  outline:       none;
+  transition:    border-color 0.15s;
+}
+.apProductFilterSelect:focus   { border-color: #c9a96e; }
+.apProductFilterSelect option  { background: #1a1a1a; color: #fff; }
+
+/* ── Sortable column headers ─────────────────────────────────────────── */
+.apTableSortHeader {
+  cursor:      pointer;
+  user-select: none;
+  display:     flex;
+  align-items: center;
+  gap:         0.15rem;
+  transition:  color 0.15s;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.7rem;
+  color:       rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.apTableSortHeader:hover        { color: rgba(255,255,255,0.75); }
+.apTableSortHeaderActive        { color: #c9a96e !important; }
+.apTableSortIcon                { font-size: 0.65rem; opacity: 0.6; }
+
+/* ── Add product form scroll body ───────────────────────────────────── */
+.apAddProductScrollBody {
+  max-height:  60vh;
+  overflow-y:  auto;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201,169,110,0.3) transparent;
+}
+.apAddProductScrollBody::-webkit-scrollbar       { width: 4px; }
+.apAddProductScrollBody::-webkit-scrollbar-track  { background: transparent; }
+.apAddProductScrollBody::-webkit-scrollbar-thumb  { background: rgba(201,169,110,0.3); border-radius: 4px; }
+
+/* ── File path config expander ──────────────────────────────────────── */
+.apFilePathToggle {
+  background:    transparent;
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color:         rgba(255,255,255,0.45);
+  font-size:     0.72rem;
+  padding:       0.25rem 0.45rem;
+  cursor:        pointer;
+  transition:    border-color 0.15s, color 0.15s;
+  line-height:   1;
+}
+.apFilePathToggle:hover { border-color: #c9a96e; color: #c9a96e; }
+
+.apFilePathConfig {
+  display:       flex;
+  flex-direction: column;
+  gap:           0.35rem;
+  padding:       0.5rem 0.6rem;
+  margin-top:    0.3rem;
+  background:    rgba(255,255,255,0.03);
+  border:        1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+}
+
+.apFilePathRow {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+}
+
+.apFilePathLabel {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.62rem;
+  color:        rgba(255,255,255,0.35);
+  white-space:  nowrap;
+  min-width:    110px;
+}
+
+.apFilePathInput {
+  flex:          1;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.68rem;
+  background:    rgba(255,255,255,0.04);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  color:         rgba(255,255,255,0.75);
+  padding:       0.25rem 0.5rem;
+  outline:       none;
+  transition:    border-color 0.15s;
+}
+.apFilePathInput:focus       { border-color: #c9a96e; }
+.apFilePathInput::placeholder { color: rgba(255,255,255,0.2); font-size: 0.62rem; }

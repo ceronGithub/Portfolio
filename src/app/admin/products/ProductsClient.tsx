@@ -17,6 +17,8 @@ interface Product {
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
   actionTwoUrl: string | null; actionThreeUrl: string | null;
+  actionFourUrl: string | null; actionFiveUrl: string | null;
+  actionSixUrl: string | null; actionSevenUrl: string | null;
   createdAt: Date;
 }
 
@@ -95,6 +97,7 @@ async function createProduct(data: {
   description?: string; isLatest?: boolean;
   previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
   actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
+  actionFourUrl?: string; actionFiveUrl?: string; actionSixUrl?: string; actionSevenUrl?: string;
 }): Promise<Product | null> {
   const res = await fetch("/api/admin/products", {
     method: "POST",
@@ -515,19 +518,26 @@ function FileUploadField({
   label,
   accept,
   defaultDestination = "r2",
+  defaultR2Folder = "products",
+  defaultDriveSubfolder = "",
   driveFolderIdRef,
   onUploaded,
 }: {
-  label:               string;
-  accept?:             string;
-  defaultDestination?: "r2" | "gdrive" | "both";
-  driveFolderIdRef:    React.RefObject<string>;
-  onUploaded:          (result: { r2Url?: string; driveId?: string; driveUrl?: string }) => void;
+  label:                 string;
+  accept?:               string;
+  defaultDestination?:   "r2" | "gdrive" | "both";
+  defaultR2Folder?:      string;
+  defaultDriveSubfolder?: string;
+  driveFolderIdRef:      React.RefObject<string>;
+  onUploaded:            (result: { r2Url?: string; driveId?: string; driveUrl?: string }) => void;
 }) {
-  const [destination, setDestination] = useState<"r2" | "gdrive" | "both">(defaultDestination);
-  const [uploading,   setUploading]   = useState(false);
-  const [done,        setDone]        = useState(false);
-  const [err,         setErr]         = useState("");
+  const [destination,    setDestination]    = useState<"r2" | "gdrive" | "both">(defaultDestination);
+  const [r2Folder,       setR2Folder]       = useState(defaultR2Folder);
+  const [driveSubfolder, setDriveSubfolder] = useState(defaultDriveSubfolder);
+  const [showPath,       setShowPath]       = useState(false);
+  const [uploading,      setUploading]      = useState(false);
+  const [done,           setDone]           = useState(false);
+  const [err,            setErr]            = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -540,7 +550,8 @@ function FileUploadField({
     const form = new FormData();
     form.append("file",        file);
     form.append("destination", destination);
-    form.append("r2Folder",    "products");
+    form.append("r2Folder",    r2Folder.trim() || "products");
+    form.append("driveSubfolder", driveSubfolder.trim());
     if ((destination === "gdrive" || destination === "both") && driveFolderIdRef.current) {
       form.append("driveFolderId", driveFolderIdRef.current);
     }
@@ -567,7 +578,6 @@ function FileUploadField({
       <div className="apFileUploadRow">
         <label className="apMediaLabel">{label}</label>
         <div className="apFileUploadControls">
-          {/* Destination selector */}
           <select
             className="apFileDestSelect"
             value={destination}
@@ -578,7 +588,15 @@ function FileUploadField({
             <option value="gdrive">GDrive</option>
             <option value="both">Both</option>
           </select>
-          {/* Hidden file input */}
+          {/* Path config toggle */}
+          <button
+            type="button"
+            className="apFilePathToggle"
+            onClick={() => setShowPath(p => !p)}
+            title="Set upload folder/path"
+          >
+            {showPath ? "▲" : "📁"}
+          </button>
           <input
             ref={inputRef}
             type="file"
@@ -586,7 +604,6 @@ function FileUploadField({
             style={{ display: "none" }}
             onChange={handleFile}
           />
-          {/* Pick button */}
           <button
             type="button"
             className={"apFilePickBtn" + (done ? " apFilePickBtnDone" : "")}
@@ -597,6 +614,35 @@ function FileUploadField({
           </button>
         </div>
       </div>
+
+      {/* Expandable path config */}
+      {showPath && (
+        <div className="apFilePathConfig">
+          {(destination === "r2" || destination === "both") && (
+            <div className="apFilePathRow">
+              <span className="apFilePathLabel">R2 folder</span>
+              <input
+                className="apFilePathInput"
+                placeholder="e.g. products/characters"
+                value={r2Folder}
+                onChange={e => setR2Folder(e.target.value)}
+              />
+            </div>
+          )}
+          {(destination === "gdrive" || destination === "both") && (
+            <div className="apFilePathRow">
+              <span className="apFilePathLabel">GDrive subfolder</span>
+              <input
+                className="apFilePathInput"
+                placeholder="e.g. Character Folder / orc-animation"
+                value={driveSubfolder}
+                onChange={e => setDriveSubfolder(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       {err && <p className="apFileUploadErr">{err}</p>}
     </div>
   );
@@ -613,9 +659,13 @@ function AddProductForm({ onProductCreated, onClose }: {
   const [previewVideoUrl, setPreviewVideoUrl] = useState("");
   const [facePngUrl, setFacePngUrl]           = useState("");
   const [threeDUrl, setThreeDUrl]             = useState("");
-  const [actionOneUrl, setActionOneUrl]       = useState("");
-  const [actionTwoUrl, setActionTwoUrl]       = useState("");
-  const [actionThreeUrl, setActionThreeUrl]   = useState("");
+  const [actionOneUrl,   setActionOneUrl]   = useState("");
+  const [actionTwoUrl,   setActionTwoUrl]   = useState("");
+  const [actionThreeUrl, setActionThreeUrl] = useState("");
+  const [actionFourUrl,  setActionFourUrl]  = useState("");
+  const [actionFiveUrl,  setActionFiveUrl]  = useState("");
+  const [actionSixUrl,   setActionSixUrl]   = useState("");
+  const [actionSevenUrl, setActionSevenUrl] = useState("");
   const [driveFolderId, setDriveFolderId]     = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState("");
@@ -642,6 +692,10 @@ function AddProductForm({ onProductCreated, onClose }: {
       actionOneUrl:    actionOneUrl.trim()    || undefined,
       actionTwoUrl:    actionTwoUrl.trim()    || undefined,
       actionThreeUrl:  actionThreeUrl.trim()  || undefined,
+      actionFourUrl:   actionFourUrl.trim()   || undefined,
+      actionFiveUrl:   actionFiveUrl.trim()   || undefined,
+      actionSixUrl:    actionSixUrl.trim()    || undefined,
+      actionSevenUrl:  actionSevenUrl.trim()  || undefined,
     });
     if (product) {
       onProductCreated(product);
@@ -655,6 +709,7 @@ function AddProductForm({ onProductCreated, onClose }: {
   return (
     <div className="apAddProductForm">
       <p className="apAddAddonFormTitle">New Product</p>
+      <div className="apAddProductScrollBody">
       <div className="apAddProductGrid">
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Name *</label>
@@ -746,10 +801,55 @@ function AddProductForm({ onProductCreated, onClose }: {
             label="Action 3 Video"
             accept="video/*"
             defaultDestination="r2"
+            defaultR2Folder="products/actions"
             driveFolderIdRef={driveFolderIdRef}
             onUploaded={r => { if (r.r2Url) setActionThreeUrl(r.r2Url); else if (r.driveId) setActionThreeUrl(`/api/drive-video?id=${r.driveId}`); }}
           />
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionThreeUrl} onChange={e => setActionThreeUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <FileUploadField
+            label="Action 4 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            defaultR2Folder="products/actions"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionFourUrl(r.r2Url); else if (r.driveId) setActionFourUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionFourUrl} onChange={e => setActionFourUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <FileUploadField
+            label="Action 5 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            defaultR2Folder="products/actions"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionFiveUrl(r.r2Url); else if (r.driveId) setActionFiveUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionFiveUrl} onChange={e => setActionFiveUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <FileUploadField
+            label="Action 6 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            defaultR2Folder="products/actions"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionSixUrl(r.r2Url); else if (r.driveId) setActionSixUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionSixUrl} onChange={e => setActionSixUrl(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <FileUploadField
+            label="Action 7 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            defaultR2Folder="products/actions"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionSevenUrl(r.r2Url); else if (r.driveId) setActionSevenUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionSevenUrl} onChange={e => setActionSevenUrl(e.target.value)} />
         </div>
         <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
           <label className="apLatestToggleLabel">
@@ -758,6 +858,7 @@ function AddProductForm({ onProductCreated, onClose }: {
           </label>
         </div>
       </div>
+      </div>{/* end apAddProductScrollBody */}
       {error && <p className="apAddAddonError">{error}</p>}
       <div className="apAddAddonFormActions">
         <button className="apPriceCancelBtn" onClick={onClose}>Cancel</button>
@@ -786,6 +887,32 @@ function ProductsSection({
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "ok"|"err" }|null>(null);
   const [showAddForm, setShowAddForm]     = useState(false);
+
+  // ── Filter + Sort ─────────────────────────────────────────────────────
+  const [filterName,     setFilterName]     = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [sortCol,        setSortCol]        = useState<"name"|"category"|"price"|"latest">("name");
+  const [sortDir,        setSortDir]        = useState<"asc"|"desc">("asc");
+
+  function toggleSort(col: typeof sortCol) {
+    if (sortCol === col) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortCol(col); setSortDir("asc"); }
+  }
+
+  const displayList = [...productList]
+    .filter(p => {
+      const nameMatch = p.name.toLowerCase().includes(filterName.toLowerCase());
+      const catMatch  = filterCategory === "all" || p.category === filterCategory;
+      return nameMatch && catMatch;
+    })
+    .sort((a, b) => {
+      let cmp = 0;
+      if (sortCol === "name")     cmp = a.name.localeCompare(b.name);
+      if (sortCol === "category") cmp = a.category.localeCompare(b.category);
+      if (sortCol === "price")    cmp = a.price - b.price;
+      if (sortCol === "latest")   cmp = (a.isLatest ? 0 : 1) - (b.isLatest ? 0 : 1);
+      return sortDir === "asc" ? cmp : -cmp;
+    });
 
   function showToast(msg: string, type: "ok"|"err") {
     setToast({ msg, type });
@@ -860,10 +987,49 @@ function ProductsSection({
       )}
 
       <div className="apTable">
-        <div className="apTableHead apGrid--productsV2">
-          <span>Name</span><span>Category</span><span>Price</span>
-          <span>Latest</span><span>Actions</span>
+        {/* ── Filter bar ── */}
+        <div className="apProductFilterBar">
+          <input
+            className="apProductFilterInput"
+            placeholder="Search by name…"
+            value={filterName}
+            onChange={e => setFilterName(e.target.value)}
+          />
+          <select
+            className="apProductFilterSelect"
+            value={filterCategory}
+            onChange={e => setFilterCategory(e.target.value)}
+          >
+            <option value="all">All Categories</option>
+            <option value="character">Character</option>
+            <option value="weapon">Weapon</option>
+            <option value="interior">Interior</option>
+            <option value="exterior">Exterior</option>
+          </select>
         </div>
+
+        {/* ── Sortable column headers ── */}
+        <div className="apTableHead apGrid--productsV2">
+          {(["name","category","price","latest"] as const).map(col => (
+            <span
+              key={col}
+              className={"apTableSortHeader" + (sortCol === col ? " apTableSortHeaderActive" : "")}
+              onClick={() => toggleSort(col)}
+            >
+              {col.charAt(0).toUpperCase() + col.slice(1)}
+              <span className="apTableSortIcon">
+                {sortCol === col ? (sortDir === "asc" ? " ↑" : " ↓") : " ↕"}
+              </span>
+            </span>
+          ))}
+          <span>Actions</span>
+        </div>
+        {displayList.length === 0 && productList.length > 0 && (
+          <div className="apEmpty">
+            <p className="apEmptyTitle">No results</p>
+            <p className="apEmptyHint">Try adjusting your search or filter.</p>
+          </div>
+        )}
         {productList.length === 0 && (
           <div className="apEmpty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -874,7 +1040,7 @@ function ProductsSection({
             <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
           </div>
         )}
-        {productList.map(p => (
+        {displayList.map(p => (
           <div key={p.id}>
             <div className="apTableRow apGrid--productsV2">
               <span className="apCell apCellName">{p.name}</span>

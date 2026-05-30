@@ -86,6 +86,10 @@ model Product {
   actionOneUrl      String?
   actionTwoUrl      String?
   actionThreeUrl    String?
+  actionFourUrl     String?
+  actionFiveUrl     String?
+  actionSixUrl      String?
+  actionSevenUrl    String?
 
   // ── 3D viewer URL (architecture) ──────────────────────────────────
   threeDUrl         String?

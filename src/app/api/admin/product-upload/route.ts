@@ -16,7 +16,7 @@ import { NextRequest, NextResponse }              from "next/server";
 import { getServerSession }                        from "next-auth";
 import { authOptions }                             from "@/lib/auth";
 import { S3Client, PutObjectCommand }              from "@aws-sdk/client-s3";
-import { getValidAccessToken, uploadFileToDrive }  from "@/lib/googleDrive";
+import { getValidAccessToken, uploadFileToDrive, createDriveFolder, listDriveFolders } from "@/lib/googleDrive";
 
 // ── R2 client (lazy) ──────────────────────────────────────────────────────
 let s3: S3Client | null = null;
@@ -41,11 +41,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const form        = await req.formData();
-  const file        = form.get("file")        as File   | null;
-  const destination = form.get("destination") as string | null;
-  const r2Folder    = (form.get("r2Folder")   as string | null) ?? "products";
-  const driveFolderId = form.get("driveFolderId") as string | null;
+  const form           = await req.formData();
+  const file           = form.get("file")           as File   | null;
+  const destination    = form.get("destination")    as string | null;
+  const r2Folder       = (form.get("r2Folder")      as string | null) ?? "products";
+  const driveSubfolder = (form.get("driveSubfolder") as string | null) ?? "";
+  const driveFolderId  = form.get("driveFolderId")  as string | null;
 
   if (!file)        return NextResponse.json({ error: "No file provided" },        { status: 400 });
   if (!destination) return NextResponse.json({ error: "No destination provided" }, { status: 400 });
@@ -86,7 +87,16 @@ export async function POST(req: NextRequest) {
       try {
         const accessToken = await getValidAccessToken();
         if (!accessToken) throw new Error("Google Drive not connected — please reconnect in Admin.");
-        const driveFile = await uploadFileToDrive(accessToken, safeName, mimeType, buffer, driveFolderId);
+
+        // Resolve target folder — create subfolder if specified
+        let targetFolderId = driveFolderId;
+        if (driveSubfolder.trim()) {
+          const existing = await listDriveFolders(accessToken);
+          const found    = existing.find(f => f.name === driveSubfolder.trim());
+          targetFolderId = found?.id ?? await createDriveFolder(accessToken, driveSubfolder.trim(), driveFolderId);
+        }
+
+        const driveFile = await uploadFileToDrive(accessToken, safeName, mimeType, buffer, targetFolderId);
         driveId  = driveFile.id;
         driveUrl = driveFile.webViewLink ?? `https://drive.google.com/file/d/${driveFile.id}/view`;
       } catch (err) {
