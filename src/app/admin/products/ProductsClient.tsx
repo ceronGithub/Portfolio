@@ -543,6 +543,11 @@ function FileUploadField({
   const [uploading,      setUploading]      = useState(false);
   const [done,           setDone]           = useState(false);
   const [err,            setErr]            = useState("");
+  const [deleting,       setDeleting]       = useState(false);
+
+  // Track what was uploaded so we can delete it
+  const uploadedR2UrlRef  = useRef<string | null>(null);
+  const uploadedDriveIdRef = useRef<string | null>(null);
 
   // Folder lists — seeded with known real folders, live fetch merges on top
   const KNOWN_R2_FOLDERS: string[] = ["architecture", "character", "systems", "weapon"];
@@ -598,6 +603,54 @@ function FileUploadField({
     if (next) loadFolders();
   }
 
+  // ── Delete uploaded file from R2 and/or GDrive ───────────────────────
+  async function handleDelete(): Promise<void> {
+    setDeleting(true);
+    setErr("");
+    const errors: string[] = [];
+
+    // Delete from R2
+    if (uploadedR2UrlRef.current) {
+      try {
+        const res = await fetch("/api/admin/r2-delete", {
+          method:  "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ url: uploadedR2UrlRef.current }),
+        });
+        const data = await res.json();
+        if (!data.success) errors.push(`R2: ${data.error}`);
+        else uploadedR2UrlRef.current = null;
+      } catch {
+        errors.push("R2: network error");
+      }
+    }
+
+    // Delete from Google Drive
+    if (uploadedDriveIdRef.current) {
+      try {
+        const res = await fetch("/api/admin/drive-delete", {
+          method:  "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ fileId: uploadedDriveIdRef.current }),
+        });
+        const data = await res.json();
+        if (!data.success) errors.push(`Drive: ${data.error}`);
+        else uploadedDriveIdRef.current = null;
+      } catch {
+        errors.push("Drive: network error");
+      }
+    }
+
+    setDeleting(false);
+    if (errors.length > 0) {
+      setErr(errors.join(" | "));
+    } else {
+      // Clear the field — notify parent to clear the URL
+      setDone(false);
+      onUploaded({ r2Url: undefined, driveId: undefined, driveUrl: undefined });
+    }
+  }
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -619,6 +672,8 @@ function FileUploadField({
         setErr(data.errors?.join("; ") || data.error || "Upload failed");
       } else {
         setDone(true);
+        uploadedR2UrlRef.current   = data.r2Url   ?? null;
+        uploadedDriveIdRef.current = data.driveId  ?? null;
         onUploaded({ r2Url: data.r2Url, driveId: data.driveId, driveUrl: data.driveUrl });
       }
     } catch {
@@ -664,11 +719,22 @@ function FileUploadField({
           <button
             type="button"
             className={"apFilePickBtn" + (done ? " apFilePickBtnDone" : "")}
-            onClick={() => inputRef.current?.click()}
+            onClick={() => { if (!done) inputRef.current?.click(); }}
             disabled={uploading}
           >
             {uploading ? "Uploading…" : done ? "✓ Uploaded" : "Pick File"}
           </button>
+          {done && (
+            <button
+              type="button"
+              className="apFileDeleteBtn"
+              onClick={handleDelete}
+              disabled={deleting}
+              title="Delete uploaded file from R2 / Drive"
+            >
+              {deleting ? "…" : "🗑"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -812,12 +878,6 @@ function AddProductForm({ onProductCreated, onClose }: {
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Description</label>
           <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
-        </div>
-
-        {/* ── GDrive folder ID — needed for any GDrive/Both uploads ── */}
-        <div className="apAddProductField apAddProductFieldFull">
-          <label className="apMediaLabel">Google Drive Folder ID <span style={{ opacity: 0.4, fontSize: "0.7rem" }}>(required for GDrive uploads)</span></label>
-          <input className="apMediaInput" placeholder="e.g. 1ApEQgnNAza_uRL9NRR…" value={driveFolderId} onChange={e => setDriveFolderId(e.target.value)} />
         </div>
 
         {/* ── Preview Video ── */}

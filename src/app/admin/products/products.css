@@ -1553,6 +1553,30 @@
   background:   rgba(255,255,255,0.1);
   flex-shrink:  0;
 }
+
+/* ── Delete uploaded file button ─────────────────────────────────────── */
+.apFileDeleteBtn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           30px;
+  height:          30px;
+  border:          1px solid rgba(239,68,68,0.35);
+  border-radius:   6px;
+  background:      rgba(239,68,68,0.08);
+  color:           rgba(239,68,68,0.7);
+  font-size:       0.8rem;
+  cursor:          pointer;
+  transition:      background 0.15s, border-color 0.15s;
+  flex-shrink:     0;
+}
+.apFileDeleteBtn:hover:not(:disabled) {
+  background:   rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.6);
+  color:        #ef4444;
+}
+.apFileDeleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 .apFolderSelect {
   flex:             1;
   font-family:      'DM Mono', monospace;
