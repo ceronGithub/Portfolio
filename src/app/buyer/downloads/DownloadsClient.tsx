@@ -1,7 +1,7 @@
 // DownloadsClient — Buyer download library page.
 // Full-width layout with hero header band + body content area.
 // Search filter + category tabs (All / Character / Weapon / System).
-// Download button per asset — constructs Supabase URL from fileKey.
+// Download button per asset — constructs Google Drive proxy URL from fileKey.
 
 "use client";
 
@@ -120,9 +120,8 @@ export default function DownloadsClient({ downloads }: Props) {
     if (!item.fileKey) return;
     setDownloading(item.id);
     try {
-      const url = `https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/assets/${item.fileKey}`;
       const a   = document.createElement("a");
-      a.href     = url;
+      a.href     = `/api/drive-video?id=${item.fileKey}`;
       a.download = item.name;
       a.target   = "_blank";
       a.click();
@@ -131,21 +130,10 @@ export default function DownloadsClient({ downloads }: Props) {
     }
   }
 
-  // Opens a file URL — supports both Google Drive proxy (/api/drive-video?id=...) and Supabase storage URLs.
+  // Opens a file via Google Drive proxy — fileKey is always a Drive file ID.
   function openFileKey(fileKey: string, filename: string) {
-    let url: string;
-    
-    // Check if it's a Google Drive proxy URL
-    if (fileKey.startsWith("/api/drive-video")) {
-      // Google Drive file — use the proxy URL directly
-      url = fileKey;
-    } else {
-      // Supabase storage key — construct the full URL
-      url = `https://ktuahohvysmjxumekaov.supabase.co/storage/v1/object/public/assets/${fileKey}`;
-    }
-    
     const a   = document.createElement("a");
-    a.href     = url;
+    a.href     = `/api/drive-video?id=${fileKey}`;
     a.download = filename;
     a.target   = "_blank";
     a.click();

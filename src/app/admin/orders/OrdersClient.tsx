@@ -167,7 +167,7 @@ function DeliveryPanel({
   );
 }
 
-// ── FileKeyPanel — admin attaches Supabase fileKey to buyer's Ownership record ──
+// ── FileKeyPanel — admin attaches Google Drive fileKey to buyer's Ownership record ──
 // Only shown when order status is DELIVERED. Writes to Ownership via PATCH /api/admin/unlock.
 const TIER_LABELS: Record<string, string> = {
   mesh_only:  "Mesh Only (OBJ + FBX)",
@@ -237,7 +237,7 @@ function FileKeyPanel({
         Attach Download File
       </p>
       <p className="ordFileKeyPanelHint">
-        Select the tier granted, then paste the Supabase storage key. Buyer sees only files for their tier.
+        Select the tier granted, then paste the Google Drive file ID. Buyer sees only files for their tier.
       </p>
       <div className="ordFileKeyTierRow">
         {Object.entries(TIER_LABELS).map(([val, label]) => (
@@ -255,7 +255,7 @@ function FileKeyPanel({
         <input
           className="ordFileKeyInput"
           type="text"
-          placeholder="e.g. weapons/axe-01/axe-01-mesh.zip"
+          placeholder="e.g. 1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP"
           value={fileKey}
           onChange={e => setFileKey(sanitize(e.target.value))}
           spellCheck={false}

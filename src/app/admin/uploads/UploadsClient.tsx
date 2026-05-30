@@ -3,10 +3,9 @@
 //   1. Google Drive connect button (if not connected).
 //   2. Drive folder selector (fetched live from Google Drive).
 //   3. Product type selector (also Drive folders — admin picks the category).
-//   4. Multi-file picker: MP4, .obj, png/jpeg/webp.
-//   5. MP4 selector — admin picks which MP4s go to Supabase Storage.
-//   6. Upload button — sends all files to Drive, selected MP4s to Supabase.
-//   7. Upload progress + results list.
+//   4. Multi-file picker: MP4, .obj, .fbx, .glb, png/jpeg/webp.
+//   5. Upload button — sends all files to Google Drive.
+//   6. Upload progress + results list.
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -20,7 +19,6 @@ interface DriveFolder {
 interface UploadResult {
   fileName: string;
   drive?:   string;
-  supabase?: string;
   error?:   string;
 }
 
@@ -61,9 +59,7 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
   // Form state
   const [selectedDriveFolder,  setSelectedDriveFolder]  = useState<DriveFolder | null>(null);
   const [selectedProductType,  setSelectedProductType]  = useState<DriveFolder | null>(null);
-  const [supabaseFolder,       setSupabaseFolder]       = useState("");
   const [selectedFiles,        setSelectedFiles]        = useState<File[]>([]);
-  const [supabaseSelectedMp4s, setSupabaseSelectedMp4s] = useState<Set<string>>(new Set());
 
   // Upload state
   const [uploading,      setUploading]      = useState(false);
@@ -116,17 +112,6 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
 
   function removeFile(fileName: string) {
     setSelectedFiles(prev => prev.filter(f => f.name !== fileName));
-    setSupabaseSelectedMp4s(prev => { const next = new Set(prev); next.delete(fileName); return next; });
-  }
-
-  // ── Toggle MP4 for Supabase upload ────────────────────────────────
-  function toggleSupabaseMp4(fileName: string) {
-    setSupabaseSelectedMp4s(prev => {
-      const next = new Set(prev);
-      if (next.has(fileName)) next.delete(fileName);
-      else next.add(fileName);
-      return next;
-    });
   }
 
   const mp4Files = selectedFiles.filter(f => f.name.endsWith(".mp4"));
@@ -143,9 +128,7 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
     const formData = new FormData();
     formData.append("driveFolderId",  selectedDriveFolder.id);
     formData.append("productType",    selectedProductType.name);
-    formData.append("supabaseFolder", supabaseFolder || selectedProductType.name.toLowerCase().replace(/\s+/g, "_"));
 
-    supabaseSelectedMp4s.forEach(name => formData.append("supabaseFiles", name));
     selectedFiles.forEach(file => formData.append("files", file));
 
     // Simulate progress while uploading (real progress requires XHR)
@@ -165,7 +148,6 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
       } else {
         setResults(data.results ?? []);
         setSelectedFiles([]);
-        setSupabaseSelectedMp4s(new Set());
       }
     } catch (err) {
       clearInterval(progressInterval);
@@ -220,7 +202,7 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
       <div className="uploadsHeader">
         <div>
           <h1 className="uploadsTitle">Upload Assets</h1>
-          <p className="uploadsSubtitle">Upload MP4s, 3D objects, and images to Google Drive and Supabase</p>
+          <p className="uploadsSubtitle">Upload MP4s, 3D objects, and images to Google Drive</p>
         </div>
         <div className="uploadsDriveStatus">
           <span className="uploadsDriveStatusDot" />
@@ -346,34 +328,23 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
             </div>
           ) : (
             <>
-              <div className="uploadsFilesHeader">
+                <div className="uploadsFilesHeader">
                 <span className="uploadsFilesCount">{selectedFiles.length} file{selectedFiles.length !== 1 ? "s" : ""} selected</span>
-                <button className="uploadsClearBtn" onClick={() => { setSelectedFiles([]); setSupabaseSelectedMp4s(new Set()); }}>
+                <button className="uploadsClearBtn" onClick={() => { setSelectedFiles([]); }}>
                   Clear all
                 </button>
               </div>
 
               <div className="uploadsFilesList">
                 {selectedFiles.map(file => {
-                  const isMp4 = file.name.endsWith(".mp4");
-                  const isForSupabase = supabaseSelectedMp4s.has(file.name);
                   return (
-                    <div key={file.name} className={`uploadsFileRow${isForSupabase ? " uploadsFileRowSupabase" : ""}`}>
+                    <div key={file.name} className="uploadsFileRow">
                       <span className="uploadsFileIcon">{getFileIcon(file.name)}</span>
                       <div className="uploadsFileInfo">
                         <span className="uploadsFileName">{file.name}</span>
                         <span className="uploadsFileSize">{formatBytes(file.size)}</span>
                       </div>
                       <div className="uploadsFileActions">
-                        {isMp4 && (
-                          <button
-                            className={`uploadsSupabaseToggle${isForSupabase ? " uploadsSupabaseToggleOn" : ""}`}
-                            onClick={() => toggleSupabaseMp4(file.name)}
-                            title={isForSupabase ? "Remove from Supabase" : "Also upload to Supabase Storage"}
-                          >
-                            {isForSupabase ? "✓ Supabase" : "+ Supabase"}
-                          </button>
-                        )}
                         <button className="uploadsRemoveBtn" onClick={() => removeFile(file.name)} title="Remove">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -384,18 +355,6 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
                   );
                 })}
               </div>
-
-              {/* MP4 → Supabase summary */}
-              {mp4Files.length > 0 && (
-                <div className="uploadsSupabaseSummary">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  {supabaseSelectedMp4s.size > 0
-                    ? `${supabaseSelectedMp4s.size} MP4${supabaseSelectedMp4s.size !== 1 ? "s" : ""} will also upload to Supabase Storage`
-                    : "Click \"+ Supabase\" on any MP4 to also store it in Supabase"}
-                </div>
-              )}
 
               {/* Upload button */}
               <button
@@ -443,7 +402,6 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
                   <div className="uploadsResultInfo">
                     <span className="uploadsResultName">{r.fileName}</span>
                     {r.drive    && <span className="uploadsResultBadge uploadsResultBadgeDrive">Drive ✓</span>}
-                    {r.supabase && <span className="uploadsResultBadge uploadsResultBadgeSupabase">Supabase ✓</span>}
                     {r.error    && <span className="uploadsResultError">{r.error}</span>}
                   </div>
                 </div>
