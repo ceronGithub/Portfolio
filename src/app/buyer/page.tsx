@@ -56,23 +56,24 @@ export default async function BuyerPage() {
   // Fallback maps for systems whose video URLs haven't been set in the DB yet.
   // Once admin sets demoVideoUrl / bgVideoUrl via the System Full Editor,
   // the DB value takes precedence and these fallbacks are ignored.
-  // Video URLs migrated to Google Drive (Matthew Studio/videos/).
-  // Format: https://drive.google.com/uc?export=download&id=FILE_ID
+  // Video URLs — Cloudflare R2 (zero egress fees, direct CDN delivery).
+  const R2 = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
+
   const demoVideoFallbacks: Record<string, string> = {
     Restaurant: "",
   };
 
   const bgVideoFallbacks: Record<string, string> = {
-    Restaurant:    "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/restaurant-bg.mp4",
-    Finance:       "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/finance-bg.mp4",
-    Booking:       "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/booking-bg.mp4",
-    CRM:           "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/crm-bg.mp4",
-    Warehouse:     "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/warehouse-bg.mp4",
-    "E-commerce":  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/ecommerce-bg.mp4",
-    Education:     "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/education-bg.mp4",
-    Inventory:     "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/inventory-bg.mp4",
-    Construction:  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/construction-bg.mp4",
-    HR:            "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/videos/hr-bg.mp4",
+    Restaurant:    `${R2}/systems/restaurant-bg.mp4`,
+    Finance:       `${R2}/systems/finance-bg.mp4`,
+    Booking:       `${R2}/systems/booking-bg.mp4`,
+    CRM:           `${R2}/systems/crm-bg.mp4`,
+    Warehouse:     `${R2}/systems/warehouse-bg.mp4`,
+    "E-commerce":  `${R2}/systems/ecommerce-bg.mp4`,
+    Education:     `${R2}/systems/education-bg.mp4`,
+    Inventory:     `${R2}/systems/inventory-bg.mp4`,
+    Construction:  `${R2}/systems/construction-bg.mp4`,
+    HR:            `${R2}/systems/hr-bg.mp4`,
   };
 
   const items = systems.map((s: any) => ({
