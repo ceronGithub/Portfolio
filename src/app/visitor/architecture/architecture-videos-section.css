@@ -134,7 +134,7 @@
 .avMagRight {
   display:        flex;
   flex-direction: column;
-  padding-right:  1rem;
+  padding:        0;
 }
 
 /* ── Slide stack ──────────────────────────────────────────────────────── */
@@ -142,17 +142,32 @@
   display:        flex;
   flex-direction: column;
   height:         100%;
-  gap:            0;
   width:          100%;
+  position:       relative;
+}
+
+/* ── Video counter badge ──────────────────────────────────────────────── */
+.avSlideCounter {
+  position:        absolute;
+  top:             1rem;
+  right:           1rem;
+  font-size:       0.63rem;
+  font-weight:     700;
+  letter-spacing:  0.08em;
+  background:      rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  padding:         0.2rem 0.65rem;
+  border-radius:   999px;
+  z-index:         4;
+  opacity:         0.7;
 }
 
 .avSlideCard {
   display:        flex;
   flex-direction: column;
-  border:         1px solid rgba(255, 255, 255, 0.07);
   overflow:       hidden;
-  transition:     border-color 0.3s;
-  border-radius:  30px;
+  border-radius:  0;
+  height:         100%;
 }
 
 .avSlideCardActive {
@@ -217,12 +232,10 @@
 
 /* ── Card info ────────────────────────────────────────────────────────── */
 .avSlideCardInfo {
-  padding:                    0.9rem 1.1rem;
-  background:                 rgba(0, 0, 0, 0.35);
-  backdrop-filter:            blur(4px);
-  flex-shrink:                0;
-  border-bottom-right-radius: 30px;
-  border-bottom-left-radius:  30px;
+  padding:         0.9rem 1.1rem;
+  background:      rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  flex-shrink:     0;
 }
 
 .avSlideCardTitle {
@@ -239,48 +252,6 @@
   color:      rgba(255, 255, 255, 0.38);
   line-height: 1.6;
   margin:     0.3rem 0 0;
-}
-
-/* ── Arrow controls ───────────────────────────────────────────────────── */
-.avSlideOuterArrow {
-  display:         flex;
-  align-items:     center;
-  justify-content: flex-end;
-  gap:             0.55rem;
-  padding:         0.45rem 0.5rem;
-  flex-shrink:     0;
-}
-
-.avSlideOuterArrowBottom {
-  justify-content: flex-end;
-}
-
-.avSlideArrowBtn {
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  width:           30px;
-  height:          30px;
-  border-radius:   8px;
-  border:          1px solid;
-  background:      rgba(255, 255, 255, 0.04);
-  cursor:          pointer;
-  transition:      background 0.2s, transform 0.15s;
-  flex-shrink:     0;
-}
-
-.avSlideArrowBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform:  scale(1.06);
-}
-
-.avSlideArrowCount {
-  font-size:      0.63rem;
-  font-weight:    700;
-  letter-spacing: 0.08em;
-  opacity:        0.55;
-  min-width:      32px;
-  text-align:     center;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
