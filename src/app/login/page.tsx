@@ -9,19 +9,20 @@ import { sanitize } from "@/lib/utils";
 import Link from "next/link";
 import "./login.css";
 
-// Video URLs migrated to Google Drive (Matthew Studio/architecture/).
+// Video URLs — Cloudflare R2 (zero egress fees, direct CDN delivery).
+const R2 = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
 const ARCH_VIDEOS = [
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_1.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_2.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_3.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/exterior_4.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_1.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_2.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_3.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_4.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_5.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_6.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/architecture/interior_7.mp4",
+  `${R2}/architecture/exterior_1.mp4`,
+  `${R2}/architecture/exterior_2.mp4`,
+  `${R2}/architecture/exterior_3.mp4`,
+  `${R2}/architecture/exterior_4.mp4`,
+  `${R2}/architecture/interior_1.mp4`,
+  `${R2}/architecture/interior_2.mp4`,
+  `${R2}/architecture/interior_3.mp4`,
+  `${R2}/architecture/interior_4.mp4`,
+  `${R2}/architecture/interior_5.mp4`,
+  `${R2}/architecture/interior_6.mp4`,
+  `${R2}/architecture/interior_7.mp4`,
 ];
 
 export default function LoginPage() {

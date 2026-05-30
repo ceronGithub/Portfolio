@@ -8,15 +8,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { sanitize } from "@/lib/utils";
 
-// Video URLs migrated to Google Drive (Matthew Studio/weapon_character/).
+// Video URLs — Cloudflare R2 (zero egress fees, direct CDN delivery).
+const R2 = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
 const WEAPON_VIDEOS = [
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/axe-01-animation.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/axe-02-animation.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/axe-03-animation.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/orc-01-animation.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/orc-02-animation.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/orc-03-animation.mp4",
-  "https://9pyiak1lvdjbjlav.public.blob.vercel-storage.com/Matthew%20Studio-20260526T003901Z-3-001/Matthew%20Studio/weapon_character/orc-04-animation.mp4",
+  `${R2}/weapon/axe-01-animation.mp4`,
+  `${R2}/weapon/axe-02-animation.mp4`,
+  `${R2}/weapon/axe-03-animation.mp4`,
+  `${R2}/character/orc-01-animation.mp4`,
+  `${R2}/character/orc-02-animation.mp4`,
+  `${R2}/character/orc-03-animation.mp4`,
+  `${R2}/character/orc-04-animation.mp4`,
+  `${R2}/character/orc-05-animation.mp4`,
+  `${R2}/character/orc-06-animation.mp4`,
+  `${R2}/character/orc-07-animation.mp4`,
 ];
 
 export default function RegisterPage() {

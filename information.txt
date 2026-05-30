@@ -1,9 +1,11 @@
 github & deployment
 developerceron
+cloudflare
 
 ceroncalsena
 gdrive
 supabase : xFdC9ZnXKyGv3xsH
+bucker remove
 
 paymongo
 ceroncalsena
