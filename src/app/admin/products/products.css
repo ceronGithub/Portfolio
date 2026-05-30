@@ -1319,3 +1319,71 @@
   opacity:     0.65;
   line-height: 1.4;
 }
+
+/* ── FileUploadField ─────────────────────────────────────────────────── */
+.apFileUploadField {
+  width: 100%;
+}
+
+.apFileUploadRow {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             0.5rem;
+  margin-bottom:   0.35rem;
+}
+
+.apFileUploadControls {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  flex-shrink: 0;
+}
+
+.apFileDestSelect {
+  font-family:      'DM Mono', monospace;
+  font-size:        0.68rem;
+  background:       rgba(255,255,255,0.05);
+  border:           1px solid rgba(255,255,255,0.1);
+  border-radius:    6px;
+  color:            rgba(255,255,255,0.7);
+  padding:          0.3rem 0.5rem;
+  cursor:           pointer;
+  outline:          none;
+  transition:       border-color 0.15s;
+}
+.apFileDestSelect:focus { border-color: #c9a96e; }
+
+.apFilePickBtn {
+  font-family:   'DM Mono', monospace;
+  font-size:     0.68rem;
+  font-weight:   500;
+  padding:       0.3rem 0.75rem;
+  border-radius: 6px;
+  border:        1px solid rgba(201,169,110,0.4);
+  background:    rgba(201,169,110,0.08);
+  color:         #c9a96e;
+  cursor:        pointer;
+  transition:    background 0.15s, opacity 0.15s;
+  white-space:   nowrap;
+}
+.apFilePickBtn:hover:not(:disabled) { background: rgba(201,169,110,0.16); }
+.apFilePickBtn:disabled             { opacity: 0.5; cursor: not-allowed; }
+.apFilePickBtnDone {
+  border-color: rgba(34,197,94,0.5);
+  background:   rgba(34,197,94,0.1);
+  color:        #22c55e;
+}
+
+.apFileManualInput {
+  margin-top: 0.3rem;
+  font-size:  0.7rem;
+  opacity:    0.7;
+}
+
+.apFileUploadErr {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.65rem;
+  color:       #f87171;
+  margin:      0.2rem 0 0;
+}

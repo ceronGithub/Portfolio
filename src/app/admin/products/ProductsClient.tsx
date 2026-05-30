@@ -506,6 +506,101 @@ function MediaEditor({ product, onFieldSaved }: {
 // ── AddProductForm — create a new product from the Admin UI ───────────────
 // Shown when the admin clicks "Add New Product" at the top of the table.
 // On success, the new product is prepended to the list in local state.
+
+// ── FileUploadField — pick a file, choose R2/GDrive/Both, get URL back ───
+// destination: r2 → returns public CDN URL
+//              gdrive → returns Drive file ID (usable with /api/drive-video)
+//              both → returns both
+function FileUploadField({
+  label,
+  accept,
+  defaultDestination = "r2",
+  driveFolderIdRef,
+  onUploaded,
+}: {
+  label:               string;
+  accept?:             string;
+  defaultDestination?: "r2" | "gdrive" | "both";
+  driveFolderIdRef:    React.RefObject<string>;
+  onUploaded:          (result: { r2Url?: string; driveId?: string; driveUrl?: string }) => void;
+}) {
+  const [destination, setDestination] = useState<"r2" | "gdrive" | "both">(defaultDestination);
+  const [uploading,   setUploading]   = useState(false);
+  const [done,        setDone]        = useState(false);
+  const [err,         setErr]         = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setDone(false);
+    setErr("");
+
+    const form = new FormData();
+    form.append("file",        file);
+    form.append("destination", destination);
+    form.append("r2Folder",    "products");
+    if ((destination === "gdrive" || destination === "both") && driveFolderIdRef.current) {
+      form.append("driveFolderId", driveFolderIdRef.current);
+    }
+
+    try {
+      const res  = await fetch("/api/admin/product-upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setErr(data.errors?.join("; ") || data.error || "Upload failed");
+      } else {
+        setDone(true);
+        onUploaded({ r2Url: data.r2Url, driveId: data.driveId, driveUrl: data.driveUrl });
+      }
+    } catch {
+      setErr("Network error — upload failed.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="apFileUploadField">
+      <div className="apFileUploadRow">
+        <label className="apMediaLabel">{label}</label>
+        <div className="apFileUploadControls">
+          {/* Destination selector */}
+          <select
+            className="apFileDestSelect"
+            value={destination}
+            onChange={e => setDestination(e.target.value as "r2" | "gdrive" | "both")}
+            disabled={uploading}
+          >
+            <option value="r2">R2</option>
+            <option value="gdrive">GDrive</option>
+            <option value="both">Both</option>
+          </select>
+          {/* Hidden file input */}
+          <input
+            ref={inputRef}
+            type="file"
+            accept={accept}
+            style={{ display: "none" }}
+            onChange={handleFile}
+          />
+          {/* Pick button */}
+          <button
+            type="button"
+            className={"apFilePickBtn" + (done ? " apFilePickBtnDone" : "")}
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading…" : done ? "✓ Uploaded" : "Pick File"}
+          </button>
+        </div>
+      </div>
+      {err && <p className="apFileUploadErr">{err}</p>}
+    </div>
+  );
+}
 function AddProductForm({ onProductCreated, onClose }: {
   onProductCreated: (product: Product) => void;
   onClose: () => void;
@@ -521,8 +616,13 @@ function AddProductForm({ onProductCreated, onClose }: {
   const [actionOneUrl, setActionOneUrl]       = useState("");
   const [actionTwoUrl, setActionTwoUrl]       = useState("");
   const [actionThreeUrl, setActionThreeUrl]   = useState("");
+  const [driveFolderId, setDriveFolderId]     = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState("");
+
+  // Ref so FileUploadField always sees latest driveFolderId without re-mount
+  const driveFolderIdRef = useRef<string>("");
+  driveFolderIdRef.current = driveFolderId;
 
   async function handleCreate() {
     if (!name.trim()) { setError("Name is required."); return; }
@@ -577,29 +677,79 @@ function AddProductForm({ onProductCreated, onClose }: {
           <label className="apMediaLabel">Description</label>
           <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
         </div>
+
+        {/* ── GDrive folder ID — needed for any GDrive/Both uploads ── */}
         <div className="apAddProductField apAddProductFieldFull">
-          <label className="apMediaLabel">Preview Video URL</label>
-          <input className="apMediaInput" placeholder="GDrive or /api/drive-video?id=…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
+          <label className="apMediaLabel">Google Drive Folder ID <span style={{ opacity: 0.4, fontSize: "0.7rem" }}>(required for GDrive uploads)</span></label>
+          <input className="apMediaInput" placeholder="e.g. 1ApEQgnNAza_uRL9NRR…" value={driveFolderId} onChange={e => setDriveFolderId(e.target.value)} />
+        </div>
+
+        {/* ── Preview Video ── */}
+        <div className="apAddProductField apAddProductFieldFull">
+          <FileUploadField
+            label="Preview Video"
+            accept="video/*"
+            defaultDestination="r2"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setPreviewVideoUrl(r.r2Url); else if (r.driveId) setPreviewVideoUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
+        </div>
+
+        {/* ── Face PNG ── */}
+        <div className="apAddProductField">
+          <FileUploadField
+            label="Face PNG"
+            accept="image/*"
+            defaultDestination="r2"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setFacePngUrl(r.r2Url); else if (r.driveUrl) setFacePngUrl(r.driveUrl); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
+        </div>
+
+        {/* ── 3D Model ── */}
+        <div className="apAddProductField">
+          <FileUploadField
+            label="3D Model (OBJ/FBX/GLB)"
+            accept=".obj,.fbx,.glb,.gltf"
+            defaultDestination="gdrive"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.driveId) setThreeDUrl(r.driveId); else if (r.r2Url) setThreeDUrl(r.r2Url); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste Drive ID / URL…" value={threeDUrl} onChange={e => setThreeDUrl(e.target.value)} />
+        </div>
+
+        {/* ── Action Videos ── */}
+        <div className="apAddProductField">
+          <FileUploadField
+            label="Action 1 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionOneUrl(r.r2Url); else if (r.driveId) setActionOneUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionOneUrl} onChange={e => setActionOneUrl(e.target.value)} />
         </div>
         <div className="apAddProductField">
-          <label className="apMediaLabel">Face PNG URL</label>
-          <input className="apMediaInput" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <label className="apMediaLabel">3D Model URL</label>
-          <input className="apMediaInput" value={threeDUrl} onChange={e => setThreeDUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <label className="apMediaLabel">Action 1 URL</label>
-          <input className="apMediaInput" value={actionOneUrl} onChange={e => setActionOneUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <label className="apMediaLabel">Action 2 URL</label>
-          <input className="apMediaInput" value={actionTwoUrl} onChange={e => setActionTwoUrl(e.target.value)} />
+          <FileUploadField
+            label="Action 2 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionTwoUrl(r.r2Url); else if (r.driveId) setActionTwoUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionTwoUrl} onChange={e => setActionTwoUrl(e.target.value)} />
         </div>
         <div className="apAddProductField apAddProductFieldFull">
-          <label className="apMediaLabel">Action 3 URL</label>
-          <input className="apMediaInput" value={actionThreeUrl} onChange={e => setActionThreeUrl(e.target.value)} />
+          <FileUploadField
+            label="Action 3 Video"
+            accept="video/*"
+            defaultDestination="r2"
+            driveFolderIdRef={driveFolderIdRef}
+            onUploaded={r => { if (r.r2Url) setActionThreeUrl(r.r2Url); else if (r.driveId) setActionThreeUrl(`/api/drive-video?id=${r.driveId}`); }}
+          />
+          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionThreeUrl} onChange={e => setActionThreeUrl(e.target.value)} />
         </div>
         <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
           <label className="apLatestToggleLabel">
