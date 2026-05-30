@@ -689,6 +689,24 @@ export default function AssetBuySection({
                   ? `Buy now (${cartEntries.length}) — ${fmt(finalTotal)}`
                   : "Buy now"}
               </button>
+              <button
+                className={"assetCartIconBtn" + (cartEntries.length === 0 ? " assetCartIconBtnDisabled" : "")}
+                disabled={cartEntries.length === 0}
+                onClick={() => {
+                  if (cartEntries.length === 0) return;
+                  const ids = cartEntries.map(e => e.asset.id).join(",");
+                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                }}
+                title={cartEntries.length > 0 ? `Checkout (${cartEntries.length} items)` : "No items selected"}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                {cartEntries.length > 0 && (
+                  <span className="assetCartIconBadge">{cartEntries.length}</span>
+                )}
+              </button>
             </div>
           </div>
 

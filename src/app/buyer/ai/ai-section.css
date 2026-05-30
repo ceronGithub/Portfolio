@@ -26,12 +26,13 @@
 }
 
 .aiSectionTitle {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight: 800;
-  font-style: italic;
-  color: #fff;
-  letter-spacing: -0.03em;
-  margin-bottom: 0.75rem;
+  font-size:      clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight:    600;
+  font-style:     italic;
+  font-family:    var(--font-cormorant), Georgia, serif;
+  color:          #fff;
+  letter-spacing: -0.01em;
+  margin-bottom:  0.75rem;
 }
 
 .aiSectionSub {

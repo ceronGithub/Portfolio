@@ -18,39 +18,36 @@
 
 import "./ai-section.css";
 
-const GD = (id: string) => `/api/drive-video?id=${id}`;
+// Video rows — Cloudflare R2 (zero egress, direct CDN).
+const R2 = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
 
-// 5 videos per row — reduced from 7–13 to limit concurrent Drive video requests
 const AI_ROW_EXTERIOR: string[] = [
-  GD("1QKCGiJCNzSbpkVsQPN073ws6WbZMwrZC"), // Drone_shot_1517
-  GD("1hIAB7FrCEnn8cfrGSCplccHkZ4Gonnxu"), // Drone_shot_1518
-  GD("1kp23x5YBnWovDamPDT2FS00d1ID9SB0k"), // project-01
-  GD("10CfcifgZBQMoxK2L_ANH8TJ8vUj7v26T"), // project-02
-  GD("1uK7a0BedMTfGWeZ17WxJt-YYKAJL3bZJ"), // project-03
+  `${R2}/architecture/exterior_1.mp4`,
+  `${R2}/architecture/exterior_2.mp4`,
+  `${R2}/architecture/exterior_3.mp4`,
+  `${R2}/architecture/exterior_4.mp4`,
 ];
 
 const AI_ROW_INTERIOR: string[] = [
-  GD("16IlbksfqFgAsIUlIbSnfG1k0miktYC0d"), // cinematic_motion_0923
-  GD("1cHTTgKBilMBXIrIGuSqB2tAb4A9WdobJ"), // cinematic_motion_0923 (1)
-  GD("1A9sgWrWpi_Jq2NWZIH5mkh2XP491_2Ce"), // cinematic_motion_0923 (2)
-  GD("1sr1O1HBL-q0oFZ2mfhgI3Zf3Y_AWmOzl"), // cinematic_motion_0923 (3)
-  GD("1wQtULgqst4SX2imqwdEhnqYRgzcPWJiu"), // cinematic_motion_0923 (4)
+  `${R2}/architecture/interior_1.mp4`,
+  `${R2}/architecture/interior_2.mp4`,
+  `${R2}/architecture/interior_3.mp4`,
+  `${R2}/architecture/interior_4.mp4`,
+  `${R2}/architecture/interior_5.mp4`,
 ];
 
 const AI_ROW_WEAPON: string[] = [
-  GD("1NrTbKznn-3pcIC9q-BqBa2lUfMUsGKa8"), // axe-01
-  GD("1db1EOrzdG2phPiaJ8DJV9Tz1-bfYwB67"), // axe-02
-  GD("1ZPhiN56sAU9EQIlrrTPY3OSDBhijtHld"), // axe-03
-  GD("1jjU-r5EawMDjzhbJueiadCMjkcCZrHtr"), // axe-04
-  GD("1vl3KhBI_UQIugyIXeBTduabrOh0eZSU5"), // axe-05
+  `${R2}/weapon/axe-01-animation.mp4`,
+  `${R2}/weapon/axe-02-animation.mp4`,
+  `${R2}/weapon/axe-03-animation.mp4`,
 ];
 
 const AI_ROW_CHARACTER: string[] = [
-  GD("1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP"), // orc-01
-  GD("1SaHl7fGvD2uoy34clB1p2UWT-knWENwl"), // orc-02
-  GD("1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i"), // orc-03
-  GD("1cx2sETIft3K7R8NnNPumoLet1pW5It0a"), // orc-04
-  GD("1-n33tw86ViaKB6xzM0UuCrgF45JVc63-"), // orc-05
+  `${R2}/character/orc-01-animation.mp4`,
+  `${R2}/character/orc-02-animation.mp4`,
+  `${R2}/character/orc-03-animation.mp4`,
+  `${R2}/character/orc-04-animation.mp4`,
+  `${R2}/character/orc-05-animation.mp4`,
 ];
 
 const ALL_ROWS = [

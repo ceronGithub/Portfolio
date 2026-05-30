@@ -190,13 +190,14 @@
 }
 
 .heroSubGreet {
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
-  font-weight: 800;
-  font-style: italic;
-  color: #fff;
-  letter-spacing: -0.03em;
-  text-shadow: 0 4px 32px rgba(0,0,0,0.7);
-  white-space: nowrap;
+  font-size:      clamp(2.4rem, 5vw, 4.2rem);
+  font-weight:    600;
+  font-style:     italic;
+  font-family:    var(--font-cormorant), Georgia, serif;
+  color:          #fff;
+  letter-spacing: -0.01em;
+  text-shadow:    0 4px 32px rgba(0,0,0,0.7);
+  white-space:    nowrap;
 }
 
 .heroSubName {

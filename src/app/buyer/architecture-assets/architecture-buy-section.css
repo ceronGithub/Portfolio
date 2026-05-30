@@ -122,6 +122,49 @@
 
 .archBrowseBtn:hover { background: #5a3a20; opacity: 0.9; }
 
+/* ── Cart icon button (beside BUY) ────────────────────────────────── */
+.archCartIconBtn {
+  position:        relative;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           42px;
+  height:          42px;
+  border-radius:   999px;
+  background:      rgba(34, 197, 94, 0.1);
+  border:          1px solid rgba(34, 197, 94, 0.3);
+  color:           #22c55e;
+  cursor:          pointer;
+  transition:      background 0.2s, transform 0.15s, opacity 0.2s;
+  flex-shrink:     0;
+}
+.archCartIconBtn:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.2);
+  transform:  translateY(-1px);
+}
+.archCartIconBtnDisabled {
+  opacity:        0.3;
+  cursor:         not-allowed;
+  pointer-events: none;
+}
+.archCartIconBadge {
+  position:        absolute;
+  top:             -4px;
+  right:           -4px;
+  min-width:       16px;
+  height:          16px;
+  border-radius:   999px;
+  background:      #22c55e;
+  color:           #000;
+  font-size:       0.6rem;
+  font-weight:     800;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         0 4px;
+  line-height:     1;
+}
+
 /* Bundle bar */
 .archBundleBar {
   display:         flex;
