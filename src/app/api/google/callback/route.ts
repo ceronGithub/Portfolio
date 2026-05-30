@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic';
 // api/google/callback/route.ts
 // Handles the OAuth2 redirect from Google after admin grants Drive access.
-// Exchanges the authorization code for access + refresh tokens.
-// Stores tokens in httpOnly cookies, then redirects back to Admin Products.
+// Exchanges the authorization code for tokens, saves to DB (permanent).
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
+import { saveGoogleTokens }          from "@/lib/googleDrive";
 
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID!;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
@@ -37,28 +37,12 @@ export async function GET(req: NextRequest) {
 
   const tokens = await tokenResponse.json();
 
-  if (!tokens.access_token) {
+  if (!tokens.access_token || !tokens.refresh_token) {
     return NextResponse.redirect(new URL("/admin/products?drive_error=token_failed", req.url));
   }
 
-  // Redirect back to Admin Products — Drive is now connected
-  const response = NextResponse.redirect(new URL("/admin/products?drive_connected=true", req.url));
+  // Save tokens to DB — permanent storage, no expiry on refresh token
+  await saveGoogleTokens(tokens.refresh_token, tokens.access_token);
 
-  response.cookies.set("google_access_token", tokens.access_token, {
-    httpOnly: true,
-    secure:   process.env.NODE_ENV === "production",
-    maxAge:   3600, // 1 hour
-    path:     "/",
-  });
-
-  if (tokens.refresh_token) {
-    response.cookies.set("google_refresh_token", tokens.refresh_token, {
-      httpOnly: true,
-      secure:   process.env.NODE_ENV === "production",
-      maxAge:   60 * 60 * 24 * 30, // 30 days
-      path:     "/",
-    });
-  }
-
-  return response;
+  return NextResponse.redirect(new URL("/admin/products?drive_connected=true", req.url));
 }

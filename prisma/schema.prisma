@@ -336,3 +336,15 @@ model MaintenanceTask {
 
   @@index([maintenanceOrderId])
 }
+// ── Google OAuth Token ──────────────────────────────────────────────────
+// Stores the Google Drive refresh token for the admin account.
+// Single row — upserted on every successful OAuth callback.
+// Permanent until manually revoked in Google Account settings.
+
+model GoogleToken {
+  id           String   @id @default("singleton")  // always "singleton" — one row only
+  refreshToken String                               // never expires unless revoked
+  accessToken  String?                              // cached, refreshed automatically
+  accessExpiry DateTime?                            // when the cached access token expires
+  updatedAt    DateTime @updatedAt
+}

@@ -1795,6 +1795,27 @@ export default function ProductsClient({ products, systems }: Props) {
         )}
       </div>
 
+      {/* ── Page footer — GDrive setup note ──────── */}
+      <footer className="apPageFooter">
+        <p className="apPageFooterNote">
+          <strong>Google Drive uploads</strong> require an authorized redirect URI in your Google Cloud Console.
+          Go to{" "}
+          <a
+            href="https://console.cloud.google.com/apis/credentials"
+            target="_blank"
+            rel="noreferrer"
+            className="apPageFooterLink"
+          >
+            APIs &amp; Services → Credentials → OAuth 2.0 Client
+          </a>
+          {" "}and add{" "}
+          <code className="apPageFooterCode">
+            {typeof window !== "undefined" ? window.location.origin : "https://your-domain.vercel.app"}/api/google/callback
+          </code>
+          {" "}under <strong>Authorized redirect URIs</strong> before connecting.
+        </p>
+      </footer>
+
     </div>
   );
 }

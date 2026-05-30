@@ -1701,3 +1701,29 @@
   text-underline-offset: 3px;
 }
 .apDriveConsoleLink:hover { color: rgba(255,255,255,0.65); }
+
+/* ── Page footer ─────────────────────────────────────────────────────── */
+.apPageFooter {
+  margin-top:   3rem;
+  padding:      1.2rem 1.4rem;
+  border-top:   1px solid rgba(255,255,255,0.06);
+}
+.apPageFooterNote {
+  font-family:  'DM Mono', monospace;
+  font-size:    0.65rem;
+  color:        rgba(255,255,255,0.25);
+  line-height:  1.7;
+  margin:       0;
+}
+.apPageFooterNote strong { color: rgba(255,255,255,0.4); font-weight: 600; }
+.apPageFooterLink {
+  color:            rgba(201,163,110,0.6);
+  text-decoration:  underline;
+  text-underline-offset: 3px;
+}
+.apPageFooterLink:hover { color: rgba(201,163,110,1); }
+.apPageFooterCode {
+  color:        #c9a36e;
+  font-size:    0.63rem;
+  word-break:   break-all;
+}

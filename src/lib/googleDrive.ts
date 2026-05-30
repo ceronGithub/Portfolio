@@ -1,33 +1,46 @@
 // lib/googleDrive.ts
 // Helper functions for Google Drive API interactions.
+// Tokens are stored in the DB (GoogleToken table) — permanent until revoked.
 
-import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID!;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
 
+// ── Save tokens to DB (upsert) ─────────────────────────────────────────
+// Called after OAuth callback. Stores refresh token permanently.
+
+export async function saveGoogleTokens(refreshToken: string, accessToken: string): Promise<void> {
+  const accessExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour from now
+  await prisma.googleToken.upsert({
+    where:  { id: "singleton" },
+    update: { refreshToken, accessToken, accessExpiry },
+    create: { id: "singleton", refreshToken, accessToken, accessExpiry },
+  });
+}
+
 // ── Get valid access token ─────────────────────────────────────────────
-// Tries access token first. If missing, uses refresh token to get a new one.
-// Does NOT validate the token — Drive API will reject if invalid.
+// Reads from DB. Uses cached access token if still valid.
+// Auto-refreshes using refresh token when expired.
 
 export async function getValidAccessToken(): Promise<string | null> {
-  const cookieStore  = await cookies();
-  const accessToken  = cookieStore.get("google_access_token")?.value;
-  const refreshToken = cookieStore.get("google_refresh_token")?.value;
+  const record = await prisma.googleToken.findUnique({ where: { id: "singleton" } });
+  if (!record) return null; // Never connected
 
-  // Use stored access token directly — Drive API will tell us if expired
-  if (accessToken) return accessToken;
+  // Use cached access token if not expired (with 2-minute buffer)
+  if (record.accessToken && record.accessExpiry) {
+    const buffer = new Date(Date.now() + 2 * 60 * 1000);
+    if (record.accessExpiry > buffer) return record.accessToken;
+  }
 
-  // No access token — try refreshing
-  if (!refreshToken) return null;
-
+  // Refresh using stored refresh token
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id:     GOOGLE_CLIENT_ID,
       client_secret: GOOGLE_CLIENT_SECRET,
-      refresh_token: refreshToken,
+      refresh_token: record.refreshToken,
       grant_type:    "refresh_token",
     }),
   });
@@ -35,12 +48,11 @@ export async function getValidAccessToken(): Promise<string | null> {
   const data = await res.json();
   if (!data.access_token) return null;
 
-  // Save new access token in cookie
-  cookieStore.set("google_access_token", data.access_token, {
-    httpOnly: true,
-    secure:   process.env.NODE_ENV === "production",
-    maxAge:   3600,
-    path:     "/",
+  // Cache the new access token in DB
+  const accessExpiry = new Date(Date.now() + 3600 * 1000);
+  await prisma.googleToken.update({
+    where:  { id: "singleton" },
+    data:   { accessToken: data.access_token, accessExpiry },
   });
 
   return data.access_token;
