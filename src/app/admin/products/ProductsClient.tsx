@@ -91,6 +91,36 @@ async function patchProductMedia(
   return res.ok;
 }
 
+// Deletes a product from the DB (cascade: ownership + orders).
+async function deleteProduct(id: string): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+  if (res.ok) return { ok: true };
+  const b = await res.json().catch(() => ({}));
+  return { ok: false, error: b.error ?? `HTTP ${res.status}` };
+}
+
+// Deletes a file from R2 by its public URL. Silently passes on 404.
+async function deleteFromR2(url: string): Promise<void> {
+  try {
+    await fetch("/api/admin/r2-delete", {
+      method:  "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ url }),
+    });
+  } catch { /* silent — best-effort */ }
+}
+
+// Deletes a file from Google Drive by file ID. Silently passes on 404.
+async function deleteFromDrive(fileId: string): Promise<void> {
+  try {
+    await fetch("/api/admin/drive-delete", {
+      method:  "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ fileId }),
+    });
+  } catch { /* silent — best-effort */ }
+}
+
 // Creates a new product record.
 async function createProduct(data: {
   name: string; price: number; category: string;
@@ -544,6 +574,7 @@ function FileUploadField({
   const [done,           setDone]           = useState(false);
   const [err,            setErr]            = useState("");
   const [deleting,       setDeleting]       = useState(false);
+  const [driveConnectUrl, setDriveConnectUrl] = useState<string | null>(null);
 
   // Track what was uploaded so we can delete it
   const uploadedR2UrlRef  = useRef<string | null>(null);
@@ -568,6 +599,8 @@ function FileUploadField({
   const foldersLoadedRef = useRef(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  // Tracks the actual Drive folder ID selected from the dropdown for this field
+  const selectedDriveFolderIdRef = useRef<string>("");
 
   // ── Fetch folders on first open — merges live results with known list ───
   async function loadFolders(): Promise<void> {
@@ -661,15 +694,27 @@ function FileUploadField({
     form.append("destination",    destination);
     form.append("r2Folder",       r2Folder.trim() || "products");
     form.append("driveSubfolder", driveSubfolder.trim());
-    if ((destination === "gdrive" || destination === "both") && driveFolderIdRef.current) {
-      form.append("driveFolderId", driveFolderIdRef.current);
+    if (destination === "gdrive" || destination === "both") {
+      // Prefer folder ID selected from dropdown; fall back to parent-provided ref
+      const resolvedFolderId = selectedDriveFolderIdRef.current || driveFolderIdRef.current;
+      if (resolvedFolderId) {
+        form.append("driveFolderId", resolvedFolderId);
+      }
     }
 
     try {
       const res  = await fetch("/api/admin/product-upload", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setErr(data.errors?.join("; ") || data.error || "Upload failed");
+        const errMsg = data.errors?.join("; ") || data.error || "Upload failed";
+        setErr(errMsg);
+        // If Drive is not connected, fetch the reconnect URL
+        if (errMsg.toLowerCase().includes("not connected")) {
+          fetch("/api/admin/drive-connect-url")
+            .then(r => r.json())
+            .then(d => { if (d.url) setDriveConnectUrl(d.url); })
+            .catch(() => {});
+        }
       } else {
         setDone(true);
         uploadedR2UrlRef.current   = data.r2Url   ?? null;
@@ -775,7 +820,13 @@ function FileUploadField({
               <select
                 className="apFolderSelect"
                 value={driveSubfolder}
-                onChange={e => setDriveSubfolder(e.target.value)}
+                onChange={e => {
+                  const selectedName = e.target.value;
+                  setDriveSubfolder(selectedName);
+                  // Store the real folder ID locally for upload
+                  const found = driveFolders.find(f => f.name === selectedName);
+                  selectedDriveFolderIdRef.current = found?.id ?? "";
+                }}
               >
                 <option value="">— root / no subfolder —</option>
                 {driveFolders.map(f => (
@@ -790,7 +841,31 @@ function FileUploadField({
         </div>
       )}
 
-      {err && <p className="apFileUploadErr">{err}</p>}
+      {err && (
+        <div className="apFileUploadErrWrap">
+          <p className="apFileUploadErr">{err}</p>
+          {driveConnectUrl && (
+            <div className="apDriveReconnectRow">
+              <a
+                href={driveConnectUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="apDriveReconnectBtn"
+              >
+                🔗 Reconnect Google Drive
+              </a>
+              <a
+                href="/admin/uploads"
+                target="_blank"
+                rel="noreferrer"
+                className="apDriveReconnectBtn apDriveReconnectBtnAlt"
+              >
+                ↗ Go to Upload Assets page
+              </a>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1055,6 +1130,48 @@ function ProductsSection({
   const [togglingLatest, setTogglingLatest] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "ok"|"err" }|null>(null);
   const [showAddForm, setShowAddForm]     = useState(false);
+  const [deletingId,  setDeletingId]      = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // ── Delete product — purges R2/Drive files then removes DB record ────
+  async function handleDeleteProduct(product: Product): Promise<void> {
+    setDeletingId(product.id);
+    setConfirmDeleteId(null);
+
+    // Collect all media URLs on this product
+    const r2PublicBase = process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? "";
+    const R2_FIELDS: (keyof Product)[] = [
+      "previewVideoUrl", "facePngUrl",
+      "actionOneUrl", "actionTwoUrl", "actionThreeUrl",
+      "actionFourUrl", "actionFiveUrl", "actionSixUrl", "actionSevenUrl",
+    ];
+    // GDrive fields store a Drive file ID (not a URL)
+    const DRIVE_FIELDS: (keyof Product)[] = ["threeDUrl"];
+
+    // Best-effort delete from R2 (fire-and-forget, parallel)
+    const r2Deletions = R2_FIELDS
+      .map(f => product[f] as string | null)
+      .filter((url): url is string => !!url && url.includes(r2PublicBase || "r2."));
+    await Promise.allSettled(r2Deletions.map(deleteFromR2));
+
+    // Best-effort delete from Drive
+    const driveIds = DRIVE_FIELDS
+      .map(f => product[f] as string | null)
+      .filter((id): id is string => !!id && !id.startsWith("http"));
+    await Promise.allSettled(driveIds.map(deleteFromDrive));
+
+    // Delete from DB
+    const { ok, error } = await deleteProduct(product.id);
+    setDeletingId(null);
+    if (ok) {
+      setProductList(prev => prev.filter(p => p.id !== product.id));
+      setToast({ msg: `"${product.name}" deleted.`, type: "ok" });
+      setTimeout(() => setToast(null), 3000);
+    } else {
+      setToast({ msg: error ?? "Delete failed.", type: "err" });
+      setTimeout(() => setToast(null), 4000);
+    }
+  }
 
   // ── Filter + Sort ─────────────────────────────────────────────────────
   const [filterName,     setFilterName]     = useState("");
@@ -1249,6 +1366,35 @@ function ProductsSection({
                 >
                   {expandedRow === p.id ? "▲ Media" : "✎ Media"}
                 </button>
+                {/* Delete — two-step confirm */}
+                {confirmDeleteId === p.id ? (
+                  <>
+                    <button
+                      className="apActionBtn apActionBtnDelete apActionBtnDeleteConfirm"
+                      onClick={() => handleDeleteProduct(p)}
+                      disabled={deletingId === p.id}
+                    >
+                      {deletingId === p.id ? "…" : "Confirm"}
+                    </button>
+                    <button
+                      className="apActionBtn apActionBtnDeactivate"
+                      style={{ fontSize: "0.7rem" }}
+                      onClick={() => setConfirmDeleteId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="apActionBtn apActionBtnDelete"
+                    style={{ fontSize: "0.72rem" }}
+                    onClick={() => setConfirmDeleteId(p.id)}
+                    disabled={deletingId === p.id}
+                    title="Delete product + files from R2/Drive"
+                  >
+                    🗑 Delete
+                  </button>
+                )}
               </span>
             </div>
             {/* Expanded media editor row */}
