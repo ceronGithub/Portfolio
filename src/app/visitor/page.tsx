@@ -41,7 +41,10 @@ const DRIVE_EXTERIOR = "https://drive.google.com/drive/folders/1qsx8USrcKU37ljmD
 const DRIVE_WEAPONS  = ""; // files delivered via email after purchase — not publicly accessible
 
 /* ─── Google Drive /preview — only reliable embeddable video src ─────── */
-const drivePreview = (id: string) => `https://drive.google.com/file/d/${id}/preview`;
+const drivePreview = (id: string) => `https://drive.google.com/file/d/${id}/preview?autoplay=1&rm=minimal`;
+
+/* ── R2 base ─────────────────────────────────────────────────────────── */
+const R2_MODELING = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
 
 /* ── Section 3: 3D Animation — Blender axe animations ───────────────── */
 const animationCards = [
@@ -52,7 +55,7 @@ const animationCards = [
     desc: "Full Blender animation of a hand-modelled battle axe — cinematic camera orbit, studio lighting, and procedural metal shading.",
     accent: "#4ade80",
     gradient: "linear-gradient(135deg, #061a0e 0%, #0e2a18 40%, #0d0c0b 100%)",
-    videoFileId: "1NrTbKznn-3pcIC9q-BqBa2lUfMUsGKa8",
+    videoUrl: `${R2_MODELING}/weapon/axe-01-animation.mp4`,
   },
   {
     id: "anim-2",
@@ -61,7 +64,7 @@ const animationCards = [
     desc: "Viking battle axe with knotwork engravings — slow 360° turntable render with HDRI environment and subsurface metal material.",
     accent: "#4ade80",
     gradient: "linear-gradient(135deg, #061a0e 0%, #0e2a18 40%, #0d0c0b 100%)",
-    videoFileId: "1db1EOrzdG2phPiaJ8DJV9Tz1-bfYwB67",
+    videoUrl: `${R2_MODELING}/weapon/axe-02-animation.mp4`,
   },
   {
     id: "anim-3",
@@ -70,7 +73,7 @@ const animationCards = [
     desc: "Precision-modelled poll axe with dynamic lighting pass — edge highlights, shadow casting, and cinematic depth of field.",
     accent: "#4ade80",
     gradient: "linear-gradient(135deg, #061a0e 0%, #0e2a18 40%, #0d0c0b 100%)",
-    videoFileId: "1ZPhiN56sAU9EQIlrrTPY3OSDBhijtHld",
+    videoUrl: `${R2_MODELING}/weapon/axe-03-animation.mp4`,
   },
 ];
 
@@ -83,7 +86,7 @@ const orcCards = [
     desc: "Full Blender character animation of an orc model — cinematic lighting, procedural skin shader, and dynamic camera movement.",
     accent: "#86efac",
     gradient: "linear-gradient(135deg, #061a0a 0%, #0e2a12 40%, #0d0c0b 100%)",
-    videoFileId: "1ApEQgnNAza_uRL9NRRPtCMOurPqKj1VP",
+    videoUrl: `${R2_MODELING}/character/orc-01-animation.mp4`,
   },
   {
     id: "orc-2",
@@ -92,7 +95,7 @@ const orcCards = [
     desc: "Orc warrior with detailed armor and weapon — slow orbit render with dramatic rim lighting and subsurface skin scattering.",
     accent: "#86efac",
     gradient: "linear-gradient(135deg, #061a0a 0%, #0e2a12 40%, #0d0c0b 100%)",
-    videoFileId: "1SaHl7fGvD2uoy34clB1p2UWT-knWENwl",
+    videoUrl: `${R2_MODELING}/character/orc-02-animation.mp4`,
   },
   {
     id: "orc-3",
@@ -101,7 +104,7 @@ const orcCards = [
     desc: "High-poly orc sculpt animated with cinematic depth of field, HDRI environment lighting, and full shadow pass.",
     accent: "#86efac",
     gradient: "linear-gradient(135deg, #061a0a 0%, #0e2a12 40%, #0d0c0b 100%)",
-    videoFileId: "1L_mshqNnDK3rfTHrcds3yApBiY-Wt55i",
+    videoUrl: `${R2_MODELING}/character/orc-03-animation.mp4`,
   },
 ];
 
@@ -198,80 +201,63 @@ function ActiveVideoPlayer({ videoFileId, gradient, accent }: {
   );
 }
 
-/* ─── Vertical sliding stack — top card always active ───────────────── */
+/* ─── Vertical sliding stack — R2 video, auto-advances on end ───────── */
 type SlideCard = {
   id: string; title: string; category: string;
-  desc: string; accent: string; gradient: string; videoFileId: string;
+  desc: string; accent: string; gradient: string; videoUrl: string;
 };
 
 function SlideStack({ cards, accent }: { cards: SlideCard[]; accent: string }) {
-  const [order, setOrder] = useState(cards.map((_, i) => i));
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Rotates the entire order array — down shifts top to bottom, up shifts bottom to top
-  const rotate = (direction: "up" | "down") => {
-    setOrder((prev) => {
-      const next = [...prev];
-      if (direction === "down") {
-        const top = next.shift()!;
-        next.push(top);
-      } else {
-        const bottom = next.pop()!;
-        next.unshift(bottom);
-      }
-      return next;
-    });
-  };
+  const activeCard = cards[currentIndex];
 
-  const activeCard = cards[order[0]];
+  // Advance to next video — wraps around for continuous loop
+  function handleEnded() {
+    setCurrentIndex(prev => (prev + 1) % cards.length);
+  }
+
+  // Play new video when index changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [currentIndex]);
 
   return (
     <div className="vSlideStack">
 
-      {/* Up arrow — sits ABOVE the active card, outside */}
-      <div className="vSlideOuterArrow vSlideOuterArrowTop">
-        <button
-          className="vSlideArrowBtn"
-          onClick={() => rotate("up")}
-          aria-label="Previous video"
-          style={{ color: accent, borderColor: accent + "44" }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 10L7 4L12 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <span className="vSlideArrowCount" style={{ color: accent }}>
-          {order[0] + 1} / {cards.length}
-        </span>
+      {/* Counter badge */}
+      <div className="vSlideCounter" style={{ color: accent }}>
+        {currentIndex + 1} / {cards.length}
       </div>
 
-      {/* Active — top card */}
+      {/* Active card */}
       <motion.div
         key={`active-${activeCard.id}`}
-        layout
         className="vSlideCard vSlideCardActive"
         style={{ borderColor: accent + "40" }}
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="vSlideCardThumb" style={{ background: activeCard.gradient }}>
-          {/* iframe /preview — only reliable Drive video playback */}
-          <iframe
-            key={activeCard.videoFileId}
-            src={drivePreview(activeCard.videoFileId)}
-            className="vAiDriveEmbed"
-            allow="autoplay"
-            allowFullScreen
-            title={activeCard.title}
+          <video
+            ref={videoRef}
+            key={activeCard.videoUrl}
+            src={activeCard.videoUrl}
+            className="vR2Embed"
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            onEnded={handleEnded}
           />
           <span className="vSlideActiveBadge" style={{ color: accent, borderColor: accent + "44" }}>
             Now Playing
           </span>
-          {/* Overlay covers Drive's external-link icon in the top-right corner of the iframe */}
-          <div className="vDriveIconOverlay">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/favicon.png" alt="Matthew Studio" className="vDriveOverlayLogo" />
-          </div>
         </div>
         <div className="vSlideCardInfo">
           <span className="vAiCardCategory" style={{ color: accent }}>{activeCard.category}</span>
@@ -279,20 +265,6 @@ function SlideStack({ cards, accent }: { cards: SlideCard[]; accent: string }) {
           <p className="vSlideCardDesc">{activeCard.desc}</p>
         </div>
       </motion.div>
-
-      {/* Down arrow — sits below the active card */}
-      <div className="vSlideOuterArrow vSlideOuterArrowBottom">
-        <button
-          className="vSlideArrowBtn"
-          onClick={() => rotate("down")}
-          aria-label="Next video"
-          style={{ color: accent, borderColor: accent + "44" }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 4L7 10L12 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
 
     </div>
   );
