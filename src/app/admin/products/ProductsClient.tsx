@@ -846,21 +846,27 @@ function FileUploadField({
           <p className="apFileUploadErr">{err}</p>
           {driveConnectUrl && (
             <div className="apDriveReconnectRow">
+              <p className="apDriveRedirectNote">
+                ⚠ Before clicking, make sure your Google Cloud Console has this URI added under
+                <strong> APIs &amp; Services → Credentials → OAuth 2.0 Client → Authorized redirect URIs</strong>:
+                <br />
+                <code className="apDriveRedirectUri">
+                  {typeof window !== "undefined" ? window.location.origin : ""}/api/google/callback
+                </code>
+                <a
+                  href="https://console.cloud.google.com/apis/credentials"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="apDriveConsoleLink"
+                >
+                  Open Google Cloud Console ↗
+                </a>
+              </p>
               <a
                 href={driveConnectUrl}
-                target="_blank"
-                rel="noreferrer"
                 className="apDriveReconnectBtn"
               >
                 🔗 Reconnect Google Drive
-              </a>
-              <a
-                href="/admin/uploads"
-                target="_blank"
-                rel="noreferrer"
-                className="apDriveReconnectBtn apDriveReconnectBtnAlt"
-              >
-                ↗ Go to Upload Assets page
               </a>
             </div>
           )}
@@ -1706,7 +1712,22 @@ export default function ProductsClient({ products, systems }: Props) {
   const [productList, setProductList]   = useState<Product[]>(products);
   const [togglingId, setTogglingId]     = useState<string | null>(null);
   const [expandedSystem, setExpandedSystem] = useState<string | null>(null);
+  const [driveToast, setDriveToast]     = useState<"connected" | "error" | null>(null);
   const headerRef                       = useReveal();
+
+  // Show Drive connection result from OAuth callback query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("drive_connected") === "true") {
+      setDriveToast("connected");
+      window.history.replaceState({}, "", "/admin/products");
+      setTimeout(() => setDriveToast(null), 5000);
+    } else if (params.get("drive_error")) {
+      setDriveToast("error");
+      window.history.replaceState({}, "", "/admin/products");
+      setTimeout(() => setDriveToast(null), 6000);
+    }
+  }, []);
 
   async function handleToggleActive(id: string, current: boolean) {
     setTogglingId(id);
@@ -1717,6 +1738,18 @@ export default function ProductsClient({ products, systems }: Props) {
 
   return (
     <div className="apPage">
+
+      {/* ── Drive connection toast ───────────────── */}
+      {driveToast === "connected" && (
+        <div className="apDriveToast apDriveToastOk">
+          ✓ Google Drive connected — you can now upload to Drive.
+        </div>
+      )}
+      {driveToast === "error" && (
+        <div className="apDriveToast apDriveToastErr">
+          ✗ Google Drive connection failed — please try reconnecting.
+        </div>
+      )}
 
       {/* ── Page header ──────────────────────────── */}
       <div className="apPageHeader apReveal" ref={headerRef}>
