@@ -511,9 +511,14 @@ function MediaEditor({ product, onFieldSaved }: {
 // On success, the new product is prepended to the list in local state.
 
 // ── FileUploadField — pick a file, choose R2/GDrive/Both, get URL back ───
-// destination: r2 → returns public CDN URL
+// destination: r2     → returns public CDN URL
 //              gdrive → returns Drive file ID (usable with /api/drive-video)
-//              both → returns both
+//              both   → returns both
+//
+// Folder selectors are live dropdowns fetched from:
+//   R2:     GET /api/admin/r2-folders      → { folders: string[] }
+//   GDrive: GET /api/admin/drive-folders   → { folders: { id, name }[] }
+// Dropdowns open on 📁 click and lazy-load on first open.
 function FileUploadField({
   label,
   accept,
@@ -523,13 +528,13 @@ function FileUploadField({
   driveFolderIdRef,
   onUploaded,
 }: {
-  label:                 string;
-  accept?:               string;
-  defaultDestination?:   "r2" | "gdrive" | "both";
-  defaultR2Folder?:      string;
+  label:                  string;
+  accept?:                string;
+  defaultDestination?:    "r2" | "gdrive" | "both";
+  defaultR2Folder?:       string;
   defaultDriveSubfolder?: string;
-  driveFolderIdRef:      React.RefObject<string>;
-  onUploaded:            (result: { r2Url?: string; driveId?: string; driveUrl?: string }) => void;
+  driveFolderIdRef:       React.RefObject<string>;
+  onUploaded:             (result: { r2Url?: string; driveId?: string; driveUrl?: string }) => void;
 }) {
   const [destination,    setDestination]    = useState<"r2" | "gdrive" | "both">(defaultDestination);
   const [r2Folder,       setR2Folder]       = useState(defaultR2Folder);
@@ -538,19 +543,70 @@ function FileUploadField({
   const [uploading,      setUploading]      = useState(false);
   const [done,           setDone]           = useState(false);
   const [err,            setErr]            = useState("");
+
+  // Folder lists — seeded with known real folders, live fetch merges on top
+  const KNOWN_R2_FOLDERS: string[] = ["architecture", "character", "systems", "weapon"];
+  const KNOWN_DRIVE_FOLDERS: { id: string; name: string }[] = [
+    { id: "ai-building",   name: "AI Generated building interior and exterior timelapse" },
+    { id: "ai-ext-design", name: "AI Generated Exterior Design" },
+    { id: "ai-ext-time",   name: "AI Generated Exterior timelapse" },
+    { id: "ai-int-design", name: "AI Generated Interior Design" },
+    { id: "ai-int-time",   name: "AI Generated Interior timelapse" },
+    { id: "char-modeling", name: "character-modeling" },
+    { id: "prompts",       name: "Prompts" },
+    { id: "weapons",       name: "weapons-modeling" },
+  ];
+
+  const [r2Folders,      setR2Folders]      = useState<string[]>(KNOWN_R2_FOLDERS);
+  const [driveFolders,   setDriveFolders]   = useState<{ id: string; name: string }[]>(KNOWN_DRIVE_FOLDERS);
+  const [foldersLoading, setFoldersLoading] = useState(false);
+  const foldersLoadedRef = useRef(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  // ── Fetch folders on first open — merges live results with known list ───
+  async function loadFolders(): Promise<void> {
+    if (foldersLoadedRef.current) return;
+    foldersLoadedRef.current = true;
+    setFoldersLoading(true);
+    try {
+      const [r2Res, driveRes] = await Promise.allSettled([
+        fetch("/api/admin/r2-folders").then(r => r.json()),
+        fetch("/api/admin/drive-folders").then(r => r.json()),
+      ]);
+      if (r2Res.status === "fulfilled" && Array.isArray(r2Res.value.folders)) {
+        // Merge live + known, dedup, sort
+        const merged = Array.from(new Set([...KNOWN_R2_FOLDERS, ...r2Res.value.folders])).sort();
+        setR2Folders(merged);
+      }
+      if (driveRes.status === "fulfilled" && Array.isArray(driveRes.value.folders)) {
+        // Live Drive folders have real IDs — prefer them over placeholder IDs
+        const liveNames = new Set((driveRes.value.folders as { id: string; name: string }[]).map(f => f.name));
+        const knownNotInLive = KNOWN_DRIVE_FOLDERS.filter(f => !liveNames.has(f.name));
+        const merged = [...driveRes.value.folders, ...knownNotInLive]
+          .sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
+        setDriveFolders(merged);
+      }
+    } finally {
+      setFoldersLoading(false);
+    }
+  }
+
+  function togglePath(): void {
+    const next = !showPath;
+    setShowPath(next);
+    if (next) loadFolders();
+  }
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    setDone(false);
-    setErr("");
+    setUploading(true); setDone(false); setErr("");
 
     const form = new FormData();
-    form.append("file",        file);
-    form.append("destination", destination);
-    form.append("r2Folder",    r2Folder.trim() || "products");
+    form.append("file",           file);
+    form.append("destination",    destination);
+    form.append("r2Folder",       r2Folder.trim() || "products");
     form.append("driveSubfolder", driveSubfolder.trim());
     if ((destination === "gdrive" || destination === "both") && driveFolderIdRef.current) {
       form.append("driveFolderId", driveFolderIdRef.current);
@@ -588,15 +644,16 @@ function FileUploadField({
             <option value="gdrive">GDrive</option>
             <option value="both">Both</option>
           </select>
-          {/* Path config toggle */}
+
           <button
             type="button"
             className="apFilePathToggle"
-            onClick={() => setShowPath(p => !p)}
-            title="Set upload folder/path"
+            onClick={togglePath}
+            title="Choose upload folder"
           >
             {showPath ? "▲" : "📁"}
           </button>
+
           <input
             ref={inputRef}
             type="file"
@@ -615,29 +672,53 @@ function FileUploadField({
         </div>
       </div>
 
-      {/* Expandable path config */}
+      {/* ── Expandable folder picker ── */}
       {showPath && (
         <div className="apFilePathConfig">
-          {(destination === "r2" || destination === "both") && (
+          {foldersLoading && (
+            <p className="apFolderLoading">Loading folders…</p>
+          )}
+
+          {/* R2 folder dropdown */}
+          {!foldersLoading && (destination === "r2" || destination === "both") && (
             <div className="apFilePathRow">
               <span className="apFilePathLabel">R2 folder</span>
-              <input
-                className="apFilePathInput"
-                placeholder="e.g. products/characters"
+              <select
+                className="apFolderSelect"
                 value={r2Folder}
                 onChange={e => setR2Folder(e.target.value)}
-              />
+              >
+                {/* Keep current value even if not in list */}
+                {!r2Folders.includes(r2Folder) && r2Folder && (
+                  <option value={r2Folder}>{r2Folder}</option>
+                )}
+                {r2Folders.map(f => (
+                  <option key={f} value={f}>{f}</option>
+                ))}
+                {r2Folders.length === 0 && (
+                  <option value="products">products</option>
+                )}
+              </select>
             </div>
           )}
-          {(destination === "gdrive" || destination === "both") && (
+
+          {/* GDrive folder dropdown */}
+          {!foldersLoading && (destination === "gdrive" || destination === "both") && (
             <div className="apFilePathRow">
-              <span className="apFilePathLabel">GDrive subfolder</span>
-              <input
-                className="apFilePathInput"
-                placeholder="e.g. Character Folder / orc-animation"
+              <span className="apFilePathLabel">GDrive folder</span>
+              <select
+                className="apFolderSelect"
                 value={driveSubfolder}
                 onChange={e => setDriveSubfolder(e.target.value)}
-              />
+              >
+                <option value="">— root / no subfolder —</option>
+                {driveFolders.map(f => (
+                  <option key={f.id} value={f.name}>{f.name}</option>
+                ))}
+                {driveFolders.length === 0 && (
+                  <option disabled>No folders found — check Drive connection</option>
+                )}
+              </select>
             </div>
           )}
         </div>
@@ -721,7 +802,7 @@ function AddProductForm({ onProductCreated, onClose }: {
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Category *</label>
-          <select className="apMediaInput apMediaSelect" value={category} onChange={e => setCategory(e.target.value)}>
+          <select className="apMediaInput apMediaSelect" value={category} onChange={e => { setCategory(e.target.value); setIsLatest(false); }}>
             <option value="character">Character</option>
             <option value="weapon">Weapon</option>
             <option value="interior">Interior</option>
@@ -852,10 +933,37 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionSevenUrl} onChange={e => setActionSevenUrl(e.target.value)} />
         </div>
         <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
-          <label className="apLatestToggleLabel">
-            <input type="checkbox" checked={isLatest} onChange={e => setIsLatest(e.target.checked)} />
-            Mark as Latest Drop
-          </label>
+          <p className="apMediaLabel" style={{ marginBottom: "0.5rem" }}>Mark as Latest Drop</p>
+          <div className="apLatestRadioGroup">
+            <label className="apLatestToggleLabel">
+              <input
+                type="radio"
+                name="latestDropType"
+                checked={!isLatest}
+                onChange={() => setIsLatest(false)}
+              />
+              None
+            </label>
+            <div className="apLatestRadioDivider" />
+            <label className="apLatestToggleLabel">
+              <input
+                type="radio"
+                name="latestDropType"
+                checked={isLatest && (category === "character" || category === "weapon")}
+                onChange={() => setIsLatest(true)}
+              />
+              Mark as Latest Drop on Character &amp; Weapon
+            </label>
+            <label className="apLatestToggleLabel">
+              <input
+                type="radio"
+                name="latestDropType"
+                checked={isLatest && (category === "interior" || category === "exterior")}
+                onChange={() => setIsLatest(true)}
+              />
+              Mark as Latest Drop on Interior &amp; Exterior
+            </label>
+          </div>
         </div>
       </div>
       </div>{/* end apAddProductScrollBody */}
