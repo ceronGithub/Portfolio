@@ -80,9 +80,8 @@ function AiCarouselRow({ srcs, reversed }: { srcs: string[]; reversed?: boolean 
                 muted
                 loop
                 playsInline
-                crossOrigin="anonymous"
+                preload="auto"
                 className="aiVideoCardNative"
-                preload="none"
               />
             </div>
           </div>
