@@ -43,71 +43,6 @@ const DRIVE_WEAPONS  = ""; // files delivered via email after purchase — not p
 /* ─── Google Drive /preview — only reliable embeddable video src ─────── */
 const drivePreview = (id: string) => `https://drive.google.com/file/d/${id}/preview?autoplay=1&rm=minimal`;
 
-/* ── R2 base ─────────────────────────────────────────────────────────── */
-const R2_MODELING = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
-
-/* ── Section 3: 3D Animation — Blender axe animations ───────────────── */
-const animationCards = [
-  {
-    id: "anim-1",
-    title: "Battle Axe I",
-    category: "3D Animation",
-    desc: "Full Blender animation of a hand-modelled battle axe — cinematic camera orbit, studio lighting, and procedural metal shading.",
-    accent: "#4ade80",
-    gradient: "linear-gradient(135deg, #061a0e 0%, #0e2a18 40%, #0d0c0b 100%)",
-    videoUrl: `${R2_MODELING}/weapon/axe-01-animation.mp4`,
-  },
-  {
-    id: "anim-2",
-    title: "Battle Axe II",
-    category: "3D Animation",
-    desc: "Viking battle axe with knotwork engravings — slow 360° turntable render with HDRI environment and subsurface metal material.",
-    accent: "#4ade80",
-    gradient: "linear-gradient(135deg, #061a0e 0%, #0e2a18 40%, #0d0c0b 100%)",
-    videoUrl: `${R2_MODELING}/weapon/axe-02-animation.mp4`,
-  },
-  {
-    id: "anim-3",
-    title: "Battle Axe III",
-    category: "3D Animation",
-    desc: "Precision-modelled poll axe with dynamic lighting pass — edge highlights, shadow casting, and cinematic depth of field.",
-    accent: "#4ade80",
-    gradient: "linear-gradient(135deg, #061a0e 0%, #0e2a18 40%, #0d0c0b 100%)",
-    videoUrl: `${R2_MODELING}/weapon/axe-03-animation.mp4`,
-  },
-];
-
-/* ── Section 4: ORC 3D Animation — Blender orc animations ──────────── */
-const orcCards = [
-  {
-    id: "orc-1",
-    title: "ORC Character I",
-    category: "3D Character Animation",
-    desc: "Full Blender character animation of an orc model — cinematic lighting, procedural skin shader, and dynamic camera movement.",
-    accent: "#86efac",
-    gradient: "linear-gradient(135deg, #061a0a 0%, #0e2a12 40%, #0d0c0b 100%)",
-    videoUrl: `${R2_MODELING}/character/orc-01-animation.mp4`,
-  },
-  {
-    id: "orc-2",
-    title: "ORC Character II",
-    category: "3D Character Animation",
-    desc: "Orc warrior with detailed armor and weapon — slow orbit render with dramatic rim lighting and subsurface skin scattering.",
-    accent: "#86efac",
-    gradient: "linear-gradient(135deg, #061a0a 0%, #0e2a12 40%, #0d0c0b 100%)",
-    videoUrl: `${R2_MODELING}/character/orc-02-animation.mp4`,
-  },
-  {
-    id: "orc-3",
-    title: "ORC Character III",
-    category: "3D Character Animation",
-    desc: "High-poly orc sculpt animated with cinematic depth of field, HDRI environment lighting, and full shadow pass.",
-    accent: "#86efac",
-    gradient: "linear-gradient(135deg, #061a0a 0%, #0e2a12 40%, #0d0c0b 100%)",
-    videoUrl: `${R2_MODELING}/character/orc-03-animation.mp4`,
-  },
-];
-
 /* ─── Mixed carousel — interior + exterior interleaved ──────────────── */
 const carouselVideos = [
   { id: "1MJR8A38OCNRDxb_jRheBdRgexnAOugZf", label: "Interior" },
@@ -201,71 +136,75 @@ function ActiveVideoPlayer({ videoFileId, gradient, accent }: {
   );
 }
 
-/* ─── Vertical sliding stack — R2 video, auto-advances on end ───────── */
-type SlideCard = {
-  id: string; title: string; category: string;
-  desc: string; accent: string; gradient: string; videoUrl: string;
-};
+/* ─── Dynamic R2 fetch ───────────────────────────────────────────────── */
+type SlideCard = { id: string; title: string; category: string; accent: string; gradient: string; videoUrl: string; };
 
-function SlideStack({ cards, accent }: { cards: SlideCard[]; accent: string }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
+async function fetchR2Modeling(prefix: string): Promise<string[]> {
+  try {
+    const res = await fetch(`/api/r2-videos?prefix=${encodeURIComponent(prefix)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.urls ?? [];
+  } catch { return []; }
+}
 
-  const activeCard = cards[currentIndex];
+function urlToModelCard(url: string, i: number, category: string, accent: string, gradient: string): SlideCard {
+  const raw   = url.split("/").pop()?.replace(".mp4", "") ?? `Video ${i + 1}`;
+  const title = raw.replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return { id: `${category}-${i}`, title, category, accent, gradient, videoUrl: url };
+}
 
-  // Advance to next video — wraps around for continuous loop
-  function handleEnded() {
-    setCurrentIndex(prev => (prev + 1) % cards.length);
-  }
+/* ─── SlideStack — fetches R2 prefix, auto-advances on video end ─────── */
+function SlideStack({ r2Prefix, category, accent, gradient }: {
+  r2Prefix: string; category: string; accent: string; gradient: string;
+}) {
+  const [cards, setCards] = useState<SlideCard[]>([]);
+  const [idx,   setIdx]   = useState(0);
+  const videoRef          = useRef<HTMLVideoElement>(null);
 
-  // Play new video when index changes
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch(() => {});
-    }
-  }, [currentIndex]);
+    fetchR2Modeling(r2Prefix).then(urls =>
+      setCards(urls.map((url, i) => urlToModelCard(url, i, category, accent, gradient)))
+    );
+  }, [r2Prefix, category, accent, gradient]);
+
+  useEffect(() => {
+    videoRef.current?.load();
+    videoRef.current?.play().catch(() => {});
+  }, [idx]);
+
+  const card = cards[idx];
+  if (!card) return <div style={{ color: accent, padding: "2rem", opacity: 0.5 }}>Loading…</div>;
 
   return (
     <div className="vSlideStack">
-
-      {/* Counter badge */}
-      <div className="vSlideCounter" style={{ color: accent }}>
-        {currentIndex + 1} / {cards.length}
-      </div>
-
-      {/* Active card */}
+      <div className="vSlideCounter" style={{ color: accent }}>{idx + 1} / {cards.length}</div>
       <motion.div
-        key={`active-${activeCard.id}`}
+        key={card.id}
         className="vSlideCard vSlideCardActive"
         style={{ borderColor: accent + "40" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="vSlideCardThumb" style={{ background: activeCard.gradient }}>
+        <div className="vSlideCardThumb" style={{ background: card.gradient }}>
           <video
             ref={videoRef}
-            key={activeCard.videoUrl}
-            src={activeCard.videoUrl}
+            key={card.videoUrl}
+            src={card.videoUrl}
             className="vR2Embed"
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            onEnded={handleEnded}
+            autoPlay muted playsInline preload="auto"
+            onEnded={() => setIdx(p => (p + 1) % cards.length)}
           />
           <span className="vSlideActiveBadge" style={{ color: accent, borderColor: accent + "44" }}>
             Now Playing
           </span>
         </div>
         <div className="vSlideCardInfo">
-          <span className="vAiCardCategory" style={{ color: accent }}>{activeCard.category}</span>
-          <p className="vSlideCardTitle">{activeCard.title}</p>
-          <p className="vSlideCardDesc">{activeCard.desc}</p>
+          <span className="vAiCardCategory" style={{ color: accent }}>{card.category}</span>
+          <p className="vSlideCardTitle">{card.title}</p>
         </div>
       </motion.div>
-
     </div>
   );
 }
@@ -273,14 +212,14 @@ function SlideStack({ cards, accent }: { cards: SlideCard[]; accent: string }) {
 /* ─── Magazine split section — text left, slide stack right ─────────── */
 function MagazineSection({
   label, labelAccent, title, titleAccent, italicLine,
-  desc, accent, gradient, cards, ctaLabel, delay,
+  desc, accent, gradient, r2Prefix, ctaLabel, delay,
 }: {
   label: string; labelAccent: string; title: string;
   titleAccent: string; italicLine: string;
   desc: string; accent: string; gradient: string;
-  cards: SlideCard[]; ctaLabel: string; delay: number;
+  r2Prefix: string; ctaLabel: string; delay: number;
 }) {
-  const ref = useRef(null);
+  const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
@@ -291,7 +230,6 @@ function MagazineSection({
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Left — text + steps + CTA */}
       <div className="vMagLeft" style={{ background: gradient }}>
         <div className="vMagLeftInner">
           <span className="vAiCardCategory" style={{ color: accent }}>{label}</span>
@@ -301,27 +239,16 @@ function MagazineSection({
           </h3>
           <p className="vMagDesc">{desc}</p>
           <div className="vAiSteps">
-            <div className="vAiStep">
-              <span className="vAiStepNum" style={{ color: accent }}>01</span>
-              <div>
-                <strong>Create an account</strong>
-                <p>Register with your email. Free, 30 seconds.</p>
+            {[
+              ["01", "Create an account",       "Register with your email. Free, 30 seconds."],
+              ["02", "Purchase the collection", "One-time payment. No subscription, no renewal."],
+              ["03", "Download forever",        "Instant access. Re-download anytime from your dashboard."],
+            ].map(([num, t, sub]) => (
+              <div className="vAiStep" key={num}>
+                <span className="vAiStepNum" style={{ color: accent }}>{num}</span>
+                <div><strong>{t}</strong><p>{sub}</p></div>
               </div>
-            </div>
-            <div className="vAiStep">
-              <span className="vAiStepNum" style={{ color: accent }}>02</span>
-              <div>
-                <strong>Purchase the collection</strong>
-                <p>One-time payment. No subscription, no renewal.</p>
-              </div>
-            </div>
-            <div className="vAiStep">
-              <span className="vAiStepNum" style={{ color: accent }}>03</span>
-              <div>
-                <strong>Download forever</strong>
-                <p>Instant access. Re-download anytime from your dashboard.</p>
-              </div>
-            </div>
+            ))}
           </div>
           <a href="/register" className="vAiGetAccessBtn" style={{ background: accent }}>
             {ctaLabel}
@@ -331,10 +258,8 @@ function MagazineSection({
           </a>
         </div>
       </div>
-
-      {/* Right — vertical slide stack */}
       <div className="vMagRight">
-        <SlideStack cards={cards} accent={accent} />
+        <SlideStack r2Prefix={r2Prefix} category={label} accent={accent} gradient={gradient} />
       </div>
     </motion.div>
   );
@@ -2019,7 +1944,7 @@ export default function VisitorPage() {
           desc="Hand-modelled 3D assets animated in Blender — cinematic camera orbits, HDRI lighting, and photorealistic metal shaders. Full resolution MP4, lifetime access."
           accent="#4ade80"
           gradient="linear-gradient(135deg, #061a0e 0%, #0e2a18 60%, #0d0c0b 100%)"
-          cards={animationCards}
+          r2Prefix="weapon"
           ctaLabel="Get Animation Access"
           delay={0.1}
         />
@@ -2052,7 +1977,7 @@ export default function VisitorPage() {
           desc="High-poly orc character animations rendered in Blender — cinematic camera orbits, HDRI environment lighting, procedural skin shaders, and full shadow passes. Full resolution MP4, lifetime access."
           accent="#86efac"
           gradient="linear-gradient(135deg, #061a0a 0%, #0e2a12 60%, #0d0c0b 100%)"
-          cards={orcCards}
+          r2Prefix="character"
           ctaLabel="Get Character Access"
           delay={0.15}
         />
