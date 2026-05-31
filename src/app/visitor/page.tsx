@@ -158,14 +158,16 @@ function urlToModelCard(url: string, i: number, category: string, accent: string
 function SlideStack({ r2Prefix, category, accent, gradient }: {
   r2Prefix: string; category: string; accent: string; gradient: string;
 }) {
-  const [cards, setCards] = useState<SlideCard[]>([]);
-  const [idx,   setIdx]   = useState(0);
-  const videoRef          = useRef<HTMLVideoElement>(null);
+  const [cards,  setCards]  = useState<SlideCard[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [idx,    setIdx]    = useState(0);
+  const videoRef            = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    fetchR2Modeling(r2Prefix).then(urls =>
-      setCards(urls.map((url, i) => urlToModelCard(url, i, category, accent, gradient)))
-    );
+    fetchR2Modeling(r2Prefix).then(urls => {
+      setCards(urls.map((url, i) => urlToModelCard(url, i, category, accent, gradient)));
+      setLoaded(true);
+    });
   }, [r2Prefix, category, accent, gradient]);
 
   useEffect(() => {
@@ -173,8 +175,20 @@ function SlideStack({ r2Prefix, category, accent, gradient }: {
     videoRef.current?.play().catch(() => {});
   }, [idx]);
 
+  if (!loaded) return (
+    <div className="vSlideStackLoading" style={{ color: accent }}>
+      <span className="vSlideLoadingDot" style={{ background: accent }} />
+      Loading videos…
+    </div>
+  );
+
+  if (loaded && cards.length === 0) return (
+    <div className="vSlideStackEmpty" style={{ color: accent, opacity: 0.5 }}>
+      No videos available yet.
+    </div>
+  );
+
   const card = cards[idx];
-  if (!card) return <div style={{ color: accent, padding: "2rem", opacity: 0.5 }}>Loading…</div>;
 
   return (
     <div className="vSlideStack">

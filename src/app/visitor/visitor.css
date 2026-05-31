@@ -5029,3 +5029,32 @@
   color:       rgba(255, 255, 255, 0.28);
   line-height: 1.5;
 }
+/* ── SlideStack loading / empty states ──────────────────────────────── */
+.vSlideStackLoading {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  padding:     2rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.75rem;
+  opacity:     0.6;
+}
+
+.vSlideLoadingDot {
+  width:            6px;
+  height:           6px;
+  border-radius:    50%;
+  animation:        vSlidePulse 1.2s ease-in-out infinite;
+  flex-shrink:      0;
+}
+
+@keyframes vSlidePulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+.vSlideStackEmpty {
+  padding:     2rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.75rem;
+}
