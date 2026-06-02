@@ -55,7 +55,13 @@ export async function POST(req: NextRequest) {
   const mimeType = file.type || "application/octet-stream";
   // Sanitize filename — no spaces, no special chars
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const key      = `${r2Folder}/${Date.now()}_${safeName}`;
+  // Skip timestamp prefix if the filename is already a clean custom name
+  // (i.e. no underscores from sanitization, meaning it was intentionally renamed).
+  // A custom filename like "axe-01-animation.mp4" needs no timestamp — it IS the key.
+  const isCleanCustomName = safeName === file.name; // no chars were replaced
+  const key = isCleanCustomName
+    ? `${r2Folder}/${safeName}`
+    : `${r2Folder}/${Date.now()}_${safeName}`;
 
   let r2Url:    string | null = null;
   let driveId:  string | null = null;

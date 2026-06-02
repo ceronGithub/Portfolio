@@ -58,6 +58,20 @@ function spawnFireParticle(canvasWidth: number, canvasHeight: number): FireParti
   };
 }
 
+// ── normalizeFacePngUrl — ensures Drive URLs go through the image proxy ──
+// Raw drive.google.com/file/d/.../view URLs cannot be used in <img src>.
+// Convert them to /api/drive-video?id=XXX which proxies the file content.
+function normalizeFacePngUrl(url: string | null): string | null {
+  if (!url) return null;
+  // Already a proxy URL
+  if (url.startsWith("/api/drive-video")) return url;
+  // Raw Drive share URL: drive.google.com/file/d/FILE_ID/view
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (driveMatch) return `/api/drive-video?id=${driveMatch[1]}`;
+  // R2 or any other http URL — use as-is
+  return url;
+}
+
 export default function NewAssetSection({ latestCharacter, latestWeapon }: Props) {
   const sectionRef    = useRef<HTMLDivElement>(null);
   const fireCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -193,7 +207,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
               <div className="newAssetCardInner">
                 {latestChar.facePngUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={latestChar.facePngUrl} alt={latestChar.name} className="newAssetCardFaceImg" />
+                  <img src={normalizeFacePngUrl(latestChar.facePngUrl)!} alt={latestChar.name} className="newAssetCardFaceImg" />
                 ) : (
                   <span className="newAssetCardIcon">🧟</span>
                 )}
@@ -220,7 +234,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
               <div className="newAssetCardInner">
                 {latestWeapon.facePngUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={latestWeapon.facePngUrl} alt={latestWeapon.name} className="newAssetCardFaceImg" />
+                  <img src={normalizeFacePngUrl(latestWeapon.facePngUrl)!} alt={latestWeapon.name} className="newAssetCardFaceImg" />
                 ) : (
                   <span className="newAssetCardIcon">⚔️</span>
                 )}

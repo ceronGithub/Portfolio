@@ -471,7 +471,7 @@ function AddAddonForm({ systemId, accent, onAdded }: {
 // defaultDest: which storage to default to for the "Upload to" dropdown.
 const MEDIA_FIELDS: { field: string; label: string; defaultDest: "r2" | "gdrive" | "both" }[] = [
   { field: "previewVideoUrl", label: "Preview Video",  defaultDest: "r2"    },
-  { field: "facePngUrl",      label: "Face PNG",       defaultDest: "gdrive" },
+  { field: "facePngUrl",      label: "Face PNG",       defaultDest: "r2"    },
   { field: "threeDUrl",       label: "3D Model",       defaultDest: "both"  },
   { field: "actionOneUrl",    label: "Action 1",       defaultDest: "both"  },
   { field: "actionTwoUrl",    label: "Action 2",       defaultDest: "both"  },
@@ -1080,15 +1080,15 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
         </div>
 
-        {/* ── Face PNG → GDrive, filename: name-face ── */}
+        {/* ── Face PNG → R2 (direct public URL for <img> display), filename: name-face ── */}
         <div className="apAddProductField">
           <FileUploadField
-            label="Face PNG (GDrive)"
+            label="Face PNG (R2)"
             accept="image/*"
-            defaultDestination="gdrive"
+            defaultDestination="r2"
             driveFolderIdRef={driveFolderIdRef}
             customFileName={nameSlug ? `${nameSlug}-face` : undefined}
-            onUploaded={r => { if (r.r2Url) setFacePngUrl(r.r2Url); else if (r.driveUrl) setFacePngUrl(r.driveUrl); else if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`); }}
+            onUploaded={r => { if (r.r2Url) setFacePngUrl(r.r2Url); else if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`); }}
           />
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
         </div>
