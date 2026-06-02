@@ -305,7 +305,6 @@ function ConfidenceSection() {
   );
 }
 
-/* ─── FAQ ─────────────────────────────────────────────────────────────── */
 const FAQ_ITEMS = [
   {
     question: "Do I really get the full source code?",
