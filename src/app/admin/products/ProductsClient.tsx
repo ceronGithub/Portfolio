@@ -496,7 +496,7 @@ const SIMPLE_MEDIA_FIELDS: { field: string; label: string; isImage?: boolean }[]
 ];
 
 // Action slot definitions for MediaEditor — Action 1–7.
-const ACTION_FIELDS: { field: string; label: string }[] = [
+const ACTION_FIELDS: { field: keyof Product; label: string }[] = [
   { field: "actionOneUrl",   label: "Action 1" },
   { field: "actionTwoUrl",   label: "Action 2" },
   { field: "actionThreeUrl", label: "Action 3" },
@@ -695,7 +695,7 @@ function MediaEditor({ product, onFieldSaved }: {
       <div className="apMediaSectionActions">
         <p className="apMediaSectionLabel">Action Slots (1 – 7) <span className="apMediaSectionHint">— uploading auto-saves</span></p>
         {ACTION_FIELDS.map(({ field, label }) => {
-          const currentVal = (product as Record<string, string | null>)[field];
+          const currentVal = product[field] as string | null;
           return (
             <div key={field} className="apMediaActionRow">
               <span className="apMediaLabel" style={{ minWidth: "4.5rem" }}>{label}</span>

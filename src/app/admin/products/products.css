@@ -484,10 +484,11 @@
   outline: none;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
+  appearance: textfield;
   transition: border-color 0.15s ease;
 }
 .apPriceInput::-webkit-outer-spin-button,
-.apPriceInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.apPriceInput::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; }
 .apPriceInput:focus { border-color: #c9a96e; }
 
 .apPriceInputSmall { width: 80px; font-size: 0.78rem; }
@@ -720,9 +721,10 @@
 
 .apAddAddonInputPrice {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 .apAddAddonInputPrice::-webkit-outer-spin-button,
-.apAddAddonInputPrice::-webkit-inner-spin-button { -webkit-appearance: none; }
+.apAddAddonInputPrice::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; }
 
 .apAddAddonError {
   font-size: 0.74rem;
@@ -1084,7 +1086,7 @@
   background:    rgba(255,255,255,0.06);
   border-color:  rgba(255,255,255,0.18);
 }
-.apPackOptionSelected { /* color overridden inline */ }
+.apPackOptionSelected { cursor: default; /* color overridden inline */ }
 .apPackOptionTop {
   display:        flex;
   align-items:    center;
