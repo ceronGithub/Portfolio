@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
             fileKeyObj, fileKeyFbx, fileKeyGlb,
             animIdleUrl, animWalkUrl, animRunUrl,
             animAttackOneUrl, animAttackTwoUrl, animDeathUrl, animHitUrl,
+            mediaDriveIds,
           } = body;
 
     if (!name || typeof name !== "string") {
@@ -89,6 +90,7 @@ export async function POST(req: NextRequest) {
         animAttackTwoUrl:animAttackTwoUrl?? null,
         animDeathUrl:    animDeathUrl    ?? null,
         animHitUrl:      animHitUrl      ?? null,
+        mediaDriveIds:   typeof mediaDriveIds === "string" ? mediaDriveIds : null,
       },
     });
 

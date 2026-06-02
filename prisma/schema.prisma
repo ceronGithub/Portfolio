@@ -94,6 +94,11 @@ model Product {
   // ── 3D viewer URL (architecture) ──────────────────────────────────
   threeDUrl         String?
 
+  // ── Drive ID map — JSON string { fieldName: driveFileId } ──────────
+  // Tracks Drive IDs for files uploaded to both R2+Drive so delete can
+  // purge the Drive copy even when only the R2 URL is stored on the field.
+  mediaDriveIds     String?
+
   isLatest          Boolean         @default(false)
   isActive          Boolean         @default(true)
   createdAt         DateTime        @default(now())

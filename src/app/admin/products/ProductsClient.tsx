@@ -23,6 +23,7 @@ interface Product {
   animIdleUrl: string | null; animWalkUrl: string | null; animRunUrl: string | null;
   animAttackOneUrl: string | null; animAttackTwoUrl: string | null;
   animDeathUrl: string | null; animHitUrl: string | null;
+  mediaDriveIds: string | null;
   createdAt: Date;
 }
 
@@ -95,6 +96,22 @@ async function patchProductMedia(
   return res.ok;
 }
 
+// Saves a Drive file ID to the mediaDriveIds map for a given field.
+// This is called after an upload to "both" so the Drive copy can be purged on product delete.
+async function patchMediaDriveId(
+  productId: string,
+  field: string,
+  driveId: string
+): Promise<void> {
+  try {
+    await fetch(`/api/admin/products/${productId}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ mediaDriveIds: JSON.stringify({ [field]: driveId }) }),
+    });
+  } catch { /* silent — best-effort */ }
+}
+
 // Deletes a product from the DB (cascade: ownership + orders).
 async function deleteProduct(id: string): Promise<{ ok: boolean; error?: string }> {
   const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
@@ -132,6 +149,7 @@ async function createProduct(data: {
   previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
   actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
   actionFourUrl?: string; actionFiveUrl?: string; actionSixUrl?: string; actionSevenUrl?: string;
+  mediaDriveIds?: string;
 }): Promise<Product | null> {
   const res = await fetch("/api/admin/products", {
     method: "POST",
@@ -470,53 +488,52 @@ function AddAddonForm({ systemId, accent, onAdded }: {
   );
 }
 
-// ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
-// Used by MediaEditor to render one inline editor row per field.
-// defaultDest: which storage to default to for the "Upload to" dropdown.
-const MEDIA_FIELDS: { field: string; label: string; defaultDest: "r2" | "gdrive" | "both"; isImage?: boolean }[] = [
-  { field: "previewVideoUrl", label: "Preview Video",  defaultDest: "r2"                },
-  { field: "facePngUrl",      label: "Face PNG",       defaultDest: "r2",  isImage: true },
-  { field: "threeDUrl",       label: "3D Model (URL)", defaultDest: "both"              },
-  // Action 1–7: default to r2 only — MediaEditor has no driveFolderId UI, so
-  // "both" would silently skip GDrive every time. Admin can switch to "both" manually.
-  { field: "actionOneUrl",    label: "Action 1",       defaultDest: "r2"                },
-  { field: "actionTwoUrl",    label: "Action 2",       defaultDest: "r2"                },
-  { field: "actionThreeUrl",  label: "Action 3",       defaultDest: "r2"                },
-  { field: "actionFourUrl",   label: "Action 4",       defaultDest: "r2"                },
-  { field: "actionFiveUrl",   label: "Action 5",       defaultDest: "r2"                },
-  { field: "actionSixUrl",    label: "Action 6",       defaultDest: "r2"                },
-  { field: "actionSevenUrl",  label: "Action 7",       defaultDest: "r2"                },
+// ── MEDIA_FIELDS — ordered list of URL-based media fields (non-action, non-3D) ──
+// Used by MediaEditor for previewVideo and facePng rows only.
+const SIMPLE_MEDIA_FIELDS: { field: string; label: string; isImage?: boolean }[] = [
+  { field: "previewVideoUrl", label: "Preview Video"  },
+  { field: "facePngUrl",      label: "Face PNG", isImage: true },
 ];
 
-// ── MediaEditor — inline URL editor for all media fields of one product ──
-// Each row: label | text input | [Pick File] [Upload to ▾] [Save] [✕]
-// If admin picks a file first, clicking Save uploads it to the selected
-// destination and then patches the resulting URL to the DB.
+// Action slot definitions for MediaEditor — Action 1–7.
+const ACTION_FIELDS: { field: string; label: string }[] = [
+  { field: "actionOneUrl",   label: "Action 1" },
+  { field: "actionTwoUrl",   label: "Action 2" },
+  { field: "actionThreeUrl", label: "Action 3" },
+  { field: "actionFourUrl",  label: "Action 4" },
+  { field: "actionFiveUrl",  label: "Action 5" },
+  { field: "actionSixUrl",   label: "Action 6" },
+  { field: "actionSevenUrl", label: "Action 7" },
+];
+
+// ── MediaEditor — inline editor for all media fields of one product ──
+// Simple fields (Preview Video, Face PNG): text input + pick file + upload-to select.
+// 3D slots (OBJ, FBX, GLB): separate FileUploadField per format with folder picker.
+// Action 1–7: FileUploadField each with full R2/GDrive/Both + folder picker.
+// When a Drive ID is returned alongside an R2 URL ("both"), it is saved to
+// mediaDriveIds so product delete can purge the Drive copy.
 function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
 }) {
-  const initialDrafts = Object.fromEntries(
-    MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
+  const initialSimpleDrafts = Object.fromEntries(
+    SIMPLE_MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
   );
-  const [drafts,     setDrafts]     = useState<Record<string, string>>(initialDrafts);
+  const [drafts,     setDrafts]     = useState<Record<string, string>>(initialSimpleDrafts);
   const [saving,     setSaving]     = useState<Record<string, boolean>>({});
   const [saved,      setSaved]      = useState<Record<string, boolean>>({});
-  // Per-field pending file and destination
   const [pendingFiles, setPendingFiles] = useState<Record<string, File | null>>({});
   const [destinations, setDestinations] = useState<Record<string, "r2" | "gdrive" | "both">>(() =>
-    Object.fromEntries(MEDIA_FIELDS.map(({ field, defaultDest }) => [field, defaultDest]))
+    Object.fromEntries(SIMPLE_MEDIA_FIELDS.map(({ field }) => [field, "r2" as const]))
   );
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const fileInputRefs    = useRef<Record<string, HTMLInputElement | null>>({});
   const driveFolderIdRef = useRef<string>("");
 
   // ── Upload pending file then PATCH the resulting URL ─────────────────
-  async function handleSaveField(field: string) {
+  async function handleSaveSimpleField(field: string) {
     setSaving(prev => ({ ...prev, [field]: true }));
-
     let urlToSave = drafts[field].trim() || null;
 
-    // If admin picked a file, upload it first
     const pendingFile = pendingFiles[field];
     if (pendingFile) {
       const dest = destinations[field];
@@ -524,19 +541,23 @@ function MediaEditor({ product, onFieldSaved }: {
       form.append("file",        pendingFile);
       form.append("destination", dest);
       form.append("r2Folder",    "products");
-      if (dest === "gdrive" || dest === "both") {
-        if (driveFolderIdRef.current) form.append("driveFolderId", driveFolderIdRef.current);
+      if ((dest === "gdrive" || dest === "both") && driveFolderIdRef.current) {
+        form.append("driveFolderId", driveFolderIdRef.current);
       }
       try {
         const res  = await fetch("/api/admin/product-upload", { method: "POST", body: form });
         const data = await res.json();
         if (data.success) {
-          if (data.r2Url)   urlToSave = data.r2Url;
+          if (data.r2Url)        urlToSave = data.r2Url;
           else if (data.driveId) urlToSave = `/api/drive-video?id=${data.driveId}`;
           setDrafts(prev => ({ ...prev, [field]: urlToSave ?? "" }));
           setPendingFiles(prev => ({ ...prev, [field]: null }));
+          // Track Drive ID if uploaded to both
+          if (data.driveId && dest === "both") {
+            await patchMediaDriveId(product.id, field, data.driveId);
+          }
         }
-      } catch { /* silent — save whatever URL is in draft */ }
+      } catch { /* silent */ }
     }
 
     const ok = await patchProductMedia(product.id, field, urlToSave);
@@ -550,22 +571,27 @@ function MediaEditor({ product, onFieldSaved }: {
 
   return (
     <div className="apMediaEditor">
-      {MEDIA_FIELDS.map(({ field, label, isImage }) => {
+
+      {/* ── Preview Video + Face PNG — simple text + pick file rows ── */}
+      {SIMPLE_MEDIA_FIELDS.map(({ field, isImage }) => {
         const hasPending = !!pendingFiles[field];
         const currentUrl = drafts[field];
+        const labelMap: Record<string, string> = {
+          previewVideoUrl: "Preview Video",
+          facePngUrl:      "Face PNG",
+        };
         return (
           <div key={field} className="apMediaRow apMediaRowUpload">
-            <span className="apMediaLabel">{label}</span>
+            <span className="apMediaLabel">{labelMap[field]}</span>
             <input
               className="apMediaInput"
               type="text"
               placeholder={hasPending ? `📎 ${pendingFiles[field]!.name}` : "Paste URL or leave empty to clear"}
               value={hasPending ? "" : currentUrl}
               onChange={e => { if (!hasPending) setDrafts(prev => ({ ...prev, [field]: e.target.value })); }}
-              onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
+              onKeyDown={e => { if (e.key === "Enter") handleSaveSimpleField(field); }}
               style={hasPending ? { color: "#c9a96e", fontStyle: "italic" } : undefined}
             />
-            {/* Hidden file input */}
             <input
               type="file"
               style={{ display: "none" }}
@@ -576,7 +602,6 @@ function MediaEditor({ product, onFieldSaved }: {
                 if (e.target) e.target.value = "";
               }}
             />
-            {/* Pick File button */}
             <button
               type="button"
               className={`apMediaPickBtn${hasPending ? " apMediaPickBtnActive" : ""}`}
@@ -585,7 +610,6 @@ function MediaEditor({ product, onFieldSaved }: {
             >
               {hasPending ? "✓ File" : "Pick File"}
             </button>
-            {/* Upload To dropdown */}
             <select
               className="apMediaDestSelect"
               value={destinations[field]}
@@ -595,27 +619,24 @@ function MediaEditor({ product, onFieldSaved }: {
               <option value="gdrive">GDrive</option>
               <option value="both">Both</option>
             </select>
-            {/* Save */}
             <button
               className="apPriceSaveBtn"
-              onClick={() => handleSaveField(field)}
+              onClick={() => handleSaveSimpleField(field)}
               disabled={saving[field]}
             >
               {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
             </button>
-            {/* Clear */}
             <button
               className="apPriceCancelBtn"
               onClick={() => {
                 setPendingFiles(prev => ({ ...prev, [field]: null }));
                 setDrafts(prev => ({ ...prev, [field]: "" }));
-                handleSaveField(field);
+                handleSaveSimpleField(field);
               }}
               title="Clear this URL"
             >
               ✕
             </button>
-            {/* Image 1 (Face PNG) — inline preview thumbnail below the row */}
             {isImage && currentUrl && !hasPending && (
               <div className="apMediaImagePreview">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -625,24 +646,99 @@ function MediaEditor({ product, onFieldSaved }: {
           </div>
         );
       })}
-      {/* ── 3D Model files — separate read-only display of all three slots ── */}
-      {(["fileKeyObj", "fileKeyFbx", "fileKeyGlb"] as const).map(key => {
-        const val = (product as unknown as Record<string, string | null>)[key];
-        const labelMap: Record<string, string> = {
-          fileKeyObj: "3D — OBJ file",
-          fileKeyFbx: "3D — FBX file",
-          fileKeyGlb: "3D — GLB file",
-        };
-        if (!val) return null;
-        return (
-          <div key={key} className="apMediaRow apMediaRow3DDisplay">
-            <span className="apMediaLabel" style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem" }}>
-              {labelMap[key]}
-            </span>
-            <span className="apMedia3DUrl" title={val}>{val}</span>
-          </div>
-        );
-      })}
+
+      {/* ── 3D Model — separate editable FileUploadField per slot ── */}
+      {/* OBJ, FBX, GLB each get their own upload row with R2/GDrive/Both + folder picker. */}
+      {/* On save, R2 URL is patched to fileKeyObj/Fbx/Glb. Drive ID saved to mediaDriveIds. */}
+      <div className="apMediaSection3D">
+        <p className="apMediaSectionLabel">3D Model Files</p>
+        {([
+          { key: "fileKeyObj" as const, label: "OBJ",      accept: ".obj"          },
+          { key: "fileKeyFbx" as const, label: "FBX",      accept: ".fbx"          },
+          { key: "fileKeyGlb" as const, label: "GLB / GLTF", accept: ".glb,.gltf"  },
+        ] as { key: "fileKeyObj" | "fileKeyFbx" | "fileKeyGlb"; label: string; accept: string }[]).map(({ key, label, accept }) => {
+          const currentVal = product[key];
+          return (
+            <div key={key} className="apMedia3DRow">
+              <span className="apMediaLabel" style={{ minWidth: "4.5rem" }}>{label}</span>
+              {currentVal && (
+                <span className="apMedia3DCurrentUrl" title={currentVal}>
+                  {currentVal.length > 40 ? `…${currentVal.slice(-38)}` : currentVal}
+                </span>
+              )}
+              <FileUploadField
+                label=""
+                accept={accept}
+                defaultDestination="both"
+                driveFolderIdRef={driveFolderIdRef}
+                onUploaded={async (result) => {
+                  const urlToSave = result.r2Url ?? (result.driveId ? `/api/drive-video?id=${result.driveId}` : null);
+                  if (!urlToSave) return;
+                  const ok = await patchProductMedia(product.id, key, urlToSave);
+                  if (ok) {
+                    onFieldSaved(product.id, key, urlToSave);
+                    // Track Drive ID so product delete can purge the Drive copy
+                    if (result.driveId) {
+                      await patchMediaDriveId(product.id, key, result.driveId);
+                    }
+                  }
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Action 1–7 — full FileUploadField per slot with folder picker ── */}
+      {/* Each slot shows the R2/GDrive/Both destination selector + the 📁 folder picker. */}
+      {/* On upload to "both", Drive ID is saved to mediaDriveIds for purge on delete. */}
+      <div className="apMediaSectionActions">
+        <p className="apMediaSectionLabel">Action Slots (1 – 7)</p>
+        {ACTION_FIELDS.map(({ field, label }) => {
+          const currentVal = (product as Record<string, string | null>)[field];
+          return (
+            <div key={field} className="apMediaActionRow">
+              <span className="apMediaLabel" style={{ minWidth: "4.5rem" }}>{label}</span>
+              {currentVal && (
+                <span className="apMediaActionCurrentUrl" title={currentVal}>
+                  {currentVal.length > 36 ? `…${currentVal.slice(-34)}` : currentVal}
+                </span>
+              )}
+              <FileUploadField
+                label=""
+                accept="video/*"
+                defaultDestination="both"
+                driveFolderIdRef={driveFolderIdRef}
+                onUploaded={async (result) => {
+                  const urlToSave = result.r2Url ?? (result.driveId ? `/api/drive-video?id=${result.driveId}` : null);
+                  if (!urlToSave) return;
+                  const ok = await patchProductMedia(product.id, field, urlToSave);
+                  if (ok) {
+                    onFieldSaved(product.id, field, urlToSave);
+                    // Track Drive ID so product delete can purge the Drive copy
+                    if (result.driveId) {
+                      await patchMediaDriveId(product.id, field, result.driveId);
+                    }
+                  }
+                }}
+              />
+              {/* Clear button — removes URL from DB */}
+              <button
+                className="apPriceCancelBtn"
+                style={{ flexShrink: 0 }}
+                title={`Clear ${label}`}
+                onClick={async () => {
+                  const ok = await patchProductMedia(product.id, field, null);
+                  if (ok) onFieldSaved(product.id, field, null);
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
     </div>
   );
 }
@@ -1036,6 +1132,8 @@ function AddProductForm({ onProductCreated, onClose }: {
       .catch(() => null);
   }, []);
 
+  const [mediaDriveIds, setMediaDriveIds] = useState<Record<string, string>>({});
+
   // Slugify name to use as filename base — e.g. "Axe-01" → "axe-01"
   function slugifyName(raw: string): string {
     return raw.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -1068,6 +1166,7 @@ function AddProductForm({ onProductCreated, onClose }: {
       actionFiveUrl:   actionFiveUrl.trim()   || undefined,
       actionSixUrl:    actionSixUrl.trim()    || undefined,
       actionSevenUrl:  actionSevenUrl.trim()  || undefined,
+      mediaDriveIds:   Object.keys(mediaDriveIds).length > 0 ? JSON.stringify(mediaDriveIds) : undefined,
     });
     if (product) {
       onProductCreated(product);
@@ -1213,15 +1312,15 @@ function AddProductForm({ onProductCreated, onClose }: {
         </div>
 
         {/* ── Action Videos 1–7 → Both, filename: name-action-N ── */}
-        {([
-          ["Action 1 Video", actionOneUrl,   setActionOneUrl,   "1"],
-          ["Action 2 Video", actionTwoUrl,   setActionTwoUrl,   "2"],
-          ["Action 3 Video", actionThreeUrl, setActionThreeUrl, "3"],
-          ["Action 4 Video", actionFourUrl,  setActionFourUrl,  "4"],
-          ["Action 5 Video", actionFiveUrl,  setActionFiveUrl,  "5"],
-          ["Action 6 Video", actionSixUrl,   setActionSixUrl,   "6"],
-          ["Action 7 Video", actionSevenUrl, setActionSevenUrl, "7"],
-        ] as [string, string, React.Dispatch<React.SetStateAction<string>>, string][]).map(([lbl, val, setter, num]) => (
+        {(([
+          ["Action 1 Video", actionOneUrl,   setActionOneUrl,   "actionOneUrl",   "1"],
+          ["Action 2 Video", actionTwoUrl,   setActionTwoUrl,   "actionTwoUrl",   "2"],
+          ["Action 3 Video", actionThreeUrl, setActionThreeUrl, "actionThreeUrl", "3"],
+          ["Action 4 Video", actionFourUrl,  setActionFourUrl,  "actionFourUrl",  "4"],
+          ["Action 5 Video", actionFiveUrl,  setActionFiveUrl,  "actionFiveUrl",  "5"],
+          ["Action 6 Video", actionSixUrl,   setActionSixUrl,   "actionSixUrl",   "6"],
+          ["Action 7 Video", actionSevenUrl, setActionSevenUrl, "actionSevenUrl", "7"],
+        ] as [string, string, React.Dispatch<React.SetStateAction<string>>, string, string][])).map(([lbl, val, setter, fieldKey, num]) => (
           <div key={num} className="apAddProductField">
             <FileUploadField
               label={`${lbl} (Both)`}
@@ -1229,7 +1328,12 @@ function AddProductForm({ onProductCreated, onClose }: {
               defaultDestination="both"
               driveFolderIdRef={driveFolderIdRef}
               customFileName={nameSlug ? `${nameSlug}-action-${num}` : undefined}
-              onUploaded={r => { if (r.r2Url) setter(r.r2Url); else if (r.driveId) setter(`/api/drive-video?id=${r.driveId}`); }}
+              onUploaded={r => {
+                if (r.r2Url) setter(r.r2Url);
+                else if (r.driveId) setter(`/api/drive-video?id=${r.driveId}`);
+                // Track Drive ID for purge-on-delete
+                if (r.driveId) setMediaDriveIds(prev => ({ ...prev, [fieldKey]: r.driveId! }));
+              }}
             />
             <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={val} onChange={e => setter(e.target.value)} />
           </div>
@@ -1348,6 +1452,18 @@ function ProductsSection({
         const id = new URLSearchParams(val.split("?")[1] ?? "").get("id");
         if (id) driveIds.push(id);
       }
+    }
+
+    // ── Add Drive IDs from mediaDriveIds map ─────────────────────────
+    // Captures Drive copies of files uploaded to "both" — where only the
+    // R2 URL was saved to the media field and the Drive ID was tracked separately.
+    if (product.mediaDriveIds) {
+      try {
+        const driveMap: Record<string, string> = JSON.parse(product.mediaDriveIds);
+        for (const driveId of Object.values(driveMap)) {
+          if (driveId && !driveIds.includes(driveId)) driveIds.push(driveId);
+        }
+      } catch { /* malformed JSON — skip */ }
     }
 
     // Best-effort parallel deletion from both storages

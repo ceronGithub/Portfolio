@@ -1855,3 +1855,45 @@
   text-overflow:  ellipsis;
   max-width:      520px;
 }
+/* ── MediaEditor 3D section — separate OBJ/FBX/GLB editable rows ─────── */
+.apMediaSection3D,
+.apMediaSectionActions {
+  padding:        0.75rem 0 0.5rem;
+  border-top:     1px solid rgba(255,255,255,0.06);
+  margin-top:     0.5rem;
+}
+
+.apMediaSectionLabel {
+  font-size:      0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.35);
+  font-weight:    600;
+  margin-bottom:  0.55rem;
+}
+
+/* Each 3D slot row: label + current URL truncated + FileUploadField inline */
+.apMedia3DRow,
+.apMediaActionRow {
+  display:        flex;
+  align-items:    center;
+  flex-wrap:      wrap;
+  gap:            0.5rem;
+  padding:        0.4rem 0;
+  border-bottom:  1px solid rgba(255,255,255,0.04);
+}
+.apMedia3DRow:last-child,
+.apMediaActionRow:last-child { border-bottom: none; }
+
+/* Truncated current URL badge */
+.apMedia3DCurrentUrl,
+.apMediaActionCurrentUrl {
+  font-size:      0.65rem;
+  color:          rgba(255,255,255,0.3);
+  font-family:    'DM Mono', monospace;
+  white-space:    nowrap;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  max-width:      240px;
+  flex-shrink:    1;
+}
