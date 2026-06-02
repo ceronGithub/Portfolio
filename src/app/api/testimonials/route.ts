@@ -16,14 +16,25 @@ function getInitials(name: string): string {
   return name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-// ── GET /api/testimonials — approved testimonials for the visitor carousel ────
+// ── GET /api/testimonials — approved + visible testimonials for the visitor carousel ──
 export async function GET() {
   try {
     const testimonials = await (prisma as any).testimonial.findMany({
-      where:   { isApproved: true },
-      orderBy: { createdAt: "asc" },
+      where:   { isApproved: true, isHidden: false },
+      orderBy: [{ isPinned: "desc" }, { createdAt: "asc" }],
     });
-    return NextResponse.json(testimonials);
+    return NextResponse.json(testimonials.map((t: any) => ({
+      id:            t.id,
+      name:          t.name,
+      project:       t.project,
+      rate:          t.rate,
+      comment:       t.comment,
+      initials:      t.initials,
+      accent:        t.accent,
+      isHighlighted: t.isHighlighted ?? false,
+      isPinned:      t.isPinned      ?? false,
+      adminReply:    t.adminReply    ?? null,
+    })));
   } catch {
     return NextResponse.json([], { status: 200 });
   }

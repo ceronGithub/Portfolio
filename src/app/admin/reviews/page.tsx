@@ -22,13 +22,17 @@ export default async function AdminReviewsPage() {
   });
 
   const serialized = reviews.map((r: any) => ({
-    id:        r.id,
-    rating:    r.rating,
-    comment:   r.comment ?? "",
-    assetId:   r.assetId,
-    createdAt: r.createdAt.toISOString(),
-    buyerName: r.user.name ?? r.user.email.split("@")[0],
-    email:     r.user.email,
+    id:            r.id,
+    rating:        r.rating,
+    comment:       r.comment ?? "",
+    assetId:       r.assetId,
+    createdAt:     r.createdAt.toISOString(),
+    buyerName:     r.user.name ?? r.user.email.split("@")[0],
+    email:         r.user.email,
+    isHidden:      r.isHidden,
+    isHighlighted: r.isHighlighted,
+    isPinned:      r.isPinned,
+    adminReply:    r.adminReply ?? null,
   }));
 
   return (

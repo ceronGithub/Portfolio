@@ -25,15 +25,19 @@ export default async function AdminTestimonialsPage() {
   } catch { /* migration pending — page loads empty */ }
 
   const serialized = testimonials.map((t: any) => ({
-    id:         t.id,
-    name:       t.name,
-    project:    t.project,
-    rate:       t.rate,
-    comment:    t.comment,
-    initials:   t.initials,
-    accent:     t.accent,
-    isApproved: t.isApproved,
-    createdAt:  t.createdAt.toISOString(),
+    id:            t.id,
+    name:          t.name,
+    project:       t.project,
+    rate:          t.rate,
+    comment:       t.comment,
+    initials:      t.initials,
+    accent:        t.accent,
+    isApproved:    t.isApproved,
+    isHidden:      t.isHidden      ?? false,
+    isHighlighted: t.isHighlighted ?? false,
+    isPinned:      t.isPinned      ?? false,
+    adminReply:    t.adminReply    ?? null,
+    createdAt:     t.createdAt.toISOString(),
   }));
 
   const approvedCount = testimonials.filter((t: any) => t.isApproved).length;

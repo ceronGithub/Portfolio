@@ -10,17 +10,21 @@ import { prisma }                    from "@/lib/prisma";
 export async function GET() {
   try {
     const reviews = await prisma.review.findMany({
-      orderBy: { createdAt: "desc" },
+      where:   { isHidden: false },
+      orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
       include: { user: { select: { name: true, email: true } } },
     });
 
     return NextResponse.json(reviews.map((r: any) => ({
-      id:        r.id,
-      rating:    r.rating,
-      comment:   r.comment ?? "",
-      createdAt: r.createdAt.toISOString(),
-      userName:  r.user.name ?? r.user.email.split("@")[0],
-      assetId:   r.assetId,
+      id:            r.id,
+      rating:        r.rating,
+      comment:       r.comment ?? "",
+      createdAt:     r.createdAt.toISOString(),
+      userName:      r.user.name ?? r.user.email.split("@")[0],
+      assetId:       r.assetId,
+      isHighlighted: r.isHighlighted ?? false,
+      isPinned:      r.isPinned      ?? false,
+      adminReply:    r.adminReply    ?? null,
     })));
   } catch {
     return NextResponse.json([], { status: 200 });

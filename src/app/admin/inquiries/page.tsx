@@ -19,7 +19,16 @@ export default async function AdminInquiriesPage() {
   // ── Custom Requests (Inquiry model) ────────────────────────────────────────
   const customRequests = await prisma.inquiry.findMany({
     orderBy: { createdAt: "desc" },
-    include: { user: { select: { name: true, email: true } } },
+    include: {
+      user:     { select: { name: true, email: true } },
+      comments: {
+        where:   { parentId: null },
+        orderBy: { createdAt: "asc" },
+        include: {
+          replies: { orderBy: { createdAt: "asc" } },
+        },
+      },
+    },
   });
 
   const serializedRequests = customRequests.map((r: any) => ({
@@ -38,6 +47,21 @@ export default async function AdminInquiriesPage() {
     createdAt:      r.createdAt.toISOString(),
     buyerName:      r.user.name ?? r.user.email.split("@")[0],
     email:          r.user.email,
+    comments:       (r.comments ?? []).map((c: any) => ({
+      id:        c.id,
+      role:      c.role,
+      content:   c.content,
+      parentId:  c.parentId ?? null,
+      createdAt: c.createdAt.toISOString(),
+      replies:   (c.replies ?? []).map((rep: any) => ({
+        id:        rep.id,
+        role:      rep.role,
+        content:   rep.content,
+        parentId:  rep.parentId ?? null,
+        createdAt: rep.createdAt.toISOString(),
+        replies:   [],
+      })),
+    })),
   }));
 
   // ── Contact Messages (ContactMessage model) ────────────────────────────────

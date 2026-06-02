@@ -62,7 +62,36 @@ export async function GET() {
       buyerComment:   true,
       status:         true,
       createdAt:      true,
+      comments: {
+        where:   { parentId: null, role: "ADMIN" },
+        orderBy: { createdAt: "asc" },
+        select: {
+          id:        true,
+          role:      true,
+          content:   true,
+          parentId:  true,
+          createdAt: true,
+          replies: {
+            orderBy: { createdAt: "asc" },
+            select: {
+              id:        true,
+              role:      true,
+              content:   true,
+              parentId:  true,
+              createdAt: true,
+            },
+          },
+        },
+      },
     },
   });
-  return NextResponse.json(inquiries);
+  return NextResponse.json(inquiries.map((inq: any) => ({
+    ...inq,
+    createdAt: inq.createdAt.toISOString(),
+    comments:  inq.comments.map((c: any) => ({
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+      replies:   c.replies.map((r: any) => ({ ...r, createdAt: r.createdAt.toISOString() })),
+    })),
+  })));
 }

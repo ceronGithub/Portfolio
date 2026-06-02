@@ -179,12 +179,16 @@ model SystemAddon {
 
 // ── Reviews ────────────────────────────────────────────────────────────────
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  assetId   String   // asset slug e.g. "orc-01", "axe-03", "int-01"
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String
+  assetId       String   // asset slug e.g. "orc-01", "axe-03", "int-01"
+  rating        Int
+  comment       String?
+  isHidden      Boolean  @default(false)   // Admin hide — hides from buyer/visitor
+  isHighlighted Boolean  @default(false)   // Admin highlight — featured on visitor page
+  isPinned      Boolean  @default(false)   // Admin pin — pinned to top
+  adminReply    String?                    // Admin's reply to this review
+  createdAt     DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 
@@ -194,15 +198,19 @@ model Review {
 // ── Visitor Testimonials ───────────────────────────────────────────────────
 // Submitted by visitors on the landing page. Admin can approve or delete.
 model Testimonial {
-  id         String   @id @default(cuid())
-  name       String
-  project    String
-  rate       Int                        // 1–100 satisfaction percentage
-  comment    String
-  initials   String
-  accent     String
-  isApproved Boolean  @default(false)   // Admin must approve before showing
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  name          String
+  project       String
+  rate          Int                        // 1–100 satisfaction percentage
+  comment       String
+  initials      String
+  accent        String
+  isApproved    Boolean  @default(false)   // Admin must approve before showing
+  isHidden      Boolean  @default(false)   // Admin hide — hides from visitor/buyer
+  isHighlighted Boolean  @default(false)   // Admin highlight — featured
+  isPinned      Boolean  @default(false)   // Admin pin — pinned to top
+  adminReply    String?                    // Admin's reply shown below the testimonial
+  createdAt     DateTime @default(now())
 }
 
 // ── Contact Messages (General Inquiries from InquirySection) ──────────────
@@ -230,12 +238,31 @@ model Inquiry {
   deliverySpeed String
   estimatedQuote Int?
   adminQuote     Int?     // Admin's official quoted price — set/updated by admin anytime
-  adminComment   String?  // Admin's comment / response on the request
-  buyerComment   String?  // Buyer's reply or additional notes on the request
+  adminComment   String?  // Admin's comment / response on the request (legacy single-comment)
+  buyerComment   String?  // Buyer's reply or additional notes on the request (legacy)
   status         String   @default("pending")
   createdAt     DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user     User             @relation(fields: [userId], references: [id])
+  comments InquiryComment[]
+}
+
+// ── Inquiry Comment Thread ─────────────────────────────────────────────────
+// Threaded comments on a custom request. Admin posts comments; buyer can reply
+// to each admin comment (parentId references the admin comment being replied to).
+model InquiryComment {
+  id         String   @id @default(cuid())
+  inquiryId  String
+  role       String                        // "ADMIN" | "BUYER"
+  content    String
+  parentId   String?                       // null = root admin comment; non-null = buyer reply to that comment
+  createdAt  DateTime @default(now())
+
+  inquiry Inquiry          @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  parent  InquiryComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies InquiryComment[] @relation("CommentReplies")
+
+  @@index([inquiryId])
 }
 
 // ── Site Visits — one row per unique daily session ─────────────────────────

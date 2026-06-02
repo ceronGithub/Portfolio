@@ -1,6 +1,6 @@
 // admin/inquiries/InquiriesClient.tsx — Inquiries admin UI.
 // Two tabs: Custom Requests + Contact Messages.
-// Custom Requests: status pipeline (pending → read → quoted → replied) + editable adminQuote field.
+// Custom Requests: status pipeline, editable adminQuote, threaded comments (admin posts; buyer replies per comment).
 // Contact Messages: status (new → read → replied).
 
 "use client";
@@ -9,6 +9,15 @@ import { useState } from "react";
 import { sanitize } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+
+type InquiryComment = {
+  id:        string;
+  role:      "ADMIN" | "BUYER";
+  content:   string;
+  parentId:  string | null;
+  createdAt: string;
+  replies:   InquiryComment[];
+};
 
 type CustomRequest = {
   id:             string;
@@ -26,6 +35,7 @@ type CustomRequest = {
   createdAt:      string;
   buyerName:      string;
   email:          string;
+  comments:       InquiryComment[];
 };
 
 type ContactMessage = {
@@ -44,6 +54,10 @@ type Tab = "Custom Requests" | "Contact Messages";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 function fmt(p: number) {
@@ -103,9 +117,7 @@ function StatusBadge({ status, id, type, onUpdate }: {
   );
 }
 
-// ── AdminQuote inline editor ───────────────────────────────────────────────────
-// Allows admin to set or update the official quoted price at any time.
-// Clicking the value makes it editable; press Enter or blur to save.
+// ── AdminQuoteEditor ──────────────────────────────────────────────────────────
 
 function AdminQuoteEditor({ inquiryId, currentQuote, onSave }: {
   inquiryId:    string;
@@ -171,77 +183,233 @@ function AdminQuoteEditor({ inquiryId, currentQuote, onSave }: {
   );
 }
 
-// ── AdminCommentEditor — admin can write/edit a comment on a custom request ──
-// Clicking the displayed text (or the "Add comment" button) opens an inline textarea.
-// Press Save or blur to persist via PATCH /api/admin/inquiries.
+// ── CommentThread — threaded comment UI on a custom request ──────────────────
+// Admin can add multiple comments. Each admin comment shows a "Reply" button.
+// Buyer replies are shown indented beneath the admin comment they reply to.
 
-function AdminCommentEditor({ inquiryId, currentComment, onSave }: {
-  inquiryId:      string;
-  currentComment: string | null;
-  onSave:         (id: string, newComment: string | null) => void;
+function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
+  inquiryId:        string;
+  initialComments:  InquiryComment[];
+  onCommentsChange: (id: string, comments: InquiryComment[]) => void;
 }) {
-  const [isEditing,  setIsEditing]  = useState(false);
-  const [inputValue, setInputValue] = useState(currentComment ?? "");
-  const [saving,     setSaving]     = useState(false);
+  const [comments,      setComments]      = useState<InquiryComment[]>(initialComments);
+  const [newAdminText,  setNewAdminText]  = useState("");
+  const [postingAdmin,  setPostingAdmin]  = useState(false);
+  const [replyingToId,  setReplyingToId]  = useState<string | null>(null);
+  const [replyText,     setReplyText]     = useState("");
+  const [postingReply,  setPostingReply]  = useState(false);
+  const [isExpanded,    setIsExpanded]    = useState(comments.length > 0);
 
-  async function handleSave() {
-    setSaving(true);
-    const trimmed = inputValue.trim() || null;
+  // ── Post new admin comment ────────────────────────────────────────────────
+  async function postAdminComment() {
+    const trimmed = newAdminText.trim();
+    if (!trimmed) return;
+    setPostingAdmin(true);
     try {
-      const res = await fetch(`/api/admin/inquiries?id=${inquiryId}&type=custom`, {
-        method:  "PATCH",
+      const res = await fetch(`/api/admin/inquiries/${inquiryId}/comments`, {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ adminComment: trimmed }),
+        body:    JSON.stringify({ role: "ADMIN", content: trimmed }),
       });
       if (res.ok) {
-        onSave(inquiryId, trimmed);
-        setInputValue(trimmed ?? "");
+        const data = await res.json();
+        const updated = [...comments, { ...data.comment, replies: [] }];
+        setComments(updated);
+        onCommentsChange(inquiryId, updated);
+        setNewAdminText("");
+        setIsExpanded(true);
       }
     } finally {
-      setSaving(false);
-      setIsEditing(false);
+      setPostingAdmin(false);
     }
   }
 
-  if (isEditing) {
-    return (
-      <div className="adminInquiriesCommentEditor">
-        <textarea
-          className="adminInquiriesCommentTextarea"
-          autoFocus
-          value={inputValue}
-          disabled={saving}
-          placeholder="Write a comment for the buyer…"
-          onChange={e => setInputValue(sanitize(e.target.value))}
-          rows={3}
-        />
-        <div className="adminInquiriesCommentActions">
-          <button
-            className="adminInquiriesCommentSave"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
-          <button
-            className="adminInquiriesCommentCancel"
-            onClick={() => { setIsEditing(false); setInputValue(currentComment ?? ""); }}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
+  // ── Post buyer reply to a specific admin comment ──────────────────────────
+  async function postBuyerReply(parentId: string) {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    setPostingReply(true);
+    try {
+      const res = await fetch(`/api/admin/inquiries/${inquiryId}/comments`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ role: "BUYER", content: trimmed, parentId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = comments.map(c =>
+          c.id === parentId
+            ? { ...c, replies: [...c.replies, data.comment] }
+            : c
+        );
+        setComments(updated);
+        onCommentsChange(inquiryId, updated);
+        setReplyText("");
+        setReplyingToId(null);
+      }
+    } finally {
+      setPostingReply(false);
+    }
   }
 
+  // ── Delete a comment ──────────────────────────────────────────────────────
+  async function deleteComment(commentId: string, parentId: string | null) {
+    const res = await fetch(`/api/admin/inquiries/${inquiryId}/comments?commentId=${commentId}`, { method: "DELETE" });
+    if (!res.ok) return;
+    let updated: InquiryComment[];
+    if (!parentId) {
+      updated = comments.filter(c => c.id !== commentId);
+    } else {
+      updated = comments.map(c =>
+        c.id === parentId
+          ? { ...c, replies: c.replies.filter(r => r.id !== commentId) }
+          : c
+      );
+    }
+    setComments(updated);
+    onCommentsChange(inquiryId, updated);
+  }
+
+  const rootComments = comments.filter(c => !c.parentId);
+
   return (
-    <button
-      className={`adminInquiriesCommentBtn ${currentComment ? "adminInquiriesCommentBtnSet" : ""}`}
-      onClick={() => setIsEditing(true)}
-      title="Click to add or edit admin comment"
-    >
-      {currentComment ? currentComment : "Add comment"}
-    </button>
+    <div className="adminInquiriesThread">
+      {/* Thread header + toggle */}
+      <button
+        className="adminInquiriesThreadToggle"
+        onClick={() => setIsExpanded(prev => !prev)}
+        title={isExpanded ? "Collapse thread" : "Expand thread"}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        {rootComments.length > 0 ? `${rootComments.length} comment${rootComments.length !== 1 ? "s" : ""}` : "Add comment"}
+        <svg className={`adminInquiriesThreadChevron ${isExpanded ? "adminInquiriesThreadChevronOpen" : ""}`}
+          width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      {isExpanded && (
+        <div className="adminInquiriesThreadBody">
+          {/* Existing comment thread */}
+          {rootComments.length > 0 && (
+            <div className="adminInquiriesCommentList">
+              {rootComments.map(comment => (
+                <div key={comment.id} className="adminInquiriesCommentBlock">
+                  {/* Admin comment */}
+                  <div className="adminInquiriesCommentItem adminInquiriesCommentItemAdmin">
+                    <div className="adminInquiriesCommentMeta">
+                      <span className="adminInquiriesCommentRoleBadge adminInquiriesCommentRoleBadgeAdmin">Admin</span>
+                      <span className="adminInquiriesCommentTime">{formatTime(comment.createdAt)}</span>
+                    </div>
+                    <p className="adminInquiriesCommentText">{comment.content}</p>
+                    <div className="adminInquiriesCommentItemActions">
+                      <button
+                        className="adminInquiriesCommentReplyBtn"
+                        onClick={() => { setReplyingToId(comment.id); setReplyText(""); }}
+                      >
+                        Reply as Buyer
+                      </button>
+                      <button
+                        className="adminInquiriesCommentDeleteBtn"
+                        onClick={() => deleteComment(comment.id, null)}
+                        title="Delete this comment"
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M10 11v6M14 11v6"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Buyer replies to this comment */}
+                  {comment.replies.length > 0 && (
+                    <div className="adminInquiriesReplyList">
+                      {comment.replies.map(reply => (
+                        <div key={reply.id} className="adminInquiriesCommentItem adminInquiriesCommentItemBuyer">
+                          <div className="adminInquiriesCommentMeta">
+                            <span className="adminInquiriesCommentRoleBadge adminInquiriesCommentRoleBadgeBuyer">Buyer</span>
+                            <span className="adminInquiriesCommentTime">{formatTime(reply.createdAt)}</span>
+                          </div>
+                          <p className="adminInquiriesCommentText">{reply.content}</p>
+                          <div className="adminInquiriesCommentItemActions">
+                            <button
+                              className="adminInquiriesCommentDeleteBtn"
+                              onClick={() => deleteComment(reply.id, comment.id)}
+                              title="Delete reply"
+                            >
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                <path d="M10 11v6M14 11v6"/>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Inline reply form */}
+                  {replyingToId === comment.id && (
+                    <div className="adminInquiriesReplyForm">
+                      <textarea
+                        className="adminInquiriesCommentTextarea"
+                        autoFocus
+                        value={replyText}
+                        disabled={postingReply}
+                        placeholder="Write buyer reply…"
+                        onChange={e => setReplyText(sanitize(e.target.value))}
+                        rows={2}
+                      />
+                      <div className="adminInquiriesCommentActions">
+                        <button
+                          className="adminInquiriesCommentSave"
+                          onClick={() => postBuyerReply(comment.id)}
+                          disabled={postingReply || !replyText.trim()}
+                        >
+                          {postingReply ? "Posting…" : "Post Reply"}
+                        </button>
+                        <button
+                          className="adminInquiriesCommentCancel"
+                          onClick={() => setReplyingToId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* New admin comment form */}
+          <div className="adminInquiriesNewCommentForm">
+            <textarea
+              className="adminInquiriesCommentTextarea"
+              value={newAdminText}
+              disabled={postingAdmin}
+              placeholder="Write a comment for the buyer…"
+              onChange={e => setNewAdminText(sanitize(e.target.value))}
+              rows={3}
+            />
+            <div className="adminInquiriesCommentActions">
+              <button
+                className="adminInquiriesCommentSave"
+                onClick={postAdminComment}
+                disabled={postingAdmin || !newAdminText.trim()}
+              >
+                {postingAdmin ? "Posting…" : "Post Comment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -264,7 +432,6 @@ export default function InquiriesClient({
     setTimeout(() => setToast(null), 3000);
   }
 
-  // ── Status update handlers ──────────────────────────────────────────────
   function updateCustomStatus(id: string, newStatus: string) {
     setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
     showToast(`Status updated to "${newStatus}".`, "ok");
@@ -275,16 +442,13 @@ export default function InquiriesClient({
     showToast(`Status updated to "${newStatus}".`, "ok");
   }
 
-  // ── Admin quote update handler ──────────────────────────────────────────
   function updateAdminQuote(id: string, newQuote: number | null) {
     setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, adminQuote: newQuote } : r));
     showToast(newQuote ? `Quote set to ₱${newQuote.toLocaleString()}.` : "Quote cleared.", "ok");
   }
 
-  // ── Admin comment update handler ─────────────────────────────────────────
-  function updateAdminComment(id: string, newComment: string | null) {
-    setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, adminComment: newComment } : r));
-    showToast(newComment ? "Comment saved." : "Comment cleared.", "ok");
+  function updateComments(id: string, comments: InquiryComment[]) {
+    setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, comments } : r));
   }
 
   const pendingCount = customRequests.filter(r => r.status === "pending").length;
@@ -343,8 +507,7 @@ export default function InquiriesClient({
               <span>Description</span>
               <span>Est. Quote</span>
               <span>Official Quote</span>
-              <span>Admin Comment</span>
-              <span>Buyer Comment</span>
+              <span>Comment Thread</span>
               <span>Speed</span>
               <span>Date</span>
               <span>Status</span>
@@ -365,14 +528,11 @@ export default function InquiriesClient({
                   currentQuote={r.adminQuote}
                   onSave={updateAdminQuote}
                 />
-                <AdminCommentEditor
+                <CommentThread
                   inquiryId={r.id}
-                  currentComment={r.adminComment}
-                  onSave={updateAdminComment}
+                  initialComments={r.comments ?? []}
+                  onCommentsChange={updateComments}
                 />
-                <span className="adminInquiriesBuyerCommentCell">
-                  {r.buyerComment ? r.buyerComment : <span className="adminInquiriesNone">—</span>}
-                </span>
                 <span className="adminInquiriesSpeed">{r.deliverySpeed}</span>
                 <span className="adminInquiriesDate">{formatDate(r.createdAt)}</span>
                 <StatusBadge

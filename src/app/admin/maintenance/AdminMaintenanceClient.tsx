@@ -37,6 +37,50 @@ interface Order {
   vcSchedules: VCSchedule[]; bugReports: BugReport[]; tasks: Task[];
 }
 
+const PKG_CONFIG: Record<Pkg, {
+  name: string; price: string; bugLimit: number; revisionLimit: number;
+  popular?: boolean;
+  features: { label: string; included: boolean }[];
+}> = {
+  BASIC: {
+    name: "Basic", price: "₱4,500", bugLimit: 3, revisionLimit: 2,
+    features: [
+      { label: "3 bug reports/month (Minor only)", included: true },
+      { label: "2 revision updates/month",         included: true },
+      { label: "Monthly health check",             included: true },
+      { label: "Immediate response",               included: true },
+      { label: "Security patches",                 included: false },
+      { label: "Performance monitoring",           included: false },
+      { label: "Database backups",                 included: false },
+    ],
+  },
+  PRIORITY: {
+    name: "Priority Support", price: "₱8,500", bugLimit: 5, revisionLimit: 4,
+    popular: true,
+    features: [
+      { label: "5 bug reports/month (Minor + Moderate)", included: true },
+      { label: "4 revision updates/month",               included: true },
+      { label: "Monthly health check",                   included: true },
+      { label: "Immediate response",                     included: true },
+      { label: "Security patches",                       included: true },
+      { label: "Performance monitoring",                 included: true },
+      { label: "Database backups",                       included: true },
+    ],
+  },
+  FULL: {
+    name: "Full Maintenance", price: "₱15,000", bugLimit: 8, revisionLimit: 6,
+    features: [
+      { label: "8 bug reports/month (All categories)", included: true },
+      { label: "6 revision updates/month",             included: true },
+      { label: "Monthly health check",                 included: true },
+      { label: "Priority response (first in queue)",   included: true },
+      { label: "Security patches",                     included: true },
+      { label: "Performance monitoring",               included: true },
+      { label: "Database backups",                     included: true },
+    ],
+  },
+};
+
 const PKG_LABELS: Record<Pkg, string> = { BASIC: "Basic", PRIORITY: "Priority", FULL: "Full" };
 
 function fmt(d: string) {
@@ -545,6 +589,7 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
 // ── Client Detail ─────────────────────────────────────────────────────────────
 function ClientDetail({ order }: { order: Order }) {
   const [tab, setTab] = useState<"tasks" | "bugs" | "vc">("tasks");
+  const pkgCfg = PKG_CONFIG[order.package];
 
   return (
     <div className="amDetail">
@@ -554,6 +599,47 @@ function ClientDetail({ order }: { order: Order }) {
           <p className="amDetailEmail">{order.user.email}</p>
         </div>
         <span className="amDetailPkg">{PKG_LABELS[order.package]}</span>
+      </div>
+
+      {/* Package description panel */}
+      <div className="amPkgDesc">
+        <div className="amPkgDescHeader">
+          <div className="amPkgDescMeta">
+            <span className="amPkgDescName">{pkgCfg.name}</span>
+            <span className="amPkgDescPrice">{pkgCfg.price}<span className="amPkgDescPriceSub">/mo</span></span>
+          </div>
+          <div className="amPkgDescLimits">
+            <span className="amPkgDescLimit">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+              </svg>
+              {pkgCfg.bugLimit} bugs/mo
+            </span>
+            <span className="amPkgDescLimit">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              {pkgCfg.revisionLimit} revisions/mo
+            </span>
+          </div>
+        </div>
+        <ul className="amPkgDescFeatures">
+          {pkgCfg.features.map(f => (
+            <li key={f.label} className={`amPkgDescFeature ${f.included ? "amPkgDescFeatureIncluded" : "amPkgDescFeatureExcluded"}`}>
+              {f.included ? (
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              ) : (
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              )}
+              {f.label}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="amTabs">

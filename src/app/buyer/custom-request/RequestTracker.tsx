@@ -1,8 +1,7 @@
 // RequestTracker.tsx — Buyer-side tracker for submitted custom requests.
 // Fetches GET /api/inquiry on mount and displays each inquiry as a collapsible card.
 // Shows a 4-step status pipeline: Pending → Under Review → Quoted → Replied.
-// Displays adminQuote and adminComment when set.
-// Buyer can: delete their request, edit description, add/edit their own comment.
+// Displays adminQuote. Admin comments shown as a thread; buyer can reply per comment.
 
 "use client";
 
@@ -13,6 +12,15 @@ import "./request-tracker.css";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type RequestStatus = "pending" | "read" | "quoted" | "replied";
+
+interface InquiryComment {
+  id:        string;
+  role:      "ADMIN" | "BUYER";
+  content:   string;
+  parentId:  string | null;
+  createdAt: string;
+  replies:   Omit<InquiryComment, "replies">[];
+}
 
 interface TrackedRequest {
   id:             string;
@@ -28,6 +36,7 @@ interface TrackedRequest {
   buyerComment:   string | null;
   status:         RequestStatus;
   createdAt:      string;
+  comments:       InquiryComment[];
 }
 
 // ── Pipeline steps — 4 stages ─────────────────────────────────────────────────
@@ -56,6 +65,97 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-PH", {
     year: "numeric", month: "short", day: "numeric",
   });
+}
+
+// ── BuyerCommentBlock — renders one admin comment + buyer replies + reply form ─
+
+function BuyerCommentBlock({ inquiryId, comment, onReplyPosted }: {
+  inquiryId:      string;
+  comment:        InquiryComment;
+  onReplyPosted:  (parentId: string, reply: Omit<InquiryComment, "replies">) => void;
+}) {
+  const [replying,    setReplying]    = useState(false);
+  const [replyText,   setReplyText]   = useState("");
+  const [posting,     setPosting]     = useState(false);
+
+  function formatCommentTime(iso: string) {
+    return new Date(iso).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  async function handlePostReply() {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    setPosting(true);
+    try {
+      const res = await fetch(`/api/buyer/inquiry/${inquiryId}/reply`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ parentId: comment.id, content: trimmed }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onReplyPosted(comment.id, data.comment);
+        setReplyText("");
+        setReplying(false);
+      }
+    } finally {
+      setPosting(false);
+    }
+  }
+
+  return (
+    <div className="rtCommentBlock">
+      {/* Admin comment */}
+      <div className="rtCommentItem rtCommentItemAdmin">
+        <div className="rtCommentMeta">
+          <span className="rtCommentRoleBadge rtCommentRoleBadgeAdmin">Admin</span>
+          <span className="rtCommentTime">{formatCommentTime(comment.createdAt)}</span>
+        </div>
+        <p className="rtCommentText">{comment.content}</p>
+        {!replying && (
+          <button className="rtCommentReplyBtn" onClick={() => { setReplying(true); setReplyText(""); }}>
+            Reply
+          </button>
+        )}
+      </div>
+
+      {/* Buyer replies */}
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="rtReplyList">
+          {comment.replies.map(reply => (
+            <div key={reply.id} className="rtCommentItem rtCommentItemBuyer">
+              <div className="rtCommentMeta">
+                <span className="rtCommentRoleBadge rtCommentRoleBadgeBuyer">You</span>
+                <span className="rtCommentTime">{formatCommentTime(reply.createdAt)}</span>
+              </div>
+              <p className="rtCommentText">{reply.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Inline reply form */}
+      {replying && (
+        <div className="rtReplyForm">
+          <textarea
+            className="rtEditTextarea"
+            autoFocus
+            value={replyText}
+            disabled={posting}
+            placeholder="Write your reply…"
+            onChange={e => setReplyText(sanitize(e.target.value))}
+            rows={2}
+          />
+          <div className="rtEditActions">
+            <button className="rtEditSave" onClick={handlePostReply} disabled={posting || !replyText.trim()}>
+              {posting ? "Posting…" : "Send Reply"}
+            </button>
+            <button className="rtEditCancel" onClick={() => setReplying(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ── Single request card ───────────────────────────────────────────────────────
@@ -259,16 +359,31 @@ function RequestCard({
             )}
           </div>
 
-          {/* Admin comment — read-only for buyer */}
-          {request.adminComment && (
-            <div className="rtAdminCommentRow">
-              <span className="rtAdminCommentLabel">
+          {/* Comment thread — admin comments with per-comment buyer reply */}
+          {request.comments && request.comments.length > 0 && (
+            <div className="rtCommentThread">
+              <span className="rtCommentThreadLabel">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                Admin Comment
+                Comments
               </span>
-              <p className="rtAdminCommentText">{request.adminComment}</p>
+              {request.comments.map((comment) => (
+                <BuyerCommentBlock
+                  key={comment.id}
+                  inquiryId={request.id}
+                  comment={comment}
+                  onReplyPosted={(parentId, reply) => {
+                    onUpdate(request.id, {
+                      comments: request.comments.map(c =>
+                        c.id === parentId
+                          ? { ...c, replies: [...c.replies, reply] }
+                          : c
+                      ),
+                    });
+                  }}
+                />
+              ))}
             </div>
           )}
 

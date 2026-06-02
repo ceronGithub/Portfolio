@@ -663,3 +663,115 @@
 .rtDeleteConfirmNo:hover {
   color: rgba(255,255,255,0.7);
 }
+
+/* ── Comment Thread (buyer side) ─────────────────────────────── */
+.rtCommentThread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+}
+
+.rtCommentThreadLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+
+.rtCommentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rtCommentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.rtCommentItemAdmin {
+  background: rgba(201,169,110,0.05);
+  border-color: rgba(201,169,110,0.12);
+}
+.rtCommentItemBuyer {
+  background: rgba(56,161,105,0.05);
+  border-color: rgba(56,161,105,0.12);
+}
+
+.rtCommentMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rtCommentRoleBadge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+}
+.rtCommentRoleBadgeAdmin {
+  background: rgba(201,169,110,0.15);
+  color: #c9a96e;
+}
+.rtCommentRoleBadgeBuyer {
+  background: rgba(56,161,105,0.15);
+  color: #38a169;
+}
+
+.rtCommentTime {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.28);
+}
+
+.rtCommentText {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.55;
+  margin: 0;
+  word-break: break-word;
+}
+
+.rtCommentReplyBtn {
+  align-self: flex-start;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.15rem;
+  transition: color 0.18s;
+}
+.rtCommentReplyBtn:hover { color: #c9a96e; }
+
+.rtReplyList {
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-left: 2px solid rgba(56,161,105,0.18);
+  margin-left: 0.75rem;
+}
+
+.rtReplyForm {
+  padding-left: 1.2rem;
+  margin-left: 0.75rem;
+  border-left: 2px solid rgba(201,169,110,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
