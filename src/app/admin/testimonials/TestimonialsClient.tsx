@@ -52,6 +52,13 @@ export default function TestimonialsClient({ testimonials: initial }: { testimon
   const [activeFilter,  setActiveFilter]  = useState<FilterTab>("All");
   const [approvingId,   setApprovingId]   = useState<string | null>(null);
   const [deletingId,    setDeletingId]    = useState<string | null>(null);
+  const [toast,         setToast]         = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+
+  // ── Show toast helper ────────────────────────────────────────────────
+  function showToast(msg: string, type: "ok" | "err") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
 
   // ── Filter ────────────────────────────────────────────────────────────────
   const visibleTestimonials = testimonials.filter(t => {
@@ -69,7 +76,12 @@ export default function TestimonialsClient({ testimonials: initial }: { testimon
         setTestimonials(prev =>
           prev.map(t => t.id === testimonialId ? { ...t, isApproved: true } : t)
         );
+        showToast("Testimonial approved.", "ok");
+      } else {
+        showToast("Failed to approve testimonial.", "err");
       }
+    } catch {
+      showToast("Network error. Try again.", "err");
     } finally {
       setApprovingId(null);
     }
@@ -83,7 +95,12 @@ export default function TestimonialsClient({ testimonials: initial }: { testimon
       const res = await fetch(`/api/admin/testimonials?id=${testimonialId}`, { method: "DELETE" });
       if (res.ok) {
         setTestimonials(prev => prev.filter(t => t.id !== testimonialId));
+        showToast("Testimonial deleted.", "ok");
+      } else {
+        showToast("Failed to delete testimonial.", "err");
       }
+    } catch {
+      showToast("Network error. Try again.", "err");
     } finally {
       setDeletingId(null);
     }
@@ -94,6 +111,16 @@ export default function TestimonialsClient({ testimonials: initial }: { testimon
 
   return (
     <div className="adminTestimonialsContent">
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
+          background: toast.type === "ok" ? "#22c55e" : "#ef4444",
+          color: "#0d0d0d", padding: "0.6rem 1.2rem", borderRadius: "8px",
+          fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+        }}>{toast.msg}</div>
+      )}
 
       {/* Filter tabs */}
       <div className="adminTestimonialsFilterTabs">

@@ -48,6 +48,13 @@ export default function ReviewsClient({ reviews: initial }: { reviews: ReviewRow
   const [reviews,       setReviews]      = useState<ReviewRow[]>(initial);
   const [activeFilter,  setActiveFilter] = useState<FilterOption>("All");
   const [deletingId,    setDeletingId]   = useState<string | null>(null);
+  const [toast,         setToast]        = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+
+  // ── Show toast helper ────────────────────────────────────────────────
+  function showToast(msg: string, type: "ok" | "err") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
 
   // ── Filter logic ──────────────────────────────────────────────────────────
   const targetRating = filterRating(activeFilter);
@@ -63,7 +70,12 @@ export default function ReviewsClient({ reviews: initial }: { reviews: ReviewRow
       const res = await fetch(`/api/admin/reviews?id=${reviewId}`, { method: "DELETE" });
       if (res.ok) {
         setReviews(prev => prev.filter(r => r.id !== reviewId));
+        showToast("Review deleted.", "ok");
+      } else {
+        showToast("Failed to delete review.", "err");
       }
+    } catch {
+      showToast("Network error. Try again.", "err");
     } finally {
       setDeletingId(null);
     }
@@ -71,6 +83,16 @@ export default function ReviewsClient({ reviews: initial }: { reviews: ReviewRow
 
   return (
     <div className="adminReviewsContent">
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
+          background: toast.type === "ok" ? "#22c55e" : "#ef4444",
+          color: "#0d0d0d", padding: "0.6rem 1.2rem", borderRadius: "8px",
+          fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+        }}>{toast.msg}</div>
+      )}
 
       {/* Filter tabs */}
       <div className="adminReviewsFilterTabs">

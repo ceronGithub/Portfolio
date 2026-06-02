@@ -158,6 +158,13 @@ function linkAvailabilityLabel(isoStr: string): string {
 
 export default function PendingPaymentsClient({ orders }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [toast,     setToast]     = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+
+  // ── Show toast helper ────────────────────────────────────────────────
+  function showToast(msg: string, type: "ok" | "err") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  }
 
   /**
    * Retry payment — fetch PayMongo link and redirect to checkout
@@ -178,13 +185,22 @@ export default function PendingPaymentsClient({ orders }: Props) {
       window.location.href = checkoutUrl;
     } catch (err: any) {
       console.error("[PendingPayments] retry failed:", err);
-      alert(`Error: ${err?.message ?? "Failed to retrieve payment link"}`);
+      showToast(err?.message ?? "Failed to retrieve payment link.", "err");
       setLoadingId(null);
     }
   }
 
   return (
     <div className="pendingPaymentsPage">
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
+          background: toast.type === "ok" ? "#22c55e" : "#ef4444",
+          color: "#0d0d0d", padding: "0.6rem 1.2rem", borderRadius: "8px",
+          fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+        }}>{toast.msg}</div>
+      )}
       <div className="pendingPaymentsContainer">
         <div className="pendingPaymentsHeader">
           <h1 className="pendingPaymentsTitle">Pending Payments</h1>

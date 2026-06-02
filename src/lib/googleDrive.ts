@@ -97,6 +97,10 @@ export async function createDriveFolder(
 }
 
 // ── Upload file to Drive folder ────────────────────────────────────────
+// Uses the resumable upload protocol for all files to prevent binary corruption.
+// Multipart upload encodes the body as UTF-8 strings which corrupts large
+// binary files (MP4, OBJ, FBX). Resumable upload sends the raw binary buffer
+// in a separate step, preserving byte integrity for all file types.
 
 export async function uploadFileToDrive(
   accessToken: string,
@@ -105,31 +109,46 @@ export async function uploadFileToDrive(
   fileBuffer:  Buffer,
   folderId:    string
 ): Promise<{ id: string; name: string; webViewLink: string }> {
-  const metadata    = JSON.stringify({ name: fileName, parents: [folderId] });
-  const boundary    = "-------matthew_studio_boundary";
-  const delimiter   = `\r\n--${boundary}\r\n`;
-  const closeDelim  = `\r\n--${boundary}--`;
+  // Step 1 — Initiate the resumable session, metadata only (JSON, no binary)
+  const metadata = JSON.stringify({ name: fileName, parents: [folderId] });
 
-  const metaPart    = `${delimiter}Content-Type: application/json; charset=UTF-8\r\n\r\n${metadata}`;
-  const filePart    = `${delimiter}Content-Type: ${mimeType}\r\n\r\n`;
-  const body        = Buffer.concat([
-    Buffer.from(metaPart, "utf-8"),
-    Buffer.from(filePart, "utf-8"),
-    fileBuffer,
-    Buffer.from(closeDelim, "utf-8"),
-  ]);
-
-  const res = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink",
+  const initRes = await fetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,webViewLink",
     {
-      method:  "POST",
+      method: "POST",
       headers: {
-        Authorization:    `Bearer ${accessToken}`,
-        "Content-Type":   `multipart/related; boundary="${boundary}"`,
-        "Content-Length": String(body.length),
+        Authorization:   `Bearer ${accessToken}`,
+        "Content-Type":  "application/json; charset=UTF-8",
+        "X-Upload-Content-Type":   mimeType,
+        "X-Upload-Content-Length": String(fileBuffer.length),
       },
-      body,
+      body: metadata,
     }
   );
-  return res.json();
+
+  if (!initRes.ok) {
+    const errBody = await initRes.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message ?? `Drive initiate upload failed: ${initRes.status}`);
+  }
+
+  // Step 2 — The Location header contains the resumable session URI
+  const uploadUrl = initRes.headers.get("Location");
+  if (!uploadUrl) throw new Error("Drive did not return a resumable upload URL.");
+
+  // Step 3 — Upload the raw binary buffer in one PUT request
+  const uploadRes = await fetch(uploadUrl, {
+    method:  "PUT",
+    headers: {
+      "Content-Type":   mimeType,
+      "Content-Length": String(fileBuffer.length),
+    },
+    body: fileBuffer,
+  });
+
+  if (!uploadRes.ok) {
+    const errBody = await uploadRes.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message ?? `Drive upload failed: ${uploadRes.status}`);
+  }
+
+  return uploadRes.json();
 }

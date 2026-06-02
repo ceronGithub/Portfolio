@@ -1713,6 +1713,7 @@ export default function ProductsClient({ products, systems }: Props) {
   const [togglingId, setTogglingId]     = useState<string | null>(null);
   const [expandedSystem, setExpandedSystem] = useState<string | null>(null);
   const [driveToast, setDriveToast]     = useState<"connected" | "error" | null>(null);
+  const [globalToast, setGlobalToast]   = useState<{ msg: string; type: "ok" | "err" } | null>(null);
   const headerRef                       = useReveal();
 
   // Show Drive connection result from OAuth callback query params
@@ -1732,7 +1733,15 @@ export default function ProductsClient({ products, systems }: Props) {
   async function handleToggleActive(id: string, current: boolean) {
     setTogglingId(id);
     const ok = await toggleProductActive(id, current);
-    if (ok) setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
+    if (ok) {
+      setProductList(prev => prev.map(p => p.id === id ? { ...p, isActive: !current } : p));
+      const name = productList.find(p => p.id === id)?.name ?? "Product";
+      setGlobalToast({ msg: current ? `"${name}" deactivated.` : `"${name}" activated.`, type: "ok" });
+      setTimeout(() => setGlobalToast(null), 3000);
+    } else {
+      setGlobalToast({ msg: "Failed to update product status.", type: "err" });
+      setTimeout(() => setGlobalToast(null), 4000);
+    }
     setTogglingId(null);
   }
 
@@ -1749,6 +1758,16 @@ export default function ProductsClient({ products, systems }: Props) {
         <div className="apDriveToast apDriveToastErr">
           ✗ Google Drive connection failed — please try reconnecting.
         </div>
+      )}
+
+      {/* ── Global action toast (activate / deactivate) ──────────────── */}
+      {globalToast && (
+        <div style={{
+          position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
+          background: globalToast.type === "ok" ? "#22c55e" : "#ef4444",
+          color: "#0d0d0d", padding: "0.6rem 1.2rem", borderRadius: "8px",
+          fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+        }}>{globalToast.msg}</div>
       )}
 
       {/* ── Page header ──────────────────────────── */}
