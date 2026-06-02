@@ -118,7 +118,7 @@
 .adminInquiriesTableHeaderCustom,
 .adminInquiriesTableRowCustom {
   display: grid;
-  grid-template-columns: 160px 100px 1fr 80px 110px 80px 95px 120px;
+  grid-template-columns: 160px 100px 1fr 80px 110px 180px 140px 80px 95px 120px;
   gap: 0.75rem;
   padding: 0.8rem 1.25rem;
   align-items: center;
@@ -350,4 +350,106 @@
 
 .adminShellDark .adminInquiriesQuoteInput {
   color: rgba(255,255,255,0.8);
+}
+
+/* ── Admin comment editor ──────────────────────────────────────────────────── */
+
+.adminInquiriesCommentBtn {
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+  font-size: 0.75rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.18s ease, border-color 0.18s ease;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adminInquiriesCommentBtn:hover {
+  color: #c9a96e;
+  border-color: #c9a96e66;
+}
+.adminInquiriesCommentBtnSet {
+  color: rgba(255,255,255,0.7);
+  border-style: solid;
+  border-color: rgba(255,255,255,0.1);
+}
+
+.adminInquiriesCommentEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 180px;
+}
+
+.adminInquiriesCommentTextarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,169,110,0.4);
+  border-radius: 7px;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.7rem;
+  resize: vertical;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.adminInquiriesCommentTextarea:focus {
+  outline: none;
+  border-color: #c9a96e;
+}
+.adminInquiriesCommentTextarea:disabled {
+  opacity: 0.5;
+}
+
+.adminInquiriesCommentActions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.adminInquiriesCommentSave {
+  background: #c9a96e;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.adminInquiriesCommentSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.adminInquiriesCommentCancel {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.35);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+.adminInquiriesCommentCancel:hover {
+  color: rgba(255,255,255,0.6);
+}
+
+.adminInquiriesBuyerCommentCell {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.45;
+  max-width: 180px;
+  word-break: break-word;
+}
+
+.adminInquiriesNone {
+  color: rgba(255,255,255,0.2);
 }

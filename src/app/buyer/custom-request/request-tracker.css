@@ -456,3 +456,210 @@
   color:       rgba(255,255,255,0.2);
   margin:      0;
 }
+
+/* ── Edit blocks (description + buyer comment) ─────────────────────────────── */
+
+.rtDescriptionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.rtEditBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.45);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.rtEditBtn:hover {
+  color: #c9a96e;
+  border-color: #c9a96e66;
+}
+
+.rtEditBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rtEditTextarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  padding: 0.65rem 0.85rem;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.18s ease;
+  box-sizing: border-box;
+}
+.rtEditTextarea:focus {
+  outline: none;
+  border-color: #c9a96e88;
+}
+.rtEditTextarea:disabled {
+  opacity: 0.5;
+}
+
+.rtEditActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rtEditSave {
+  background: #c9a96e;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.rtEditSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rtEditCancel {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  border-radius: 7px;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.rtEditCancel:hover {
+  color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* ── Admin comment block ───────────────────────────────────────────────────── */
+
+.rtAdminCommentRow {
+  padding: 0.85rem 1rem;
+  background: rgba(167, 139, 250, 0.06);
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.rtAdminCommentLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #a78bfa;
+}
+
+.rtAdminCommentText {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.8);
+  margin: 0;
+}
+
+/* ── Buyer comment block ───────────────────────────────────────────────────── */
+
+.rtBuyerCommentRow {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 0.75rem;
+}
+
+.rtNoneText {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.25);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Delete action row ─────────────────────────────────────────────────────── */
+
+.rtDeleteRow {
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+}
+
+.rtDeleteBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid rgba(229, 62, 62, 0.25);
+  color: rgba(229, 62, 62, 0.5);
+  font-size: 0.72rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+.rtDeleteBtn:hover {
+  color: #e53e3e;
+  border-color: rgba(229, 62, 62, 0.6);
+  background: rgba(229, 62, 62, 0.06);
+}
+
+.rtDeleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.rtDeleteConfirmText {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+}
+
+.rtDeleteConfirmYes {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.rtDeleteConfirmYes:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rtDeleteConfirmNo {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  border-radius: 7px;
+  font-size: 0.73rem;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+.rtDeleteConfirmNo:hover {
+  color: rgba(255,255,255,0.7);
+}

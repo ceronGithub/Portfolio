@@ -19,6 +19,10 @@ interface Product {
   actionTwoUrl: string | null; actionThreeUrl: string | null;
   actionFourUrl: string | null; actionFiveUrl: string | null;
   actionSixUrl: string | null; actionSevenUrl: string | null;
+  fileKeyObj: string | null; fileKeyFbx: string | null; fileKeyGlb: string | null;
+  animIdleUrl: string | null; animWalkUrl: string | null; animRunUrl: string | null;
+  animAttackOneUrl: string | null; animAttackTwoUrl: string | null;
+  animDeathUrl: string | null; animHitUrl: string | null;
   createdAt: Date;
 }
 
@@ -1305,11 +1309,14 @@ function ProductsSection({
     setDeletingId(product.id);
     setConfirmDeleteId(null);
 
-    // All media fields on the Product model
+    // All media fields on the Product model — includes R2 URLs, Drive IDs, and file keys
     const ALL_MEDIA_FIELDS: (keyof Product)[] = [
       "previewVideoUrl", "facePngUrl",    "threeDUrl",
       "actionOneUrl",    "actionTwoUrl",  "actionThreeUrl",
       "actionFourUrl",   "actionFiveUrl", "actionSixUrl", "actionSevenUrl",
+      "fileKeyObj",      "fileKeyFbx",    "fileKeyGlb",
+      "animIdleUrl",     "animWalkUrl",   "animRunUrl",
+      "animAttackOneUrl","animAttackTwoUrl","animDeathUrl","animHitUrl",
     ];
 
     const r2Urls:    string[] = [];

@@ -1,11 +1,13 @@
 // RequestTracker.tsx — Buyer-side tracker for submitted custom requests.
 // Fetches GET /api/inquiry on mount and displays each inquiry as a collapsible card.
 // Shows a 4-step status pipeline: Pending → Under Review → Quoted → Replied.
-// Displays adminQuote when admin has set an official price.
+// Displays adminQuote and adminComment when set.
+// Buyer can: delete their request, edit description, add/edit their own comment.
 
 "use client";
 
 import { useState, useEffect } from "react";
+import { sanitize } from "@/lib/utils";
 import "./request-tracker.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -22,6 +24,8 @@ interface TrackedRequest {
   deliverySpeed:  string;
   estimatedQuote: number | null;
   adminQuote:     number | null;
+  adminComment:   string | null;
+  buyerComment:   string | null;
   status:         RequestStatus;
   createdAt:      string;
 }
@@ -56,9 +60,76 @@ function formatDate(iso: string) {
 
 // ── Single request card ───────────────────────────────────────────────────────
 
-function RequestCard({ request }: { request: TrackedRequest }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+function RequestCard({
+  request,
+  onDelete,
+  onUpdate,
+}: {
+  request:  TrackedRequest;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, changes: Partial<TrackedRequest>) => void;
+}) {
+  const [isExpanded,       setIsExpanded]       = useState(false);
+  const [confirmDelete,    setConfirmDelete]     = useState(false);
+  const [isDeleting,       setIsDeleting]        = useState(false);
+  const [editingDesc,      setEditingDesc]       = useState(false);
+  const [descValue,        setDescValue]         = useState(request.description);
+  const [savingDesc,       setSavingDesc]        = useState(false);
+  const [editingComment,   setEditingComment]    = useState(false);
+  const [commentValue,     setCommentValue]      = useState(request.buyerComment ?? "");
+  const [savingComment,    setSavingComment]     = useState(false);
+
   const currentStepIndex = STATUS_ORDER[request.status];
+
+  // ── Delete handler ────────────────────────────────────────────────────────
+  async function handleDelete() {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/buyer/inquiry/${request.id}`, { method: "DELETE" });
+      if (res.ok) onDelete(request.id);
+    } finally {
+      setIsDeleting(false);
+      setConfirmDelete(false);
+    }
+  }
+
+  // ── Save description handler ───────────────────────────────────────────────
+  async function handleSaveDescription() {
+    if (!descValue.trim()) return;
+    setSavingDesc(true);
+    try {
+      const res = await fetch(`/api/buyer/inquiry/${request.id}`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ description: descValue.trim() }),
+      });
+      if (res.ok) {
+        onUpdate(request.id, { description: descValue.trim() });
+        setEditingDesc(false);
+      }
+    } finally {
+      setSavingDesc(false);
+    }
+  }
+
+  // ── Save buyer comment handler ─────────────────────────────────────────────
+  async function handleSaveComment() {
+    setSavingComment(true);
+    try {
+      const trimmed = commentValue.trim() || null;
+      const res = await fetch(`/api/buyer/inquiry/${request.id}`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ buyerComment: trimmed }),
+      });
+      if (res.ok) {
+        onUpdate(request.id, { buyerComment: trimmed });
+        setEditingComment(false);
+      }
+    } finally {
+      setSavingComment(false);
+    }
+  }
 
   return (
     <div className={`rtCard ${isExpanded ? "rtCardExpanded" : ""}`}>
@@ -96,9 +167,9 @@ function RequestCard({ request }: { request: TrackedRequest }) {
           {/* 4-step pipeline */}
           <div className="rtPipeline">
             {PIPELINE_STEPS.map((step, index) => {
-              const isDone    = index < currentStepIndex;
-              const isActive  = index === currentStepIndex;
-              const isFuture  = index > currentStepIndex;
+              const isDone   = index < currentStepIndex;
+              const isActive = index === currentStepIndex;
+              const isFuture = index > currentStepIndex;
               return (
                 <div key={step.key} className="rtPipelineStep">
                   {/* Connector line before step (not first) */}
@@ -147,10 +218,106 @@ function RequestCard({ request }: { request: TrackedRequest }) {
             </div>
           </div>
 
-          {/* Description */}
+          {/* Description — editable by buyer */}
           <div className="rtDescriptionRow">
-            <span className="rtDescriptionLabel">Description</span>
-            <p className="rtDescriptionText">{request.description}</p>
+            <div className="rtDescriptionHeader">
+              <span className="rtDescriptionLabel">Description</span>
+              {!editingDesc && (
+                <button
+                  className="rtEditBtn"
+                  onClick={() => { setEditingDesc(true); setDescValue(request.description); }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  Edit
+                </button>
+              )}
+            </div>
+            {editingDesc ? (
+              <div className="rtEditBlock">
+                <textarea
+                  className="rtEditTextarea"
+                  autoFocus
+                  value={descValue}
+                  disabled={savingDesc}
+                  onChange={e => setDescValue(sanitize(e.target.value))}
+                  rows={4}
+                />
+                <div className="rtEditActions">
+                  <button className="rtEditSave" onClick={handleSaveDescription} disabled={savingDesc || !descValue.trim()}>
+                    {savingDesc ? "Saving…" : "Save"}
+                  </button>
+                  <button className="rtEditCancel" onClick={() => { setEditingDesc(false); setDescValue(request.description); }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="rtDescriptionText">{request.description}</p>
+            )}
+          </div>
+
+          {/* Admin comment — read-only for buyer */}
+          {request.adminComment && (
+            <div className="rtAdminCommentRow">
+              <span className="rtAdminCommentLabel">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Admin Comment
+              </span>
+              <p className="rtAdminCommentText">{request.adminComment}</p>
+            </div>
+          )}
+
+          {/* Buyer comment — editable */}
+          <div className="rtBuyerCommentRow">
+            <div className="rtDescriptionHeader">
+              <span className="rtDescriptionLabel">
+                {request.adminComment ? "Your Reply" : "Add a Note"}
+              </span>
+              {!editingComment && (
+                <button
+                  className="rtEditBtn"
+                  onClick={() => { setEditingComment(true); setCommentValue(request.buyerComment ?? ""); }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  {request.buyerComment ? "Edit" : "Add"}
+                </button>
+              )}
+            </div>
+            {editingComment ? (
+              <div className="rtEditBlock">
+                <textarea
+                  className="rtEditTextarea"
+                  autoFocus
+                  value={commentValue}
+                  disabled={savingComment}
+                  placeholder={request.adminComment ? "Reply to admin…" : "Add a note to your request…"}
+                  onChange={e => setCommentValue(sanitize(e.target.value))}
+                  rows={3}
+                />
+                <div className="rtEditActions">
+                  <button className="rtEditSave" onClick={handleSaveComment} disabled={savingComment}>
+                    {savingComment ? "Saving…" : "Save"}
+                  </button>
+                  <button className="rtEditCancel" onClick={() => { setEditingComment(false); setCommentValue(request.buyerComment ?? ""); }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              request.buyerComment ? (
+                <p className="rtDescriptionText">{request.buyerComment}</p>
+              ) : (
+                <p className="rtNoneText">No note added yet.</p>
+              )
+            )}
           </div>
 
           {/* Optional detail chips */}
@@ -182,6 +349,35 @@ function RequestCard({ request }: { request: TrackedRequest }) {
             </div>
           )}
 
+          {/* Delete action row */}
+          <div className="rtDeleteRow">
+            {confirmDelete ? (
+              <div className="rtDeleteConfirm">
+                <span className="rtDeleteConfirmText">Delete this request?</span>
+                <button
+                  className="rtDeleteConfirmYes"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting…" : "Yes, delete"}
+                </button>
+                <button className="rtDeleteConfirmNo" onClick={() => setConfirmDelete(false)}>
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button className="rtDeleteBtn" onClick={() => setConfirmDelete(true)}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+                Delete request
+              </button>
+            )}
+          </div>
+
         </div>
       )}
     </div>
@@ -206,9 +402,7 @@ export default function RequestTracker({ isModal = false }: RequestTrackerProps)
       try {
         const res  = await fetch("/api/inquiry");
         const data = await res.json();
-        if (Array.isArray(data)) {
-          setRequests(data);
-        }
+        if (Array.isArray(data)) setRequests(data);
       } catch {
         setFetchError("Could not load your requests. Please refresh.");
       } finally {
@@ -217,6 +411,16 @@ export default function RequestTracker({ isModal = false }: RequestTrackerProps)
     }
     loadRequests();
   }, []);
+
+  // Remove a deleted request from local state
+  function handleDeleteRequest(id: string) {
+    setRequests(prev => prev.filter(r => r.id !== id));
+  }
+
+  // Merge partial updates into local state
+  function handleUpdateRequest(id: string, changes: Partial<TrackedRequest>) {
+    setRequests(prev => prev.map(r => r.id === id ? { ...r, ...changes } : r));
+  }
 
   // Don't render the section at all if no requests and not loading (only in standalone section mode)
   if (!isModal && !isLoading && requests.length === 0 && !fetchError) return null;
@@ -256,8 +460,13 @@ export default function RequestTracker({ isModal = false }: RequestTrackerProps)
         </div>
       ) : (
         <div className="rtList">
-          {requests.map(request => (
-            <RequestCard key={request.id} request={request} />
+          {requests.map((request: TrackedRequest) => (
+            <RequestCard
+              key={request.id}
+              request={request}
+              onDelete={handleDeleteRequest}
+              onUpdate={handleUpdateRequest}
+            />
           ))}
         </div>
       )}

@@ -58,6 +58,8 @@ export async function GET() {
       deliverySpeed:  true,
       estimatedQuote: true,
       adminQuote:     true,
+      adminComment:   true,
+      buyerComment:   true,
       status:         true,
       createdAt:      true,
     },

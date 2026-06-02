@@ -32,6 +32,8 @@ export default async function AdminInquiriesPage() {
     deliverySpeed:  r.deliverySpeed,
     estimatedQuote: r.estimatedQuote ?? null,
     adminQuote:     r.adminQuote     ?? null,
+    adminComment:   r.adminComment   ?? null,
+    buyerComment:   r.buyerComment   ?? null,
     status:         r.status,
     createdAt:      r.createdAt.toISOString(),
     buyerName:      r.user.name ?? r.user.email.split("@")[0],

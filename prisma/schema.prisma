@@ -230,6 +230,8 @@ model Inquiry {
   deliverySpeed String
   estimatedQuote Int?
   adminQuote     Int?     // Admin's official quoted price — set/updated by admin anytime
+  adminComment   String?  // Admin's comment / response on the request
+  buyerComment   String?  // Buyer's reply or additional notes on the request
   status         String   @default("pending")
   createdAt     DateTime @default(now())
 

@@ -20,6 +20,8 @@ type CustomRequest = {
   deliverySpeed:  string;
   estimatedQuote: number | null;
   adminQuote:     number | null;
+  adminComment:   string | null;
+  buyerComment:   string | null;
   status:         string;
   createdAt:      string;
   buyerName:      string;
@@ -169,6 +171,80 @@ function AdminQuoteEditor({ inquiryId, currentQuote, onSave }: {
   );
 }
 
+// ── AdminCommentEditor — admin can write/edit a comment on a custom request ──
+// Clicking the displayed text (or the "Add comment" button) opens an inline textarea.
+// Press Save or blur to persist via PATCH /api/admin/inquiries.
+
+function AdminCommentEditor({ inquiryId, currentComment, onSave }: {
+  inquiryId:      string;
+  currentComment: string | null;
+  onSave:         (id: string, newComment: string | null) => void;
+}) {
+  const [isEditing,  setIsEditing]  = useState(false);
+  const [inputValue, setInputValue] = useState(currentComment ?? "");
+  const [saving,     setSaving]     = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    const trimmed = inputValue.trim() || null;
+    try {
+      const res = await fetch(`/api/admin/inquiries?id=${inquiryId}&type=custom`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ adminComment: trimmed }),
+      });
+      if (res.ok) {
+        onSave(inquiryId, trimmed);
+        setInputValue(trimmed ?? "");
+      }
+    } finally {
+      setSaving(false);
+      setIsEditing(false);
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <div className="adminInquiriesCommentEditor">
+        <textarea
+          className="adminInquiriesCommentTextarea"
+          autoFocus
+          value={inputValue}
+          disabled={saving}
+          placeholder="Write a comment for the buyer…"
+          onChange={e => setInputValue(sanitize(e.target.value))}
+          rows={3}
+        />
+        <div className="adminInquiriesCommentActions">
+          <button
+            className="adminInquiriesCommentSave"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button
+            className="adminInquiriesCommentCancel"
+            onClick={() => { setIsEditing(false); setInputValue(currentComment ?? ""); }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      className={`adminInquiriesCommentBtn ${currentComment ? "adminInquiriesCommentBtnSet" : ""}`}
+      onClick={() => setIsEditing(true)}
+      title="Click to add or edit admin comment"
+    >
+      {currentComment ? currentComment : "Add comment"}
+    </button>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function InquiriesClient({
@@ -203,6 +279,12 @@ export default function InquiriesClient({
   function updateAdminQuote(id: string, newQuote: number | null) {
     setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, adminQuote: newQuote } : r));
     showToast(newQuote ? `Quote set to ₱${newQuote.toLocaleString()}.` : "Quote cleared.", "ok");
+  }
+
+  // ── Admin comment update handler ─────────────────────────────────────────
+  function updateAdminComment(id: string, newComment: string | null) {
+    setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, adminComment: newComment } : r));
+    showToast(newComment ? "Comment saved." : "Comment cleared.", "ok");
   }
 
   const pendingCount = customRequests.filter(r => r.status === "pending").length;
@@ -261,6 +343,8 @@ export default function InquiriesClient({
               <span>Description</span>
               <span>Est. Quote</span>
               <span>Official Quote</span>
+              <span>Admin Comment</span>
+              <span>Buyer Comment</span>
               <span>Speed</span>
               <span>Date</span>
               <span>Status</span>
@@ -281,6 +365,14 @@ export default function InquiriesClient({
                   currentQuote={r.adminQuote}
                   onSave={updateAdminQuote}
                 />
+                <AdminCommentEditor
+                  inquiryId={r.id}
+                  currentComment={r.adminComment}
+                  onSave={updateAdminComment}
+                />
+                <span className="adminInquiriesBuyerCommentCell">
+                  {r.buyerComment ? r.buyerComment : <span className="adminInquiriesNone">—</span>}
+                </span>
                 <span className="adminInquiriesSpeed">{r.deliverySpeed}</span>
                 <span className="adminInquiriesDate">{formatDate(r.createdAt)}</span>
                 <StatusBadge

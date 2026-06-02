@@ -47,6 +47,11 @@ export async function PATCH(req: NextRequest) {
       updateData.adminQuote = body.adminQuote !== null ? Number(body.adminQuote) : null;
     }
 
+    // adminComment update — optional, can be set or cleared
+    if (body.adminComment !== undefined) {
+      updateData.adminComment = body.adminComment !== null ? String(body.adminComment).trim() : null;
+    }
+
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });
     }
