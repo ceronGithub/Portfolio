@@ -41,7 +41,15 @@ const BASE_PRICE: Partial<Record<AssetType, number>> = {
 };
 
 const SPEED_MULTIPLIER: Record<DeliverySpeed, number> = {
-  Standard: 1.0, Rush: 1.25, Urgent: 1.55,
+  Standard: 1.0,
+  Rush:     2.2,   // package price + (package price × 1.2)
+  Urgent:   3.2,   // package price + (package price × 2.2)
+};
+
+const SPEED_SURCHARGE_LABEL: Record<DeliverySpeed, string> = {
+  Standard: "",
+  Rush:     "+120% surcharge (×1.2 added)",
+  Urgent:   "+220% surcharge (×2.2 added)",
 };
 
 const SPEED_DELIVERY: Record<DeliverySpeed, string> = {
@@ -153,23 +161,29 @@ function PackSelector<T extends string>({
   accent:   string;
 }) {
   return (
-    <div className="crbPackGrid">
-      {packs.map(pack => {
-        const isActive = selected === pack.key;
-        return (
-          <button
-            key={pack.key}
-            className={`crbPackBtn ${isActive ? "crbPackBtnActive" : ""}`}
-            style={isActive ? { borderColor: accent + "66", background: accent + "10" } : {}}
-            onClick={() => onSelect(pack.key)}
-          >
-            <span className="crbPackBtnLabel" style={isActive ? { color: accent } : {}}>{pack.label}</span>
-            <span className="crbPackBtnDesc">{pack.desc}</span>
-            <span className="crbPackBtnPrice" style={isActive ? { color: accent } : {}}>{fmt(pack.price)}</span>
-          </button>
-        );
-      })}
-    </div>
+    <>
+      <div className="crbPackGrid">
+        {packs.map(pack => {
+          const isActive = selected === pack.key;
+          return (
+            <button
+              key={pack.key}
+              className={`crbPackBtn ${isActive ? "crbPackBtnActive" : ""}`}
+              style={isActive ? { borderColor: accent + "66", background: accent + "10" } : {}}
+              onClick={() => onSelect(pack.key)}
+            >
+              <span className="crbPackBtnLabel" style={isActive ? { color: accent } : {}}>{pack.label}</span>
+              <span className="crbPackBtnDesc">{pack.desc}</span>
+              <span className="crbPackBtnPrice" style={isActive ? { color: accent } : {}}>{fmt(pack.price)}</span>
+              <span className="crbPackBtnRange">
+                Rush {fmt(Math.round(pack.price * 2.2))} · Urgent {fmt(Math.round(pack.price * 3.2))}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="crbPriceNote">⚠ Price can change once admin reviews the request.</p>
+    </>
   );
 }
 
@@ -449,12 +463,13 @@ export default function CustomRequestBuilder() {
                         <span className="crbSpeedBtnDelivery">{SPEED_DELIVERY[speed]}</span>
                         <span className="crbSpeedBtnPrice">{baseForSpeed > 0 ? fmt(displayTotal) : "—"}</span>
                         {speed !== "Standard" && (
-                          <span className="crbSpeedBtnSurcharge">+{Math.round((SPEED_MULTIPLIER[speed] - 1) * 100)}% surcharge</span>
+                          <span className="crbSpeedBtnSurcharge">{SPEED_SURCHARGE_LABEL[speed]}</span>
                         )}
                       </button>
                     );
                   })}
                 </div>
+                <p className="crbPriceNote">⚠ Price can change once admin reviews the request.</p>
                 <div className="crbNavRow">
                   <button className="crbBackBtn" onClick={() => setStep(1)}>← Back</button>
                   <button
@@ -505,6 +520,7 @@ export default function CustomRequestBuilder() {
                     <span>Estimated quote</span>
                     <span>{estimate ? fmt(estimate) : "—"}</span>
                   </div>
+                  <p className="crbPriceNote crbPriceNoteConfirm">⚠ Price can change once admin reviews the request.</p>
                 </div>
 
                 {submitErr && <p className="crbSubmitErr">{submitErr}</p>}
