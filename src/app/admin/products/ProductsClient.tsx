@@ -468,18 +468,24 @@ function AddAddonForm({ systemId, accent, onAdded }: {
 
 // ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
 // Used by MediaEditor to render one inline editor row per field.
-const MEDIA_FIELDS: { field: string; label: string }[] = [
-  { field: "previewVideoUrl", label: "Preview Video URL" },
-  { field: "facePngUrl",      label: "Face PNG URL"       },
-  { field: "threeDUrl",       label: "3D Model URL"       },
-  { field: "actionOneUrl",    label: "Action 1 URL"       },
-  { field: "actionTwoUrl",    label: "Action 2 URL"       },
-  { field: "actionThreeUrl",  label: "Action 3 URL"       },
+// defaultDest: which storage to default to for the "Upload to" dropdown.
+const MEDIA_FIELDS: { field: string; label: string; defaultDest: "r2" | "gdrive" | "both" }[] = [
+  { field: "previewVideoUrl", label: "Preview Video",  defaultDest: "r2"    },
+  { field: "facePngUrl",      label: "Face PNG",       defaultDest: "gdrive" },
+  { field: "threeDUrl",       label: "3D Model",       defaultDest: "both"  },
+  { field: "actionOneUrl",    label: "Action 1",       defaultDest: "both"  },
+  { field: "actionTwoUrl",    label: "Action 2",       defaultDest: "both"  },
+  { field: "actionThreeUrl",  label: "Action 3",       defaultDest: "both"  },
+  { field: "actionFourUrl",   label: "Action 4",       defaultDest: "both"  },
+  { field: "actionFiveUrl",   label: "Action 5",       defaultDest: "both"  },
+  { field: "actionSixUrl",    label: "Action 6",       defaultDest: "both"  },
+  { field: "actionSevenUrl",  label: "Action 7",       defaultDest: "both"  },
 ];
 
 // ── MediaEditor — inline URL editor for all media fields of one product ──
-// Rendered inside an expandable row. Each field shows a text input with
-// Save / Clear buttons that PATCH only the changed field immediately.
+// Each row: label | text input | [Pick File] [Upload to ▾] [Save] [✕]
+// If admin picks a file first, clicking Save uploads it to the selected
+// destination and then patches the resulting URL to the DB.
 function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
@@ -487,16 +493,49 @@ function MediaEditor({ product, onFieldSaved }: {
   const initialDrafts = Object.fromEntries(
     MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
   );
-  const [drafts, setDrafts]   = useState<Record<string, string>>(initialDrafts);
-  const [saving, setSaving]   = useState<Record<string, boolean>>({});
-  const [saved, setSaved]     = useState<Record<string, boolean>>({});
+  const [drafts,     setDrafts]     = useState<Record<string, string>>(initialDrafts);
+  const [saving,     setSaving]     = useState<Record<string, boolean>>({});
+  const [saved,      setSaved]      = useState<Record<string, boolean>>({});
+  // Per-field pending file and destination
+  const [pendingFiles, setPendingFiles] = useState<Record<string, File | null>>({});
+  const [destinations, setDestinations] = useState<Record<string, "r2" | "gdrive" | "both">>(() =>
+    Object.fromEntries(MEDIA_FIELDS.map(({ field, defaultDest }) => [field, defaultDest]))
+  );
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const driveFolderIdRef = useRef<string>("");
 
+  // ── Upload pending file then PATCH the resulting URL ─────────────────
   async function handleSaveField(field: string) {
-    const value = drafts[field].trim() || null;
     setSaving(prev => ({ ...prev, [field]: true }));
-    const ok = await patchProductMedia(product.id, field, value);
+
+    let urlToSave = drafts[field].trim() || null;
+
+    // If admin picked a file, upload it first
+    const pendingFile = pendingFiles[field];
+    if (pendingFile) {
+      const dest = destinations[field];
+      const form = new FormData();
+      form.append("file",        pendingFile);
+      form.append("destination", dest);
+      form.append("r2Folder",    "products");
+      if (dest === "gdrive" || dest === "both") {
+        if (driveFolderIdRef.current) form.append("driveFolderId", driveFolderIdRef.current);
+      }
+      try {
+        const res  = await fetch("/api/admin/product-upload", { method: "POST", body: form });
+        const data = await res.json();
+        if (data.success) {
+          if (data.r2Url)   urlToSave = data.r2Url;
+          else if (data.driveId) urlToSave = `/api/drive-video?id=${data.driveId}`;
+          setDrafts(prev => ({ ...prev, [field]: urlToSave ?? "" }));
+          setPendingFiles(prev => ({ ...prev, [field]: null }));
+        }
+      } catch { /* silent — save whatever URL is in draft */ }
+    }
+
+    const ok = await patchProductMedia(product.id, field, urlToSave);
     if (ok) {
-      onFieldSaved(product.id, field, value);
+      onFieldSaved(product.id, field, urlToSave);
       setSaved(prev => ({ ...prev, [field]: true }));
       setTimeout(() => setSaved(prev => ({ ...prev, [field]: false })), 2200);
     }
@@ -505,33 +544,73 @@ function MediaEditor({ product, onFieldSaved }: {
 
   return (
     <div className="apMediaEditor">
-      {MEDIA_FIELDS.map(({ field, label }) => (
-        <div key={field} className="apMediaRow">
-          <span className="apMediaLabel">{label}</span>
-          <input
-            className="apMediaInput"
-            type="text"
-            placeholder="Paste URL or leave empty to clear"
-            value={drafts[field]}
-            onChange={e => setDrafts(prev => ({ ...prev, [field]: e.target.value }))}
-            onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
-          />
-          <button
-            className="apPriceSaveBtn"
-            onClick={() => handleSaveField(field)}
-            disabled={saving[field]}
-          >
-            {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
-          </button>
-          <button
-            className="apPriceCancelBtn"
-            onClick={() => { setDrafts(prev => ({ ...prev, [field]: "" })); handleSaveField(field); }}
-            title="Clear this URL"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
+      {MEDIA_FIELDS.map(({ field, label }) => {
+        const hasPending = !!pendingFiles[field];
+        return (
+          <div key={field} className="apMediaRow apMediaRowUpload">
+            <span className="apMediaLabel">{label}</span>
+            <input
+              className="apMediaInput"
+              type="text"
+              placeholder={hasPending ? `📎 ${pendingFiles[field]!.name}` : "Paste URL or leave empty to clear"}
+              value={hasPending ? "" : drafts[field]}
+              onChange={e => { if (!hasPending) setDrafts(prev => ({ ...prev, [field]: e.target.value })); }}
+              onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
+              style={hasPending ? { color: "#c9a96e", fontStyle: "italic" } : undefined}
+            />
+            {/* Hidden file input */}
+            <input
+              type="file"
+              style={{ display: "none" }}
+              ref={el => { fileInputRefs.current[field] = el; }}
+              onChange={e => {
+                const file = e.target.files?.[0] ?? null;
+                setPendingFiles(prev => ({ ...prev, [field]: file }));
+                if (e.target) e.target.value = "";
+              }}
+            />
+            {/* Pick File button */}
+            <button
+              type="button"
+              className={`apMediaPickBtn${hasPending ? " apMediaPickBtnActive" : ""}`}
+              onClick={() => fileInputRefs.current[field]?.click()}
+              title="Pick a file to upload"
+            >
+              {hasPending ? "✓ File" : "Pick File"}
+            </button>
+            {/* Upload To dropdown */}
+            <select
+              className="apMediaDestSelect"
+              value={destinations[field]}
+              onChange={e => setDestinations(prev => ({ ...prev, [field]: e.target.value as "r2" | "gdrive" | "both" }))}
+            >
+              <option value="r2">R2</option>
+              <option value="gdrive">GDrive</option>
+              <option value="both">Both</option>
+            </select>
+            {/* Save */}
+            <button
+              className="apPriceSaveBtn"
+              onClick={() => handleSaveField(field)}
+              disabled={saving[field]}
+            >
+              {saving[field] ? "…" : saved[field] ? "✓" : "Save"}
+            </button>
+            {/* Clear */}
+            <button
+              className="apPriceCancelBtn"
+              onClick={() => {
+                setPendingFiles(prev => ({ ...prev, [field]: null }));
+                setDrafts(prev => ({ ...prev, [field]: "" }));
+                handleSaveField(field);
+              }}
+              title="Clear this URL"
+            >
+              ✕
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -556,6 +635,7 @@ function FileUploadField({
   defaultR2Folder = "products",
   defaultDriveSubfolder = "",
   driveFolderIdRef,
+  customFileName,
   onUploaded,
 }: {
   label:                  string;
@@ -564,6 +644,8 @@ function FileUploadField({
   defaultR2Folder?:       string;
   defaultDriveSubfolder?: string;
   driveFolderIdRef:       React.RefObject<string>;
+  // If provided, the file is renamed to this value (preserving extension) before upload.
+  customFileName?:        string;
   onUploaded:             (result: { r2Url?: string; driveId?: string; driveUrl?: string }) => void;
 }) {
   const [destination,    setDestination]    = useState<"r2" | "gdrive" | "both">(defaultDestination);
@@ -685,8 +767,17 @@ function FileUploadField({
   }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>): Promise<void> {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
+
+    // Rename file to customFileName (preserving extension) if provided
+    let file = rawFile;
+    if (customFileName) {
+      const ext = rawFile.name.includes(".") ? rawFile.name.slice(rawFile.name.lastIndexOf(".")) : "";
+      const renamedName = `${customFileName}${ext}`;
+      file = new File([rawFile], renamedName, { type: rawFile.type });
+    }
+
     setUploading(true); setDone(false); setErr("");
 
     const form = new FormData();
@@ -886,7 +977,10 @@ function AddProductForm({ onProductCreated, onClose }: {
   const [isLatest, setIsLatest]       = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState("");
   const [facePngUrl, setFacePngUrl]           = useState("");
-  const [threeDUrl, setThreeDUrl]             = useState("");
+  // 3D Model — three separate slots (OBJ, FBX, GLB), stored concatenated or as first found
+  const [threeDObjUrl, setThreeDObjUrl] = useState("");
+  const [threeDFbxUrl, setThreeDFbxUrl] = useState("");
+  const [threeDGlbUrl, setThreeDGlbUrl] = useState("");
   const [actionOneUrl,   setActionOneUrl]   = useState("");
   const [actionTwoUrl,   setActionTwoUrl]   = useState("");
   const [actionThreeUrl, setActionThreeUrl] = useState("");
@@ -902,6 +996,16 @@ function AddProductForm({ onProductCreated, onClose }: {
   const driveFolderIdRef = useRef<string>("");
   driveFolderIdRef.current = driveFolderId;
 
+  // Slugify name to use as filename base — e.g. "Axe-01" → "axe-01"
+  function slugifyName(raw: string): string {
+    return raw.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  }
+
+  // The threeDUrl stored in DB is the first available 3D URL (OBJ preferred, then FBX, then GLB)
+  function resolveThreeDUrl(): string {
+    return (threeDObjUrl || threeDFbxUrl || threeDGlbUrl).trim();
+  }
+
   async function handleCreate() {
     if (!name.trim()) { setError("Name is required."); return; }
     const parsedPrice = parseInt(price.replace(/,/g, ""), 10);
@@ -916,7 +1020,7 @@ function AddProductForm({ onProductCreated, onClose }: {
       isLatest,
       previewVideoUrl: previewVideoUrl.trim() || undefined,
       facePngUrl:      facePngUrl.trim()      || undefined,
-      threeDUrl:       threeDUrl.trim()        || undefined,
+      threeDUrl:       resolveThreeDUrl()      || undefined,
       actionOneUrl:    actionOneUrl.trim()    || undefined,
       actionTwoUrl:    actionTwoUrl.trim()    || undefined,
       actionThreeUrl:  actionThreeUrl.trim()  || undefined,
@@ -934,6 +1038,8 @@ function AddProductForm({ onProductCreated, onClose }: {
     setSaving(false);
   }
 
+  const nameSlug = slugifyName(name);
+
   return (
     <div className="apAddProductForm">
       <p className="apAddAddonFormTitle">New Product</p>
@@ -941,11 +1047,11 @@ function AddProductForm({ onProductCreated, onClose }: {
       <div className="apAddProductGrid">
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel">Name *</label>
-          <input className="apMediaInput" placeholder="e.g. Orc 12 — Berserker" value={name} onChange={e => setName(e.target.value)} />
+          <input className="apMediaInput" placeholder="e.g. Axe-01" value={name} onChange={e => setName(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Price (₱) *</label>
-          <input className="apMediaInput" type="number" min="0" placeholder="5500" value={price} onChange={e => setPrice(e.target.value)} />
+          <input className="apMediaInput" type="number" min="0" placeholder="999" value={price} onChange={e => setPrice(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Category *</label>
@@ -961,118 +1067,134 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
         </div>
 
-        {/* ── Preview Video ── */}
+        {/* ── Preview Video → R2, filename: name-animation ── */}
         <div className="apAddProductField apAddProductFieldFull">
           <FileUploadField
-            label="Preview Video"
+            label="Preview Video (R2)"
             accept="video/*"
             defaultDestination="r2"
             driveFolderIdRef={driveFolderIdRef}
+            customFileName={nameSlug ? `${nameSlug}-animation` : undefined}
             onUploaded={r => { if (r.r2Url) setPreviewVideoUrl(r.r2Url); else if (r.driveId) setPreviewVideoUrl(`/api/drive-video?id=${r.driveId}`); }}
           />
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
         </div>
 
-        {/* ── Face PNG ── */}
+        {/* ── Face PNG → GDrive, filename: name-face ── */}
         <div className="apAddProductField">
           <FileUploadField
-            label="Face PNG"
+            label="Face PNG (GDrive)"
             accept="image/*"
-            defaultDestination="r2"
+            defaultDestination="gdrive"
             driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setFacePngUrl(r.r2Url); else if (r.driveUrl) setFacePngUrl(r.driveUrl); }}
+            customFileName={nameSlug ? `${nameSlug}-face` : undefined}
+            onUploaded={r => { if (r.r2Url) setFacePngUrl(r.r2Url); else if (r.driveUrl) setFacePngUrl(r.driveUrl); else if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`); }}
           />
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
         </div>
 
-        {/* ── 3D Model ── */}
-        <div className="apAddProductField">
-          <FileUploadField
-            label="3D Model (OBJ/FBX/GLB)"
-            accept=".obj,.fbx,.glb,.gltf"
-            defaultDestination="gdrive"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.driveId) setThreeDUrl(r.driveId); else if (r.r2Url) setThreeDUrl(r.r2Url); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste Drive ID / URL…" value={threeDUrl} onChange={e => setThreeDUrl(e.target.value)} />
+        {/* ── 3D Model — multi-upload: OBJ, FBX, GLB — each with delete ── */}
+        <div className="apAddProductField apAddProductFieldFull">
+          <label className="apMediaLabel" style={{ marginBottom: "0.35rem" }}>3D Model (OBJ / FBX / GLB) — Both</label>
+          <div className="apThreeDSlots">
+            {/* OBJ slot */}
+            <div className="apThreeDSlot">
+              <FileUploadField
+                label="OBJ"
+                accept=".obj"
+                defaultDestination="both"
+                driveFolderIdRef={driveFolderIdRef}
+                customFileName={nameSlug ? `${nameSlug}-obj` : undefined}
+                onUploaded={r => { if (r.r2Url) setThreeDObjUrl(r.r2Url); else if (r.driveId) setThreeDObjUrl(r.driveId); }}
+              />
+              {threeDObjUrl && (
+                <div className="apThreeDUploaded">
+                  <span className="apThreeDUploadedName" title={threeDObjUrl}>✓ OBJ saved</span>
+                  <button
+                    type="button"
+                    className="apThreeDDeleteBtn"
+                    onClick={() => setThreeDObjUrl("")}
+                    title="Remove OBJ"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* FBX slot */}
+            <div className="apThreeDSlot">
+              <FileUploadField
+                label="FBX"
+                accept=".fbx"
+                defaultDestination="both"
+                driveFolderIdRef={driveFolderIdRef}
+                customFileName={nameSlug ? `${nameSlug}-fbx` : undefined}
+                onUploaded={r => { if (r.r2Url) setThreeDFbxUrl(r.r2Url); else if (r.driveId) setThreeDFbxUrl(r.driveId); }}
+              />
+              {threeDFbxUrl && (
+                <div className="apThreeDUploaded">
+                  <span className="apThreeDUploadedName" title={threeDFbxUrl}>✓ FBX saved</span>
+                  <button
+                    type="button"
+                    className="apThreeDDeleteBtn"
+                    onClick={() => setThreeDFbxUrl("")}
+                    title="Remove FBX"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* GLB slot */}
+            <div className="apThreeDSlot">
+              <FileUploadField
+                label="GLB"
+                accept=".glb,.gltf"
+                defaultDestination="both"
+                driveFolderIdRef={driveFolderIdRef}
+                customFileName={nameSlug ? `${nameSlug}-glb` : undefined}
+                onUploaded={r => { if (r.r2Url) setThreeDGlbUrl(r.r2Url); else if (r.driveId) setThreeDGlbUrl(r.driveId); }}
+              />
+              {threeDGlbUrl && (
+                <div className="apThreeDUploaded">
+                  <span className="apThreeDUploadedName" title={threeDGlbUrl}>✓ GLB saved</span>
+                  <button
+                    type="button"
+                    className="apThreeDDeleteBtn"
+                    onClick={() => setThreeDGlbUrl("")}
+                    title="Remove GLB"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* ── Action Videos ── */}
-        <div className="apAddProductField">
-          <FileUploadField
-            label="Action 1 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionOneUrl(r.r2Url); else if (r.driveId) setActionOneUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionOneUrl} onChange={e => setActionOneUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <FileUploadField
-            label="Action 2 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionTwoUrl(r.r2Url); else if (r.driveId) setActionTwoUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionTwoUrl} onChange={e => setActionTwoUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField apAddProductFieldFull">
-          <FileUploadField
-            label="Action 3 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            defaultR2Folder="products/actions"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionThreeUrl(r.r2Url); else if (r.driveId) setActionThreeUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionThreeUrl} onChange={e => setActionThreeUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <FileUploadField
-            label="Action 4 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            defaultR2Folder="products/actions"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionFourUrl(r.r2Url); else if (r.driveId) setActionFourUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionFourUrl} onChange={e => setActionFourUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <FileUploadField
-            label="Action 5 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            defaultR2Folder="products/actions"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionFiveUrl(r.r2Url); else if (r.driveId) setActionFiveUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionFiveUrl} onChange={e => setActionFiveUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <FileUploadField
-            label="Action 6 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            defaultR2Folder="products/actions"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionSixUrl(r.r2Url); else if (r.driveId) setActionSixUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionSixUrl} onChange={e => setActionSixUrl(e.target.value)} />
-        </div>
-        <div className="apAddProductField">
-          <FileUploadField
-            label="Action 7 Video"
-            accept="video/*"
-            defaultDestination="r2"
-            defaultR2Folder="products/actions"
-            driveFolderIdRef={driveFolderIdRef}
-            onUploaded={r => { if (r.r2Url) setActionSevenUrl(r.r2Url); else if (r.driveId) setActionSevenUrl(`/api/drive-video?id=${r.driveId}`); }}
-          />
-          <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={actionSevenUrl} onChange={e => setActionSevenUrl(e.target.value)} />
-        </div>
+        {/* ── Action Videos 1–7 → Both, filename: name-action-N ── */}
+        {([
+          ["Action 1 Video", actionOneUrl,   setActionOneUrl,   "1"],
+          ["Action 2 Video", actionTwoUrl,   setActionTwoUrl,   "2"],
+          ["Action 3 Video", actionThreeUrl, setActionThreeUrl, "3"],
+          ["Action 4 Video", actionFourUrl,  setActionFourUrl,  "4"],
+          ["Action 5 Video", actionFiveUrl,  setActionFiveUrl,  "5"],
+          ["Action 6 Video", actionSixUrl,   setActionSixUrl,   "6"],
+          ["Action 7 Video", actionSevenUrl, setActionSevenUrl, "7"],
+        ] as [string, string, React.Dispatch<React.SetStateAction<string>>, string][]).map(([lbl, val, setter, num]) => (
+          <div key={num} className="apAddProductField">
+            <FileUploadField
+              label={`${lbl} (Both)`}
+              accept="video/*"
+              defaultDestination="both"
+              driveFolderIdRef={driveFolderIdRef}
+              customFileName={nameSlug ? `${nameSlug}-action-${num}` : undefined}
+              onUploaded={r => { if (r.r2Url) setter(r.r2Url); else if (r.driveId) setter(`/api/drive-video?id=${r.driveId}`); }}
+            />
+            <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={val} onChange={e => setter(e.target.value)} />
+          </div>
+        ))}
+
         <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
           <p className="apMediaLabel" style={{ marginBottom: "0.5rem" }}>Mark as Latest Drop</p>
           <div className="apLatestRadioGroup">
