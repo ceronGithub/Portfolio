@@ -34,7 +34,8 @@ export default async function PendingPaymentsPage() {
         id:               o.id,
         productName:      o.product.name,
         productCategory:  o.product.category,
-        amount:           o.amountPaid ?? o.product.price,
+        // amountPaid is stored in centavos — divide by 100 to display as PHP
+        amount:           o.amountPaid ? Math.round(o.amountPaid / 100) : o.product.price,
         paymongoOrderId:  o.paymongoOrderId ?? null,
         createdAt:        o.createdAt.toISOString(),
       }))}

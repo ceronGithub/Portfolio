@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./pending-payments.css";
 
 type CategoryType = "character" | "weapon" | "interior" | "exterior" | "system";
@@ -159,6 +159,22 @@ function linkAvailabilityLabel(isoStr: string): string {
 export default function PendingPaymentsClient({ orders }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [toast,     setToast]     = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+
+  // ── Auto-mark expired orders on mount ───────────────────────────────
+  // For every order whose payment link has passed the 24h window, silently
+  // call the expire endpoint so admin sees LINK_EXPIRED status immediately.
+  useEffect(() => {
+    orders.forEach(order => {
+      if (isLinkExpired(order.createdAt)) {
+        fetch("/api/buyer/pending-payment/expire", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ orderId: order.id }),
+        }).catch(() => { /* silent — best-effort */ });
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Show toast helper ────────────────────────────────────────────────
   function showToast(msg: string, type: "ok" | "err") {

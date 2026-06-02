@@ -770,3 +770,12 @@
   color: rgba(255,255,255,0.2);
   text-decoration: line-through;
 }
+
+/* ── Revision limit reached notice ──────────────────────────────────── */
+.amRevisionLimitNote {
+  font-size:      0.72rem;
+  color:          rgba(255,255,255,0.3);
+  font-style:     italic;
+  padding:        0.4rem 0;
+  display:        block;
+}

@@ -91,7 +91,11 @@ function fmtTime(d: string) {
 }
 
 // ── Tasks Tab ─────────────────────────────────────────────────────────────────
-function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }) {
+function TasksTab({ orderId, initTasks, revisionLimit }: {
+  orderId: string;
+  initTasks: Task[];
+  revisionLimit: number;
+}) {
   const [tasks, setTasks]         = useState(initTasks);
   const [title, setTitle]         = useState("");
   const [desc, setDesc]           = useState("");
@@ -221,11 +225,17 @@ function TasksTab({ orderId, initTasks }: { orderId: string; initTasks: Task[] }
         </div>
       }
 
-      {/* Collapsible add-task form — toggled by button */}
+      {/* Collapsible add-task form — disabled when at revision limit */}
       <div className="amAddTaskToggleRow">
-        <button className="amAddTaskToggle" onClick={() => setFormOpen(p => !p)}>
-          {formOpen ? "✕ Cancel" : "+ Add Task"}
-        </button>
+        {tasks.length >= revisionLimit ? (
+          <span className="amRevisionLimitNote">
+            Revision limit reached ({revisionLimit}/{revisionLimit}) — upgrade package to add more
+          </span>
+        ) : (
+          <button className="amAddTaskToggle" onClick={() => setFormOpen(p => !p)}>
+            {formOpen ? "✕ Cancel" : `+ Add Task (${tasks.length}/${revisionLimit})`}
+          </button>
+        )}
       </div>
 
       {formOpen && (
@@ -655,7 +665,7 @@ function ClientDetail({ order }: { order: Order }) {
       </div>
 
       <div className="amDetailContent">
-        {tab === "tasks" && <TasksTab orderId={order.id} initTasks={order.tasks} />}
+        {tab === "tasks" && <TasksTab orderId={order.id} initTasks={order.tasks} revisionLimit={pkgCfg.revisionLimit} />}
         {tab === "bugs"  && <BugsTab  orderId={order.id} initBugs={order.bugReports} />}
         {tab === "vc"    && (
           <VCTab

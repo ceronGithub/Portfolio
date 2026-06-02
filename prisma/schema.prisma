@@ -37,6 +37,7 @@ enum OrderStatus {
   IN_TESTING       // QA / UAT phase
   DELIVERED        // Handed over to buyer
   FAILED           // Payment failed or order cancelled
+  LINK_EXPIRED     // Payment link expired (24h passed, no payment made)
 }
 
 model User {

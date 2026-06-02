@@ -8,7 +8,8 @@ import { sanitize } from "@/lib/utils";
 
 type OrderStatus =
   | "PAID" | "PENDING" | "FAILED"
-  | "IN_DEVELOPMENT" | "IN_TESTING" | "DELIVERED";
+  | "IN_DEVELOPMENT" | "IN_TESTING" | "DELIVERED"
+  | "LINK_EXPIRED";
 
 interface Order {
   id:              string;
@@ -41,6 +42,7 @@ const filterTabs: { label: string; value: FilterTab }[] = [
   { label: "In Dev",     value: "IN_DEVELOPMENT"},
   { label: "In Testing", value: "IN_TESTING"    },
   { label: "Delivered",  value: "DELIVERED"     },
+  { label: "Expired",    value: "LINK_EXPIRED"  },
 ];
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -50,6 +52,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   IN_DEVELOPMENT: "#63b3ed",
   IN_TESTING:     "#b794f4",
   DELIVERED:      "#c9a96e",
+  LINK_EXPIRED:   "#9ca3af",
 };
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -59,6 +62,7 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   IN_DEVELOPMENT: "IN DEV",
   IN_TESTING:     "TESTING",
   DELIVERED:      "DELIVERED",
+  LINK_EXPIRED:   "EXPIRED",
 };
 
 // Sends an order status email to the buyer via EmailJS.
