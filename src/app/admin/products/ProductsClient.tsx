@@ -1261,40 +1261,65 @@ function ProductsSection({
   const [deletingId,  setDeletingId]      = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  // ── Delete product — purges R2/Drive files then removes DB record ────
+  // ── Delete product — purges ALL R2 and Drive files then removes DB record ──
+  // Every media field is checked. A URL is sent to R2 delete if it looks like an
+  // R2/CDN URL. A value is sent to Drive delete if it is a bare Drive file ID
+  // (no "http") or contains "/api/drive-video?id=". Both deletions run in parallel.
   async function handleDeleteProduct(product: Product): Promise<void> {
     setDeletingId(product.id);
     setConfirmDeleteId(null);
 
-    // Collect all media URLs on this product
-    const r2PublicBase = process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? "";
-    const R2_FIELDS: (keyof Product)[] = [
-      "previewVideoUrl", "facePngUrl",
-      "actionOneUrl", "actionTwoUrl", "actionThreeUrl",
-      "actionFourUrl", "actionFiveUrl", "actionSixUrl", "actionSevenUrl",
+    // All media fields on the Product model
+    const ALL_MEDIA_FIELDS: (keyof Product)[] = [
+      "previewVideoUrl", "facePngUrl",    "threeDUrl",
+      "actionOneUrl",    "actionTwoUrl",  "actionThreeUrl",
+      "actionFourUrl",   "actionFiveUrl", "actionSixUrl", "actionSevenUrl",
     ];
-    // GDrive fields store a Drive file ID (not a URL)
-    const DRIVE_FIELDS: (keyof Product)[] = ["threeDUrl"];
 
-    // Best-effort delete from R2 (fire-and-forget, parallel)
-    const r2Deletions = R2_FIELDS
-      .map(f => product[f] as string | null)
-      .filter((url): url is string => !!url && url.includes(r2PublicBase || "r2."));
-    await Promise.allSettled(r2Deletions.map(deleteFromR2));
+    const r2Urls:    string[] = [];
+    const driveIds:  string[] = [];
 
-    // Best-effort delete from Drive
-    const driveIds = DRIVE_FIELDS
-      .map(f => product[f] as string | null)
-      .filter((id): id is string => !!id && !id.startsWith("http"));
-    await Promise.allSettled(driveIds.map(deleteFromDrive));
+    for (const field of ALL_MEDIA_FIELDS) {
+      const val = product[field] as string | null;
+      if (!val) continue;
+
+      // Detect Drive file ID: bare ID (no http) OR /api/drive-video?id=XXX
+      const driveMatch = val.match(/[?&]id=([^&]+)/);
+      if (driveMatch) {
+        driveIds.push(driveMatch[1]);
+        continue;
+      }
+      if (!val.startsWith("http") && !val.startsWith("/")) {
+        // Looks like a raw Drive file ID
+        driveIds.push(val);
+        continue;
+      }
+
+      // Anything starting with http that is not a drive.google.com share link → R2
+      if (val.startsWith("http") && !val.includes("drive.google.com")) {
+        r2Urls.push(val);
+        continue;
+      }
+      // /api/ internal proxied Drive files — extract the id param
+      if (val.startsWith("/api/drive-video")) {
+        const id = new URLSearchParams(val.split("?")[1] ?? "").get("id");
+        if (id) driveIds.push(id);
+      }
+    }
+
+    // Best-effort parallel deletion from both storages
+    await Promise.allSettled([
+      ...r2Urls.map(deleteFromR2),
+      ...driveIds.map(deleteFromDrive),
+    ]);
 
     // Delete from DB
     const { ok, error } = await deleteProduct(product.id);
     setDeletingId(null);
     if (ok) {
       setProductList(prev => prev.filter(p => p.id !== product.id));
-      setToast({ msg: `"${product.name}" deleted.`, type: "ok" });
-      setTimeout(() => setToast(null), 3000);
+      setToast({ msg: `"${product.name}" deleted — files purged from R2 & Drive.`, type: "ok" });
+      setTimeout(() => setToast(null), 4000);
     } else {
       setToast({ msg: error ?? "Delete failed.", type: "err" });
       setTimeout(() => setToast(null), 4000);

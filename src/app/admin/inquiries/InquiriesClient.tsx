@@ -181,19 +181,28 @@ export default function InquiriesClient({
   const [customRequests,  setCustomRequests]  = useState<CustomRequest[]>(initialRequests);
   const [contactMessages, setContactMessages] = useState<ContactMessage[]>(initialContacts);
   const [activeTab,       setActiveTab]       = useState<Tab>("Custom Requests");
+  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+
+  function showToast(msg: string, type: "ok" | "err") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
 
   // ── Status update handlers ──────────────────────────────────────────────
   function updateCustomStatus(id: string, newStatus: string) {
     setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+    showToast(`Status updated to "${newStatus}".`, "ok");
   }
 
   function updateContactStatus(id: string, newStatus: string) {
     setContactMessages(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
+    showToast(`Status updated to "${newStatus}".`, "ok");
   }
 
   // ── Admin quote update handler ──────────────────────────────────────────
   function updateAdminQuote(id: string, newQuote: number | null) {
     setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, adminQuote: newQuote } : r));
+    showToast(newQuote ? `Quote set to ₱${newQuote.toLocaleString()}.` : "Quote cleared.", "ok");
   }
 
   const pendingCount = customRequests.filter(r => r.status === "pending").length;
@@ -201,6 +210,17 @@ export default function InquiriesClient({
 
   return (
     <div className="adminInquiriesContent">
+
+      {/* ── Toast notification ── */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
+          background: toast.type === "ok" ? "#22c55e" : "#ef4444",
+          color: "#fff", padding: "0.75rem 1.25rem", borderRadius: "10px",
+          fontWeight: 700, fontSize: "0.85rem",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.4)", pointerEvents: "none",
+        }}>{toast.msg}</div>
+      )}
 
       {/* Tabs */}
       <div className="adminInquiriesTabs">
