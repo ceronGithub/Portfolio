@@ -1897,3 +1897,12 @@
   max-width:      240px;
   flex-shrink:    1;
 }
+
+/* ── MediaEditor section hint — "uploading auto-saves" ───────────────── */
+.apMediaSectionHint {
+  font-size:      0.6rem;
+  color:          rgba(255,255,255,0.2);
+  font-weight:    400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}

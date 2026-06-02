@@ -127,6 +127,8 @@
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 16px;
   padding: 1.75rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
 }
 
 .amDetailHeader {
@@ -387,7 +389,8 @@
    DETAIL CONTENT — scrollable right panel
 ═══════════════════════════════════════ */
 .amDetailContent {
-  max-height: 60vh;
+  max-height: calc(100vh - 380px);
+  min-height: 320px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -687,7 +690,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .amPkgDescHeader {

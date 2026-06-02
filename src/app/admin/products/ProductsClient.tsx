@@ -651,7 +651,7 @@ function MediaEditor({ product, onFieldSaved }: {
       {/* OBJ, FBX, GLB each get their own upload row with R2/GDrive/Both + folder picker. */}
       {/* On save, R2 URL is patched to fileKeyObj/Fbx/Glb. Drive ID saved to mediaDriveIds. */}
       <div className="apMediaSection3D">
-        <p className="apMediaSectionLabel">3D Model Files</p>
+        <p className="apMediaSectionLabel">3D Model Files <span className="apMediaSectionHint">— uploading auto-saves</span></p>
         {([
           { key: "fileKeyObj" as const, label: "OBJ",      accept: ".obj"          },
           { key: "fileKeyFbx" as const, label: "FBX",      accept: ".fbx"          },
@@ -693,7 +693,7 @@ function MediaEditor({ product, onFieldSaved }: {
       {/* Each slot shows the R2/GDrive/Both destination selector + the 📁 folder picker. */}
       {/* On upload to "both", Drive ID is saved to mediaDriveIds for purge on delete. */}
       <div className="apMediaSectionActions">
-        <p className="apMediaSectionLabel">Action Slots (1 – 7)</p>
+        <p className="apMediaSectionLabel">Action Slots (1 – 7) <span className="apMediaSectionHint">— uploading auto-saves</span></p>
         {ACTION_FIELDS.map(({ field, label }) => {
           const currentVal = (product as Record<string, string | null>)[field];
           return (
@@ -986,7 +986,7 @@ function FileUploadField({
             onClick={() => { if (!done) inputRef.current?.click(); }}
             disabled={uploading}
           >
-            {uploading ? "Uploading…" : done ? "✓ Uploaded" : "Pick File"}
+            {uploading ? "Uploading…" : done ? "✓ Saved" : "Upload & Save"}
           </button>
           {done && (
             <button
@@ -1219,15 +1219,19 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
         </div>
 
-        {/* ── Face PNG → R2 (direct public URL for <img> display), filename: name-face ── */}
+        {/* ── Face PNG → Both (R2 for display URL + GDrive backup), filename: name-face ── */}
         <div className="apAddProductField">
           <FileUploadField
-            label="Face PNG (R2)"
+            label="Face PNG (R2 + GDrive)"
             accept="image/*"
-            defaultDestination="r2"
+            defaultDestination="both"
             driveFolderIdRef={driveFolderIdRef}
             customFileName={nameSlug ? `${nameSlug}-face` : undefined}
-            onUploaded={r => { if (r.r2Url) setFacePngUrl(r.r2Url); else if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`); }}
+            onUploaded={r => {
+              if (r.r2Url) setFacePngUrl(r.r2Url);
+              else if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`);
+              if (r.driveId) setMediaDriveIds(prev => ({ ...prev, facePngUrl: r.driveId! }));
+            }}
           />
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
         </div>

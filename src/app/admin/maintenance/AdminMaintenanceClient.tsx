@@ -644,7 +644,7 @@ function ClientDetail({ order }: { order: Order }) {
 
       <div className="amTabs">
         <button className={`amTab${tab === "tasks" ? " active" : ""}`} onClick={() => setTab("tasks")}>
-          Tasks ({order.tasks.length})
+          Tasks / Revisions ({order.tasks.length})
         </button>
         <button className={`amTab${tab === "bugs" ? " active" : ""}`} onClick={() => setTab("bugs")}>
           Bugs ({order.bugReports.length})
@@ -699,7 +699,7 @@ export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) 
                   <div className="amClientMeta">
                     <span className="amPkgBadge">{PKG_LABELS[o.package]}</span>
                     <span className="amStatBadge">
-                      {o.tasks.length}T · {o.bugReports.length}B · {o.vcSchedules.length}VC
+                      {o.tasks.length}T/R · {o.bugReports.length}B · {o.vcSchedules.length}VC
                     </span>
                   </div>
                 </div>
