@@ -113,6 +113,7 @@ model Order {
   userId          String
   productId       String?     // nullable — set for 3D asset orders
   systemId        String?     // nullable — set for System orders
+  selectedTierId  String?     // nullable — DesignTier chosen by buyer
   status          OrderStatus @default(PENDING)
   paymongoOrderId String?
   amountPaid      Int?
@@ -162,6 +163,7 @@ model System {
 
   addons       SystemAddon[]
   orders       Order[]
+  designTiers  DesignTier[]
 }
 
 // ── System add-ons ─────────────────────────────────────────────────
@@ -180,6 +182,29 @@ model SystemAddon {
   system      System   @relation(fields: [systemId], references: [id])
 
   @@unique([systemId, addonKey])
+  @@index([systemId])
+}
+
+// ── Design Tiers ───────────────────────────────────────────────────
+// Each system can have up to 4 design tiers (Static, Dynamic, Modern, AI-Powered).
+// priceModifier is added on top of the system basePrice at checkout.
+// sortOrder controls display sequence (0 = first).
+
+model DesignTier {
+  id            String   @id @default(cuid())
+  systemId      String
+  name          String                   // "Static" | "Dynamic" | "Modern" | "AI-Powered"
+  slug          String                   // "static" | "dynamic" | "modern" | "ai-powered"
+  tagline       String?                  // Short description shown under the name
+  priceModifier Int      @default(0)     // Added to system basePrice (in PHP)
+  demoVideoUrl  String?                  // Tier-specific demo video
+  liveUrl       String?                  // Live demo website link
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  system System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@unique([systemId, slug])
   @@index([systemId])
 }
 
