@@ -14,7 +14,8 @@ type OrderStatus =
   | "IN_DEVELOPMENT"
   | "IN_TESTING"
   | "DELIVERED"
-  | "FAILED";
+  | "FAILED"
+  | "LINK_EXPIRED";
 
 interface Order {
   id:           string;
@@ -47,6 +48,7 @@ const STAGE_INDEX: Record<OrderStatus, number> = {
   IN_TESTING:     3,
   DELIVERED:      4,
   FAILED:         -1,
+  LINK_EXPIRED:   -1,
 };
 
 const STATUS_META: Record<OrderStatus, { label: string; color: string }> = {
@@ -56,9 +58,10 @@ const STATUS_META: Record<OrderStatus, { label: string; color: string }> = {
   IN_TESTING:     { label: "Testing",     color: "#a855f7" },
   DELIVERED:      { label: "Delivered",   color: "#22c55e" },
   FAILED:         { label: "Cancelled",   color: "#ef4444" },
+  LINK_EXPIRED:   { label: "Expired",     color: "#9ca3af" },
 };
 
-type FilterTab = "All" | "Active" | "Delivered" | "Cancelled";
+type FilterTab = "All" | "Active" | "Delivered" | "Cancelled" | "Expired";
 
 function fmt(p: number) {
   return "₱" + p.toLocaleString("en-PH", { minimumFractionDigits: 0 });
@@ -72,12 +75,14 @@ function fmtDate(iso: string) {
 
 // ── Single order timeline card ─────────────────────────────────────────────
 function OrderCard({ order }: { order: Order }) {
-  const activeIndex = STAGE_INDEX[order.status];
-  const isFailed    = order.status === "FAILED";
-  const meta        = STATUS_META[order.status];
+  const activeIndex  = STAGE_INDEX[order.status];
+  const isFailed     = order.status === "FAILED";
+  const isExpired    = order.status === "LINK_EXPIRED";
+  const isTerminal   = isFailed || isExpired;
+  const meta         = STATUS_META[order.status];
 
   return (
-    <div className={`ohCard ${isFailed ? "ohCardFailed" : ""}`}>
+    <div className={`ohCard ${isFailed ? "ohCardFailed" : ""} ${isExpired ? "ohCardExpired" : ""}`}>
 
       {/* Header row */}
       <div className="ohCardHeader">
@@ -85,7 +90,7 @@ function OrderCard({ order }: { order: Order }) {
           <p className="ohCardName">{order.productName}</p>
           <p className="ohCardMeta">
             Ordered {fmtDate(order.createdAt)}
-            {order.estimatedAt && !isFailed && (
+            {order.estimatedAt && !isTerminal && (
               <> · Est. {fmtDate(order.estimatedAt)}</>
             )}
             {order.deliveredAt && (
@@ -104,8 +109,8 @@ function OrderCard({ order }: { order: Order }) {
         </div>
       </div>
 
-      {/* Timeline stepper */}
-      {!isFailed && (
+      {/* Timeline stepper — only for non-terminal statuses */}
+      {!isTerminal && (
         <div className="ohTimeline">
           {STAGES.map((stage, i) => {
             const isPast   = i < activeIndex;
@@ -126,7 +131,6 @@ function OrderCard({ order }: { order: Order }) {
                   </div>
                   <p className="ohStageLabel">{stage.label}</p>
                 </div>
-                {/* Connector — not after last */}
                 {i < STAGES.length - 1 && (
                   <div className={`ohConnector ${isPast ? "ohConnectorFilled" : ""}`} />
                 )}
@@ -150,6 +154,13 @@ function OrderCard({ order }: { order: Order }) {
           <p>This order was cancelled or payment failed.</p>
         </div>
       )}
+
+      {isExpired && (
+        <div className="ohExpiredNote">
+          <span>⏱</span>
+          <p>Payment link expired. Contact support to reissue a new payment link.</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -162,15 +173,17 @@ export default function OrdersClient({ orders }: Props) {
     if (tab === "All")       return orders;
     if (tab === "Delivered") return orders.filter(o => o.status === "DELIVERED");
     if (tab === "Cancelled") return orders.filter(o => o.status === "FAILED");
-    // Active = anything not delivered or failed
-    return orders.filter(o => o.status !== "DELIVERED" && o.status !== "FAILED");
+    if (tab === "Expired")   return orders.filter(o => o.status === "LINK_EXPIRED");
+    // Active = anything not terminal
+    return orders.filter(o => o.status !== "DELIVERED" && o.status !== "FAILED" && o.status !== "LINK_EXPIRED");
   }, [orders, tab]);
 
   const tabCounts: Record<FilterTab, number> = {
     All:       orders.length,
-    Active:    orders.filter(o => o.status !== "DELIVERED" && o.status !== "FAILED").length,
+    Active:    orders.filter(o => o.status !== "DELIVERED" && o.status !== "FAILED" && o.status !== "LINK_EXPIRED").length,
     Delivered: orders.filter(o => o.status === "DELIVERED").length,
     Cancelled: orders.filter(o => o.status === "FAILED").length,
+    Expired:   orders.filter(o => o.status === "LINK_EXPIRED").length,
   };
 
   return (
@@ -185,7 +198,7 @@ export default function OrdersClient({ orders }: Props) {
 
       {/* Filter tabs */}
       <div className="ohTabs">
-        {(["All", "Active", "Delivered", "Cancelled"] as FilterTab[]).map(t => (
+        {(["All", "Active", "Delivered", "Cancelled", "Expired"] as FilterTab[]).map(t => (
           <button
             key={t}
             className={`ohTab ${tab === t ? "ohTabActive" : ""}`}

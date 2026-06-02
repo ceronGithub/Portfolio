@@ -308,6 +308,21 @@
   color:         rgba(239,68,68,0.55);
 }
 
+.ohCardExpired { opacity: 0.55; border-color: rgba(156,163,175,0.2); }
+
+.ohExpiredNote {
+  display:       flex;
+  align-items:   center;
+  gap:           0.6rem;
+  background:    rgba(156,163,175,0.04);
+  border:        1px solid rgba(156,163,175,0.15);
+  border-radius: 12px;
+  padding:       0.75rem 1rem;
+  font-family:   'DM Mono', monospace;
+  font-size:     0.7rem;
+  color:         rgba(156,163,175,0.7);
+}
+
 /* ── Empty state ── */
 .ohEmpty {
   width:           100%;
