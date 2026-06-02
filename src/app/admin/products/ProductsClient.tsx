@@ -37,6 +37,7 @@ interface System {
   accent: string; timeline: string; deploy: string;
   description: string; features: string[]; isActive: boolean;
   bgVideoUrl: string | null; demoVideoUrl: string | null;
+  displayStatus: string;
   addons: Addon[];
 }
 
@@ -177,6 +178,7 @@ async function updateSystemFields(
     title: string; description: string; accent: string;
     timeline: string; deploy: string; features: string[];
     bgVideoUrl: string | null; demoVideoUrl: string | null;
+    displayStatus: string; isActive: boolean;
   }>
 ): Promise<boolean> {
   const res = await fetch(`/api/admin/systems/${id}`, {
@@ -1744,8 +1746,9 @@ function SystemFullEditor({ system, accent, onSaved }: {
   const [timeline, setTimeline]     = useState(system.timeline);
   const [deploy, setDeploy]         = useState(system.deploy);
   const [features, setFeatures]     = useState((system.features ?? []).join("\n"));
-  const [bgVideoUrl, setBgVideo]    = useState(system.bgVideoUrl ?? "");
-  const [demoVideoUrl, setDemoVideo]= useState(system.demoVideoUrl ?? "");
+  const [bgVideoUrl, setBgVideo]        = useState(system.bgVideoUrl ?? "");
+  const [demoVideoUrl, setDemoVideo]    = useState(system.demoVideoUrl ?? "");
+  const [displayStatus, setDisplayStatus] = useState(system.displayStatus ?? "visible");
   const [saving, setSaving]         = useState(false);
   const [saved, setSaved]           = useState(false);
   const [error, setError]           = useState("");
@@ -1756,25 +1759,27 @@ function SystemFullEditor({ system, accent, onSaved }: {
     setError("");
     const featuresList = features.split("\n").map(f => f.trim()).filter(Boolean);
     const ok = await updateSystemFields(system.id, {
-      title:        title.trim(),
-      description:  description.trim(),
-      accent:       accentVal.trim(),
-      timeline:     timeline.trim(),
-      deploy:       deploy.trim(),
-      features:     featuresList,
-      bgVideoUrl:   bgVideoUrl.trim() || null,
-      demoVideoUrl: demoVideoUrl.trim() || null,
+      title:         title.trim(),
+      description:   description.trim(),
+      accent:        accentVal.trim(),
+      timeline:      timeline.trim(),
+      deploy:        deploy.trim(),
+      features:      featuresList,
+      bgVideoUrl:    bgVideoUrl.trim() || null,
+      demoVideoUrl:  demoVideoUrl.trim() || null,
+      displayStatus: displayStatus,
     });
     if (ok) {
       onSaved({
-        title:        title.trim(),
-        description:  description.trim(),
-        accent:       accentVal.trim(),
-        timeline:     timeline.trim(),
-        deploy:       deploy.trim(),
-        features:     featuresList,
-        bgVideoUrl:   bgVideoUrl.trim() || null,
-        demoVideoUrl: demoVideoUrl.trim() || null,
+        title:         title.trim(),
+        description:   description.trim(),
+        accent:        accentVal.trim(),
+        timeline:      timeline.trim(),
+        deploy:        deploy.trim(),
+        features:      featuresList,
+        bgVideoUrl:    bgVideoUrl.trim() || null,
+        demoVideoUrl:  demoVideoUrl.trim() || null,
+        displayStatus: displayStatus,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -1820,6 +1825,37 @@ function SystemFullEditor({ system, accent, onSaved }: {
         <div className="apSystemEditorField">
           <label className="apMediaLabel">Deploy (e.g. Cloud / On-premise)</label>
           <input className="apMediaInput" value={deploy} onChange={e => setDeploy(e.target.value)} />
+        </div>
+
+        {/* ── Display Status — controls how this system appears to buyers/visitors ── */}
+        <div className="apSystemEditorField apSystemEditorFieldFull">
+          <label className="apMediaLabel">Display Status</label>
+          <div className="apSystemStatusGroup">
+            {([
+              { value: "visible",      label: "Visible",      hint: "Shown normally — buyers can configure & order",           color: "#22c55e" },
+              { value: "coming_soon",  label: "Coming Soon",  hint: "Shown with a locked badge — no ordering allowed",         color: "#f6ad55" },
+              { value: "ongoing",      label: "Ongoing",      hint: "Shown with an In Development badge",                      color: "#63b3ed" },
+              { value: "hidden",       label: "Hidden",       hint: "Not shown to buyers or visitors at all",                  color: "#fc8181" },
+            ] as { value: string; label: string; hint: string; color: string }[]).map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`apSystemStatusBtn${displayStatus === opt.value ? " apSystemStatusBtnActive" : ""}`}
+                style={displayStatus === opt.value ? { borderColor: opt.color, color: opt.color, background: `${opt.color}14` } : undefined}
+                onClick={() => setDisplayStatus(opt.value)}
+                title={opt.hint}
+              >
+                <span className="apSystemStatusDot" style={{ background: opt.color }} />
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <p className="apSystemStatusHint">
+            {displayStatus === "visible"     && "Buyers can see and order this system."}
+            {displayStatus === "coming_soon" && "System is visible but locked — buyers see a Coming Soon badge."}
+            {displayStatus === "ongoing"     && "System shows an In Development badge."}
+            {displayStatus === "hidden"      && "System is completely hidden from buyers and visitors."}
+          </p>
         </div>
 
         <div className="apSystemEditorField apSystemEditorFieldFull">
@@ -1936,6 +1972,13 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
           <span className={`apBadge ${localSystem.isActive ? "apBadgeActive" : "apBadgeInactive"}`}>
             {localSystem.isActive ? "Active" : "Inactive"}
           </span>
+          {/* Display status badge */}
+          {({
+            visible:     null,
+            coming_soon: <span className="apBadge apBadgeComingSoon">Coming Soon</span>,
+            ongoing:     <span className="apBadge apBadgeOngoing">In Dev</span>,
+            hidden:      <span className="apBadge apBadgeHidden">Hidden</span>,
+          } as Record<string, React.ReactNode>)[localSystem.displayStatus ?? "visible"]}
         </div>
         <div className="apSystemHeaderRight">
           <SystemBasePriceEditor
