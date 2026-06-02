@@ -7,8 +7,8 @@
 .amPage {
   padding: 2rem;
   min-height: 100vh;
-  background: #0a0a0b;
-  color: #f0ede8;
+  background: var(--main-bg, #f5f4f1);
+  color: var(--content-color, #1a1a1a);
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -779,3 +779,145 @@
   padding:        0.4rem 0;
   display:        block;
 }
+
+/* ═══════════════════════════════════════
+   LIGHT MODE OVERRIDES (white theme)
+   All rgba(255,255,255,...) values above
+   are dark-only. These override them for
+   the light/white admin theme.
+═══════════════════════════════════════ */
+
+/* Root text colors */
+.adminShell:not(.adminShellDark) .amEyebrow  { color: var(--sidebar-text, #aaa); }
+.adminShell:not(.adminShellDark) .amTitle    { color: var(--content-color, #1a1a1a); }
+.adminShell:not(.adminShellDark) .amCount    { color: var(--sidebar-text, #888); }
+
+/* Client list cards */
+.adminShell:not(.adminShellDark) .amClientList::-webkit-scrollbar-thumb { background: var(--sidebar-border, #ccc); }
+.adminShell:not(.adminShellDark) .amClientCard {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #e8e4de);
+}
+.adminShell:not(.adminShellDark) .amClientCard:hover {
+  border-color: var(--content-color, #888);
+  background: var(--nav-active-bg, #f0ede8);
+}
+.adminShell:not(.adminShellDark) .amClientName  { color: var(--content-color, #1a1a1a); }
+.adminShell:not(.adminShellDark) .amClientEmail { color: var(--sidebar-text, #888); }
+.adminShell:not(.adminShellDark) .amClientCount { color: var(--sidebar-text, #999); }
+
+/* Detail panel */
+.adminShell:not(.adminShellDark) .amDetailEmpty  { color: var(--sidebar-text, #bbb); }
+.adminShell:not(.adminShellDark) .amDetailHeader {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #e8e4de);
+}
+.adminShell:not(.adminShellDark) .amDetailName   { color: var(--content-color, #1a1a1a); }
+.adminShell:not(.adminShellDark) .amDetailMeta   { color: var(--sidebar-text, #888); }
+
+/* Tabs */
+.adminShell:not(.adminShellDark) .amTab {
+  color: var(--sidebar-text, #888);
+  border-color: var(--sidebar-border, #ddd);
+  background: transparent;
+}
+.adminShell:not(.adminShellDark) .amTab:hover { color: var(--content-color, #333); }
+.adminShell:not(.adminShellDark) .amTab.active {
+  background: var(--nav-active-bg, #f0ede8);
+  color: var(--content-color, #1a1a1a);
+  border-color: var(--sidebar-border, #ccc);
+}
+.adminShell:not(.adminShellDark) .amTabCount { color: var(--sidebar-text, #999); }
+
+/* Scrollpane and content */
+.adminShell:not(.adminShellDark) .amScrollPane::-webkit-scrollbar-thumb  { background: var(--sidebar-border, #ccc); }
+.adminShell:not(.adminShellDark) .amDetailContent::-webkit-scrollbar-thumb { background: var(--sidebar-border, #ccc); }
+
+/* Task cards */
+.adminShell:not(.adminShellDark) .amTaskCard {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #e8e4de);
+}
+.adminShell:not(.adminShellDark) .amTaskTitle   { color: var(--content-color, #1a1a1a); }
+.adminShell:not(.adminShellDark) .amTaskDesc    { color: var(--sidebar-text, #777); }
+.adminShell:not(.adminShellDark) .amTaskMeta    { color: var(--sidebar-text, #aaa); }
+.adminShell:not(.adminShellDark) .amTaskDot.PENDING { background: var(--sidebar-border, #ccc); }
+
+/* Status buttons */
+.adminShell:not(.adminShellDark) .amStatusBtn {
+  border-color: var(--sidebar-border, #ddd);
+  color: var(--sidebar-text, #888);
+}
+.adminShell:not(.adminShellDark) .amStatusBtn:hover   { border-color: var(--content-color, #555); color: var(--content-color, #333); }
+.adminShell:not(.adminShellDark) .amStatusBtn.current { background: var(--nav-active-bg, #f0ede8); color: var(--content-color, #1a1a1a); border-color: var(--sidebar-border, #ccc); }
+
+/* Inputs */
+.adminShell:not(.adminShellDark) .amInput {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #ddd);
+  color: var(--content-color, #1a1a1a);
+}
+.adminShell:not(.adminShellDark) .amInput::placeholder { color: var(--sidebar-text, #bbb); }
+.adminShell:not(.adminShellDark) .amInput:focus        { border-color: #c9a96e; }
+.adminShell:not(.adminShellDark) .amNoteInput::placeholder { color: var(--sidebar-text, #bbb); }
+
+/* Bug cards */
+.adminShell:not(.adminShellDark) .amBugCard {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #e8e4de);
+}
+.adminShell:not(.adminShellDark) .amBugBtn {
+  border-color: var(--sidebar-border, #ddd);
+  color: var(--sidebar-text, #888);
+}
+.adminShell:not(.adminShellDark) .amBugBtn:hover    { border-color: var(--content-color, #555); color: var(--content-color, #333); }
+.adminShell:not(.adminShellDark) .amBugBtn.selected { background: var(--nav-active-bg, #f0ede8); color: var(--content-color, #1a1a1a); border-color: var(--sidebar-border, #ccc); }
+
+/* VC / Calendar */
+.adminShell:not(.adminShellDark) .amVCCard {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #e8e4de);
+}
+.adminShell:not(.adminShellDark) .amVCMeta   { color: var(--sidebar-text, #aaa); }
+.adminShell:not(.adminShellDark) .amCalHeader { color: var(--sidebar-text, #aaa); }
+.adminShell:not(.adminShellDark) .amCalDay   { color: var(--content-color, #1a1a1a); }
+.adminShell:not(.adminShellDark) .amCalDay.disabled  { color: var(--sidebar-text, #ccc); }
+.adminShell:not(.adminShellDark) .amCalDay.available {
+  background: var(--nav-active-bg, #f0ede8);
+  border-color: var(--sidebar-border, #ddd);
+  color: var(--content-color, #333);
+}
+.adminShell:not(.adminShellDark) .amCalDay.available:hover {
+  background: var(--sidebar-border, #e0dbd4);
+  border-color: var(--content-color, #aaa);
+}
+.adminShell:not(.adminShellDark) .amCalDay.selected  {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+.adminShell:not(.adminShellDark) .amCalNav {
+  color: var(--sidebar-text, #888);
+  background: transparent;
+  border-color: var(--sidebar-border, #ddd);
+}
+.adminShell:not(.adminShellDark) .amCalNav:hover { background: var(--nav-active-bg, #f0ede8); color: var(--content-color, #333); }
+
+/* Add form / note areas */
+.adminShell:not(.adminShellDark) .amAddForm {
+  background: var(--sidebar-bg, #fff);
+  border-color: var(--sidebar-border, #e8e4de);
+}
+.adminShell:not(.adminShellDark) .amNoteArea {
+  background: var(--nav-active-bg, #f0ede8);
+  border-color: var(--sidebar-border, #ddd);
+  color: var(--content-color, #1a1a1a);
+}
+
+/* Misc text */
+.adminShell:not(.adminShellDark) .amSectionLabel  { color: var(--sidebar-text, #999); }
+.adminShell:not(.adminShellDark) .amEmptyHint     { color: var(--sidebar-text, #bbb); }
+.adminShell:not(.adminShellDark) .amNote          { color: var(--content-color, #555); }
+.adminShell:not(.adminShellDark) .amNoteTime      { color: var(--sidebar-text, #aaa); }
+.adminShell:not(.adminShellDark) .amDeleteBtn     { color: var(--sidebar-text, #ccc); }
+.adminShell:not(.adminShellDark) .amDeleteBtn:hover { color: #ef4444; }
