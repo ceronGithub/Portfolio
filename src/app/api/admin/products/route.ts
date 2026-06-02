@@ -52,12 +52,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid category" }, { status: 400 });
     }
 
+    // ── If isLatest is true, clear the flag on all sibling products in same category
+    // so only one product per category holds the isLatest flag at a time.
+    const isLatestValue = body.isLatest === true;
+    if (isLatestValue) {
+      await prisma.product.updateMany({
+        where: { category, isLatest: true },
+        data:  { isLatest: false },
+      });
+    }
+
     const product = await prisma.product.create({
       data: {
         name:            name.trim(),
         price,
         category,
         description:     description ?? null,
+        isLatest:        isLatestValue,
         previewVideoUrl: previewVideoUrl ?? null,
         facePngUrl:      facePngUrl      ?? null,
         threeDUrl:       threeDUrl       ?? null,
