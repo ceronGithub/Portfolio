@@ -462,6 +462,15 @@ export default function CustomRequestBuilder() {
                         <span className="crbSpeedBtnLabel">{speed}</span>
                         <span className="crbSpeedBtnDelivery">{SPEED_DELIVERY[speed]}</span>
                         <span className="crbSpeedBtnPrice">{baseForSpeed > 0 ? fmt(displayTotal) : "—"}</span>
+                        {speed === "Standard" && baseForSpeed > 0 && (
+                          <span className="crbSpeedBtnFormula">{fmt(baseForSpeed)} base</span>
+                        )}
+                        {speed === "Rush" && baseForSpeed > 0 && (
+                          <span className="crbSpeedBtnFormula">{fmt(baseForSpeed)} + {fmt(Math.round(baseForSpeed * 1.2))}</span>
+                        )}
+                        {speed === "Urgent" && baseForSpeed > 0 && (
+                          <span className="crbSpeedBtnFormula">{fmt(baseForSpeed)} + {fmt(Math.round(baseForSpeed * 2.2))}</span>
+                        )}
                         {speed !== "Standard" && (
                           <span className="crbSpeedBtnSurcharge">{SPEED_SURCHARGE_LABEL[speed]}</span>
                         )}

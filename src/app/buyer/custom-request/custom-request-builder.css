@@ -686,3 +686,12 @@
 .crbPriceNoteConfirm {
   margin-top: 0.5rem;
 }
+
+/* ── Speed card formula breakdown line ── */
+.crbSpeedBtnFormula {
+  font-family: "DM Mono", monospace;
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.28);
+  margin-top:  0.05rem;
+  line-height: 1.4;
+}
