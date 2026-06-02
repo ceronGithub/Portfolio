@@ -1,7 +1,68 @@
 // app/checkout/success/page.tsx — PayMongo redirects here after successful payment.
 // Shows confirmation and links to buyer downloads.
+// Renders a toast-style success banner via client component on mount.
+"use client";
+
 import Link from "next/link";
 import "../../globals.css";
+import { useEffect, useState } from "react";
+
+// ToastBanner — auto-appears on mount and fades after 4 s.
+// Styled to match the buyer ToastStack palette.
+function ToastBanner() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Brief delay so the animation is perceivable after page load
+    const showTimer = setTimeout(() => setVisible(true), 300);
+    const hideTimer = setTimeout(() => setVisible(false), 4500);
+    return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: "1.5rem",
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: 9999,
+      display: "flex",
+      alignItems: "center",
+      gap: "0.65rem",
+      padding: "0.7rem 0.9rem",
+      background: "rgba(10,22,14,0.95)",
+      border: "1px solid rgba(34,197,94,0.25)",
+      borderRadius: "12px",
+      backdropFilter: "blur(8px)",
+      boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
+      animation: "toastIn 0.25s cubic-bezier(0.32,0,0.15,1)",
+      minWidth: "240px",
+      maxWidth: "340px",
+    }}>
+      <style>{`
+        @keyframes toastIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.97); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0)      scale(1);   }
+        }
+      `}</style>
+      {/* Icon */}
+      <span style={{
+        width: "26px", height: "26px", borderRadius: "8px",
+        background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.2)",
+        color: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </span>
+      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.68rem", color: "rgba(255,255,255,0.65)", flex: 1, lineHeight: 1.4 }}>
+        Payment successful! Your downloads are ready.
+      </span>
+    </div>
+  );
+}
 
 export default function CheckoutSuccessPage() {
   return (
@@ -13,6 +74,8 @@ export default function CheckoutSuccessPage() {
       justifyContent: "center",
       padding: "2rem",
     }}>
+      <ToastBanner />
+
       <div style={{
         maxWidth: "480px",
         width: "100%",

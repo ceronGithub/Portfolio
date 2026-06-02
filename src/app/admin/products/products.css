@@ -1822,3 +1822,36 @@
   color:          #ef4444;
   border-color:   rgba(239,68,68,0.65);
 }
+/* ── Face PNG image preview (Task 3) ──────────────────────────────────── */
+/* Shown below the Face PNG row in MediaEditor when a URL is present.     */
+.apMediaImagePreview {
+  grid-column:    1 / -1;
+  padding:        0.5rem 0 0.25rem;
+}
+.apMediaImageThumb {
+  width:          72px;
+  height:         72px;
+  object-fit:     cover;
+  border-radius:  8px;
+  border:         1px solid rgba(255,255,255,0.08);
+  display:        block;
+}
+
+/* ── 3D model file display rows (Task 3) ─────────────────────────────── */
+/* Read-only rows showing fileKeyObj / fileKeyFbx / fileKeyGlb values.   */
+.apMediaRow3DDisplay {
+  display:         flex;
+  align-items:     center;
+  gap:             0.75rem;
+  padding:         0.35rem 0;
+  border-bottom:   1px solid rgba(255,255,255,0.04);
+}
+.apMedia3DUrl {
+  font-size:      0.68rem;
+  color:          rgba(255,255,255,0.3);
+  font-family:    monospace;
+  white-space:    nowrap;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  max-width:      520px;
+}

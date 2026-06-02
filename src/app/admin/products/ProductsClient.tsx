@@ -469,17 +469,19 @@ function AddAddonForm({ systemId, accent, onAdded }: {
 // ── MEDIA_FIELDS — ordered list of editable media URL fields per product ──
 // Used by MediaEditor to render one inline editor row per field.
 // defaultDest: which storage to default to for the "Upload to" dropdown.
-const MEDIA_FIELDS: { field: string; label: string; defaultDest: "r2" | "gdrive" | "both" }[] = [
-  { field: "previewVideoUrl", label: "Preview Video",  defaultDest: "r2"    },
-  { field: "facePngUrl",      label: "Face PNG",       defaultDest: "r2"    },
-  { field: "threeDUrl",       label: "3D Model",       defaultDest: "both"  },
-  { field: "actionOneUrl",    label: "Action 1",       defaultDest: "both"  },
-  { field: "actionTwoUrl",    label: "Action 2",       defaultDest: "both"  },
-  { field: "actionThreeUrl",  label: "Action 3",       defaultDest: "both"  },
-  { field: "actionFourUrl",   label: "Action 4",       defaultDest: "both"  },
-  { field: "actionFiveUrl",   label: "Action 5",       defaultDest: "both"  },
-  { field: "actionSixUrl",    label: "Action 6",       defaultDest: "both"  },
-  { field: "actionSevenUrl",  label: "Action 7",       defaultDest: "both"  },
+const MEDIA_FIELDS: { field: string; label: string; defaultDest: "r2" | "gdrive" | "both"; isImage?: boolean }[] = [
+  { field: "previewVideoUrl", label: "Preview Video",  defaultDest: "r2"                },
+  { field: "facePngUrl",      label: "Face PNG",       defaultDest: "r2",  isImage: true },
+  { field: "threeDUrl",       label: "3D Model (URL)", defaultDest: "both"              },
+  // Action 1–7: default to r2 only — MediaEditor has no driveFolderId UI, so
+  // "both" would silently skip GDrive every time. Admin can switch to "both" manually.
+  { field: "actionOneUrl",    label: "Action 1",       defaultDest: "r2"                },
+  { field: "actionTwoUrl",    label: "Action 2",       defaultDest: "r2"                },
+  { field: "actionThreeUrl",  label: "Action 3",       defaultDest: "r2"                },
+  { field: "actionFourUrl",   label: "Action 4",       defaultDest: "r2"                },
+  { field: "actionFiveUrl",   label: "Action 5",       defaultDest: "r2"                },
+  { field: "actionSixUrl",    label: "Action 6",       defaultDest: "r2"                },
+  { field: "actionSevenUrl",  label: "Action 7",       defaultDest: "r2"                },
 ];
 
 // ── MediaEditor — inline URL editor for all media fields of one product ──
@@ -544,8 +546,9 @@ function MediaEditor({ product, onFieldSaved }: {
 
   return (
     <div className="apMediaEditor">
-      {MEDIA_FIELDS.map(({ field, label }) => {
+      {MEDIA_FIELDS.map(({ field, label, isImage }) => {
         const hasPending = !!pendingFiles[field];
+        const currentUrl = drafts[field];
         return (
           <div key={field} className="apMediaRow apMediaRowUpload">
             <span className="apMediaLabel">{label}</span>
@@ -553,7 +556,7 @@ function MediaEditor({ product, onFieldSaved }: {
               className="apMediaInput"
               type="text"
               placeholder={hasPending ? `📎 ${pendingFiles[field]!.name}` : "Paste URL or leave empty to clear"}
-              value={hasPending ? "" : drafts[field]}
+              value={hasPending ? "" : currentUrl}
               onChange={e => { if (!hasPending) setDrafts(prev => ({ ...prev, [field]: e.target.value })); }}
               onKeyDown={e => { if (e.key === "Enter") handleSaveField(field); }}
               style={hasPending ? { color: "#c9a96e", fontStyle: "italic" } : undefined}
@@ -608,6 +611,31 @@ function MediaEditor({ product, onFieldSaved }: {
             >
               ✕
             </button>
+            {/* Image 1 (Face PNG) — inline preview thumbnail below the row */}
+            {isImage && currentUrl && !hasPending && (
+              <div className="apMediaImagePreview">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={currentUrl} alt="Face PNG preview" className="apMediaImageThumb" />
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {/* ── 3D Model files — separate read-only display of all three slots ── */}
+      {(["fileKeyObj", "fileKeyFbx", "fileKeyGlb"] as const).map(key => {
+        const val = (product as unknown as Record<string, string | null>)[key];
+        const labelMap: Record<string, string> = {
+          fileKeyObj: "3D — OBJ file",
+          fileKeyFbx: "3D — FBX file",
+          fileKeyGlb: "3D — GLB file",
+        };
+        if (!val) return null;
+        return (
+          <div key={key} className="apMediaRow apMediaRow3DDisplay">
+            <span className="apMediaLabel" style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem" }}>
+              {labelMap[key]}
+            </span>
+            <span className="apMedia3DUrl" title={val}>{val}</span>
           </div>
         );
       })}
@@ -996,6 +1024,14 @@ function AddProductForm({ onProductCreated, onClose }: {
   const driveFolderIdRef = useRef<string>("");
   driveFolderIdRef.current = driveFolderId;
 
+  // Fetch live Drive folder IDs on mount so FileUploadField dropdowns have real IDs ready.
+  // This prevents the placeholder IDs in KNOWN_DRIVE_FOLDERS from being used on upload.
+  useEffect(() => {
+    fetch("/api/admin/drive-folders")
+      .then(r => r.json())
+      .catch(() => null);
+  }, []);
+
   // Slugify name to use as filename base — e.g. "Axe-01" → "axe-01"
   function slugifyName(raw: string): string {
     return raw.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -1361,6 +1397,7 @@ function ProductsSection({
     setProductList(prev => prev.map(p =>
       p.id === productId ? { ...p, [field]: value } : p
     ));
+    showToast(value ? "✓ Media field updated." : "✓ Media field cleared.", "ok");
   }
 
   async function handleToggleLatest(id: string, current: boolean) {
@@ -1387,6 +1424,8 @@ function ProductsSection({
 
   function handleProductCreated(newProduct: Product) {
     setProductList(prev => [newProduct, ...prev]);
+    showToast(`✦ "${newProduct.name}" created successfully.`, "ok");
+    setShowAddForm(false);
   }
 
   return (

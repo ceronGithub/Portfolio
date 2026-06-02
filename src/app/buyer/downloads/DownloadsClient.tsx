@@ -8,6 +8,8 @@
 import { useState, useMemo } from "react";
 import "./downloads.css";
 import { sanitize } from "@/lib/utils";
+import { useToast }    from "../shared/useToast";
+import ToastStack      from "../shared/ToastStack";
 
 interface DownloadItem {
   id:           string;
@@ -106,6 +108,7 @@ export default function DownloadsClient({ downloads }: Props) {
   const [search,      setSearch]      = useState("");
   const [tab,         setTab]         = useState<"All" | "Character" | "Weapon" | "System">("All");
   const [downloading, setDownloading] = useState<string | null>(null);
+  const { toasts, showToast, dismissToast } = useToast();
 
   const filtered = useMemo(() => {
     return downloads.filter(d => {
@@ -125,6 +128,7 @@ export default function DownloadsClient({ downloads }: Props) {
       a.download = item.name;
       a.target   = "_blank";
       a.click();
+      showToast("Download started!", "success");
     } finally {
       setTimeout(() => setDownloading(null), 1200);
     }
@@ -137,10 +141,12 @@ export default function DownloadsClient({ downloads }: Props) {
     a.download = filename;
     a.target   = "_blank";
     a.click();
+    showToast(`Downloading ${filename}`, "success");
   }
 
   return (
     <div className="dlPage">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
 
       {/* ── Hero header band ── */}
       <div className="dlHeader">
