@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { sanitize } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -199,6 +199,7 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
   const [replyText,     setReplyText]     = useState("");
   const [postingReply,  setPostingReply]  = useState(false);
   const [isExpanded,    setIsExpanded]    = useState(comments.length > 0);
+  const commentListRef = useRef<HTMLDivElement>(null);
 
   // ── Post new admin comment ────────────────────────────────────────────────
   async function postAdminComment() {
@@ -218,6 +219,9 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
         onCommentsChange(inquiryId, updated);
         setNewAdminText("");
         setIsExpanded(true);
+        setTimeout(() => {
+          commentListRef.current?.scrollTo({ top: commentListRef.current.scrollHeight, behavior: "smooth" });
+        }, 50);
       }
     } finally {
       setPostingAdmin(false);
@@ -294,7 +298,7 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
         <div className="adminInquiriesThreadBody">
           {/* Existing comment thread */}
           {rootComments.length > 0 && (
-            <div className="adminInquiriesCommentList">
+            <div className="adminInquiriesCommentList" ref={commentListRef}>
               {rootComments.map(comment => (
                 <div key={comment.id} className="adminInquiriesCommentBlock">
                   {/* Admin comment */}

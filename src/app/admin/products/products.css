@@ -1771,6 +1771,30 @@
 }
 .apMediaDestSelect:focus { border-color: #c9a96e; }
 
+/* Folder picker dropdown for simple media fields (Preview Video, Face PNG) */
+.apMediaFolderSelect {
+  padding:            0.3rem 1.8rem 0.3rem 0.55rem;
+  border:             1px solid var(--sidebar-border);
+  border-radius:      6px;
+  background:         var(--sidebar-bg);
+  color:              var(--sidebar-text);
+  font-size:          0.7rem;
+  font-weight:        500;
+  cursor:             pointer;
+  outline:            none;
+  appearance:         none;
+  -webkit-appearance: none;
+  background-image:   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:  no-repeat;
+  background-position: right 0.5rem center;
+  max-width:          160px;
+  white-space:        nowrap;
+  overflow:           hidden;
+  text-overflow:      ellipsis;
+  transition:         border-color 0.15s ease;
+}
+.apMediaFolderSelect:focus { border-color: #c9a96e; }
+
 /* ── 3D Model multi-upload slots — Task 1 ───────────────────────────── */
 .apThreeDSlots {
   display:        grid;

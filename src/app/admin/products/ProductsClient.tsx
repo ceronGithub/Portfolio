@@ -528,7 +528,42 @@ function MediaEditor({ product, onFieldSaved }: {
   const [destinations, setDestinations] = useState<Record<string, "r2" | "gdrive" | "both">>(() =>
     Object.fromEntries(SIMPLE_MEDIA_FIELDS.map(({ field }) => [field, "r2" as const]))
   );
+  // Per-field R2 folder and Drive folder selections for simple media fields
+  const [simpleR2Folders,    setSimpleR2Folders]    = useState<Record<string, string>>(() =>
+    Object.fromEntries(SIMPLE_MEDIA_FIELDS.map(({ field }) => [field, "products"]))
+  );
+  const [simpleDriveFolderIds, setSimpleDriveFolderIds] = useState<Record<string, string>>(() =>
+    Object.fromEntries(SIMPLE_MEDIA_FIELDS.map(({ field }) => [field, ""]))
+  );
+  // Folder lists for simple field dropdowns — fetched lazily on first GDrive/Both selection
+  const [simpleFolderR2List,    setSimpleFolderR2List]    = useState<string[]>(["products", "architecture", "character", "systems", "weapon"]);
+  const [simpleFolderDriveList, setSimpleFolderDriveList] = useState<{ id: string; name: string }[]>([]);
+  const simpleFoldersLoadedRef = useRef(false);
+
+  // Loads R2 + Drive folder lists for simple media field pickers (once)
+  async function loadSimpleFolders(): Promise<void> {
+    if (simpleFoldersLoadedRef.current) return;
+    simpleFoldersLoadedRef.current = true;
+    try {
+      const [r2Res, driveRes] = await Promise.allSettled([
+        fetch("/api/admin/r2-folders").then(r => r.json()),
+        fetch("/api/admin/drive-folders").then(r => r.json()),
+      ]);
+      if (r2Res.status === "fulfilled" && Array.isArray(r2Res.value.folders)) {
+        const merged = Array.from(new Set(["products", ...r2Res.value.folders])).sort();
+        setSimpleFolderR2List(merged);
+      }
+      if (driveRes.status === "fulfilled" && Array.isArray(driveRes.value.folders)) {
+        setSimpleFolderDriveList(
+          (driveRes.value.folders as { id: string; name: string }[])
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+      }
+    } catch { /* silent */ }
+  }
+
   const fileInputRefs    = useRef<Record<string, HTMLInputElement | null>>({});
+  // Shared drive folder ref for 3D model and action file uploads (FileUploadField components)
   const driveFolderIdRef = useRef<string>("");
 
   // ── Upload pending file then PATCH the resulting URL ─────────────────
@@ -542,9 +577,9 @@ function MediaEditor({ product, onFieldSaved }: {
       const form = new FormData();
       form.append("file",        pendingFile);
       form.append("destination", dest);
-      form.append("r2Folder",    "products");
-      if ((dest === "gdrive" || dest === "both") && driveFolderIdRef.current) {
-        form.append("driveFolderId", driveFolderIdRef.current);
+      form.append("r2Folder",    simpleR2Folders[field] || "products");
+      if ((dest === "gdrive" || dest === "both") && simpleDriveFolderIds[field]) {
+        form.append("driveFolderId", simpleDriveFolderIds[field]);
       }
       try {
         const res  = await fetch("/api/admin/product-upload", { method: "POST", body: form });
@@ -615,12 +650,43 @@ function MediaEditor({ product, onFieldSaved }: {
             <select
               className="apMediaDestSelect"
               value={destinations[field]}
-              onChange={e => setDestinations(prev => ({ ...prev, [field]: e.target.value as "r2" | "gdrive" | "both" }))}
+              onChange={e => {
+                const newDest = e.target.value as "r2" | "gdrive" | "both";
+                setDestinations(prev => ({ ...prev, [field]: newDest }));
+                if (newDest !== "r2") loadSimpleFolders();
+              }}
             >
               <option value="r2">R2</option>
               <option value="gdrive">GDrive</option>
               <option value="both">Both</option>
             </select>
+            {/* R2 folder picker — shown when destination is r2 or both */}
+            {(destinations[field] === "r2" || destinations[field] === "both") && (
+              <select
+                className="apMediaFolderSelect"
+                value={simpleR2Folders[field]}
+                onChange={e => setSimpleR2Folders(prev => ({ ...prev, [field]: e.target.value }))}
+                title="R2 folder"
+              >
+                {simpleFolderR2List.map(f => (
+                  <option key={f} value={f}>{f}</option>
+                ))}
+              </select>
+            )}
+            {/* Drive folder picker — shown when destination is gdrive or both */}
+            {(destinations[field] === "gdrive" || destinations[field] === "both") && (
+              <select
+                className="apMediaFolderSelect"
+                value={simpleDriveFolderIds[field]}
+                onChange={e => setSimpleDriveFolderIds(prev => ({ ...prev, [field]: e.target.value }))}
+                title="Drive folder"
+              >
+                <option value="">— Drive folder —</option>
+                {simpleFolderDriveList.map(f => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            )}
             <button
               className="apPriceSaveBtn"
               onClick={() => handleSaveSimpleField(field)}

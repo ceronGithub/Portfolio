@@ -16,9 +16,9 @@ interface Order {
   status:          OrderStatus;
   amountPaid:      number | null;
   paymongoOrderId: string | null;
-  createdAt:       Date;
+  createdAt:       string;
   deliveryNote:    string | null;
-  estimatedAt:     Date | null;
+  estimatedAt:     string | null;
   userId:          string;
   user:            { name: string | null; email: string };
   product:         { id: string; name: string } | null;
@@ -97,8 +97,8 @@ function DeliveryPanel({
 }: {
   orderId:     string;
   note:        string | null;
-  estimatedAt: Date | null;
-  onSaved:     (id: string, note: string | null, est: Date | null) => void;
+  estimatedAt: string | null;
+  onSaved:     (id: string, note: string | null, est: string | null) => void;
 }) {
   const [noteVal, setNote] = useState(note ?? "");
   const [estVal,  setEst]  = useState(
@@ -123,7 +123,7 @@ function DeliveryPanel({
       onSaved(
         orderId,
         noteVal.trim() || null,
-        estVal ? new Date(estVal) : null
+        estVal ? new Date(estVal).toISOString() : null
       );
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -387,7 +387,7 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
   function handleDeliverySaved(
     orderId:     string,
     note:        string | null,
-    estimatedAt: Date | null,
+    estimatedAt: string | null,
   ) {
     setOrders(prev => prev.map(o =>
       o.id === orderId ? { ...o, deliveryNote: note, estimatedAt } : o

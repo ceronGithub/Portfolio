@@ -78,7 +78,11 @@ export default async function AdminOrdersPage() {
           </div>
         </div>
 
-        <OrdersClient orders={orders} />
+        <OrdersClient orders={orders.map((o: typeof orders[number]) => ({
+          ...o,
+          createdAt:   o.createdAt.toISOString(),
+          estimatedAt: o.estimatedAt ? o.estimatedAt.toISOString() : null,
+        }))} />
 
       </div>
     </AdminShell>
