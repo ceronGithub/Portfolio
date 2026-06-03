@@ -8,6 +8,8 @@
 import { useState } from "react";
 import "./custom-request-builder.css";
 import { sanitize } from "@/lib/utils";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -209,6 +211,7 @@ const ASSET_BASE_DISPLAY: Partial<Record<AssetType, string>> = {
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export default function CustomRequestBuilder() {
+  const { toasts, showToast, dismissToast } = useToast();
   const [step,       setStep]       = useState(0);
   const [form,       setForm]       = useState<FormState>({
     assetType: "", description: "", characterPack: "", weaponPack: "", reference: "", deliverySpeed: "",
@@ -246,12 +249,16 @@ export default function CustomRequestBuilder() {
         }),
       });
       if (res.status === 201 || res.status === 200) {
+        showToast("✓ Custom request submitted. I'll review and get back to you soon.", "success");
         setSubmitted(true);
       } else {
         const data = await res.json().catch(() => ({}));
-        setSubmitErr(data.error ?? "Something went wrong. Try again.");
+        const msg = data.error ?? "Something went wrong. Try again.";
+        setSubmitErr(msg);
+        showToast(`✕ ${msg}`, "error");
       }
     } catch {
+      showToast("✓ Request received. I'll follow up shortly.", "success");
       setSubmitted(true);
     } finally {
       setSubmitting(false);
@@ -282,6 +289,7 @@ export default function CustomRequestBuilder() {
 
   return (
     <section className="crbSection">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="crbInner">
 
         {/* Header */}

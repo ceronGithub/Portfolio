@@ -8,6 +8,8 @@
 import { useState, useEffect } from "react";
 import DeliveryTracker         from "./DeliveryTracker";
 import { sanitize }            from "@/lib/utils";
+import { useToast }            from "@/app/buyer/shared/useToast";
+import ToastStack              from "@/app/buyer/shared/ToastStack";
 import "./profile.css";
 
 interface Order {
@@ -69,6 +71,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 export default function ProfileClient({ user, orders, ownedCount, ownedItems }: Props) {
+  const { toasts, showToast, dismissToast } = useToast();
   const [name,         setName]         = useState(user.name);
   const [editing,      setEditing]      = useState(false);
   const [editVal,      setEditVal]      = useState(user.name);
@@ -127,7 +130,10 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
       if (res.ok) {
         setName(editVal.trim());
         setSaveMsg("Saved");
+        showToast("✓ Display name updated successfully.", "success");
         setTimeout(() => setSaveMsg(""), 2000);
+      } else {
+        showToast("✕ Failed to update display name.", "error");
       }
     } finally {
       setSaving(false);
@@ -161,9 +167,11 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
         setEmail(trimmed);
         setEmailMsg("Email updated");
         setEditingEmail(false);
+        showToast("✓ Email address updated successfully.", "success");
         setTimeout(() => setEmailMsg(""), 2500);
       } else {
         setEmailError(data.error ?? "Failed to update email");
+        showToast(`✕ ${data.error ?? "Failed to update email."}`, "error");
       }
     } finally {
       setSavingEmail(false);
@@ -198,6 +206,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
       const data = await res.json();
       if (res.ok) {
         setPwMsg("Password updated");
+        showToast("✓ Password changed successfully.", "success");
         setCurrentPw("");
         setNewPw("");
         setConfirmPw("");
@@ -205,6 +214,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
         setTimeout(() => setPwMsg(""), 3000);
       } else {
         setPwError(data.error ?? "Failed to update password");
+        showToast(`✕ ${data.error ?? "Failed to update password."}`, "error");
       }
     } finally {
       setSavingPw(false);
@@ -213,6 +223,7 @@ export default function ProfileClient({ user, orders, ownedCount, ownedItems }: 
 
   return (
     <div className={"profilePage" + (mounted ? " profilePageMounted" : "")}>
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
 
       {/* ── Hero identity card ── */}
       <div className="profileHero">

@@ -1619,7 +1619,19 @@ function ProductsSection({
     setProductList(prev => prev.map(p =>
       p.id === productId ? { ...p, [field]: value } : p
     ));
-    showToast(value ? "✓ Media field updated." : "✓ Media field cleared.", "ok");
+    const labelMap: Record<string, string> = {
+      previewVideoUrl: "Preview Video",
+      facePngUrl:      "Face PNG",
+      fileKeyObj:      "OBJ file",
+      fileKeyFbx:      "FBX file",
+      fileKeyGlb:      "GLB file",
+    };
+    const fieldLabel = labelMap[field] ?? field;
+    if (value) {
+      showToast(`✓ ${fieldLabel} uploaded & saved successfully.`, "ok");
+    } else {
+      showToast(`✓ ${fieldLabel} cleared.`, "ok");
+    }
   }
 
   async function handleToggleLatest(id: string, current: boolean) {
@@ -1653,13 +1665,7 @@ function ProductsSection({
   return (
     <div className="apCard apReveal" ref={revealRef}>
       {toast && (
-        <div style={{
-          position:"fixed",bottom:"1.5rem",right:"1.5rem",zIndex:9999,
-          background:toast.type==="ok"?"#22c55e":"#ef4444",
-          color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",
-          fontWeight:700,fontSize:"0.85rem",
-          boxShadow:"0 4px 24px rgba(0,0,0,0.4)",pointerEvents:"none",
-        }}>{toast.msg}</div>
+        <div className={`apToast apToast--${toast.type}`}>{toast.msg}</div>
       )}
       <div className="apCardHeader">
         <div>

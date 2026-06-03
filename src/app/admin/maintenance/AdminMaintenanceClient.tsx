@@ -8,6 +8,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { sanitize }                          from "@/lib/utils";
+import { useToast }                          from "@/app/buyer/shared/useToast";
+import ToastStack                            from "@/app/buyer/shared/ToastStack";
 import "./admin-maintenance.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -91,10 +93,11 @@ function fmtTime(d: string) {
 }
 
 // ── Tasks Tab ─────────────────────────────────────────────────────────────────
-function TasksTab({ orderId, initTasks, revisionLimit }: {
+function TasksTab({ orderId, initTasks, revisionLimit, showToast }: {
   orderId: string;
   initTasks: Task[];
   revisionLimit: number;
+  showToast: (msg: string, type: "success" | "warning" | "error") => void;
 }) {
   const [tasks, setTasks]         = useState(initTasks);
   const [title, setTitle]         = useState("");
@@ -119,9 +122,18 @@ function TasksTab({ orderId, initTasks, revisionLimit }: {
         body: JSON.stringify({ title, description: desc, type }),
       });
       const data = await res.json();
-      if (res.ok) { setTasks(p => [data.task, ...p]); setTitle(""); setDesc(""); }
-      else setError(data.error ?? "Failed to add task.");
-    } catch { setError("Network error."); }
+      if (res.ok) {
+        setTasks(p => [data.task, ...p]);
+        setTitle(""); setDesc("");
+        showToast(`✓ Task "${title}" added successfully.`, "success");
+      } else {
+        setError(data.error ?? "Failed to add task.");
+        showToast(`✕ ${data.error ?? "Failed to add task."}`, "error");
+      }
+    } catch {
+      setError("Network error.");
+      showToast("✕ Network error — failed to add task.", "error");
+    }
     finally { setLoading(false); }
   }
 
@@ -134,6 +146,9 @@ function TasksTab({ orderId, initTasks, revisionLimit }: {
     if (res.ok) {
       const data = await res.json();
       setTasks(p => p.map(t => t.id === taskId ? data.task : t));
+      showToast(`✓ Task status updated to ${status.replace("_", " ")}.`, "success");
+    } else {
+      showToast("✕ Failed to update task status.", "error");
     }
   }
 
@@ -147,12 +162,20 @@ function TasksTab({ orderId, initTasks, revisionLimit }: {
       const data = await res.json();
       setTasks(p => p.map(t => t.id === taskId ? data.task : t));
       setEditingId(null);
+      showToast("✓ Task updated successfully.", "success");
+    } else {
+      showToast("✕ Failed to update task.", "error");
     }
   }
 
   async function deleteTask(taskId: string) {
     const res = await fetch(`/api/admin/maintenance/${orderId}/tasks/${taskId}`, { method: "DELETE" });
-    if (res.ok) setTasks(p => p.filter(t => t.id !== taskId));
+    if (res.ok) {
+      setTasks(p => p.filter(t => t.id !== taskId));
+      showToast("✓ Task deleted.", "success");
+    } else {
+      showToast("✕ Failed to delete task.", "error");
+    }
   }
 
   function startEdit(t: Task) {
@@ -260,7 +283,11 @@ function TasksTab({ orderId, initTasks, revisionLimit }: {
 }
 
 // ── Bugs Tab ──────────────────────────────────────────────────────────────────
-function BugsTab({ orderId, initBugs }: { orderId: string; initBugs: BugReport[] }) {
+function BugsTab({ orderId, initBugs, showToast }: {
+  orderId: string;
+  initBugs: BugReport[];
+  showToast: (msg: string, type: "success" | "warning" | "error") => void;
+}) {
   const [bugs, setBugs]     = useState(initBugs);
   const [notes, setNotes]   = useState<Record<string, string>>({});
 
@@ -273,6 +300,12 @@ function BugsTab({ orderId, initBugs }: { orderId: string; initBugs: BugReport[]
     if (res.ok) {
       const d = await res.json();
       setBugs(p => p.map(b => b.id === bugId ? d.bug : b));
+      // Determine what changed for a descriptive message
+      if (data.status)         showToast(`✓ Bug status updated to ${String(data.status).replace("_", " ")}.`, "success");
+      else if (data.adminNote) showToast("✓ Admin note saved on bug report.", "success");
+      else                     showToast("✓ Bug report updated.", "success");
+    } else {
+      showToast("✕ Failed to update bug report.", "error");
     }
   }
 
@@ -371,8 +404,9 @@ const MONTH_NAMES = ["January","February","March","April","May","June",
                      "July","August","September","October","November","December"];
 const DAY_LABELS  = ["Su","Mo","Tu","We","Th","Fr","Sa"];
 
-function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: defaultPhone }: {
+function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: defaultPhone, showToast }: {
   orderId: string; initSchedules: VCSchedule[]; buyerName: string; buyerPhone: string;
+  showToast: (msg: string, type: "success" | "warning" | "error") => void;
 }) {
   const today = new Date();
   today.setHours(0,0,0,0);
@@ -459,8 +493,15 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
         // Immediately reflect the new booking in local state
         setBookedSlots(p => [...p, preferredDate]);
         setNote(""); setSelectedDay(null); setSelectedHour(null);
-      } else setError(data.error ?? "Failed to schedule call.");
-    } catch { setError("Network error."); }
+        showToast("✓ Video call scheduled successfully.", "success");
+      } else {
+        setError(data.error ?? "Failed to schedule call.");
+        showToast(`✕ ${data.error ?? "Failed to schedule call."}`, "error");
+      }
+    } catch {
+      setError("Network error.");
+      showToast("✕ Network error — failed to schedule call.", "error");
+    }
     finally { setLoading(false); }
   }
 
@@ -473,6 +514,10 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
     if (res.ok) {
       const d = await res.json();
       setSchedules(p => p.map(s => s.id === vcId ? d.vc : s));
+      if (patch.status) showToast(`✓ VC status updated to ${String(patch.status).replace("_", " ")}.`, "success");
+      else              showToast("✓ VC schedule updated.", "success");
+    } else {
+      showToast("✕ Failed to update VC schedule.", "error");
     }
   }
 
@@ -665,14 +710,15 @@ function ClientDetail({ order }: { order: Order }) {
       </div>
 
       <div className="amDetailContent">
-        {tab === "tasks" && <TasksTab orderId={order.id} initTasks={order.tasks} revisionLimit={pkgCfg.revisionLimit} />}
-        {tab === "bugs"  && <BugsTab  orderId={order.id} initBugs={order.bugReports} />}
+        {tab === "tasks" && <TasksTab orderId={order.id} initTasks={order.tasks} revisionLimit={pkgCfg.revisionLimit} showToast={showToast} />}
+        {tab === "bugs"  && <BugsTab  orderId={order.id} initBugs={order.bugReports} showToast={showToast} />}
         {tab === "vc"    && (
           <VCTab
             orderId={order.id}
             initSchedules={order.vcSchedules}
             buyerName={order.user.name}
             buyerPhone={order.vcSchedules[0]?.buyerPhone ?? ""}
+            showToast={showToast}
           />
         )}
       </div>
@@ -682,10 +728,12 @@ function ClientDetail({ order }: { order: Order }) {
 
 // ── Main Export ───────────────────────────────────────────────────────────────
 export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) {
+  const { toasts, showToast, dismissToast } = useToast();
   const [selected, setSelected] = useState<Order | null>(orders[0] ?? null);
 
   return (
     <div className="amPage">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="amHeader">
         <p className="amEyebrow">Support</p>
         <h1 className="amTitle">Maintenance Clients</h1>

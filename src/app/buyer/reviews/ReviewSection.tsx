@@ -7,6 +7,8 @@
 import { useState, useEffect, useMemo } from "react";
 import "./review-section.css";
 import { sanitize } from "@/lib/utils";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 // ── Asset label map ────────────────────────────────────────────────────────
 const ASSET_LABELS: Record<string, string> = {
@@ -100,6 +102,7 @@ function RatingBar({ label, count, total }: { label: string; count: number; tota
 
 // ── Main export ────────────────────────────────────────────────────────────
 export default function ReviewSection({ ownedProductIds }: Props) {
+  const { toasts, showToast, dismissToast } = useToast();
   const [reviews,    setReviews]    = useState<Review[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filterAsset,setFilterAsset]= useState<string>("all");
@@ -146,6 +149,7 @@ export default function ReviewSection({ ownedProductIds }: Props) {
 
   async function handleSubmit() {
     if (!formAsset || formRating === 0) {
+      showToast("✕ Please select an asset and a rating.", "error");
       setSubmitMsg("Please select an asset and a rating.");
       return;
     }
@@ -163,13 +167,18 @@ export default function ReviewSection({ ownedProductIds }: Props) {
         setFormRating(0);
         setFormText("");
         setSubmitMsg("Review submitted. Thank you!");
+        showToast("✓ Review submitted. Thank you!", "success");
       } else if (res.status === 409) {
         setSubmitMsg("You already reviewed this asset.");
+        showToast("✕ You already reviewed this asset.", "error");
       } else {
-        setSubmitMsg(data.error ?? "Something went wrong.");
+        const msg = data.error ?? "Something went wrong.";
+        setSubmitMsg(msg);
+        showToast(`✕ ${msg}`, "error");
       }
     } catch {
       setSubmitMsg("Network error. Try again.");
+      showToast("✕ Network error. Try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -177,6 +186,7 @@ export default function ReviewSection({ ownedProductIds }: Props) {
 
   return (
     <section className="rvSection">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="rvInner">
 
         {/* Header */}

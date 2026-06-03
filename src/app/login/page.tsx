@@ -7,6 +7,8 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sanitize } from "@/lib/utils";
 import Link from "next/link";
+import { useToast }   from "@/app/buyer/shared/useToast";
+import ToastStack     from "@/app/buyer/shared/ToastStack";
 import "./login.css";
 
 // Video URLs — Cloudflare R2 (zero egress fees, direct CDN delivery).
@@ -30,13 +32,17 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const reason       = searchParams.get("reason");
 
+  const { toasts, showToast, dismissToast } = useToast();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState(
-    reason === "banned"      ? "Your account has been banned. Contact support." :
-    reason === "deactivated" ? "Your account has been deactivated. Contact support." : ""
-  );
   const [loading, setLoading]   = useState(false);
+
+  // Show reason-based toast on mount
+  useEffect(() => {
+    if (reason === "banned")      showToast("Your account has been banned. Contact support.", "error", 5000);
+    if (reason === "deactivated") showToast("Your account has been deactivated. Contact support.", "error", 5000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [vidIdx, setVidIdx]     = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -160,16 +166,16 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     const result = await signIn("credentials", { email, password, redirect: false });
 
     if (result?.error) {
-      setError("Invalid email or password.");
+      showToast("✕ Invalid email or password.", "error");
       setLoading(false);
       return;
     }
 
+    showToast("✓ Signed in. Redirecting…", "success");
     const res     = await fetch("/api/auth/session");
     const session = await res.json();
     const role    = (session?.user as any)?.role;
@@ -186,6 +192,7 @@ export default function LoginPage() {
 
   return (
     <main className="authPage">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
 
       {/* ── Left — video background ──────────────────────────────── */}
       <div className="authLeft">
@@ -280,16 +287,6 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
             </div>
-
-            {error && (
-              <div className="authError">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                {error}
-              </div>
-            )}
 
             <button type="submit" disabled={loading} className="authBtn">
               {loading ? (

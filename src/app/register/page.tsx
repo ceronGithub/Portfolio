@@ -7,6 +7,8 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { sanitize } from "@/lib/utils";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 // Video URLs — Cloudflare R2 (zero egress fees, direct CDN delivery).
 const R2 = "https://pub-2ce00f29dc8e495183023b1ecef335df.r2.dev";
@@ -21,6 +23,7 @@ const WEAPON_VIDEOS = [
 
 export default function RegisterPage() {
   const router  = useRouter();
+  const { toasts, showToast, dismissToast } = useToast();
   const [form, setForm]     = useState({ name: "", email: "", age: "", password: "", confirmPassword: "" });
   const [error, setError]   = useState("");
   const [loading, setLoading] = useState(false);
@@ -153,10 +156,12 @@ export default function RegisterPage() {
     setError("");
 
     if (form.password !== form.confirmPassword) {
+      showToast("✕ Passwords do not match.", "error");
       setError("Passwords do not match.");
       return;
     }
     if (parseInt(form.age) < 18) {
+      showToast("✕ You must be at least 18 years old.", "error");
       setError("You must be at least 18 years old.");
       return;
     }
@@ -170,11 +175,14 @@ export default function RegisterPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error ?? "Registration failed.");
+      const msg = data.error ?? "Registration failed.";
+      setError(msg);
+      showToast(`✕ ${msg}`, "error");
       setLoading(false);
       return;
     }
-    router.push("/login");
+    showToast("✓ Account created! Redirecting to login…", "success");
+    setTimeout(() => router.push("/login"), 1200);
   }
 
   /* Disable right-click on the entire auth page */
@@ -186,6 +194,7 @@ export default function RegisterPage() {
 
   return (
     <main className="authPage">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
 
       {/* ── Left — weapon/character video ────────────────────────── */}
       <div className="authLeft">

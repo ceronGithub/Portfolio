@@ -9,6 +9,8 @@ import { useState }  from "react";
 import emailjs       from "@emailjs/browser";
 import "./inquiry-section.css";
 import { sanitize } from "@/lib/utils";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -52,6 +54,7 @@ const CONTACT_ITEMS = [
 ];
 
 export default function InquirySection() {
+  const { toasts, showToast, dismissToast } = useToast();
   const [form,   setForm]   = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState<Status>("idle");
 
@@ -75,8 +78,10 @@ export default function InquirySection() {
         EMAILJS_PUBLIC_KEY
       );
       setStatus("sent");
+      showToast("✓ Message sent. I'll get back to you within 24 hours.", "success");
     } catch {
       setStatus("error");
+      showToast("✕ Failed to send message. Please try again.", "error");
     }
     // ── Also write to DB for admin paper trail (fire-and-forget) ────────────
     fetch("/api/contact", {
@@ -93,6 +98,7 @@ export default function InquirySection() {
 
   return (
     <section className="iqSection">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="iqInner">
 
         {/* Header */}

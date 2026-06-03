@@ -32,6 +32,8 @@ import "./wishlist/wishlist-panel.css";
 import "./cart/cart-drawer.css";
 import "./buyer-dashboard-client.css";
 import LatestDropTicker        from "./LatestDropTicker";
+import { useToast }            from "./shared/useToast";
+import ToastStack              from "./shared/ToastStack";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface AddonItem {
@@ -150,6 +152,7 @@ function buildWishlistEntries(
 }
 
 export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
+  const { toasts, showToast, dismissToast } = useToast();
   const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
   const { cartIds, addToCart, removeFromCart, clearCart, hydrated: cartHydrated } = useCart();
   const [wishlistOpen,       setWishlistOpen]       = useState(false);
@@ -174,7 +177,13 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
 
   const handleRemoveFromWishlist = useCallback((id: string) => {
     toggleWishlist(id);
-  }, [toggleWishlist]);
+    showToast("✓ Item removed from wishlist.", "success");
+  }, [toggleWishlist, showToast]);
+
+  const handleClearWishlist = useCallback(() => {
+    clearWishlist();
+    showToast("✓ Wishlist cleared.", "success");
+  }, [clearWishlist, showToast]);
 
   const { recentItems, trackView, clearRecent } = useRecentlyViewed();
   const [browseOpenId, setBrowseOpenId] = useState<string | null>(null);
@@ -224,6 +233,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
 
   return (
     <>
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       {/* ── Latest Drop Ticker — sticky top bar, renders only when drops exist ── */}
       <LatestDropTicker
         latestCharacter={latestCharacter}
@@ -268,8 +278,8 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
         entries={cartEntries}
-        onRemove={id => { removeFromCart(id); }}
-        onClear={clearCart}
+        onRemove={id => { removeFromCart(id); showToast("✓ Item removed from cart.", "success"); }}
+        onClear={() => { clearCart(); showToast("✓ Cart cleared.", "success"); }}
       />
 
       {/* ── Wishlist Drawer ── */}
@@ -278,7 +288,7 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
         onClose={() => setWishlistOpen(false)}
         entries={wishlistEntries}
         onRemove={handleRemoveFromWishlist}
-        onClearAll={clearWishlist}
+        onClearAll={handleClearWishlist}
         onAddAllToCart={handleAddAllToCart}
       />
 

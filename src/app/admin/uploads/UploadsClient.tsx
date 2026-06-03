@@ -10,6 +10,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./uploads.css";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 interface DriveFolder {
   id:   string;
@@ -50,6 +52,7 @@ function formatBytes(bytes: number): string {
 // ── Main Component ────────────────────────────────────────────────────
 
 export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsClientProps) {
+  const { toasts, showToast, dismissToast } = useToast();
   // Drive folder state
   const [driveFolders,     setDriveFolders]     = useState<DriveFolder[]>([]);
   const [foldersLoading,   setFoldersLoading]   = useState(false);
@@ -144,14 +147,24 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
       setUploadProgress(100);
 
       if (!res.ok) {
-        setUploadError(data.error ?? "Upload failed.");
+        const msg = data.error ?? "Upload failed.";
+        setUploadError(msg);
+        showToast(`✕ Upload failed — ${msg}`, "error");
       } else {
+        const successCount = (data.results ?? []).filter((r: UploadResult) => !r.error).length;
+        const failCount    = (data.results ?? []).filter((r: UploadResult) =>  r.error).length;
         setResults(data.results ?? []);
         setSelectedFiles([]);
+        if (failCount === 0) {
+          showToast(`✓ ${successCount} file${successCount !== 1 ? "s" : ""} uploaded to Google Drive.`, "success");
+        } else {
+          showToast(`⚠ ${successCount} uploaded, ${failCount} failed. Check results below.`, "warning");
+        }
       }
     } catch (err) {
       clearInterval(progressInterval);
       setUploadError("Network error — please try again.");
+      showToast("✕ Network error — upload failed. Please try again.", "error");
     } finally {
       setUploading(false);
     }
@@ -197,8 +210,7 @@ export default function UploadsClient({ isConnected, googleAuthUrl }: UploadsCli
   // ── Render: connected ─────────────────────────────────────────────
   return (
     <div className="uploadsPage">
-
-      {/* ── Header ── */}
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="uploadsHeader">
         <div>
           <h1 className="uploadsTitle">Upload Assets</h1>
