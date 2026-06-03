@@ -16,11 +16,11 @@ async function requireAdmin() {
 
 // ── POST /api/admin/inquiries/[inquiryId]/comments ─────────────────────────
 // Body: { role: "ADMIN"|"BUYER", content: string, parentId?: string }
-export async function POST(req: NextRequest, { params }: { params: { inquiryId: string } }) {
+export async function POST(req: NextRequest, context: { params: Promise<{ inquiryId: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { inquiryId } = params;
+  const { inquiryId } = await context.params;
   const body = await req.json().catch(() => ({}));
 
   const role     = body.role as string;
@@ -54,9 +54,11 @@ export async function POST(req: NextRequest, { params }: { params: { inquiryId: 
 }
 
 // ── DELETE /api/admin/inquiries/[inquiryId]/comments?commentId=<id> ────────
-export async function DELETE(req: NextRequest, { params }: { params: { inquiryId: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ inquiryId: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { inquiryId: _inquiryId } = await context.params;
 
   const commentId = req.nextUrl.searchParams.get("commentId");
   if (!commentId) return NextResponse.json({ error: "commentId required" }, { status: 400 });
