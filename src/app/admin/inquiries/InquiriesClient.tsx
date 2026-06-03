@@ -183,6 +183,125 @@ function AdminQuoteEditor({ inquiryId, currentQuote, onSave }: {
   );
 }
 
+// ── BuyerNotesList — shows buyer's standalone notes; admin can reply to each ──
+
+function BuyerNotesList({ inquiryId, buyerNotes, onBuyerNotesChange }: {
+  inquiryId:          string;
+  buyerNotes:         InquiryComment[];
+  onBuyerNotesChange: (id: string, notes: InquiryComment[]) => void;
+}) {
+  const [notes,           setNotes]           = useState<InquiryComment[]>(buyerNotes);
+  const [replyingToNoteId, setReplyingToNoteId] = useState<string | null>(null);
+  const [replyText,       setReplyText]       = useState("");
+  const [postingReply,    setPostingReply]    = useState(false);
+
+  if (notes.length === 0) return null;
+
+  // Post admin reply to a buyer note
+  async function postAdminReplyToNote(parentId: string) {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    setPostingReply(true);
+    try {
+      const res = await fetch(`/api/admin/inquiries/${inquiryId}/comments`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ role: "ADMIN", content: trimmed, parentId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = notes.map(n =>
+          n.id === parentId
+            ? { ...n, replies: [...n.replies, data.comment] }
+            : n
+        );
+        setNotes(updated);
+        onBuyerNotesChange(inquiryId, updated);
+        setReplyText("");
+        setReplyingToNoteId(null);
+      }
+    } finally {
+      setPostingReply(false);
+    }
+  }
+
+  return (
+    <div className="adminInquiriesBuyerNotesSection">
+      <span className="adminInquiriesBuyerNotesLabel">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Buyer Notes ({notes.length})
+      </span>
+      <div className="adminInquiriesBuyerNoteList">
+        {notes.map(note => (
+          <div key={note.id} className="adminInquiriesBuyerNoteBlock">
+            {/* Buyer note */}
+            <div className="adminInquiriesCommentItem adminInquiriesCommentItemBuyer">
+              <div className="adminInquiriesCommentMeta">
+                <span className="adminInquiriesCommentRoleBadge adminInquiriesCommentRoleBadgeBuyer">Buyer</span>
+                <span className="adminInquiriesCommentTime">{formatTime(note.createdAt)}</span>
+              </div>
+              <p className="adminInquiriesCommentText">{note.content}</p>
+              <div className="adminInquiriesCommentItemActions">
+                <button
+                  className="adminInquiriesCommentReplyBtn"
+                  onClick={() => { setReplyingToNoteId(note.id); setReplyText(""); }}
+                >
+                  Reply
+                </button>
+              </div>
+            </div>
+            {/* Admin replies to this buyer note */}
+            {note.replies.length > 0 && (
+              <div className="adminInquiriesReplyList">
+                {note.replies.map(reply => (
+                  <div key={reply.id} className="adminInquiriesCommentItem adminInquiriesCommentItemAdmin">
+                    <div className="adminInquiriesCommentMeta">
+                      <span className="adminInquiriesCommentRoleBadge adminInquiriesCommentRoleBadgeAdmin">Admin</span>
+                      <span className="adminInquiriesCommentTime">{formatTime(reply.createdAt)}</span>
+                    </div>
+                    <p className="adminInquiriesCommentText">{reply.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Inline admin reply form for this buyer note */}
+            {replyingToNoteId === note.id && (
+              <div className="adminInquiriesReplyForm">
+                <textarea
+                  className="adminInquiriesCommentTextarea"
+                  autoFocus
+                  value={replyText}
+                  disabled={postingReply}
+                  placeholder="Reply to buyer note…"
+                  onChange={e => setReplyText(sanitize(e.target.value))}
+                  rows={2}
+                />
+                <div className="adminInquiriesCommentActions">
+                  <button
+                    className="adminInquiriesCommentSave"
+                    onClick={() => postAdminReplyToNote(note.id)}
+                    disabled={postingReply || !replyText.trim()}
+                  >
+                    {postingReply ? "Posting…" : "Post Reply"}
+                  </button>
+                  <button
+                    className="adminInquiriesCommentCancel"
+                    onClick={() => setReplyingToNoteId(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── CommentThread — threaded comment UI on a custom request ──────────────────
 // Admin can add multiple comments. Each admin comment shows a "Reply" button.
 // Buyer replies are shown indented beneath the admin comment they reply to.
@@ -192,7 +311,11 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
   initialComments:  InquiryComment[];
   onCommentsChange: (id: string, comments: InquiryComment[]) => void;
 }) {
-  const [comments,      setComments]      = useState<InquiryComment[]>(initialComments);
+  // Separate admin root comments from buyer root notes
+  const adminComments = initialComments.filter(c => c.role === "ADMIN" && !c.parentId);
+  const buyerNotes    = initialComments.filter(c => c.role === "BUYER" && !c.parentId);
+  const [comments,      setComments]      = useState<InquiryComment[]>(adminComments);
+  const [buyerNoteList, setBuyerNoteList] = useState<InquiryComment[]>(buyerNotes);
   const [newAdminText,  setNewAdminText]  = useState("");
   const [postingAdmin,  setPostingAdmin]  = useState(false);
   const [replyingToId,  setReplyingToId]  = useState<string | null>(null);
@@ -216,7 +339,7 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
         const data = await res.json();
         const updated = [...comments, { ...data.comment, replies: [] }];
         setComments(updated);
-        onCommentsChange(inquiryId, updated);
+        onCommentsChange(inquiryId, [...updated, ...buyerNoteList]);
         setNewAdminText("");
         setIsExpanded(true);
         setTimeout(() => {
@@ -247,7 +370,7 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
             : c
         );
         setComments(updated);
-        onCommentsChange(inquiryId, updated);
+        onCommentsChange(inquiryId, [...updated, ...buyerNoteList]);
         setReplyText("");
         setReplyingToId(null);
       }
@@ -271,7 +394,7 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
       );
     }
     setComments(updated);
-    onCommentsChange(inquiryId, updated);
+    onCommentsChange(inquiryId, [...updated, ...buyerNoteList]);
   }
 
   const rootComments = comments.filter(c => !c.parentId);
@@ -390,6 +513,16 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
               ))}
             </div>
           )}
+
+          {/* Buyer standalone notes — admin can reply to each */}
+          <BuyerNotesList
+            inquiryId={inquiryId}
+            buyerNotes={buyerNoteList}
+            onBuyerNotesChange={(id, updatedNotes) => {
+              setBuyerNoteList(updatedNotes);
+              onCommentsChange(id, [...comments, ...updatedNotes]);
+            }}
+          />
 
           {/* New admin comment form */}
           <div className="adminInquiriesNewCommentForm">

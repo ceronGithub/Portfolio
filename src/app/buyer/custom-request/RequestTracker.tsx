@@ -1,7 +1,8 @@
 // RequestTracker.tsx — Buyer-side tracker for submitted custom requests.
 // Fetches GET /api/inquiry on mount and displays each inquiry as a collapsible card.
 // Shows a 4-step status pipeline: Pending → Under Review → Quoted → Replied.
-// Displays adminQuote. Admin comments shown as a thread; buyer can reply per comment.
+// Admin comments shown as a thread; buyer can reply per admin comment.
+// Buyer can also add multiple standalone notes; admin can reply to each buyer note.
 
 "use client";
 
@@ -158,6 +159,118 @@ function BuyerCommentBlock({ inquiryId, comment, onReplyPosted }: {
   );
 }
 
+// ── BuyerNoteThread — buyer posts multiple standalone notes; admin replies shown beneath each ─
+
+function BuyerNoteThread({ inquiryId, buyerNotes, onNoteAdded }: {
+  inquiryId:    string;
+  buyerNotes:   InquiryComment[];
+  onNoteAdded:  (note: InquiryComment) => void;
+}) {
+  const [addingNote,  setAddingNote]  = useState(false);
+  const [noteText,    setNoteText]    = useState("");
+  const [postingNote, setPostingNote] = useState(false);
+
+  function formatCommentTime(iso: string) {
+    return new Date(iso).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  // Post a new root-level buyer note via the dedicated note endpoint
+  async function handlePostNote() {
+    const trimmed = noteText.trim();
+    if (!trimmed) return;
+    setPostingNote(true);
+    try {
+      const res = await fetch(`/api/buyer/inquiry/${inquiryId}/note`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ content: trimmed }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onNoteAdded(data.comment);
+        setNoteText("");
+        setAddingNote(false);
+      }
+    } finally {
+      setPostingNote(false);
+    }
+  }
+
+  return (
+    <div className="rtBuyerNoteThread">
+      {/* Section header */}
+      <div className="rtDescriptionHeader">
+        <span className="rtDescriptionLabel">Your Notes</span>
+        {!addingNote && (
+          <button className="rtEditBtn" onClick={() => { setAddingNote(true); setNoteText(""); }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Note
+          </button>
+        )}
+      </div>
+
+      {/* Existing buyer notes list */}
+      {buyerNotes.length > 0 ? (
+        <div className="rtBuyerNoteList">
+          {buyerNotes.map(note => (
+            <div key={note.id} className="rtBuyerNoteBlock">
+              {/* Buyer note */}
+              <div className="rtCommentItem rtCommentItemBuyer">
+                <div className="rtCommentMeta">
+                  <span className="rtCommentRoleBadge rtCommentRoleBadgeBuyer">You</span>
+                  <span className="rtCommentTime">{formatCommentTime(note.createdAt)}</span>
+                </div>
+                <p className="rtCommentText">{note.content}</p>
+              </div>
+              {/* Admin replies to this buyer note */}
+              {note.replies && note.replies.length > 0 && (
+                <div className="rtReplyList">
+                  {note.replies.map(reply => (
+                    <div key={reply.id} className="rtCommentItem rtCommentItemAdmin">
+                      <div className="rtCommentMeta">
+                        <span className="rtCommentRoleBadge rtCommentRoleBadgeAdmin">Admin</span>
+                        <span className="rtCommentTime">{formatCommentTime(reply.createdAt)}</span>
+                      </div>
+                      <p className="rtCommentText">{reply.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rtNoneText">No notes added yet.</p>
+      )}
+
+      {/* Add note form */}
+      {addingNote && (
+        <div className="rtEditBlock">
+          <textarea
+            className="rtEditTextarea"
+            autoFocus
+            value={noteText}
+            disabled={postingNote}
+            placeholder="Add a note to your request…"
+            onChange={e => setNoteText(sanitize(e.target.value))}
+            rows={3}
+          />
+          <div className="rtEditActions">
+            <button className="rtEditSave" onClick={handlePostNote} disabled={postingNote || !noteText.trim()}>
+              {postingNote ? "Posting…" : "Post Note"}
+            </button>
+            <button className="rtEditCancel" onClick={() => { setAddingNote(false); setNoteText(""); }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Single request card ───────────────────────────────────────────────────────
 
 function RequestCard({
@@ -175,9 +288,6 @@ function RequestCard({
   const [editingDesc,      setEditingDesc]       = useState(false);
   const [descValue,        setDescValue]         = useState(request.description);
   const [savingDesc,       setSavingDesc]        = useState(false);
-  const [editingComment,   setEditingComment]    = useState(false);
-  const [commentValue,     setCommentValue]      = useState(request.buyerComment ?? "");
-  const [savingComment,    setSavingComment]     = useState(false);
 
   const currentStepIndex = STATUS_ORDER[request.status];
 
@@ -209,25 +319,6 @@ function RequestCard({
       }
     } finally {
       setSavingDesc(false);
-    }
-  }
-
-  // ── Save buyer comment handler ─────────────────────────────────────────────
-  async function handleSaveComment() {
-    setSavingComment(true);
-    try {
-      const trimmed = commentValue.trim() || null;
-      const res = await fetch(`/api/buyer/inquiry/${request.id}`, {
-        method:  "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ buyerComment: trimmed }),
-      });
-      if (res.ok) {
-        onUpdate(request.id, { buyerComment: trimmed });
-        setEditingComment(false);
-      }
-    } finally {
-      setSavingComment(false);
     }
   }
 
@@ -387,53 +478,16 @@ function RequestCard({
             </div>
           )}
 
-          {/* Buyer comment — editable */}
-          <div className="rtBuyerCommentRow">
-            <div className="rtDescriptionHeader">
-              <span className="rtDescriptionLabel">
-                {request.adminComment ? "Your Reply" : "Add a Note"}
-              </span>
-              {!editingComment && (
-                <button
-                  className="rtEditBtn"
-                  onClick={() => { setEditingComment(true); setCommentValue(request.buyerComment ?? ""); }}
-                >
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                  {request.buyerComment ? "Edit" : "Add"}
-                </button>
-              )}
-            </div>
-            {editingComment ? (
-              <div className="rtEditBlock">
-                <textarea
-                  className="rtEditTextarea"
-                  autoFocus
-                  value={commentValue}
-                  disabled={savingComment}
-                  placeholder={request.adminComment ? "Reply to admin…" : "Add a note to your request…"}
-                  onChange={e => setCommentValue(sanitize(e.target.value))}
-                  rows={3}
-                />
-                <div className="rtEditActions">
-                  <button className="rtEditSave" onClick={handleSaveComment} disabled={savingComment}>
-                    {savingComment ? "Saving…" : "Save"}
-                  </button>
-                  <button className="rtEditCancel" onClick={() => { setEditingComment(false); setCommentValue(request.buyerComment ?? ""); }}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              request.buyerComment ? (
-                <p className="rtDescriptionText">{request.buyerComment}</p>
-              ) : (
-                <p className="rtNoneText">No note added yet.</p>
-              )
-            )}
-          </div>
+          {/* Buyer notes — multiple standalone notes; admin can reply to each */}
+          <BuyerNoteThread
+            inquiryId={request.id}
+            buyerNotes={request.comments.filter(c => c.role === "BUYER" && !c.parentId)}
+            onNoteAdded={(note) => {
+              onUpdate(request.id, {
+                comments: [...request.comments, note],
+              });
+            }}
+          />
 
           {/* Optional detail chips */}
           {(request.animCount || request.polyBudget || request.reference) && (

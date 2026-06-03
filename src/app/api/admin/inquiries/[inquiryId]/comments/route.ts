@@ -32,9 +32,11 @@ export async function POST(req: NextRequest, context: { params: Promise<{ inquir
   }
 
   // If buyer reply, parentId must reference an existing ADMIN comment on this inquiry
-  if (role === "BUYER" && parentId) {
+  // If admin reply, parentId must reference an existing BUYER root note on this inquiry
+  if (parentId) {
+    const expectedParentRole = role === "BUYER" ? "ADMIN" : "BUYER";
     const parent = await prisma.inquiryComment.findFirst({
-      where: { id: parentId, inquiryId, role: "ADMIN" },
+      where: { id: parentId, inquiryId, role: expectedParentRole, parentId: null },
     });
     if (!parent) return NextResponse.json({ error: "Parent comment not found" }, { status: 404 });
   }

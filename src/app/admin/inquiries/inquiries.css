@@ -637,3 +637,34 @@
 /* ── Dark mode badge color overrides ──────────────────────────── */
 .adminShellDark .adminInquiriesCommentRoleBadgeAdmin { color: #c9a96e; }
 .adminShellDark .adminInquiriesCommentRoleBadgeBuyer { color: #38a169; }
+/* ── Buyer Notes section inside admin CommentThread ──────────────────────── */
+.adminInquiriesBuyerNotesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.adminInquiriesBuyerNotesLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(56,161,105,0.7);
+}
+
+.adminInquiriesBuyerNoteList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.adminInquiriesBuyerNoteBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
