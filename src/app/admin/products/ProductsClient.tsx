@@ -566,13 +566,20 @@ function MediaEditor({ product, onFieldSaved }: {
   // Shared drive folder ref for 3D model and action file uploads (FileUploadField components)
   const driveFolderIdRef = useRef<string>("");
 
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
+
   // ── Upload pending file then PATCH the resulting URL ─────────────────
+  // If a file is pending, uploads first. Bails without patching DB if upload fails.
+  // Surfaces upload errors to admin via per-field error state.
   async function handleSaveSimpleField(field: string) {
     setSaving(prev => ({ ...prev, [field]: true }));
+    setUploadErrors(prev => ({ ...prev, [field]: "" }));
     let urlToSave = drafts[field].trim() || null;
+    let uploadAttempted = false;
 
     const pendingFile = pendingFiles[field];
     if (pendingFile) {
+      uploadAttempted = true;
       const dest = destinations[field];
       const form = new FormData();
       form.append("file",        pendingFile);
@@ -593,8 +600,25 @@ function MediaEditor({ product, onFieldSaved }: {
           if (data.driveId && dest === "both") {
             await patchMediaDriveId(product.id, field, data.driveId);
           }
+        } else {
+          // Upload failed — surface error, bail without patching DB
+          const errMsg = data.errors?.join("; ") || data.error || "Upload failed";
+          setUploadErrors(prev => ({ ...prev, [field]: errMsg }));
+          setSaving(prev => ({ ...prev, [field]: false }));
+          return;
         }
-      } catch { /* silent */ }
+      } catch {
+        setUploadErrors(prev => ({ ...prev, [field]: "Network error — upload failed" }));
+        setSaving(prev => ({ ...prev, [field]: false }));
+        return;
+      }
+    }
+
+    // If upload was attempted but produced no URL, bail — don't wipe DB value
+    if (uploadAttempted && !urlToSave) {
+      setUploadErrors(prev => ({ ...prev, [field]: "Upload returned no URL" }));
+      setSaving(prev => ({ ...prev, [field]: false }));
+      return;
     }
 
     const ok = await patchProductMedia(product.id, field, urlToSave);
@@ -710,6 +734,9 @@ function MediaEditor({ product, onFieldSaved }: {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={currentUrl} alt="Face PNG preview" className="apMediaImageThumb" />
               </div>
+            )}
+            {uploadErrors[field] && (
+              <p className="apMediaUploadError">{uploadErrors[field]}</p>
             )}
           </div>
         );

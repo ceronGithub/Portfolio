@@ -1795,6 +1795,17 @@
 }
 .apMediaFolderSelect:focus { border-color: #c9a96e; }
 
+/* Upload error message for simple media fields */
+.apMediaUploadError {
+  width:       100%;
+  font-size:   0.7rem;
+  color:       #fc8181;
+  margin-top:  0.2rem;
+  padding:     0.2rem 0.4rem;
+  background:  rgba(252,129,129,0.08);
+  border-radius: 4px;
+}
+
 /* ── 3D Model multi-upload slots — Task 1 ───────────────────────────── */
 .apThreeDSlots {
   display:        grid;
