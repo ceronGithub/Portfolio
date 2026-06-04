@@ -109,6 +109,13 @@ export async function PATCH(
       data.packageTier = body.packageTier;
     }
 
+    // enabledTiers — comma-separated list of buyer-visible tiers, e.g. "mesh_only,standard"
+    // At least one tier must remain enabled.
+    if (typeof body.enabledTiers === "string") {
+      const tiers = body.enabledTiers.split(",").map((t: string) => t.trim()).filter((t: string) => VALID_TIERS.includes(t));
+      if (tiers.length > 0) data.enabledTiers = tiers.join(",");
+    }
+
     for (const field of TIER_PRICES) {
       if (field in body) data[field] = body[field] !== null ? Number(body[field]) : null;
     }

@@ -2158,3 +2158,74 @@
   color:      #f87171;
   margin-top: 0.4rem;
 }
+
+/* ── Tier Availability Toggle ─────────────────────────────────────────────── */
+.apTierAvailEditor {
+  padding:       1rem 0 0.5rem;
+  border-top:    1px solid rgba(255,255,255,0.07);
+}
+
+.apTierToggleRow {
+  display:        flex;
+  gap:            0.5rem;
+  flex-wrap:      wrap;
+  margin-top:     0.5rem;
+}
+
+.apTierToggleBtn {
+  display:        flex;
+  align-items:    center;
+  gap:            0.4rem;
+  padding:        0.45rem 0.85rem;
+  border-radius:  6px;
+  border:         1px solid transparent;
+  font-size:      0.75rem;
+  font-weight:    600;
+  cursor:         pointer;
+  transition:     background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.apTierToggleBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.apTierToggleBtnOn {
+  background:    rgba(34,197,94,0.12);
+  border-color:  rgba(34,197,94,0.4);
+  color:         #86efac;
+}
+.apTierToggleBtnOn:hover:not(:disabled) {
+  background:    rgba(239,68,68,0.1);
+  border-color:  rgba(239,68,68,0.35);
+  color:         #fca5a5;
+}
+
+.apTierToggleBtnOff {
+  background:    rgba(255,255,255,0.04);
+  border-color:  rgba(255,255,255,0.1);
+  color:         rgba(255,255,255,0.3);
+}
+.apTierToggleBtnOff:hover:not(:disabled) {
+  background:    rgba(34,197,94,0.08);
+  border-color:  rgba(34,197,94,0.25);
+  color:         rgba(134,239,172,0.7);
+}
+
+.apTierToggleDot {
+  width:          7px; height: 7px;
+  border-radius:  50%;
+  background:     currentColor;
+  flex-shrink:    0;
+}
+
+.apTierToggleLabel { letter-spacing: 0.01em; }
+
+.apTierToggleState {
+  font-size:      0.6rem;
+  letter-spacing: 0.08em;
+  opacity:        0.65;
+}
+
+.apTierSavedBadge {
+  color:          #86efac;
+  font-size:      0.65rem;
+  font-weight:    700;
+  margin-left:    0.25rem;
+}

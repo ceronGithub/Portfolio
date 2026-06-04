@@ -146,7 +146,7 @@ async function deleteFromDrive(fileId: string): Promise<void> {
 
 // Creates a new product record.
 async function createProduct(data: {
-  name: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; category: string;
+  name: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; enabledTiers: string; category: string;
   description?: string; isLatest?: boolean;
   previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
   actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
@@ -527,6 +527,41 @@ function MediaEditor({ product, onFieldSaved }: {
   const [priceSaved,    setPriceSaved]    = useState(false);
   const [priceError,    setPriceError]    = useState("");
 
+  // ── Tier Availability Toggles ──────────────────────────────────────────────
+  // Admin controls which tiers buyers can see and purchase.
+  // At least 1 tier must stay enabled.
+  const ALL_TIERS = ["mesh_only", "standard", "full_pack"] as const;
+  type TierKey = typeof ALL_TIERS[number];
+  const TIER_LABELS: Record<TierKey, string> = { mesh_only: "Mesh Only", standard: "Standard", full_pack: "Full Pack" };
+
+  const parsedEnabled = (product.enabledTiers ?? "mesh_only,standard,full_pack")
+    .split(",").map(t => t.trim()).filter(Boolean);
+  const [enabledTiers,    setEnabledTiers]    = useState<TierKey[]>(parsedEnabled as TierKey[]);
+  const [tiersSaving,     setTiersSaving]     = useState(false);
+  const [tiersSaved,      setTiersSaved]      = useState(false);
+
+  async function toggleTier(tier: TierKey) {
+    const next = enabledTiers.includes(tier)
+      ? enabledTiers.filter(t => t !== tier)
+      : [...enabledTiers, tier];
+    // Enforce: at least one tier must remain enabled
+    if (next.length === 0) return;
+    const ordered = ALL_TIERS.filter(t => next.includes(t));
+    setEnabledTiers(ordered);
+    setTiersSaving(true);
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ enabledTiers: ordered.join(",") }),
+    });
+    setTiersSaving(false);
+    if (res.ok) {
+      onFieldSaved(product.id, "enabledTiers", ordered.join(","));
+      setTiersSaved(true);
+      setTimeout(() => setTiersSaved(false), 2000);
+    }
+  }
+
   const fullPackNum   = parseInt(fullPackDraft.replace(/,/g, ""), 10);
   const isValidPrice  = !isNaN(fullPackNum) && fullPackNum > 0;
   const derivedMesh   = isValidPrice ? Math.round(fullPackNum * 0.45) : 0;
@@ -712,6 +747,35 @@ function MediaEditor({ product, onFieldSaved }: {
           </button>
         </div>
         {priceError && <p className="apMediaPriceError">{priceError}</p>}
+      </div>
+
+      {/* ── Tier Availability — toggle which tiers buyers can see ── */}
+      <div className="apTierAvailEditor">
+        <p className="apMediaSectionLabel">
+          Tier Availability
+          <span className="apMediaSectionHint"> — toggle which tiers buyers can purchase</span>
+          {tiersSaving && <span className="apMediaSectionHint"> · Saving…</span>}
+          {tiersSaved  && <span className="apTierSavedBadge"> ✓ Saved</span>}
+        </p>
+        <div className="apTierToggleRow">
+          {ALL_TIERS.map(tier => {
+            const isOn     = enabledTiers.includes(tier);
+            const isLast   = isOn && enabledTiers.length === 1;
+            return (
+              <button
+                key={tier}
+                className={`apTierToggleBtn ${isOn ? "apTierToggleBtnOn" : "apTierToggleBtnOff"}`}
+                onClick={() => toggleTier(tier)}
+                disabled={isLast || tiersSaving}
+                title={isLast ? "At least one tier must remain enabled" : isOn ? "Click to hide from buyers" : "Click to show to buyers"}
+              >
+                <span className="apTierToggleDot" />
+                <span className="apTierToggleLabel">{TIER_LABELS[tier]}</span>
+                <span className="apTierToggleState">{isOn ? "ON" : "OFF"}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Preview Video + Face PNG — simple text + pick file rows ── */}

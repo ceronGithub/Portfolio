@@ -64,6 +64,7 @@ model Product {
   priceMeshOnly     Int             @default(0)   // mesh_only tier price
   priceStandard     Int             @default(0)   // standard tier price
   priceFullPack     Int             @default(0)   // full_pack tier price
+  enabledTiers      String          @default("mesh_only,standard,full_pack") // comma-sep list of buyer-visible tiers
   category          ProductCategory @default(character)
   packageTier       PackageTier     @default(mesh_only)
 

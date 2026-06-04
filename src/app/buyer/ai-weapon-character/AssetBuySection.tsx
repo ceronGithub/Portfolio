@@ -24,6 +24,7 @@ interface AssetItem {
   priceMesh:    number;
   priceStandard:number;
   priceFull:    number;
+  enabledTiers: PackTier[]; // tiers admin has enabled for sale
   hasObj:       boolean;
   hasFbx:       boolean;
   hasGlb:       boolean;
@@ -175,6 +176,9 @@ export default function AssetBuySection({
             priceMesh:    p.priceMesh    ?? Math.round(base * 0.45),
             priceStandard:p.priceStandard ?? Math.round(base * 0.75),
             priceFull:    p.priceFull    ?? base,
+            enabledTiers: p.enabledTiers
+              ? (p.enabledTiers as string).split(",").map((t: string) => t.trim()).filter(Boolean) as PackTier[]
+              : (["mesh_only", "standard", "full_pack"] as PackTier[]),
             hasObj:       p.hasObj  ?? true,
             hasFbx:       p.hasFbx  ?? true,
             hasGlb:       p.hasGlb  ?? false,
@@ -199,7 +203,7 @@ export default function AssetBuySection({
           if (ownedAssetIds.has(id) || next.has(id)) return;
           const asset = allAssets.find(a => a.id === id);
           if (!asset) return;
-          next.set(id, { asset, tier: "mesh_only", price: computeTierPrice(asset, "mesh_only") });
+          next.set(id, { asset, tier: asset.enabledTiers[0] ?? "mesh_only", price: computeTierPrice(asset, asset.enabledTiers[0] ?? "mesh_only") });
         });
         return next;
       });
@@ -299,7 +303,7 @@ export default function AssetBuySection({
   // ── Cart actions ──────────────────────────────────────────────────────────
 
   // Task 1: toggle asset in cart — opens tier picker if adding, removes if already in
-  function toggleCart(asset: AssetItem, defaultTier: PackTier = "mesh_only") {
+  function toggleCart(asset: AssetItem, defaultTier: PackTier = asset.enabledTiers[0] ?? "mesh_only") {
     if (ownedAssetIds.has(asset.id)) return;
     setCart(prev => {
       const next = new Map(prev);
@@ -414,7 +418,7 @@ export default function AssetBuySection({
         <div className="abcTierSelector">
           <p className="abcTierSelectorLabel">Choose pack:</p>
           <div className="abcTierBtns">
-            {TIER_ORDER.map(t => (
+            {TIER_ORDER.filter(t => asset.enabledTiers.includes(t)).map(t => (
               <button
                 key={t}
                 className={`abcTierBtn ${t === tier ? "abcTierBtnActive" : ""} abcTierBtn_${t}`}
@@ -866,7 +870,7 @@ export default function AssetBuySection({
                       <div className="assetTierPicker" onClick={e => e.stopPropagation()}>
                         <p className="assetTierPickerLabel">Choose a pack for <strong>{asset.label}</strong>:</p>
                         <div className="assetTierPickerBtns">
-                          {TIER_ORDER.map(t => (
+                          {TIER_ORDER.filter(t => asset.enabledTiers.includes(t)).map(t => (
                             <button
                               key={t}
                               className={`assetTierPickerBtn assetTierPickerBtn_${t} ${isInCart && entry?.tier === t ? "assetTierPickerBtnActive" : ""}`}

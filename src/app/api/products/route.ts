@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
   const products = await prisma.product.findMany({
     where:  { id: { in: ids } },
-    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, category: true, previewVideoUrl: true },
+    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, enabledTiers: true, category: true, previewVideoUrl: true },
   });
 
   const mapped = products.map((p: { id: string; name: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; category: string; previewVideoUrl: string | null }) => ({
@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
     priceMeshOnly:  p.priceMeshOnly,
     priceStandard:  p.priceStandard,
     priceFullPack:  p.priceFullPack,
+    enabledTiers:   p.enabledTiers ?? "mesh_only,standard,full_pack",
     accent:         CATEGORY_ACCENT[p.category] ?? "#888",
     previewVideoUrl: toProxyUrl(p.previewVideoUrl),
   }));
