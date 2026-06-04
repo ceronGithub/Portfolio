@@ -128,6 +128,21 @@
   line-height: 1.4;
 }
 
+/* Clickable contact value — links to email/messaging apps */
+.iqContactValueLink {
+  font-family:     'DM Mono', monospace;
+  font-size:       0.72rem;
+  color:           rgba(255,255,255,0.5);
+  line-height:     1.4;
+  text-decoration: none;
+  transition:      color 0.2s;
+}
+
+.iqContactValueLink:hover {
+  color: rgba(255,255,255,0.85);
+  text-decoration: underline;
+}
+
 .iqMetaNote {
   display:     flex;
   align-items: flex-start;
