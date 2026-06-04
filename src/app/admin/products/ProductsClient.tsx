@@ -1387,15 +1387,16 @@ function AddProductForm({ onProductCreated, onClose }: {
     const parsedMesh     = parseInt(priceMeshOnly.replace(/,/g, ""), 10);
     const parsedStandard = parseInt(priceStandard.replace(/,/g, ""), 10);
     const parsedFull     = parseInt(priceFullPack.replace(/,/g, ""), 10);
-    if (isNaN(parsedMesh)     || parsedMesh     < 0) { setError("Enter a valid Mesh Only price (₱)."); return; }
-    if (isNaN(parsedStandard) || parsedStandard < 0) { setError("Enter a valid Standard price (₱)."); return; }
-    if (isNaN(parsedFull)     || parsedFull     < 0) { setError("Enter a valid Full Pack price (₱)."); return; }
+    const isFlat = category === "interior" || category === "exterior";
+    if (!isFlat && (isNaN(parsedMesh)     || parsedMesh     < 0)) { setError("Enter a valid Mesh Only price (₱)."); return; }
+    if (!isFlat && (isNaN(parsedStandard) || parsedStandard < 0)) { setError("Enter a valid Standard price (₱)."); return; }
+    if (isNaN(parsedFull) || parsedFull < 0) { setError("Enter a valid price (₱)."); return; }
     setSaving(true);
     setError("");
     const product = await createProduct({
       name: name.trim(),
-      priceMeshOnly: parsedMesh,
-      priceStandard:  parsedStandard,
+      priceMeshOnly: isFlat ? parsedFull : parsedMesh,
+      priceStandard:  isFlat ? parsedFull : parsedStandard,
       priceFullPack:  parsedFull,
       category,
       description: description.trim() || undefined,
@@ -1433,6 +1434,7 @@ function AddProductForm({ onProductCreated, onClose }: {
           <label className="apMediaLabel">Name *</label>
           <input className="apMediaInput" placeholder="e.g. Axe-01" value={name} onChange={e => setName(e.target.value)} />
         </div>
+        {(category === "character" || category === "weapon") && (<>
         <div className="apAddProductField">
           <label className="apMediaLabel">Price — Mesh Only (₱) *</label>
           <input className="apMediaInput" type="number" min="0" placeholder="0" value={priceMeshOnly} onChange={e => setPriceMeshOnly(e.target.value)} />
@@ -1441,8 +1443,9 @@ function AddProductForm({ onProductCreated, onClose }: {
           <label className="apMediaLabel">Price — Standard (₱) *</label>
           <input className="apMediaInput" type="number" min="0" placeholder="0" value={priceStandard} onChange={e => setPriceStandard(e.target.value)} />
         </div>
+        </>)}
         <div className="apAddProductField">
-          <label className="apMediaLabel">Price — Full Pack (₱) *</label>
+          <label className="apMediaLabel">{(category === "interior" || category === "exterior") ? "Price (₱) *" : "Price — Full Pack (₱) *"}</label>
           <input className="apMediaInput" type="number" min="0" placeholder="0" value={priceFullPack} onChange={e => setPriceFullPack(e.target.value)} />
         </div>
         <div className="apAddProductField">
@@ -1459,12 +1462,12 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput" placeholder="Short description…" value={description} onChange={e => setDescription(e.target.value)} />
         </div>
 
-        {/* ── Preview Video → R2, filename: name-animation ── */}
+        {/* ── Preview Video → Both (R2 + GDrive), filename: name-animation ── */}
         <div className="apAddProductField apAddProductFieldFull">
           <FileUploadField
-            label="Preview Video (R2)"
+            label="Preview Video (Both)"
             accept="video/*"
-            defaultDestination="r2"
+            defaultDestination="both"
             driveFolderIdRef={driveFolderIdRef}
             customFileName={nameSlug ? `${nameSlug}-animation` : undefined}
             onUploaded={r => { if (r.r2Url) setPreviewVideoUrl(r.r2Url); else if (r.driveId) setPreviewVideoUrl(`/api/drive-video?id=${r.driveId}`); }}
@@ -1472,7 +1475,8 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={previewVideoUrl} onChange={e => setPreviewVideoUrl(e.target.value)} />
         </div>
 
-        {/* ── Face PNG → Both (R2 for display URL + GDrive backup), filename: name-face ── */}
+        {/* ── Face PNG — Character & Weapon only ── */}
+        {(category === "character" || category === "weapon") && (
         <div className="apAddProductField">
           <FileUploadField
             label="Face PNG (R2 + GDrive)"
@@ -1488,8 +1492,10 @@ function AddProductForm({ onProductCreated, onClose }: {
           />
           <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={facePngUrl} onChange={e => setFacePngUrl(e.target.value)} />
         </div>
+        )}
 
-        {/* ── 3D Model — multi-upload: OBJ, FBX, GLB — each with delete ── */}
+        {/* ── 3D Model — Character & Weapon only ── */}
+        {(category === "character" || category === "weapon") && (
         <div className="apAddProductField apAddProductFieldFull">
           <label className="apMediaLabel" style={{ marginBottom: "0.35rem" }}>3D Model (OBJ / FBX / GLB) — Both</label>
           <div className="apThreeDSlots">
@@ -1567,34 +1573,36 @@ function AddProductForm({ onProductCreated, onClose }: {
             </div>
           </div>
         </div>
+        )} {/* end character/weapon only — 3D Model */}
 
-        {/* ── Action Videos 1–7 → Both, filename: name-action-N ── */}
-        {(([
-          ["Action 1 Video", actionOneUrl,   setActionOneUrl,   "actionOneUrl",   "1"],
-          ["Action 2 Video", actionTwoUrl,   setActionTwoUrl,   "actionTwoUrl",   "2"],
-          ["Action 3 Video", actionThreeUrl, setActionThreeUrl, "actionThreeUrl", "3"],
-          ["Action 4 Video", actionFourUrl,  setActionFourUrl,  "actionFourUrl",  "4"],
-          ["Action 5 Video", actionFiveUrl,  setActionFiveUrl,  "actionFiveUrl",  "5"],
-          ["Action 6 Video", actionSixUrl,   setActionSixUrl,   "actionSixUrl",   "6"],
-          ["Action 7 Video", actionSevenUrl, setActionSevenUrl, "actionSevenUrl", "7"],
-        ] as [string, string, React.Dispatch<React.SetStateAction<string>>, string, string][])).map(([lbl, val, setter, fieldKey, num]) => (
-          <div key={num} className="apAddProductField">
-            <FileUploadField
-              label={`${lbl} (Both)`}
-              accept="video/*"
-              defaultDestination="both"
-              driveFolderIdRef={driveFolderIdRef}
-              customFileName={nameSlug ? `${nameSlug}-action-${num}` : undefined}
-              onUploaded={r => {
-                if (r.r2Url) setter(r.r2Url);
-                else if (r.driveId) setter(`/api/drive-video?id=${r.driveId}`);
-                // Track Drive ID for purge-on-delete
-                if (r.driveId) setMediaDriveIds(prev => ({ ...prev, [fieldKey]: r.driveId! }));
-              }}
-            />
-            <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={val} onChange={e => setter(e.target.value)} />
-          </div>
-        ))}
+        {/* ── Action Videos 1–7 — Character & Weapon only ── */}
+        {(category === "character" || category === "weapon") && (<>
+          {([
+            ["Action 1 Video", actionOneUrl,   setActionOneUrl,   "actionOneUrl",   "1"],
+            ["Action 2 Video", actionTwoUrl,   setActionTwoUrl,   "actionTwoUrl",   "2"],
+            ["Action 3 Video", actionThreeUrl, setActionThreeUrl, "actionThreeUrl", "3"],
+            ["Action 4 Video", actionFourUrl,  setActionFourUrl,  "actionFourUrl",  "4"],
+            ["Action 5 Video", actionFiveUrl,  setActionFiveUrl,  "actionFiveUrl",  "5"],
+            ["Action 6 Video", actionSixUrl,   setActionSixUrl,   "actionSixUrl",   "6"],
+            ["Action 7 Video", actionSevenUrl, setActionSevenUrl, "actionSevenUrl", "7"],
+          ] as [string, string, React.Dispatch<React.SetStateAction<string>>, string, string][]).map(([lbl, val, setter, fieldKey, num]) => (
+            <div key={num} className="apAddProductField">
+              <FileUploadField
+                label={`${lbl} (Both)`}
+                accept="video/*"
+                defaultDestination="both"
+                driveFolderIdRef={driveFolderIdRef}
+                customFileName={nameSlug ? `${nameSlug}-action-${num}` : undefined}
+                onUploaded={r => {
+                  if (r.r2Url) setter(r.r2Url);
+                  else if (r.driveId) setter(`/api/drive-video?id=${r.driveId}`);
+                  if (r.driveId) setMediaDriveIds(prev => ({ ...prev, [fieldKey]: r.driveId! }));
+                }}
+              />
+              <input className="apMediaInput apFileManualInput" placeholder="or paste URL manually…" value={val} onChange={e => setter(e.target.value)} />
+            </div>
+          ))}
+        </>)}
 
         <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
           <p className="apMediaLabel" style={{ marginBottom: "0.5rem" }}>Mark as Latest Drop</p>
