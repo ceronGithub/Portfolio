@@ -113,7 +113,6 @@ model Order {
   userId          String
   productId       String?     // nullable — set for 3D asset orders
   systemId        String?     // nullable — set for System orders
-  selectedTierId  String?     // nullable — DesignTier chosen by buyer
   status          OrderStatus @default(PENDING)
   paymongoOrderId String?
   amountPaid      Int?
