@@ -106,7 +106,7 @@ export async function uploadFileToDrive(
   accessToken: string,
   fileName:    string,
   mimeType:    string,
-  fileBuffer:  Buffer,
+  fileBuffer:  Uint8Array,
   folderId:    string
 ): Promise<{ id: string; name: string; webViewLink: string }> {
   // Step 1 — Initiate the resumable session, metadata only (JSON, no binary)
@@ -142,7 +142,7 @@ export async function uploadFileToDrive(
       "Content-Type":   mimeType,
       "Content-Length": String(fileBuffer.length),
     },
-    body: fileBuffer,
+    body: fileBuffer as unknown as BodyInit,
   });
 
   if (!uploadRes.ok) {
