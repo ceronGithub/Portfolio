@@ -394,3 +394,85 @@
   background: rgba(245, 158, 11, 0.08);
   border-color: rgba(245, 158, 11, 0.18);
 }
+
+/* ── Payment check ── */
+.ohPayCheck {
+  margin-top:  1rem;
+  padding-top: 0.85rem;
+  border-top:  1px solid rgba(255,255,255,0.05);
+}
+
+.ohPayCheckBtn {
+  display:      flex;
+  align-items:  center;
+  gap:          0.4rem;
+  padding:      0.45rem 1rem;
+  border-radius: 999px;
+  border:       1px solid rgba(96,165,250,0.2);
+  background:   rgba(96,165,250,0.05);
+  color:        rgba(96,165,250,0.75);
+  font-family:  'DM Mono', monospace;
+  font-size:    0.64rem;
+  cursor:       pointer;
+  transition:   all 0.2s;
+}
+.ohPayCheckBtn:hover {
+  background:   rgba(96,165,250,0.1);
+  border-color: rgba(96,165,250,0.35);
+  color:        rgba(96,165,250,0.95);
+}
+
+.ohPayCheckLoading {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.3);
+}
+
+.ohPayCheckSpinner {
+  display:       inline-block;
+  width:         12px;
+  height:        12px;
+  border:        2px solid rgba(255,255,255,0.1);
+  border-top-color: rgba(96,165,250,0.6);
+  border-radius: 50%;
+  animation:     ohSpin 0.7s linear infinite;
+}
+@keyframes ohSpin { to { transform: rotate(360deg); } }
+
+.ohPayCheckResult {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  flex-wrap:   wrap;
+}
+.ohPayCheckResultPaid  { color: rgba(34,197,94,0.85); }
+.ohPayCheckResultUnpaid { color: rgba(251,191,36,0.85); }
+.ohPayCheckResultError  { color: rgba(239,68,68,0.85); }
+
+.ohPayCheckLink {
+  color:           rgba(96,165,250,0.8);
+  text-decoration: underline;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.62rem;
+  margin-left:     0.25rem;
+}
+.ohPayCheckLink:hover { color: rgba(96,165,250,1); }
+
+.ohPayCheckRetry {
+  background:  none;
+  border:      1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  color:       rgba(255,255,255,0.35);
+  font-family: 'DM Mono', monospace;
+  font-size:   0.58rem;
+  padding:     0.25rem 0.65rem;
+  cursor:      pointer;
+  margin-left: 0.25rem;
+  transition:  all 0.2s;
+}
+.ohPayCheckRetry:hover { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); }

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import "./orders.css";
 
 type OrderStatus =
@@ -81,8 +81,31 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
   const isFailed     = order.status === "FAILED";
   const isExpired    = order.status === "LINK_EXPIRED";
   const isDelivered  = order.status === "DELIVERED";
+  const isPending    = order.status === "PENDING";
   const isTerminal   = isFailed || isExpired;
   const meta         = STATUS_META[order.status];
+
+  // ── Payment check state ────────────────────────────────────────────
+  const [checkState, setCheckState] = useState<"idle" | "loading" | "paid" | "unpaid" | "error">("idle");
+  const [payUrl,     setPayUrl]     = useState<string | null>(null);
+
+  const handleCheckPayment = useCallback(async () => {
+    setCheckState("loading");
+    try {
+      const res  = await fetch(`/api/buyer/pending-payment/${order.id}`);
+      const data = await res.json();
+      if (!res.ok) { setCheckState("error"); return; }
+      if (data.checkoutUrl) {
+        setPayUrl(data.checkoutUrl);
+        setCheckState("unpaid");
+        window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
+      } else {
+        setCheckState("paid");
+      }
+    } catch {
+      setCheckState("error");
+    }
+  }, [order.id]);
 
   return (
     <div className={`ohCard ${isFailed ? "ohCardFailed" : ""} ${isExpired ? "ohCardExpired" : ""}`}>
@@ -180,6 +203,62 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
         <div className="ohExpiredNote">
           <span>⏱</span>
           <p>Payment link expired. Contact support to reissue a new payment link.</p>
+        </div>
+      )}
+
+      {/* ── Payment check — PENDING orders only ── */}
+      {isPending && (
+        <div className="ohPayCheck">
+          {checkState === "idle" && (
+            <button className="ohPayCheckBtn" onClick={handleCheckPayment}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              Check if Paid
+            </button>
+          )}
+          {checkState === "loading" && (
+            <div className="ohPayCheckLoading">
+              <span className="ohPayCheckSpinner" />
+              Checking payment…
+            </div>
+          )}
+          {checkState === "paid" && (
+            <div className="ohPayCheckResult ohPayCheckResultPaid">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Payment confirmed — processing your order.
+            </div>
+          )}
+          {checkState === "unpaid" && (
+            <div className="ohPayCheckResult ohPayCheckResultUnpaid">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Not yet paid.
+              {payUrl && (
+                <a className="ohPayCheckLink" href={payUrl} target="_blank" rel="noopener noreferrer">
+                  Pay now →
+                </a>
+              )}
+              <button className="ohPayCheckRetry" onClick={() => setCheckState("idle")}>Check again</button>
+            </div>
+          )}
+          {checkState === "error" && (
+            <div className="ohPayCheckResult ohPayCheckResultError">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              Could not verify payment. Try again.
+              <button className="ohPayCheckRetry" onClick={() => setCheckState("idle")}>Retry</button>
+            </div>
+          )}
         </div>
       )}
     </div>
