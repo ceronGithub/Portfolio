@@ -12,7 +12,7 @@ import { getValidAccessToken }       from "@/lib/googleDrive";
 // ── Fields allowed per tier ───────────────────────────────────────────────────
 const TIER_FIELDS: Record<string, string[]> = {
   mesh_only: [
-    "fileKeyObj", "fileKeyFbx", "facePngUrl", "fileKey",
+    "fileKeyObj", "fileKeyFbx", "facePngUrl", "fileKey", "previewVideoUrl",
   ],
   standard: [
     "fileKeyObj", "fileKeyFbx", "fileKeyGlb", "facePngUrl", "fileKey",

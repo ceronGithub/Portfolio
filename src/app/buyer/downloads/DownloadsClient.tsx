@@ -41,17 +41,15 @@ function getTierFiles(item: DownloadItem): { label: string; field: string; ext: 
   // Admin delivery package (Ownership.fileKey)
   if (item.fileKey)   files.push({ label: "Package",  field: "fileKey",    ext: "zip" });
 
-  // PNG preview — all tiers
-  if (item.facePngUrl) files.push({ label: "PNG",     field: "facePngUrl", ext: "png" });
+  // PNG + preview video — all tiers
+  if (item.facePngUrl)      files.push({ label: "PNG",         field: "facePngUrl",      ext: "png" });
+  if (item.fileKeyObj)      files.push({ label: "OBJ",         field: "fileKeyObj",      ext: "obj" });
+  if (item.fileKeyFbx)      files.push({ label: "FBX",         field: "fileKeyFbx",      ext: "fbx" });
+  if (item.previewVideoUrl) files.push({ label: "Preview MP4", field: "previewVideoUrl", ext: "mp4" });
 
-  // Mesh files — all tiers
-  if (item.fileKeyObj) files.push({ label: "OBJ",     field: "fileKeyObj", ext: "obj" });
-  if (item.fileKeyFbx) files.push({ label: "FBX",     field: "fileKeyFbx", ext: "fbx" });
-
-  // GLB + preview + core anims — standard + full_pack
+  // GLB + core anims — standard + full_pack
   if (tier === "standard" || tier === "full_pack") {
     if (item.fileKeyGlb)       files.push({ label: "GLB",            field: "fileKeyGlb",       ext: "glb" });
-    if (item.previewVideoUrl)  files.push({ label: "Preview MP4",    field: "previewVideoUrl",  ext: "mp4" });
     if (item.animIdleUrl)      files.push({ label: "Anim: Idle",     field: "animIdleUrl",      ext: "fbx" });
     if (item.animWalkUrl)      files.push({ label: "Anim: Walk",     field: "animWalkUrl",      ext: "fbx" });
     if (item.animRunUrl)       files.push({ label: "Anim: Run",      field: "animRunUrl",       ext: "fbx" });
