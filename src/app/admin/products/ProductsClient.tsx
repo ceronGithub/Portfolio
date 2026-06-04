@@ -14,6 +14,7 @@ interface Product {
   id: string; name: string; description: string | null;
   priceMeshOnly: number; priceStandard: number; priceFullPack: number;
   isActive: boolean; isLatest: boolean;
+  enabledTiers: string | null;
   category: string;
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
@@ -535,7 +536,7 @@ function MediaEditor({ product, onFieldSaved }: {
   const TIER_LABELS: Record<TierKey, string> = { mesh_only: "Mesh Only", standard: "Standard", full_pack: "Full Pack" };
 
   const parsedEnabled = (product.enabledTiers ?? "mesh_only,standard,full_pack")
-    .split(",").map(t => t.trim()).filter(Boolean);
+    .split(",").map((t: string) => t.trim()).filter((t: string) => t.length > 0);
   const [enabledTiers,    setEnabledTiers]    = useState<TierKey[]>(parsedEnabled as TierKey[]);
   const [tiersSaving,     setTiersSaving]     = useState(false);
   const [tiersSaved,      setTiersSaved]      = useState(false);
@@ -1030,18 +1031,9 @@ function FileUploadField({
   const uploadedR2UrlRef  = useRef<string | null>(null);
   const uploadedDriveIdRef = useRef<string | null>(null);
 
-  // Folder lists — seeded with known real folders, live fetch merges on top
+  // Folder lists — seeded empty; live fetch populates on first open
   const KNOWN_R2_FOLDERS: string[] = ["architecture", "character", "systems", "weapon"];
-  const KNOWN_DRIVE_FOLDERS: { id: string; name: string }[] = [
-    { id: "ai-building",   name: "AI Generated building interior and exterior timelapse" },
-    { id: "ai-ext-design", name: "AI Generated Exterior Design" },
-    { id: "ai-ext-time",   name: "AI Generated Exterior timelapse" },
-    { id: "ai-int-design", name: "AI Generated Interior Design" },
-    { id: "ai-int-time",   name: "AI Generated Interior timelapse" },
-    { id: "char-modeling", name: "character-modeling" },
-    { id: "prompts",       name: "Prompts" },
-    { id: "weapons",       name: "weapons-modeling" },
-  ];
+  const KNOWN_DRIVE_FOLDERS: { id: string; name: string }[] = [];
 
   const [r2Folders,      setR2Folders]      = useState<string[]>(KNOWN_R2_FOLDERS);
   const [driveFolders,   setDriveFolders]   = useState<{ id: string; name: string }[]>(KNOWN_DRIVE_FOLDERS);
@@ -1156,8 +1148,12 @@ function FileUploadField({
     if (destination === "gdrive" || destination === "both") {
       // Prefer folder ID selected from dropdown; fall back to parent-provided ref
       const resolvedFolderId = selectedDriveFolderIdRef.current || driveFolderIdRef.current;
-      if (resolvedFolderId) {
-        form.append("driveFolderId", resolvedFolderId);
+      if (resolvedFolderId && resolvedFolderId.trim()) {
+        form.append("driveFolderId", resolvedFolderId.trim());
+      } else {
+        setErr("Please select a Google Drive folder before uploading.");
+        setUploading(false);
+        return;
       }
     }
 
@@ -1404,6 +1400,7 @@ function AddProductForm({ onProductCreated, onClose }: {
       category,
       description: description.trim() || undefined,
       isLatest,
+      enabledTiers:    "mesh_only,standard,full_pack",
       previewVideoUrl: previewVideoUrl.trim() || undefined,
       facePngUrl:      facePngUrl.trim()      || undefined,
       threeDUrl:       resolveThreeDUrl()      || undefined,
