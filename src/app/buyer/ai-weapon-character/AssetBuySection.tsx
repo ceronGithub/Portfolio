@@ -72,6 +72,18 @@ const TIER_INCLUDES: Record<PackTier, string[]> = {
   full_pack: ["OBJ + FBX + GLB", "4K PBR textures", "7+ animations", "Web / AR ready GLB", "Face PNG"],
 };
 
+// Weapon tier descriptions — based on file formats, not animations
+const WEAPON_TIER_INCLUDES: Record<PackTier, string[]> = {
+  mesh_only: ["OBJ file only", "4K PBR textures", "Game-ready topology"],
+  standard:  ["OBJ + FBX files", "4K PBR textures", "Unity & Unreal ready"],
+  full_pack: ["OBJ + FBX + GLB", "4K PBR textures", "Unity · Unreal · Blender · Web / AR ready"],
+};
+
+// Returns the correct tier includes based on asset category
+function getTierIncludes(category: string): Record<PackTier, string[]> {
+  return category === "Weapon" ? WEAPON_TIER_INCLUDES : TIER_INCLUDES;
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function getBundleDiscount(count: number): number {
@@ -499,12 +511,17 @@ export default function AssetBuySection({
 
           {/* Perks strip */}
           <div className="assetBuyPerks">
-            {[
+            {(browseTab === "Weapon" ? [
+              { icon: "◈", label: "OBJ + FBX + GLB" },
+              { icon: "⬡", label: "4K PBR textures" },
+              { icon: "◉", label: "Unity / Unreal ready" },
+              { icon: "∞", label: "Royalty-free" },
+            ] : [
               { icon: "◈", label: "OBJ + FBX + GLB" },
               { icon: "⬡", label: "4K PBR textures" },
               { icon: "◉", label: "Hand-keyed anims" },
               { icon: "∞", label: "Royalty-free" },
-            ].map(p => (
+            ]).map(p => (
               <div key={p.label} className="assetBuyPerk">
                 <span className="assetBuyPerkIcon">{p.icon}</span>
                 <span className="assetBuyPerkLabel">{p.label}</span>
@@ -518,26 +535,26 @@ export default function AssetBuySection({
               {
                 key:   "mesh_only" as PackTier,
                 name:  "Mesh Only",
-                price: "₱699–₱999",
+                price: browseTab === "Weapon" ? "₱299–₱599"   : "₱699–₱999",
                 cls:   "abcPkgCardMesh",
-                items: TIER_INCLUDES.mesh_only,
-                note:  "Static props, background NPCs",
+                items: getTierIncludes(browseTab).mesh_only,
+                note:  browseTab === "Weapon" ? "Single format, budget-friendly"     : "Static props, background NPCs",
               },
               {
                 key:   "standard" as PackTier,
                 name:  "Standard Pack",
-                price: "₱1,800–₱2,200",
+                price: browseTab === "Weapon" ? "₱599–₱999"   : "₱1,800–₱2,200",
                 cls:   "abcPkgCardStandard",
-                items: TIER_INCLUDES.standard,
-                note:  "Game-ready, Unity / Unreal",
+                items: getTierIncludes(browseTab).standard,
+                note:  browseTab === "Weapon" ? "OBJ + FBX, Unity & Unreal ready"    : "Game-ready, Unity / Unreal",
               },
               {
                 key:   "full_pack" as PackTier,
                 name:  "Full Pack",
-                price: "₱2,500–₱3,200",
+                price: browseTab === "Weapon" ? "₱999–₱1,599" : "₱2,500–₱3,200",
                 cls:   "abcPkgCardFull",
-                items: TIER_INCLUDES.full_pack,
-                note:  "Production-ready, VR / AR / cinematics",
+                items: getTierIncludes(browseTab).full_pack,
+                note:  browseTab === "Weapon" ? "All formats, every engine covered"  : "Production-ready, VR / AR / cinematics",
                 featured: true,
               },
             ].map(pkg => (
