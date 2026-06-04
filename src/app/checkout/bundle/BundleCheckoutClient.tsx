@@ -177,10 +177,10 @@ export default function BundleCheckoutClient({
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items:       items.map(item => ({ productId: item.id, price: item.price })),
+          items:       items.map(item => ({ productId: item.id, price: item.price, tier: (item as any).tier ?? "full_pack" })),
           method,
           total:       finalTotal,
-          grantedTier: "full_pack",   // bundle buyers always get full_pack
+          grantedTier: items[0] ? ((items[0] as any).tier ?? "full_pack") : "full_pack",
         }),
       });
 

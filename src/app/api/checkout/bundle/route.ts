@@ -8,7 +8,13 @@ import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 import { createPaymentLink }         from "@/lib/paymongo";
 
-interface BundleItem { productId: string; price: number; }
+interface BundleItem { productId: string; price: number; tier?: string; }
+
+function applyTierMultiplier(basePrice: number, tier: string): number {
+  if (tier === "mesh_only") return Math.round(basePrice * 0.45);
+  if (tier === "standard")  return Math.round(basePrice * 0.75);
+  return basePrice; // full_pack
+}
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -38,19 +44,27 @@ export async function POST(req: NextRequest) {
   const tier        = grantedTier ?? "mesh_only";
 
   try {
-    // Create one Order per product
+    // Create one Order per product — use the tier-resolved price from each item
     const orders = await Promise.all(
-      products.map((p: { id: string; price: number }) =>
-        prisma.order.create({
+      products.map((p: { id: string; price: number }) => {
+        const item     = items.find((i: BundleItem) => i.productId === p.id);
+        const itemTier = item?.tier ?? grantedTier ?? "mesh_only";
+        // Use price from request (already tier-resolved by page.tsx) if present,
+        // otherwise compute it server-side as a safe fallback
+        const itemPrice = (item?.price && item.price > 0)
+          ? item.price
+          : applyTierMultiplier(p.price, itemTier);
+
+        return prisma.order.create({
           data: {
             userId,
             productId:    p.id,
             status:       "PENDING",
-            amountPaid:   p.price,
-            deliveryNote: `tier:${tier}`,
+            amountPaid:   itemPrice,          // PHP, tier-resolved
+            deliveryNote: `tier:${itemTier}`,
           },
-        })
-      )
+        });
+      })
     );
 
     // Use first orderId as reference, store all orderIds joined in remarks

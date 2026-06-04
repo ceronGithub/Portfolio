@@ -156,7 +156,7 @@ function linkAvailabilityLabel(isoStr: string): string {
   return `Link expires in ${hoursLeft}h ${minutesLeft}m`;
 }
 
-export default function PendingPaymentsClient({ orders }: Props) {
+export default function PendingPaymentsClient({ orders = [] }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [toast,     setToast]     = useState<{ msg: string; type: "ok" | "err" } | null>(null);
 
@@ -198,7 +198,7 @@ export default function PendingPaymentsClient({ orders }: Props) {
       }
 
       const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
+      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
     } catch (err: any) {
       console.error("[PendingPayments] retry failed:", err);
       showToast(err?.message ?? "Failed to retrieve payment link.", "err");

@@ -30,16 +30,17 @@ export default async function PendingPaymentsPage() {
 
   return (
     <PendingPaymentsClient
-      orders={pendingOrders.map((o: any) => ({
-        id:               o.id,
-        productName:      o.product.name,
-        productCategory:  o.product.category,
-        // amountPaid is stored in centavos — divide by 100 to display as PHP
-        amount:           o.amountPaid ? Math.round(o.amountPaid / 100) : o.product.price,
-        paymongoOrderId:  o.paymongoOrderId ?? null,
-        createdAt:        o.createdAt.toISOString(),
-      }))}
+      orders={pendingOrders
+        .filter((o: any) => o.product != null)
+        .map((o: any) => ({
+          id:               o.id,
+          productName:      o.product.name,
+          productCategory:  o.product.category,
+          // amountPaid is stored in PHP
+          amount:           o.amountPaid ?? o.product.price,
+          paymongoOrderId:  o.paymongoOrderId ?? null,
+          createdAt:        o.createdAt.toISOString(),
+        }))}
     />
   );
 }
-

@@ -112,6 +112,7 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
         label:    p.name,
         category: toDisplayCategory(p.category),
         price:    applyTierMultiplier(p.price, tier),
+        tier,
       };
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
