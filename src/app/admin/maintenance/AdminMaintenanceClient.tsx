@@ -642,7 +642,10 @@ function VCTab({ orderId, initSchedules, buyerName: defaultName, buyerPhone: def
 }
 
 // ── Client Detail ─────────────────────────────────────────────────────────────
-function ClientDetail({ order }: { order: Order }) {
+function ClientDetail({ order, showToast }: {
+  order: Order;
+  showToast: (msg: string, type: "success" | "warning" | "error") => void;
+}) {
   const [tab, setTab] = useState<"tasks" | "bugs" | "vc">("tasks");
   const pkgCfg = PKG_CONFIG[order.package];
 
@@ -766,7 +769,7 @@ export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) 
 
             {/* Right — Detail */}
             {selected
-              ? <ClientDetail key={selected.id} order={selected} />
+              ? <ClientDetail key={selected.id} order={selected} showToast={showToast} />
               : <div className="amNoSelect">Select a client to manage</div>
             }
           </div>
