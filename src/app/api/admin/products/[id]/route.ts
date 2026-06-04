@@ -96,7 +96,7 @@ export async function PATCH(
       "animAttackOneUrl", "animAttackTwoUrl", "animDeathUrl", "animHitUrl",
     ] as const;
 
-    const TIER_PRICES = ["priceMesh", "priceStandard", "priceFull"] as const;
+    const TIER_PRICES = ["priceMeshOnly", "priceStandard", "priceFullPack"] as const;
     const VALID_TIERS = ["mesh_only", "standard", "full_pack"];
 
     const data: Record<string, unknown> = {};
@@ -108,6 +108,13 @@ export async function PATCH(
 
     if (typeof body.packageTier === "string" && VALID_TIERS.includes(body.packageTier)) {
       data.packageTier = body.packageTier;
+    }
+
+    // enabledTiers — comma-separated buyer-visible tiers e.g. "mesh_only,full_pack"
+    // At least one tier must remain enabled.
+    if (typeof body.enabledTiers === "string") {
+      const tiers = body.enabledTiers.split(",").map((t: string) => t.trim()).filter((t: string) => VALID_TIERS.includes(t));
+      if (tiers.length > 0) data.enabledTiers = tiers.join(",");
     }
 
     for (const field of TIER_PRICES) {

@@ -1,51 +1,113 @@
 export const dynamic = 'force-dynamic';
-// GET /api/products/by-ids?ids=id1,id2,...
-// Returns minimal product data for a set of cuid IDs.
-// Used by CartDrawer to resolve display names, categories, prices, and accent colors.
+// GET /api/products?category=character|weapon|interior|exterior[&latest=true]
+// Returns active products filtered by category.
+// GDrive viewer URLs are rewritten to /api/drive-video proxy URLs.
+// Returns: packageTier, priceMeshOnly/priceStandard/priceFullPack, enabledTiers,
+//          hasObj/hasFbx/hasGlb flags, animCount, animNames.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma }                    from "@/lib/prisma";
 
-// Category → accent color mapping (matches ASSET_META in BuyerDashboardClient)
-const CATEGORY_ACCENT: Record<string, string> = {
-  character: "#22c55e",
-  weapon:    "#c9935e",
-  interior:  "#60a5fa",
-  exterior:  "#a78bfa",
-};
-
 function toProxyUrl(raw: string | null): string | null {
   if (!raw) return null;
   if (raw.startsWith("/api/drive-video")) return raw;
-  const matchFile = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (matchFile) return `/api/drive-video?id=${matchFile[1]}`;
+  const matchFile  = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchFile)  return `/api/drive-video?id=${matchFile[1]}`;
+  const matchParam = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchParam) return `/api/drive-video?id=${matchParam[1]}`;
   return raw;
 }
 
-export async function GET(req: NextRequest) {
-  const rawIds = req.nextUrl.searchParams.get("ids") ?? "";
-  const ids    = rawIds.split(",").map(s => s.trim()).filter(Boolean);
+const ANIM_KEYS = [
+  { key: "animIdleUrl",      label: "Idle"     },
+  { key: "animWalkUrl",      label: "Walk"     },
+  { key: "animRunUrl",       label: "Run"      },
+  { key: "animAttackOneUrl", label: "Attack 1" },
+  { key: "animAttackTwoUrl", label: "Attack 2" },
+  { key: "animDeathUrl",     label: "Death"    },
+  { key: "animHitUrl",       label: "Hit"      },
+] as const;
 
-  if (ids.length === 0) {
-    return NextResponse.json({ products: [] });
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const category   = searchParams.get("category");
+  const latestOnly = searchParams.get("latest") === "true";
+
+  const validCategories = ["character", "weapon", "interior", "exterior"];
+  if (!category || !validCategories.includes(category)) {
+    return NextResponse.json(
+      { error: "Valid category required: character | weapon | interior | exterior" },
+      { status: 400 }
+    );
   }
 
   const products = await prisma.product.findMany({
-    where:  { id: { in: ids } },
-    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, enabledTiers: true, category: true, previewVideoUrl: true },
+    where: {
+      category: category as "character" | "weapon" | "interior" | "exterior",
+      isActive: true,
+      ...(latestOnly ? { isLatest: true } : {}),
+    },
+    select: {
+      id:              true,
+      name:            true,
+      priceMeshOnly:   true,
+      priceStandard:   true,
+      priceFullPack:   true,
+      enabledTiers:    true,
+      category:        true,
+      packageTier:     true,
+      isLatest:        true,
+      previewVideoUrl: true,
+      facePngUrl:      true,
+      fileKeyObj:      true,
+      fileKeyFbx:      true,
+      fileKeyGlb:      true,
+      animIdleUrl:     true,
+      animWalkUrl:     true,
+      animRunUrl:      true,
+      animAttackOneUrl: true,
+      animAttackTwoUrl: true,
+      animDeathUrl:    true,
+      animHitUrl:      true,
+      actionOneUrl:    true,
+      actionTwoUrl:    true,
+      actionThreeUrl:  true,
+    },
+    orderBy: { createdAt: "asc" },
   });
 
-  const mapped = products.map((p: { id: string; name: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; category: string; previewVideoUrl: string | null }) => ({
-    id:             p.id,
-    name:           p.name,
-    category:       p.category,
-    priceMeshOnly:  p.priceMeshOnly,
-    priceStandard:  p.priceStandard,
-    priceFullPack:  p.priceFullPack,
-    enabledTiers:   p.enabledTiers ?? "mesh_only,standard,full_pack",
-    accent:         CATEGORY_ACCENT[p.category] ?? "#888",
-    previewVideoUrl: toProxyUrl(p.previewVideoUrl),
-  }));
+  const mapped = products.map((p: Record<string, any>) => {
+    const animNames = ANIM_KEYS
+      .filter(a => !!p[a.key])
+      .map(a => a.label);
+
+    return {
+      id:             p.id,
+      name:           p.name,
+      // Tier prices — admin-set, used by buyer tier picker
+      priceMeshOnly:  p.priceMeshOnly,
+      priceStandard:  p.priceStandard,
+      priceFullPack:  p.priceFullPack,
+      // Enabled tiers — comma-separated, admin-controlled
+      enabledTiers:   p.enabledTiers ?? "mesh_only,standard,full_pack",
+      category:       p.category,
+      packageTier:    p.packageTier,
+      isLatest:       p.isLatest,
+      previewVideoUrl: toProxyUrl(p.previewVideoUrl),
+      facePngUrl:     p.facePngUrl,
+      // Format flags — buyer UI uses these for badges
+      hasObj:         !!p.fileKeyObj,
+      hasFbx:         !!p.fileKeyFbx,
+      hasGlb:         !!p.fileKeyGlb,
+      // Animation summary
+      animCount:      animNames.length,
+      animNames,
+      // Legacy
+      actionOneUrl:   toProxyUrl(p.actionOneUrl),
+      actionTwoUrl:   toProxyUrl(p.actionTwoUrl),
+      actionThreeUrl: toProxyUrl(p.actionThreeUrl),
+    };
+  });
 
   return NextResponse.json({ products: mapped });
 }

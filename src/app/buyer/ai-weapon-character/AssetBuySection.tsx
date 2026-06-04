@@ -173,9 +173,9 @@ export default function AssetBuySection({
             category:     browseTab,
             videoSrc:     p.previewVideoUrl ?? "",
             // Use DB tier prices if available, else compute multipliers
-            priceMesh:    p.priceMesh    ?? Math.round(base * 0.45),
-            priceStandard:p.priceStandard ?? Math.round(base * 0.75),
-            priceFull:    p.priceFull    ?? base,
+            priceMesh:    p.priceMeshOnly ?? Math.round(base * 0.45),
+            priceStandard:p.priceStandard  ?? Math.round(base * 0.75),
+            priceFull:    p.priceFullPack  ?? base,
             enabledTiers: p.enabledTiers
               ? (p.enabledTiers as string).split(",").map((t: string) => t.trim()).filter(Boolean) as PackTier[]
               : (["mesh_only", "standard", "full_pack"] as PackTier[]),
