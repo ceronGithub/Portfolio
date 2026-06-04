@@ -35,8 +35,8 @@ const WEAPON_PACKS: { key: WeaponPack; label: string; desc: string; price: numbe
 
 // ── Base prices (for Interior, Exterior, AI Animation, System, Other) ─────────
 const BASE_PRICE: Partial<Record<AssetType, number>> = {
-  Interior:      9500,
-  Exterior:      12000,
+  Interior:      15000,
+  Exterior:      20000,
   "AI Animation": 7500,
   System:        33000,
   Other:         8000,
@@ -44,8 +44,8 @@ const BASE_PRICE: Partial<Record<AssetType, number>> = {
 
 const SPEED_MULTIPLIER: Record<DeliverySpeed, number> = {
   Standard: 1.0,
-  Rush:     2.2,   // package price + (package price × 1.2)
-  Urgent:   3.2,   // package price + (package price × 2.2)
+  Rush:     2.2,   // base price + 120% of base price (base × 2.2); base = quoted price
+  Urgent:   3.2,   // base price + 220% of base price (base × 3.2); base = quoted price
 };
 
 const SPEED_SURCHARGE_LABEL: Record<DeliverySpeed, string> = {
@@ -202,8 +202,8 @@ const ASSET_ACCENT: Record<AssetType, string> = {
 };
 
 const ASSET_BASE_DISPLAY: Partial<Record<AssetType, string>> = {
-  Interior:      "from ₱9,500",
-  Exterior:      "from ₱12,000",
+  Interior:      "from ₱15,000",
+  Exterior:      "from ₱20,000",
   "AI Animation": "from ₱7,500",
   System:        "from ₱33,000",
 };

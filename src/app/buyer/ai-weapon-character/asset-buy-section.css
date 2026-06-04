@@ -46,8 +46,8 @@
 .assetBuyFogCanvas {
   position:       absolute;
   left:           0; bottom: 0;
-  width:          100%; height: 45%;
-  z-index:        3;
+  width:          100%; height: 55%;
+  z-index:        4;
   pointer-events: none;
   will-change:    transform;
 }

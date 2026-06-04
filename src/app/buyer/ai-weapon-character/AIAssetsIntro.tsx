@@ -41,13 +41,13 @@ function spawnEmber(w: number, h: number): EmberParticle {
   return {
     x:           Math.random() * w,
     y:           h + 8,
-    vx:          (Math.random() - 0.5) * 0.5,
-    vy:          -(Math.random() * 1.8 + 0.6),
+    vx:          (Math.random() - 0.5) * 0.2,
+    vy:          -(Math.random() * 0.6 + 0.15),
     wobble:      0,
-    wobbleSpeed: 0.04 + Math.random() * 0.06,
-    size:        Math.random() * 2.2 + 0.5,
+    wobbleSpeed: 0.02 + Math.random() * 0.025,
+    size:        Math.random() * 0.9 + 0.2,
     life:        0,
-    maxLife:     Math.round(Math.random() * 160 + 100),
+    maxLife:     Math.round(Math.random() * 280 + 200),
     hue:         Math.random() * 30 + 10,   // 10–40: orange-red
   };
 }
@@ -223,7 +223,7 @@ export default function AIAssetsIntro() {
     window.addEventListener("resize", resize);
 
     // Pre-seed embers scattered at random heights
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 15; i++) {
       const e = spawnEmber(canvas.width, canvas.height);
       e.life = Math.random() * e.maxLife;
       e.y    = Math.random() * canvas.height;
@@ -235,8 +235,8 @@ export default function AIAssetsIntro() {
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      // Spawn new embers
-      if (embers.current.length < 55 && Math.random() < 0.6)
+      // Spawn new embers — lower cap and lower rate for subtle effect
+      if (embers.current.length < 25 && Math.random() < 0.25)
         embers.current.push(spawnEmber(w, h));
 
       embers.current = embers.current.filter(e => e.life < e.maxLife);
@@ -254,20 +254,20 @@ export default function AIAssetsIntro() {
         if (alpha <= 0.005) continue;
 
         // Core glow — warm orange-red
-        const grad = ctx!.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * 3);
+        const grad = ctx!.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * 1.8);
         grad.addColorStop(0,   `hsla(${e.hue}, 100%, 88%, ${alpha})`);
         grad.addColorStop(0.3, `hsla(${e.hue}, 100%, 55%, ${alpha * 0.7})`);
         grad.addColorStop(0.7, `hsla(${e.hue},  80%, 30%, ${alpha * 0.3})`);
         grad.addColorStop(1,   `hsla(${e.hue},  60%, 10%, 0)`);
 
         ctx!.beginPath();
-        ctx!.arc(e.x, e.y, e.size * 3, 0, Math.PI * 2);
+        ctx!.arc(e.x, e.y, e.size * 1.8, 0, Math.PI * 2);
         ctx!.fillStyle = grad;
         ctx!.fill();
 
         // Bright core dot
         ctx!.beginPath();
-        ctx!.arc(e.x, e.y, e.size * 0.55, 0, Math.PI * 2);
+        ctx!.arc(e.x, e.y, e.size * 0.4, 0, Math.PI * 2);
         ctx!.fillStyle = `hsla(50, 100%, 95%, ${alpha * 0.9})`;
         ctx!.fill();
       }
