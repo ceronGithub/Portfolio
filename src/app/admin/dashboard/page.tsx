@@ -85,7 +85,7 @@ export default async function AdminDashboardPage() {
           && o.productId != null && productIdIsSystem.get(o.productId) === true;
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
-    return { label: m.label, value: Math.round(total / 100) };
+    return { label: m.label, value: total };
   });
 
   // ── Monthly revenue — products ────────────────────────────────────
@@ -97,7 +97,7 @@ export default async function AdminDashboardPage() {
           && (o.productId == null || productIdIsSystem.get(o.productId) !== true);
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
-    return { label: m.label, value: Math.round(total / 100) };
+    return { label: m.label, value: total };
   });
 
   // ── Weekly revenue — systems ──────────────────────────────────────
@@ -109,7 +109,7 @@ export default async function AdminDashboardPage() {
           && o.productId != null && productIdIsSystem.get(o.productId) === true;
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
-    return { label: w.label, value: Math.round(total / 100) };
+    return { label: w.label, value: total };
   });
 
   // ── Weekly revenue — products ─────────────────────────────────────
@@ -121,10 +121,10 @@ export default async function AdminDashboardPage() {
           && (o.productId == null || productIdIsSystem.get(o.productId) !== true);
       })
       .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
-    return { label: w.label, value: Math.round(total / 100) };
+    return { label: w.label, value: total };
   });
 
-  const totalRevenue = (revenue._sum.amountPaid ?? 0) / 100;
+  const totalRevenue = revenue._sum.amountPaid ?? 0;
   const notActive    = userCount - activeUsers;
 
   // ── Site visit trend — daily unique visits for last 14 days ──────

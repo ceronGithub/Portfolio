@@ -36,7 +36,7 @@ export default async function AdminOrdersPage() {
 
   const totalRevenue = orders
     .filter((o: { status: string }) => o.status === "PAID")
-    .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0) / 100;
+    .reduce((sum: number, o: { amountPaid: number | null }) => sum + (o.amountPaid ?? 0), 0);
 
   const paidCount    = orders.filter((o: { status: string }) => o.status === "PAID").length;
   const pendingCount = orders.filter((o: { status: string }) => o.status === "PENDING").length;

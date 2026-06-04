@@ -466,7 +466,7 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                 </span>
                 <span className="adminOrdersCell adminOrdersCellMono">
                   {order.amountPaid
-                    ? `₱${(order.amountPaid / 100).toLocaleString()}`
+                    ? `₱${order.amountPaid.toLocaleString()}`
                     : <span className="adminCellEmpty">—</span>}
                 </span>
                 <span className="adminOrdersCell adminOrdersCellActions">
