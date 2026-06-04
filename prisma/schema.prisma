@@ -61,7 +61,9 @@ model Product {
   slug              String?         @unique // Legacy asset slug (orc-01, axe-03, int-01, etc)
   name              String
   description       String?
-  price             Int
+  priceMeshOnly     Int             @default(0)   // mesh_only tier price
+  priceStandard     Int             @default(0)   // standard tier price
+  priceFullPack     Int             @default(0)   // full_pack tier price
   category          ProductCategory @default(character)
   packageTier       PackageTier     @default(mesh_only)
 

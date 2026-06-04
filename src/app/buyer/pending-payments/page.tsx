@@ -11,10 +11,10 @@ import PendingPaymentsClient from "./PendingPaymentsClient";
 
 // Mirrors the multiplier logic in checkout/bundle/page.tsx and AssetBuySection.tsx.
 // Source of truth: product.price (base) × tier multiplier = amount due.
-function applyTierMultiplier(basePrice: number, tier: string): number {
-  if (tier === "mesh_only") return Math.round(basePrice * 0.45);
-  if (tier === "standard")  return Math.round(basePrice * 0.75);
-  return basePrice; // full_pack = base price, no multiplier
+function getTierPrice(product: { priceMeshOnly: number; priceStandard: number; priceFullPack: number }, tier: string): number {
+  if (tier === "mesh_only") return product.priceMeshOnly;
+  if (tier === "standard")  return product.priceStandard;
+  return product.priceFullPack;
 }
 
 // Extract tier from deliveryNote field (stored as "tier:mesh_only", "tier:full_pack", etc.)
@@ -40,7 +40,7 @@ export default async function PendingPaymentsPage() {
       deliveryNote:    true,
       createdAt:       true,
       paymongoOrderId: true,
-      product: { select: { name: true, price: true, category: true } },
+      product: { select: { name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, category: true } },
     },
   });
 
@@ -50,13 +50,13 @@ export default async function PendingPaymentsPage() {
         .filter((o: any) => o.product != null)
         .map((o: any) => {
           const tier          = extractTier(o.deliveryNote as string | null);
-          const correctAmount = applyTierMultiplier(o.product.price, tier);
+          const correctAmount = getTierPrice(o.product, tier);
 
           return {
             id:              o.id,
             productName:     o.product.name,
             productCategory: o.product.category,
-            // Always recompute from product.price + tier — never trust stale amountPaid
+            // Always recompute from product tier price — never trust stale amountPaid
             amount:          correctAmount,
             tier,
             paymongoOrderId: o.paymongoOrderId ?? null,

@@ -10,10 +10,10 @@ import { createPaymentLink }         from "@/lib/paymongo";
 
 interface BundleItem { productId: string; price: number; tier?: string; }
 
-function applyTierMultiplier(basePrice: number, tier: string): number {
-  if (tier === "mesh_only") return Math.round(basePrice * 0.45);
-  if (tier === "standard")  return Math.round(basePrice * 0.75);
-  return basePrice; // full_pack
+function getTierPrice(product: { priceMeshOnly: number; priceStandard: number; priceFullPack: number }, tier: string): number {
+  if (tier === "mesh_only") return product.priceMeshOnly;
+  if (tier === "standard")  return product.priceStandard;
+  return product.priceFullPack;
 }
 
 export async function POST(req: NextRequest) {
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   const productIds = items.map((i: BundleItem) => i.productId);
   const products   = await prisma.product.findMany({
     where:  { id: { in: productIds }, isActive: true },
-    select: { id: true, price: true, name: true },
+    select: { id: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, name: true },
   });
   if (products.length !== productIds.length)
     return NextResponse.json({ error: "One or more products not found or inactive" }, { status: 404 });
@@ -46,14 +46,12 @@ export async function POST(req: NextRequest) {
   try {
     // Create one Order per product — use the tier-resolved price from each item
     const orders = await Promise.all(
-      products.map((p: { id: string; price: number }) => {
+      products.map((p: { id: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; name: string }) => {
         const item     = items.find((i: BundleItem) => i.productId === p.id);
         const itemTier = item?.tier ?? grantedTier ?? "mesh_only";
-        // Use price from request (already tier-resolved by page.tsx) if present,
-        // otherwise compute it server-side as a safe fallback
         const itemPrice = (item?.price && item.price > 0)
           ? item.price
-          : applyTierMultiplier(p.price, itemTier);
+          : getTierPrice(p, itemTier);
 
         return prisma.order.create({
           data: {

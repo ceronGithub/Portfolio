@@ -7,10 +7,11 @@ import { prisma }                           from "@/lib/prisma";
 import { getPaymentLink, createPaymentLink } from "@/lib/paymongo";
 
 // Mirrors the multiplier in checkout/bundle/page.tsx and pending-payments/page.tsx.
-function applyTierMultiplier(basePrice: number, tier: string): number {
-  if (tier === "mesh_only") return Math.round(basePrice * 0.45);
-  if (tier === "standard")  return Math.round(basePrice * 0.75);
-  return basePrice; // full_pack = base price
+// Returns the correct price for the given tier directly from product fields
+function getTierPrice(product: { priceMeshOnly: number; priceStandard: number; priceFullPack: number }, tier: string): number {
+  if (tier === "mesh_only") return product.priceMeshOnly;
+  if (tier === "standard")  return product.priceStandard;
+  return product.priceFullPack; // full_pack
 }
 
 // Extract tier from deliveryNote (stored as "tier:mesh_only" etc.)
@@ -58,7 +59,7 @@ export async function GET(
         paymongoOrderId: true,
         deliveryNote:    true,
         product: {
-          select: { id: true, name: true, price: true },
+          select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true },
         },
       },
     });
@@ -76,9 +77,9 @@ export async function GET(
       return NextResponse.json({ error: "Product not found for this order" }, { status: 404 });
     }
 
-    // Recompute correct amount — always from DB, never hardcoded
+    // Recompute correct amount — always from DB tier price, never hardcoded
     const tier      = extractTier(order.deliveryNote);
-    const amountPHP = applyTierMultiplier(order.product.price, tier);
+    const amountPHP = getTierPrice(order.product, tier);
 
     if (amountPHP <= 0) {
       return NextResponse.json(

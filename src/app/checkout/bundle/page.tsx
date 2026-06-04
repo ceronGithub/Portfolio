@@ -19,10 +19,10 @@ function getBundleDiscount(count: number): number {
 }
 
 // ── Tier multipliers (mirrors AssetBuySection.tsx computeTierPrice) ───────────
-function applyTierMultiplier(basePrice: number, tier: string): number {
-  if (tier === "mesh_only") return Math.round(basePrice * 0.45);
-  if (tier === "standard")  return Math.round(basePrice * 0.75);
-  return basePrice; // full_pack = base price
+function getTierPrice(product: { priceMeshOnly: number; priceStandard: number; priceFullPack: number }, tier: string): number {
+  if (tier === "mesh_only") return product.priceMeshOnly;
+  if (tier === "standard")  return product.priceStandard;
+  return product.priceFullPack;
 }
 
 // ── Normalise category enum to display string ─────────────────────────────────
@@ -84,11 +84,13 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
       ],
     },
     select: {
-      id:       true,
-      slug:     true,
-      name:     true,
-      price:    true,
-      category: true,
+      id:            true,
+      slug:          true,
+      name:          true,
+      priceMeshOnly: true,
+      priceStandard: true,
+      priceFullPack: true,
+      category:      true,
     },
   });
 
@@ -111,7 +113,7 @@ export default async function BundleCheckoutPage({ searchParams }: Props) {
         id:       p.id,
         label:    p.name,
         category: toDisplayCategory(p.category),
-        price:    applyTierMultiplier(p.price, tier),
+        price:    getTierPrice(p, tier),
         tier,
       };
     })

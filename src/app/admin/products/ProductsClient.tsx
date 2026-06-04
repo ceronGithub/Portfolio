@@ -12,7 +12,8 @@ import { useState, useEffect, useRef } from "react";
 
 interface Product {
   id: string; name: string; description: string | null;
-  price: number; isActive: boolean; isLatest: boolean;
+  priceMeshOnly: number; priceStandard: number; priceFullPack: number;
+  isActive: boolean; isLatest: boolean;
   category: string;
   previewVideoUrl: string | null; facePngUrl: string | null;
   threeDUrl: string | null; actionOneUrl: string | null;
@@ -145,7 +146,7 @@ async function deleteFromDrive(fileId: string): Promise<void> {
 
 // Creates a new product record.
 async function createProduct(data: {
-  name: string; price: number; category: string;
+  name: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; category: string;
   description?: string; isLatest?: boolean;
   previewVideoUrl?: string; facePngUrl?: string; threeDUrl?: string;
   actionOneUrl?: string; actionTwoUrl?: string; actionThreeUrl?: string;
@@ -1194,7 +1195,9 @@ function AddProductForm({ onProductCreated, onClose }: {
   onClose: () => void;
 }) {
   const [name, setName]               = useState("");
-  const [price, setPrice]             = useState("");
+  const [priceMeshOnly, setPriceMeshOnly] = useState("");
+  const [priceStandard,  setPriceStandard]  = useState("");
+  const [priceFullPack,  setPriceFullPack]  = useState("");
   const [category, setCategory]       = useState("character");
   const [description, setDescription] = useState("");
   const [isLatest, setIsLatest]       = useState(false);
@@ -1241,13 +1244,19 @@ function AddProductForm({ onProductCreated, onClose }: {
 
   async function handleCreate() {
     if (!name.trim()) { setError("Name is required."); return; }
-    const parsedPrice = parseInt(price.replace(/,/g, ""), 10);
-    if (isNaN(parsedPrice) || parsedPrice < 0) { setError("Enter a valid price (₱)."); return; }
+    const parsedMesh     = parseInt(priceMeshOnly.replace(/,/g, ""), 10);
+    const parsedStandard = parseInt(priceStandard.replace(/,/g, ""), 10);
+    const parsedFull     = parseInt(priceFullPack.replace(/,/g, ""), 10);
+    if (isNaN(parsedMesh)     || parsedMesh     < 0) { setError("Enter a valid Mesh Only price (₱)."); return; }
+    if (isNaN(parsedStandard) || parsedStandard < 0) { setError("Enter a valid Standard price (₱)."); return; }
+    if (isNaN(parsedFull)     || parsedFull     < 0) { setError("Enter a valid Full Pack price (₱)."); return; }
     setSaving(true);
     setError("");
     const product = await createProduct({
       name: name.trim(),
-      price: parsedPrice,
+      priceMeshOnly: parsedMesh,
+      priceStandard:  parsedStandard,
+      priceFullPack:  parsedFull,
       category,
       description: description.trim() || undefined,
       isLatest,
@@ -1284,8 +1293,16 @@ function AddProductForm({ onProductCreated, onClose }: {
           <input className="apMediaInput" placeholder="e.g. Axe-01" value={name} onChange={e => setName(e.target.value)} />
         </div>
         <div className="apAddProductField">
-          <label className="apMediaLabel">Price (₱) *</label>
-          <input className="apMediaInput" type="number" min="0" placeholder="999" value={price} onChange={e => setPrice(e.target.value)} />
+          <label className="apMediaLabel">Price — Mesh Only (₱) *</label>
+          <input className="apMediaInput" type="number" min="0" placeholder="0" value={priceMeshOnly} onChange={e => setPriceMeshOnly(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Price — Standard (₱) *</label>
+          <input className="apMediaInput" type="number" min="0" placeholder="0" value={priceStandard} onChange={e => setPriceStandard(e.target.value)} />
+        </div>
+        <div className="apAddProductField">
+          <label className="apMediaLabel">Price — Full Pack (₱) *</label>
+          <input className="apMediaInput" type="number" min="0" placeholder="0" value={priceFullPack} onChange={e => setPriceFullPack(e.target.value)} />
         </div>
         <div className="apAddProductField">
           <label className="apMediaLabel">Category *</label>
@@ -1605,7 +1622,7 @@ function ProductsSection({
       let cmp = 0;
       if (sortCol === "name")     cmp = a.name.localeCompare(b.name);
       if (sortCol === "category") cmp = a.category.localeCompare(b.category);
-      if (sortCol === "price")    cmp = a.price - b.price;
+      if (sortCol === "price")    cmp = a.priceMeshOnly - b.priceMeshOnly;
       if (sortCol === "latest")   cmp = (a.isLatest ? 0 : 1) - (b.isLatest ? 0 : 1);
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -1750,7 +1767,11 @@ function ProductsSection({
             <div className="apTableRow apGrid--productsV2">
               <span className="apCell apCellName">{p.name}</span>
               <span className="apCell apCellMuted" style={{ textTransform: "capitalize" }}>{p.category}</span>
-              <span className="apCell apCellMono">₱{p.price.toLocaleString()}</span>
+              <span className="apCell apCellMono apCellTierPrices">
+                <span title="Mesh Only">M ₱{p.priceMeshOnly.toLocaleString()}</span>
+                <span title="Standard">S ₱{p.priceStandard.toLocaleString()}</span>
+                <span title="Full Pack">F ₱{p.priceFullPack.toLocaleString()}</span>
+              </span>
               <span className="apCell">
                 <button
                   className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}

@@ -107,10 +107,12 @@ export async function PATCH(
 
     const data: Record<string, unknown> = {};
 
-    if (typeof body.isActive  === "boolean") data.isActive  = body.isActive;
-    if (typeof body.price     === "number")  data.price     = body.price;
-    if (typeof body.name      === "string")  data.name      = body.name.trim();
-    if ("description" in body)               data.description = body.description ?? null;
+    if (typeof body.isActive       === "boolean") data.isActive       = body.isActive;
+    if (typeof body.priceMeshOnly  === "number")  data.priceMeshOnly  = body.priceMeshOnly;
+    if (typeof body.priceStandard  === "number")  data.priceStandard  = body.priceStandard;
+    if (typeof body.priceFullPack  === "number")  data.priceFullPack  = body.priceFullPack;
+    if (typeof body.name           === "string")  data.name           = body.name.trim();
+    if ("description" in body)                    data.description    = body.description ?? null;
 
     for (const field of MEDIA) {
       if (field in body) data[field] = typeof body[field] === "string" ? body[field] : null;

@@ -32,15 +32,16 @@ export async function GET(req: NextRequest) {
 
   const products = await prisma.product.findMany({
     where:  { id: { in: ids } },
-    select: { id: true, name: true, price: true, category: true, previewVideoUrl: true },
+    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, category: true, previewVideoUrl: true },
   });
 
-  const mapped = products.map((p: { id: string; name: string; price: number; category: string; previewVideoUrl: string | null }) => ({
+  const mapped = products.map((p: { id: string; name: string; priceMeshOnly: number; priceStandard: number; priceFullPack: number; category: string; previewVideoUrl: string | null }) => ({
     id:             p.id,
     name:           p.name,
     category:       p.category,
-    price:          p.price,
-    priceStr:       "₱" + p.price.toLocaleString("en-PH", { minimumFractionDigits: 0 }),
+    priceMeshOnly:  p.priceMeshOnly,
+    priceStandard:  p.priceStandard,
+    priceFullPack:  p.priceFullPack,
     accent:         CATEGORY_ACCENT[p.category] ?? "#888",
     previewVideoUrl: toProxyUrl(p.previewVideoUrl),
   }));
