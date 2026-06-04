@@ -166,7 +166,7 @@ export default function AssetBuySection({
       .then(data => {
         const mapped: AssetItem[] = (data.products ?? []).map((p: any) => {
           // Derive 3 tier prices from DB price fields or compute from base
-          const base = p.price ?? 0;
+          const base = p.priceFullPack ?? p.priceStandard ?? p.priceMeshOnly ?? 0;
           return {
             id:           p.id,
             label:        p.name,

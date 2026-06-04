@@ -89,7 +89,7 @@ export default function ArchitectureBuySection({
           label:    p.name,
           category: browseTab,
           videoSrc: p.previewVideoUrl ?? "",
-          price:    p.price,
+          price:    p.priceStandard ?? p.priceFullPack ?? p.priceMeshOnly ?? 0,
         }));
         if (category === "interior") setInteriorAssets(mapped);
         else                         setExteriorAssets(mapped);
