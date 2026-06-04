@@ -5,6 +5,8 @@
 
 import { useState, useEffect } from "react";
 import "./pending-payments.css";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 type CategoryType = "character" | "weapon" | "interior" | "exterior" | "system";
 
@@ -157,8 +159,8 @@ function linkAvailabilityLabel(isoStr: string): string {
 }
 
 export default function PendingPaymentsClient({ orders = [] }: Props) {
+  const { toasts, showToast, dismissToast } = useToast();
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [toast,     setToast]     = useState<{ msg: string; type: "ok" | "err" } | null>(null);
 
   // ── Auto-mark expired orders on mount ───────────────────────────────
   // For every order whose payment link has passed the 24h window, silently
@@ -176,12 +178,6 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Show toast helper ────────────────────────────────────────────────
-  function showToast(msg: string, type: "ok" | "err") {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 4000);
-  }
-
   /**
    * Retry payment — fetch PayMongo link and redirect to checkout
    */
@@ -198,25 +194,18 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
       }
 
       const { checkoutUrl } = await res.json();
+      showToast("✓ Redirecting to payment page…", "success");
       window.open(checkoutUrl, "_blank", "noopener,noreferrer");
     } catch (err: any) {
       console.error("[PendingPayments] retry failed:", err);
-      showToast(err?.message ?? "Failed to retrieve payment link.", "err");
+      showToast(err?.message ?? "✕ Failed to retrieve payment link.", "error");
       setLoadingId(null);
     }
   }
 
   return (
     <div className="pendingPaymentsPage">
-      {/* Toast */}
-      {toast && (
-        <div style={{
-          position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999,
-          background: toast.type === "ok" ? "#22c55e" : "#ef4444",
-          color: "#0d0d0d", padding: "0.6rem 1.2rem", borderRadius: "8px",
-          fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-        }}>{toast.msg}</div>
-      )}
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="pendingPaymentsContainer">
         <div className="pendingPaymentsHeader">
           <h1 className="pendingPaymentsTitle">Pending Payments</h1>

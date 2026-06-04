@@ -1,6 +1,6 @@
 // buyer/orders/page.tsx — Server Component.
 // Fetches all orders for the logged-in buyer, newest first.
-// Renders OrdersClient with full order + product data.
+// Renders OrdersClient with full order + product data + owned product IDs.
 
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -14,27 +14,37 @@ export default async function OrdersPage() {
 
   const userId = (session.user as any).id as string;
 
-  const orders = await prisma.order.findMany({
-    where:   { userId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id:           true,
-      status:       true,
-      amountPaid:   true,
-      deliveryNote: true,
-      estimatedAt:  true,
-      deliveredAt:  true,
-      createdAt:    true,
-      product: { select: { name: true, price: true } },
-    },
-  });
+  const [orders, ownerships] = await Promise.all([
+    prisma.order.findMany({
+      where:   { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id:           true,
+        status:       true,
+        amountPaid:   true,
+        deliveryNote: true,
+        estimatedAt:  true,
+        deliveredAt:  true,
+        createdAt:    true,
+        product: { select: { id: true, name: true, price: true } },
+      },
+    }),
+    prisma.ownership.findMany({
+      where:  { userId },
+      select: { productId: true },
+    }),
+  ]);
+
+  const ownedProductIds = ownerships.map((o: { productId: string }) => o.productId);
 
   return (
     <OrdersClient
+      ownedProductIds={ownedProductIds}
       orders={orders.map((o: any) => ({
         id:           o.id,
-        productName:  o.product.name,
-        amount:       o.amountPaid ?? o.product.price,
+        productId:    o.product?.id ?? null,
+        productName:  o.product?.name ?? "Unknown",
+        amount:       o.amountPaid ?? o.product?.price ?? 0,
         status:       o.status,
         deliveryNote: (o.deliveryNote as string | null) ?? null,
         estimatedAt:  o.estimatedAt ? (o.estimatedAt as Date).toISOString() : null,

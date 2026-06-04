@@ -19,6 +19,7 @@ type OrderStatus =
 
 interface Order {
   id:           string;
+  productId:    string | null;
   productName:  string;
   amount:       number;
   status:       OrderStatus;
@@ -29,7 +30,8 @@ interface Order {
 }
 
 interface Props {
-  orders: Order[];
+  orders:          Order[];
+  ownedProductIds: string[];
 }
 
 // ── Stage definitions ──────────────────────────────────────────────────────
@@ -74,10 +76,11 @@ function fmtDate(iso: string) {
 }
 
 // ── Single order timeline card ─────────────────────────────────────────────
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
   const activeIndex  = STAGE_INDEX[order.status];
   const isFailed     = order.status === "FAILED";
   const isExpired    = order.status === "LINK_EXPIRED";
+  const isDelivered  = order.status === "DELIVERED";
   const isTerminal   = isFailed || isExpired;
   const meta         = STATUS_META[order.status];
 
@@ -106,6 +109,24 @@ function OrderCard({ order }: { order: Order }) {
           >
             {meta.label}
           </span>
+          {isDelivered && isOwned && (
+            <span className="ohOwnedBadge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Owned
+            </span>
+          )}
+          {isDelivered && !isOwned && (
+            <span className="ohNotOwnedBadge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Not in Downloads
+            </span>
+          )}
         </div>
       </div>
 
@@ -166,7 +187,7 @@ function OrderCard({ order }: { order: Order }) {
 }
 
 // ── Main export ────────────────────────────────────────────────────────────
-export default function OrdersClient({ orders }: Props) {
+export default function OrdersClient({ orders, ownedProductIds }: Props) {
   const [tab, setTab] = useState<FilterTab>("All");
 
   const filtered = useMemo(() => {
@@ -227,7 +248,11 @@ export default function OrdersClient({ orders }: Props) {
       {filtered.length > 0 && (
         <div className="ohList">
           {filtered.map(order => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              isOwned={order.productId != null && ownedProductIds.includes(order.productId)}
+            />
           ))}
         </div>
       )}
