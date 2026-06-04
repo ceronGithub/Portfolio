@@ -695,91 +695,11 @@
   margin-top:  0.05rem;
   line-height: 1.4;
 }
-/* ── Email photo CTA — Interior / Exterior ── */
-.crbEmailPhotoBox {
-  display:       flex;
-  align-items:   center;
-  justify-content: space-between;
-  gap:           1.25rem;
-  padding:       0.9rem 1.1rem;
-  background:    rgba(96,165,250,0.04);
-  border:        1px solid rgba(96,165,250,0.12);
-  border-radius: 12px;
-  flex-wrap:     wrap;
-}
-
-.crbEmailPhotoLeft {
-  display:     flex;
-  align-items: flex-start;
-  gap:         0.65rem;
-  flex:        1;
-  min-width:   0;
-}
-
-.crbEmailPhotoLeft svg {
-  color:      rgba(96,165,250,0.5);
-  flex-shrink: 0;
-  margin-top:  0.1rem;
-}
-
-.crbEmailPhotoText {
-  font-family: 'DM Mono', monospace;
-  font-size:   0.64rem;
-  color:       rgba(255,255,255,0.28);
-  line-height: 1.7;
-}
-
-.crbEmailPhotoBtn {
-  font-family:     'DM Mono', monospace;
-  font-size:       0.64rem;
-  color:           rgba(96,165,250,0.7);
-  border:          1px solid rgba(96,165,250,0.2);
-  border-radius:   999px;
-  padding:         0.45rem 1.1rem;
-  text-decoration: none;
-  white-space:     nowrap;
-  transition:      all 0.2s;
-  flex-shrink:     0;
-}
-
-.crbEmailPhotoBtn:hover {
-  background:    rgba(96,165,250,0.08);
-  border-color:  rgba(96,165,250,0.35);
-  color:         rgba(96,165,250,0.9);
-}
-
-/* Right cluster — Send Photo button + messaging icons */
-.crbEmailPhotoRight {
-  display:     flex;
-  align-items: center;
-  gap:         0.75rem;
-  flex-shrink: 0;
-}
-
-/* Viber / WhatsApp / Telegram icon row */
-.crbMessagingIcons {
-  display:     flex;
-  align-items: center;
-  gap:         0.5rem;
-}
-
-/* Individual messaging icon link */
-.crbMessagingLink {
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  width:           30px;
-  height:          30px;
-  border-radius:   50%;
-  border:          1px solid rgba(255,255,255,0.1);
-  color:           rgba(255,255,255,0.35);
-  text-decoration: none;
-  transition:      all 0.2s;
-  flex-shrink:     0;
-}
-
-.crbMessagingLink:hover {
-  border-color: rgba(255,255,255,0.3);
-  color:        rgba(255,255,255,0.75);
-  background:   rgba(255,255,255,0.05);
+/* ── Clip selector field note ─────────────────────────────────────────────── */
+.crbFieldNote {
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.38);
+  line-height: 1.5;
+  margin:      0 0 0.6rem;
+  font-style:  italic;
 }

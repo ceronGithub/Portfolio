@@ -33,22 +33,26 @@ const WEAPON_PACKS: { key: WeaponPack; label: string; desc: string; price: numbe
   { key: "Textured + FX", label: "Textured + FX", desc: "Full textures + particle/shader FX set",      price: 5500 },
 ];
 
-// ── Interior tiers ────────────────────────────────────────────────────────────
-// Buyer uploads reference photo via email; tier determines scope and duration.
-type InteriorTier = "Short" | "Walkthrough";
-const INTERIOR_TIERS: { key: InteriorTier; label: string; desc: string; price: number }[] = [
-  { key: "Short",       label: "Short Clip",   desc: "Single room · up to 10 seconds",          price: 3500  },
-  { key: "Walkthrough", label: "Walkthrough",  desc: "Multiple rooms · 30 seconds and above",   price: 7500  },
+// ── Interior AI animation clip tiers ─────────────────────────────────────────
+// Buyer provides reference image/description; studio generates AI animation.
+// Short = 1 room, 5–15 sec. Medium = 1–2 rooms, 15–30 sec. Full = whole interior, 30sec+.
+type InteriorClip = "Short Clip" | "Medium Clip" | "Full Walkthrough";
+const INTERIOR_CLIPS: { key: InteriorClip; label: string; desc: string; price: number }[] = [
+  { key: "Short Clip",      label: "Short Clip",      desc: "5–15 sec · Single room focus",            price: 2500  },
+  { key: "Medium Clip",     label: "Medium Clip",     desc: "15–30 sec · 1–2 rooms, more detail",      price: 5000  },
+  { key: "Full Walkthrough", label: "Full Walkthrough", desc: "30sec+ · Complete interior tour",        price: 9000  },
 ];
 
-// ── Exterior tiers ────────────────────────────────────────────────────────────
-type ExteriorTier = "Single" | "FullTour";
-const EXTERIOR_TIERS: { key: ExteriorTier; label: string; desc: string; price: number }[] = [
-  { key: "Single",   label: "Single Angle", desc: "One facade or angle · up to 10 seconds",    price: 4500  },
-  { key: "FullTour", label: "Full Tour",    desc: "Multiple angles · 30 seconds and above",    price: 9500  },
+// ── Exterior AI animation clip tiers ─────────────────────────────────────────
+// Short = facade only. Medium = facade + surroundings. Full = fly-through/full tour.
+type ExteriorClip = "Short Clip" | "Medium Clip" | "Full Fly-Through";
+const EXTERIOR_CLIPS: { key: ExteriorClip; label: string; desc: string; price: number }[] = [
+  { key: "Short Clip",      label: "Short Clip",      desc: "5–15 sec · Facade or single angle",       price: 3500  },
+  { key: "Medium Clip",     label: "Medium Clip",     desc: "15–30 sec · Facade + surroundings",       price: 7000  },
+  { key: "Full Fly-Through", label: "Full Fly-Through", desc: "30sec+ · Complete exterior tour/fly-through", price: 13000 },
 ];
 
-// ── Base prices (for AI Animation, System, Other) ─────────────────────────────
+// ── Base prices (for AI Animation, System, Other — clip-based types use pack price) ──
 const BASE_PRICE: Partial<Record<AssetType, number>> = {
   "AI Animation": 7500,
   System:        33000,
@@ -57,8 +61,8 @@ const BASE_PRICE: Partial<Record<AssetType, number>> = {
 
 const SPEED_MULTIPLIER: Record<DeliverySpeed, number> = {
   Standard: 1.0,
-  Rush:     2.2,   // package price + (package price × 1.2)
-  Urgent:   3.2,   // package price + (package price × 2.2)
+  Rush:     2.2,   // base price + 120% of base price (base × 2.2); base = quoted price
+  Urgent:   3.2,   // base price + 220% of base price (base × 3.2); base = quoted price
 };
 
 const SPEED_SURCHARGE_LABEL: Record<DeliverySpeed, string> = {
@@ -76,15 +80,16 @@ const SPEED_DELIVERY: Record<DeliverySpeed, string> = {
 interface FormState {
   assetType:       AssetType | "";
   description:     string;
-  characterPack:   CharacterPack  | "";
-  weaponPack:      WeaponPack     | "";
-  interiorTier:    InteriorTier   | "";
-  exteriorTier:    ExteriorTier   | "";
+  characterPack:   CharacterPack | "";
+  weaponPack:      WeaponPack    | "";
+  interiorClip:    InteriorClip  | "";
+  exteriorClip:    ExteriorClip  | "";
   reference:       string;
   deliverySpeed:   DeliverySpeed | "";
 }
 
 // ── Price calculator ──────────────────────────────────────────────────────────
+// Resolves base price from pack/clip selection, then applies speed multiplier.
 
 function calcEstimate(form: FormState): number | null {
   if (!form.assetType || !form.deliverySpeed) return null;
@@ -102,15 +107,15 @@ function calcEstimate(form: FormState): number | null {
     if (!pack) return null;
     base = pack.price;
   } else if (form.assetType === "Interior") {
-    if (!form.interiorTier) return null;
-    const tier = INTERIOR_TIERS.find(t => t.key === form.interiorTier);
-    if (!tier) return null;
-    base = tier.price;
+    if (!form.interiorClip) return null;
+    const clip = INTERIOR_CLIPS.find(c => c.key === form.interiorClip);
+    if (!clip) return null;
+    base = clip.price;
   } else if (form.assetType === "Exterior") {
-    if (!form.exteriorTier) return null;
-    const tier = EXTERIOR_TIERS.find(t => t.key === form.exteriorTier);
-    if (!tier) return null;
-    base = tier.price;
+    if (!form.exteriorClip) return null;
+    const clip = EXTERIOR_CLIPS.find(c => c.key === form.exteriorClip);
+    if (!clip) return null;
+    base = clip.price;
   } else {
     base = BASE_PRICE[form.assetType] ?? 8000;
   }
@@ -227,10 +232,10 @@ const ASSET_ACCENT: Record<AssetType, string> = {
 };
 
 const ASSET_BASE_DISPLAY: Partial<Record<AssetType, string>> = {
-  Interior:       "₱3,500 – ₱7,500",
-  Exterior:       "₱4,500 – ₱9,500",
+  Interior:      "from ₱2,500",
+  Exterior:      "from ₱3,500",
   "AI Animation": "from ₱7,500",
-  System:         "from ₱33,000",
+  System:        "from ₱33,000",
 };
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -239,7 +244,7 @@ export default function CustomRequestBuilder() {
   const { toasts, showToast, dismissToast } = useToast();
   const [step,       setStep]       = useState(0);
   const [form,       setForm]       = useState<FormState>({
-    assetType: "", description: "", characterPack: "", weaponPack: "", interiorTier: "", exteriorTier: "", reference: "", deliverySpeed: "",
+    assetType: "", description: "", characterPack: "", weaponPack: "", interiorClip: "", exteriorClip: "", reference: "", deliverySpeed: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted,  setSubmitted]  = useState(false);
@@ -253,8 +258,8 @@ export default function CustomRequestBuilder() {
     if (!form.description) return false;
     if (form.assetType === "Character" && !form.characterPack) return false;
     if (form.assetType === "Weapon"    && !form.weaponPack)    return false;
-    if (form.assetType === "Interior"  && !form.interiorTier)  return false;
-    if (form.assetType === "Exterior"  && !form.exteriorTier)  return false;
+    if (form.assetType === "Interior"  && !form.interiorClip)  return false;
+    if (form.assetType === "Exterior"  && !form.exteriorClip)  return false;
     return true;
   }
 
@@ -270,8 +275,8 @@ export default function CustomRequestBuilder() {
           description:    form.description,
           characterPack:  form.characterPack  || null,
           weaponPack:     form.weaponPack      || null,
-          interiorTier:   form.interiorTier    || null,
-          exteriorTier:   form.exteriorTier    || null,
+          interiorClip:   form.interiorClip    || null,
+          exteriorClip:   form.exteriorClip    || null,
           reference:      form.reference       || null,
           deliverySpeed:  form.deliverySpeed,
           estimatedQuote: estimate,
@@ -296,7 +301,7 @@ export default function CustomRequestBuilder() {
 
   function reset() {
     setSubmitted(false); setStep(0);
-    setForm({ assetType: "", description: "", characterPack: "", weaponPack: "", interiorTier: "", exteriorTier: "", reference: "", deliverySpeed: "" });
+    setForm({ assetType: "", description: "", characterPack: "", weaponPack: "", interiorClip: "", exteriorClip: "", reference: "", deliverySpeed: "" });
   }
 
   if (submitted) {
@@ -360,7 +365,7 @@ export default function CustomRequestBuilder() {
                       key={t}
                       className={`crbTypeBtn ${form.assetType === t ? "crbTypeBtnActive" : ""}`}
                       style={form.assetType === t ? { borderColor: ASSET_ACCENT[t] + "66", background: ASSET_ACCENT[t] + "10" } : {}}
-                      onClick={() => setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "", interiorTier: "", exteriorTier: "" }))}
+                      onClick={() => setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "", interiorClip: "", exteriorClip: "" }))}
                     >
                       <span className="crbTypeBtnIcon" style={form.assetType === t ? { color: ASSET_ACCENT[t] } : {}}>{ICONS[t]}</span>
                       <span className="crbTypeBtnLabel">{t}</span>
@@ -394,32 +399,6 @@ export default function CustomRequestBuilder() {
               <div className="crbStep">
                 <p className="crbStepTitle">Describe your {form.assetType?.toLowerCase()}</p>
 
-                {/* Interior tiers */}
-                {form.assetType === "Interior" && (
-                  <div className="crbField">
-                    <label className="crbLabel">Animation Scope</label>
-                    <PackSelector<InteriorTier>
-                      packs={INTERIOR_TIERS}
-                      selected={form.interiorTier}
-                      onSelect={key => setForm(f => ({ ...f, interiorTier: key }))}
-                      accent={accent}
-                    />
-                  </div>
-                )}
-
-                {/* Exterior tiers */}
-                {form.assetType === "Exterior" && (
-                  <div className="crbField">
-                    <label className="crbLabel">Animation Scope</label>
-                    <PackSelector<ExteriorTier>
-                      packs={EXTERIOR_TIERS}
-                      selected={form.exteriorTier}
-                      onSelect={key => setForm(f => ({ ...f, exteriorTier: key }))}
-                      accent={accent}
-                    />
-                  </div>
-                )}
-
                 {/* Character packs */}
                 {form.assetType === "Character" && (
                   <div className="crbField">
@@ -441,6 +420,34 @@ export default function CustomRequestBuilder() {
                       packs={WEAPON_PACKS}
                       selected={form.weaponPack}
                       onSelect={key => setForm(f => ({ ...f, weaponPack: key }))}
+                      accent={accent}
+                    />
+                  </div>
+                )}
+
+                {/* Interior clip tiers */}
+                {form.assetType === "Interior" && (
+                  <div className="crbField">
+                    <label className="crbLabel">Clip Duration</label>
+                    <p className="crbFieldNote">You provide a reference image or description — I'll generate the AI animation based on your vision.</p>
+                    <PackSelector<InteriorClip>
+                      packs={INTERIOR_CLIPS}
+                      selected={form.interiorClip}
+                      onSelect={key => setForm(f => ({ ...f, interiorClip: key }))}
+                      accent={accent}
+                    />
+                  </div>
+                )}
+
+                {/* Exterior clip tiers */}
+                {form.assetType === "Exterior" && (
+                  <div className="crbField">
+                    <label className="crbLabel">Clip Duration</label>
+                    <p className="crbFieldNote">You provide a reference image or description — I'll generate the AI animation based on your vision.</p>
+                    <PackSelector<ExteriorClip>
+                      packs={EXTERIOR_CLIPS}
+                      selected={form.exteriorClip}
+                      onSelect={key => setForm(f => ({ ...f, exteriorClip: key }))}
                       accent={accent}
                     />
                   </div>
@@ -469,68 +476,6 @@ export default function CustomRequestBuilder() {
                     onChange={e => setForm(f => ({ ...f, reference: sanitize(e.target.value) }))}
                   />
                 </div>
-
-                {/* Email photo CTA — Interior and Exterior only */}
-                {(form.assetType === "Interior" || form.assetType === "Exterior") && (
-                  <div className="crbEmailPhotoBox">
-                    <div className="crbEmailPhotoLeft">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/>
-                      </svg>
-                      <span className="crbEmailPhotoText">
-                        Have a reference photo? Send it directly to my email and I&apos;ll use it as the basis for your animation.
-                      </span>
-                    </div>
-                    <div className="crbEmailPhotoRight">
-                      {/* Email address */}
-                      <a
-                        className="crbEmailPhotoBtn"
-                        href={`mailto:developerceron@gmail.com?subject=${encodeURIComponent(`Custom ${form.assetType} Animation Request`)}&body=${encodeURIComponent(`Hi, I'd like to request a custom ${form.assetType?.toLowerCase()} animation.\n\nPlease find my reference photo attached.\n\nDescription:\n${form.description || "(add your description here)"}`)}`}
-                      >
-                        Send Photo →
-                      </a>
-                      {/* Messaging channel links */}
-                      <div className="crbMessagingIcons">
-                        {/* Viber */}
-                        <a
-                          className="crbMessagingLink"
-                          href="viber://chat?number=%2B639668829302"
-                          title="Viber: +63 966 882 9302"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11.993 2C7.392 2 3.5 5.765 3.5 10.214c0 2.548 1.26 4.818 3.218 6.27v3.016l2.93-1.612c.73.197 1.505.305 2.305.305.048 0 .096 0 .144-.001 4.558-.081 8.232-3.697 8.232-8.02C20.329 5.677 16.544 2 11.993 2zm.34 13.477a7.24 7.24 0 0 1-1.933-.26l-.44-.118-2.133 1.175v-2.2l-.344-.24C5.754 12.74 4.75 11.527 4.75 10.214c0-3.693 3.25-6.714 7.243-6.714s7.086 2.937 7.086 6.564c0 3.578-3.092 6.432-6.746 6.413zm3.458-4.705c-.185-.093-1.088-.537-1.258-.599-.17-.062-.293-.093-.416.093-.123.185-.478.599-.586.722-.108.124-.216.139-.4.046-.185-.093-.781-.288-1.487-.917-.55-.49-.922-1.096-1.03-1.281-.108-.185-.011-.285.08-.377.083-.083.185-.216.278-.324.093-.108.123-.185.185-.308.062-.124.031-.232-.015-.325-.047-.093-.416-1.003-.57-1.373-.15-.36-.303-.311-.416-.317-.108-.005-.231-.006-.354-.006-.123 0-.324.046-.493.232-.17.185-.648.634-.648 1.545 0 .912.663 1.793.755 1.916.093.124 1.305 1.993 3.162 2.795.442.19.786.304 1.054.39.443.14.846.12 1.165.073.355-.053 1.088-.445 1.242-.874.154-.43.154-.797.108-.874-.046-.077-.17-.124-.355-.217z"/>
-                          </svg>
-                        </a>
-                        {/* WhatsApp */}
-                        <a
-                          className="crbMessagingLink"
-                          href="https://wa.me/639668829302"
-                          title="WhatsApp: +63 966 882 9302"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-                          </svg>
-                        </a>
-                        {/* Telegram */}
-                        <a
-                          className="crbMessagingLink"
-                          href="https://t.me/+639668829302"
-                          title="Telegram: +63 966 882 9302"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                          </svg>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <div className="crbNavRow">
                   <button className="crbBackBtn" onClick={() => setStep(0)}>← Back</button>
@@ -566,11 +511,11 @@ export default function CustomRequestBuilder() {
                       const pack = WEAPON_PACKS.find(p => p.key === form.weaponPack);
                       baseForSpeed = pack?.price ?? 0;
                     } else if (form.assetType === "Interior") {
-                      const tier = INTERIOR_TIERS.find(t => t.key === form.interiorTier);
-                      baseForSpeed = tier?.price ?? 0;
+                      const clip = INTERIOR_CLIPS.find(c => c.key === form.interiorClip);
+                      baseForSpeed = clip?.price ?? 0;
                     } else if (form.assetType === "Exterior") {
-                      const tier = EXTERIOR_TIERS.find(t => t.key === form.exteriorTier);
-                      baseForSpeed = tier?.price ?? 0;
+                      const clip = EXTERIOR_CLIPS.find(c => c.key === form.exteriorClip);
+                      baseForSpeed = clip?.price ?? 0;
                     } else {
                       baseForSpeed = BASE_PRICE[form.assetType as AssetType] ?? 8000;
                     }
@@ -642,16 +587,14 @@ export default function CustomRequestBuilder() {
                       <span>Pack</span><span>{form.weaponPack}</span>
                     </div>
                   )}
-                  {form.assetType === "Interior" && form.interiorTier && (
+                  {form.assetType === "Interior" && form.interiorClip && (
                     <div className="crbSummaryRow">
-                      <span>Scope</span>
-                      <span>{INTERIOR_TIERS.find(t => t.key === form.interiorTier)?.label} — {INTERIOR_TIERS.find(t => t.key === form.interiorTier)?.desc}</span>
+                      <span>Clip</span><span>{form.interiorClip} · {INTERIOR_CLIPS.find(c => c.key === form.interiorClip)?.desc}</span>
                     </div>
                   )}
-                  {form.assetType === "Exterior" && form.exteriorTier && (
+                  {form.assetType === "Exterior" && form.exteriorClip && (
                     <div className="crbSummaryRow">
-                      <span>Scope</span>
-                      <span>{EXTERIOR_TIERS.find(t => t.key === form.exteriorTier)?.label} — {EXTERIOR_TIERS.find(t => t.key === form.exteriorTier)?.desc}</span>
+                      <span>Clip</span><span>{form.exteriorClip} · {EXTERIOR_CLIPS.find(c => c.key === form.exteriorClip)?.desc}</span>
                     </div>
                   )}
                   <div className="crbSummaryRow">
