@@ -91,18 +91,40 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
 
   const handleCheckPayment = useCallback(async () => {
     setCheckState("loading");
+    // Open blank window BEFORE async — avoids popup blocker
+    const payWin = window.open("", "_blank");
     try {
       const res  = await fetch(`/api/buyer/pending-payment/${order.id}`);
       const data = await res.json();
-      if (!res.ok) { setCheckState("error"); return; }
+      if (!res.ok) { payWin?.close(); setCheckState("error"); return; }
       if (data.checkoutUrl) {
         setPayUrl(data.checkoutUrl);
         setCheckState("unpaid");
-        window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
+        if (payWin) payWin.location.href = data.checkoutUrl;
+        else window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
+        // Poll fulfill after opening — auto-refresh orders when paid
+        let attempts = 0;
+        const pollId = setInterval(async () => {
+          attempts++;
+          try {
+            const r = await fetch("/api/fulfill", {
+              method:  "POST",
+              headers: { "Content-Type": "application/json" },
+              body:    JSON.stringify({ orderIds: [order.id] }),
+            });
+            if (r.ok) {
+              clearInterval(pollId);
+              window.location.reload();
+            }
+          } catch { /* keep polling */ }
+          if (attempts >= 36) clearInterval(pollId);
+        }, 5000);
       } else {
+        payWin?.close();
         setCheckState("paid");
       }
     } catch {
+      payWin?.close();
       setCheckState("error");
     }
   }, [order.id]);

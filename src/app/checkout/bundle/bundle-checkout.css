@@ -514,3 +514,12 @@
    RESPONSIVE — Rule 17.6
    (breakpoints live in mediaQueries.css per Rule 9)
    ════════════════════ */
+/* ── Polling note ── */
+.bundlePollingNote {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.62rem;
+  color:       rgba(255,255,255,0.3);
+  text-align:  center;
+  margin-top:  0.6rem;
+  line-height: 1.6;
+}

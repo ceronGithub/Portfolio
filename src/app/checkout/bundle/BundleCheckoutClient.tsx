@@ -156,9 +156,11 @@ export default function BundleCheckoutClient({
   discountAmount,
   finalTotal,
 }: Props) {
-  const [method,  setMethod]  = useState<PaymentMethod>("gcash");
-  const [placing, setPlacing] = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
+  const [method,   setMethod]   = useState<PaymentMethod>("gcash");
+  const [placing,  setPlacing]  = useState(false);
+  const [error,    setError]    = useState<string | null>(null);
+  const [polling,  setPolling]  = useState(false);
+  const pollRef                 = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Entrance animation refs per Rule 17.5
   const leftRef  = useRef<HTMLDivElement>(null);
@@ -171,6 +173,9 @@ export default function BundleCheckoutClient({
     if (placing) return;
     setPlacing(true);
     setError(null);
+
+    // Open blank window BEFORE async — avoids popup blocker
+    const payWin = window.open("", "_blank");
 
     try {
       const res = await fetch("/api/checkout/bundle", {
@@ -189,8 +194,33 @@ export default function BundleCheckoutClient({
         throw new Error(err.error ?? "Order failed");
       }
 
-      const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
+      const { checkoutUrl, orderIds } = await res.json();
+      if (payWin) payWin.location.href = checkoutUrl;
+      else window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+      setPlacing(false);
+      setPolling(true);
+
+      // Poll /api/fulfill every 5s — redirect to success page once payment confirmed
+      const ids = (orderIds as string[]).join(",");
+      let attempts = 0;
+      pollRef.current = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch("/api/fulfill", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ orderIds }),
+          });
+          if (r.ok) {
+            clearInterval(pollRef.current!);
+            window.location.href = `/checkout/success?orders=${encodeURIComponent(ids)}`;
+          }
+        } catch { /* keep polling */ }
+        if (attempts >= 36) { // 3 minutes max
+          clearInterval(pollRef.current!);
+          setPolling(false);
+        }
+      }, 5000);
     } catch (err: any) {
       console.error("[BundleCheckout]", err?.message);
       setError(err?.message ?? "Something went wrong. Please try again.");
@@ -333,16 +363,24 @@ export default function BundleCheckoutClient({
 
           {/* CTA */}
           <button
-            className={`bundlePlaceBtn ${placing ? "bundlePlaceBtnLoading" : ""}`}
+            className={`bundlePlaceBtn ${(placing || polling) ? "bundlePlaceBtnLoading" : ""}`}
             onClick={handlePlaceOrder}
-            disabled={placing}
+            disabled={placing || polling}
           >
             {placing ? (
-              <><span className="bundleBtnSpinner" /> Redirecting to PayMongo…</>
+              <><span className="bundleBtnSpinner" /> Opening PayMongo…</>
+            ) : polling ? (
+              <><span className="bundleBtnSpinner" /> Waiting for payment…</>
             ) : (
               <>Pay {fmt(finalTotal)} Now</>
             )}
           </button>
+
+          {polling && (
+            <p className="bundlePollingNote">
+              Complete your payment in the PayMongo tab — this page will update automatically.
+            </p>
+          )}
 
           <p className="bundleDisclaimer">
             Asset files will be delivered to your registered email upon payment confirmation.

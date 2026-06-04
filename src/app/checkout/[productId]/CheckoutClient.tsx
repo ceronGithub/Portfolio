@@ -60,8 +60,8 @@ export default function CheckoutClient({
       }
 
       const { checkoutUrl } = await res.json();
-      // Redirect buyer to PayMongo hosted payment page
-      window.location.href = checkoutUrl;
+      // Open PayMongo hosted payment page in a new tab
+      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
     } catch (err: any) {
       console.error("[CheckoutClient]", err?.message);
       setError(err?.message ?? "Something went wrong. Please try again.");
