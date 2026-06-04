@@ -26,7 +26,7 @@ export default async function OrdersPage() {
         estimatedAt:  true,
         deliveredAt:  true,
         createdAt:    true,
-        product: { select: { id: true, name: true, priceMeshOnly: true } },
+        product: { select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true } },
       },
     }),
     prisma.ownership.findMany({
@@ -44,7 +44,7 @@ export default async function OrdersPage() {
         id:           o.id,
         productId:    o.product?.id ?? null,
         productName:  o.product?.name ?? "Unknown",
-        amount:       o.amountPaid ?? o.product?.priceMeshOnly ?? 0,
+        amount:       o.amountPaid ?? (o.product?.priceFullPack || o.product?.priceStandard || o.product?.priceMeshOnly || 0),
         status:       o.status,
         deliveryNote: (o.deliveryNote as string | null) ?? null,
         estimatedAt:  o.estimatedAt ? (o.estimatedAt as Date).toISOString() : null,

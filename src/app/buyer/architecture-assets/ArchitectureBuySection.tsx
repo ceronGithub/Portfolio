@@ -89,7 +89,10 @@ export default function ArchitectureBuySection({
           label:    p.name,
           category: browseTab,
           videoSrc: p.previewVideoUrl ?? "",
-          price:    p.priceStandard ?? p.priceFullPack ?? p.priceMeshOnly ?? 0,
+          // Interior/Exterior have a single flat price — no tier selection.
+          // Use priceFullPack as the canonical price (set by admin).
+          // Fall back down the chain if a field is 0 / unset.
+          price:    p.priceFullPack || p.priceStandard || p.priceMeshOnly || 0,
         }));
         if (category === "interior") setInteriorAssets(mapped);
         else                         setExteriorAssets(mapped);
@@ -201,8 +204,9 @@ export default function ArchitectureBuySection({
                     showToast("No items selected. Browse and select assets first.", "warning");
                     return;
                   }
-                  const ids = cartItems.map(a => a.id).join(",");
-                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                  // Interior/Exterior = flat price, always full_pack tier
+                  const items = cartItems.map(a => `${a.id}:full_pack`).join(",");
+                  window.location.href = `/checkout/bundle?items=${items}`;
                 }}
               >
                 {cartItems.length > 0 ? `BUY (${cartItems.length})` : "BUY"}
@@ -212,8 +216,9 @@ export default function ArchitectureBuySection({
                 disabled={cartItems.length === 0}
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  const ids = cartItems.map(a => a.id).join(",");
-                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                  // Interior/Exterior = flat price, always full_pack tier
+                  const items = cartItems.map(a => `${a.id}:full_pack`).join(",");
+                  window.location.href = `/checkout/bundle?items=${items}`;
                 }}
                 title={cartItems.length > 0 ? `Checkout (${cartItems.length} items)` : "No items selected"}
               >

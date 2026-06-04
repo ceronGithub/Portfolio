@@ -1921,9 +1921,15 @@ function ProductsSection({
               <span className="apCell apCellName">{p.name}</span>
               <span className="apCell apCellMuted" style={{ textTransform: "capitalize" }}>{p.category}</span>
               <span className="apCell apCellMono apCellTierPrices">
-                <span title="Mesh Only">M ₱{p.priceMeshOnly.toLocaleString()}</span>
-                <span title="Standard">S ₱{p.priceStandard.toLocaleString()}</span>
-                <span title="Full Pack">F ₱{p.priceFullPack.toLocaleString()}</span>
+                {(p.category === "interior" || p.category === "exterior") ? (
+                  <span title="Flat Price">₱{p.priceFullPack.toLocaleString()}</span>
+                ) : (
+                  <>
+                    <span title="Mesh Only">M ₱{p.priceMeshOnly.toLocaleString()}</span>
+                    <span title="Standard">S ₱{p.priceStandard.toLocaleString()}</span>
+                    <span title="Full Pack">F ₱{p.priceFullPack.toLocaleString()}</span>
+                  </>
+                )}
               </span>
               <span className="apCell">
                 <button
