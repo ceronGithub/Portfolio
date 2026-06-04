@@ -33,10 +33,23 @@ const WEAPON_PACKS: { key: WeaponPack; label: string; desc: string; price: numbe
   { key: "Textured + FX", label: "Textured + FX", desc: "Full textures + particle/shader FX set",      price: 5500 },
 ];
 
-// ── Base prices (for Interior, Exterior, AI Animation, System, Other) ─────────
+// ── Interior tiers ────────────────────────────────────────────────────────────
+// Buyer uploads reference photo via email; tier determines scope and duration.
+type InteriorTier = "Short" | "Walkthrough";
+const INTERIOR_TIERS: { key: InteriorTier; label: string; desc: string; price: number }[] = [
+  { key: "Short",       label: "Short Clip",   desc: "Single room · up to 10 seconds",          price: 3500  },
+  { key: "Walkthrough", label: "Walkthrough",  desc: "Multiple rooms · 30 seconds and above",   price: 7500  },
+];
+
+// ── Exterior tiers ────────────────────────────────────────────────────────────
+type ExteriorTier = "Single" | "FullTour";
+const EXTERIOR_TIERS: { key: ExteriorTier; label: string; desc: string; price: number }[] = [
+  { key: "Single",   label: "Single Angle", desc: "One facade or angle · up to 10 seconds",    price: 4500  },
+  { key: "FullTour", label: "Full Tour",    desc: "Multiple angles · 30 seconds and above",    price: 9500  },
+];
+
+// ── Base prices (for AI Animation, System, Other) ─────────────────────────────
 const BASE_PRICE: Partial<Record<AssetType, number>> = {
-  Interior:      15000,
-  Exterior:      20000,
   "AI Animation": 7500,
   System:        33000,
   Other:         8000,
@@ -44,8 +57,8 @@ const BASE_PRICE: Partial<Record<AssetType, number>> = {
 
 const SPEED_MULTIPLIER: Record<DeliverySpeed, number> = {
   Standard: 1.0,
-  Rush:     2.2,   // base price + 120% of base price (base × 2.2); base = quoted price
-  Urgent:   3.2,   // base price + 220% of base price (base × 3.2); base = quoted price
+  Rush:     2.2,   // package price + (package price × 1.2)
+  Urgent:   3.2,   // package price + (package price × 2.2)
 };
 
 const SPEED_SURCHARGE_LABEL: Record<DeliverySpeed, string> = {
@@ -63,8 +76,10 @@ const SPEED_DELIVERY: Record<DeliverySpeed, string> = {
 interface FormState {
   assetType:       AssetType | "";
   description:     string;
-  characterPack:   CharacterPack | "";
-  weaponPack:      WeaponPack   | "";
+  characterPack:   CharacterPack  | "";
+  weaponPack:      WeaponPack     | "";
+  interiorTier:    InteriorTier   | "";
+  exteriorTier:    ExteriorTier   | "";
   reference:       string;
   deliverySpeed:   DeliverySpeed | "";
 }
@@ -86,6 +101,16 @@ function calcEstimate(form: FormState): number | null {
     const pack = WEAPON_PACKS.find(p => p.key === form.weaponPack);
     if (!pack) return null;
     base = pack.price;
+  } else if (form.assetType === "Interior") {
+    if (!form.interiorTier) return null;
+    const tier = INTERIOR_TIERS.find(t => t.key === form.interiorTier);
+    if (!tier) return null;
+    base = tier.price;
+  } else if (form.assetType === "Exterior") {
+    if (!form.exteriorTier) return null;
+    const tier = EXTERIOR_TIERS.find(t => t.key === form.exteriorTier);
+    if (!tier) return null;
+    base = tier.price;
   } else {
     base = BASE_PRICE[form.assetType] ?? 8000;
   }
@@ -202,10 +227,10 @@ const ASSET_ACCENT: Record<AssetType, string> = {
 };
 
 const ASSET_BASE_DISPLAY: Partial<Record<AssetType, string>> = {
-  Interior:      "from ₱15,000",
-  Exterior:      "from ₱20,000",
+  Interior:       "₱3,500 – ₱7,500",
+  Exterior:       "₱4,500 – ₱9,500",
   "AI Animation": "from ₱7,500",
-  System:        "from ₱33,000",
+  System:         "from ₱33,000",
 };
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -214,7 +239,7 @@ export default function CustomRequestBuilder() {
   const { toasts, showToast, dismissToast } = useToast();
   const [step,       setStep]       = useState(0);
   const [form,       setForm]       = useState<FormState>({
-    assetType: "", description: "", characterPack: "", weaponPack: "", reference: "", deliverySpeed: "",
+    assetType: "", description: "", characterPack: "", weaponPack: "", interiorTier: "", exteriorTier: "", reference: "", deliverySpeed: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted,  setSubmitted]  = useState(false);
@@ -228,6 +253,8 @@ export default function CustomRequestBuilder() {
     if (!form.description) return false;
     if (form.assetType === "Character" && !form.characterPack) return false;
     if (form.assetType === "Weapon"    && !form.weaponPack)    return false;
+    if (form.assetType === "Interior"  && !form.interiorTier)  return false;
+    if (form.assetType === "Exterior"  && !form.exteriorTier)  return false;
     return true;
   }
 
@@ -243,6 +270,8 @@ export default function CustomRequestBuilder() {
           description:    form.description,
           characterPack:  form.characterPack  || null,
           weaponPack:     form.weaponPack      || null,
+          interiorTier:   form.interiorTier    || null,
+          exteriorTier:   form.exteriorTier    || null,
           reference:      form.reference       || null,
           deliverySpeed:  form.deliverySpeed,
           estimatedQuote: estimate,
@@ -267,7 +296,7 @@ export default function CustomRequestBuilder() {
 
   function reset() {
     setSubmitted(false); setStep(0);
-    setForm({ assetType: "", description: "", characterPack: "", weaponPack: "", reference: "", deliverySpeed: "" });
+    setForm({ assetType: "", description: "", characterPack: "", weaponPack: "", interiorTier: "", exteriorTier: "", reference: "", deliverySpeed: "" });
   }
 
   if (submitted) {
@@ -331,7 +360,7 @@ export default function CustomRequestBuilder() {
                       key={t}
                       className={`crbTypeBtn ${form.assetType === t ? "crbTypeBtnActive" : ""}`}
                       style={form.assetType === t ? { borderColor: ASSET_ACCENT[t] + "66", background: ASSET_ACCENT[t] + "10" } : {}}
-                      onClick={() => setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "" }))}
+                      onClick={() => setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "", interiorTier: "", exteriorTier: "" }))}
                     >
                       <span className="crbTypeBtnIcon" style={form.assetType === t ? { color: ASSET_ACCENT[t] } : {}}>{ICONS[t]}</span>
                       <span className="crbTypeBtnLabel">{t}</span>
@@ -364,6 +393,32 @@ export default function CustomRequestBuilder() {
             {step === 1 && (
               <div className="crbStep">
                 <p className="crbStepTitle">Describe your {form.assetType?.toLowerCase()}</p>
+
+                {/* Interior tiers */}
+                {form.assetType === "Interior" && (
+                  <div className="crbField">
+                    <label className="crbLabel">Animation Scope</label>
+                    <PackSelector<InteriorTier>
+                      packs={INTERIOR_TIERS}
+                      selected={form.interiorTier}
+                      onSelect={key => setForm(f => ({ ...f, interiorTier: key }))}
+                      accent={accent}
+                    />
+                  </div>
+                )}
+
+                {/* Exterior tiers */}
+                {form.assetType === "Exterior" && (
+                  <div className="crbField">
+                    <label className="crbLabel">Animation Scope</label>
+                    <PackSelector<ExteriorTier>
+                      packs={EXTERIOR_TIERS}
+                      selected={form.exteriorTier}
+                      onSelect={key => setForm(f => ({ ...f, exteriorTier: key }))}
+                      accent={accent}
+                    />
+                  </div>
+                )}
 
                 {/* Character packs */}
                 {form.assetType === "Character" && (
@@ -415,6 +470,28 @@ export default function CustomRequestBuilder() {
                   />
                 </div>
 
+                {/* Email photo CTA — Interior and Exterior only */}
+                {(form.assetType === "Interior" || form.assetType === "Exterior") && (
+                  <div className="crbEmailPhotoBox">
+                    <div className="crbEmailPhotoLeft">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/>
+                      </svg>
+                      <span className="crbEmailPhotoText">
+                        Have a reference photo? Send it directly to my email and I&apos;ll use it as the basis for your animation.
+                      </span>
+                    </div>
+                    <a
+                      className="crbEmailPhotoBtn"
+                      href={`mailto:developerceron@gmail.com?subject=${encodeURIComponent(`Custom ${form.assetType} Animation Request`)}&body=${encodeURIComponent(`Hi, I'd like to request a custom ${form.assetType?.toLowerCase()} animation.\n\nPlease find my reference photo attached.\n\nDescription:\n${form.description || "(add your description here)"}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Send Photo →
+                    </a>
+                  </div>
+                )}
+
                 <div className="crbNavRow">
                   <button className="crbBackBtn" onClick={() => setStep(0)}>← Back</button>
                   <button
@@ -448,6 +525,12 @@ export default function CustomRequestBuilder() {
                     } else if (form.assetType === "Weapon") {
                       const pack = WEAPON_PACKS.find(p => p.key === form.weaponPack);
                       baseForSpeed = pack?.price ?? 0;
+                    } else if (form.assetType === "Interior") {
+                      const tier = INTERIOR_TIERS.find(t => t.key === form.interiorTier);
+                      baseForSpeed = tier?.price ?? 0;
+                    } else if (form.assetType === "Exterior") {
+                      const tier = EXTERIOR_TIERS.find(t => t.key === form.exteriorTier);
+                      baseForSpeed = tier?.price ?? 0;
                     } else {
                       baseForSpeed = BASE_PRICE[form.assetType as AssetType] ?? 8000;
                     }
@@ -517,6 +600,18 @@ export default function CustomRequestBuilder() {
                   {form.assetType === "Weapon" && form.weaponPack && (
                     <div className="crbSummaryRow">
                       <span>Pack</span><span>{form.weaponPack}</span>
+                    </div>
+                  )}
+                  {form.assetType === "Interior" && form.interiorTier && (
+                    <div className="crbSummaryRow">
+                      <span>Scope</span>
+                      <span>{INTERIOR_TIERS.find(t => t.key === form.interiorTier)?.label} — {INTERIOR_TIERS.find(t => t.key === form.interiorTier)?.desc}</span>
+                    </div>
+                  )}
+                  {form.assetType === "Exterior" && form.exteriorTier && (
+                    <div className="crbSummaryRow">
+                      <span>Scope</span>
+                      <span>{EXTERIOR_TIERS.find(t => t.key === form.exteriorTier)?.label} — {EXTERIOR_TIERS.find(t => t.key === form.exteriorTier)?.desc}</span>
                     </div>
                   )}
                   <div className="crbSummaryRow">
