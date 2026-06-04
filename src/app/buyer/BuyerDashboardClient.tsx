@@ -51,7 +51,8 @@ interface SystemItem {
 }
 
 interface LatestProduct {
-  id: string; name: string; price: number;
+  id: string; name: string;
+  priceMeshOnly: number; priceStandard: number; priceFullPack: number;
   category: string; packageTier: string; previewVideoUrl: string | null; facePngUrl: string | null;
 }
 

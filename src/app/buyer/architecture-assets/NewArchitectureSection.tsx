@@ -12,7 +12,9 @@ import "./new-architecture-section.css";
 interface LatestArchProduct {
   id:              string;
   name:            string;
-  price:           number;
+  priceMeshOnly:   number;
+  priceStandard:   number;
+  priceFullPack:   number;
   category:        string;
   previewVideoUrl: string | null;
   facePngUrl:      string | null;
@@ -79,7 +81,7 @@ export default function NewArchitectureSection({ latestInterior, latestExterior 
             {latestExterior && (
               <div className="newArchMetaItem">
                 <p className="newArchMetaName">{latestExterior.name}</p>
-                <p className="newArchMetaPrice">₱{latestExterior.price.toLocaleString()}</p>
+                <p className="newArchMetaPrice">₱{latestExterior.priceMeshOnly.toLocaleString()}</p>
                 <p className="newArchMetaNote">Exterior · editable Blender file</p>
                 <a href={`/checkout/${latestExterior.id}`} className="newArchBuyBtn">
                   Buy Now →
@@ -92,7 +94,7 @@ export default function NewArchitectureSection({ latestInterior, latestExterior 
             {latestInterior && (
               <div className="newArchMetaItem">
                 <p className="newArchMetaName">{latestInterior.name}</p>
-                <p className="newArchMetaPrice">₱{latestInterior.price.toLocaleString()}</p>
+                <p className="newArchMetaPrice">₱{latestInterior.priceMeshOnly.toLocaleString()}</p>
                 <p className="newArchMetaNote">Interior · editable Blender file</p>
                 <a href={`/checkout/${latestInterior.id}`} className="newArchBuyBtn">
                   Buy Now →

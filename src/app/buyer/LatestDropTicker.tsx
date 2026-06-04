@@ -9,7 +9,9 @@ import "./latest-drop-ticker.css";
 interface LatestProduct {
   id:       string;
   name:     string;
-  price:    number;
+  priceMeshOnly: number;
+  priceStandard: number;
+  priceFullPack: number;
   category: string;
 }
 
@@ -62,7 +64,7 @@ export default function LatestDropTicker({
               </span>
               <span className="latestDropTickerName">{product.name}</span>
               <span className="latestDropTickerPrice">
-                ₱{product.price.toLocaleString()}
+                ₱{product.priceMeshOnly.toLocaleString()}
               </span>
             </span>
           ))}

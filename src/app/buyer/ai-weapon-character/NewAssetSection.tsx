@@ -11,7 +11,9 @@ import "./new-asset-section.css";
 interface LatestProduct {
   id:              string;
   name:            string;
-  price:           number;
+  priceMeshOnly:   number;
+  priceStandard:   number;
+  priceFullPack:   number;
   category:        string;
   packageTier:     string;
   previewVideoUrl: string | null;
@@ -215,7 +217,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
               <div className="newAssetCardMeta">
                 <p className="newAssetCardCat">Character</p>
                 <p className="newAssetCardName">{latestChar.name}</p>
-                <p className="newAssetCardPrice">₱{latestChar.price.toLocaleString()}</p>
+                <p className="newAssetCardPrice">₱{latestChar.priceMeshOnly.toLocaleString()}</p>
                 <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn">
                   Buy Now →
                 </a>
@@ -242,7 +244,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
               <div className="newAssetCardMeta">
                 <p className="newAssetCardCat">Weapon</p>
                 <p className="newAssetCardName">{latestWeapon.name}</p>
-                <p className="newAssetCardPrice">₱{latestWeapon.price.toLocaleString()}</p>
+                <p className="newAssetCardPrice">₱{latestWeapon.priceMeshOnly.toLocaleString()}</p>
                 <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn">
                   Buy Now →
                 </a>
