@@ -41,7 +41,7 @@ export default async function CheckoutPage({ params }: Props) {
   // Fall back to Product table (assets) — resolve by cuid id only (Product table has no slug field)
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { id: true, name: true, price: true, description: true },
+    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, description: true },
   });
 
   if (!product) notFound();
@@ -50,7 +50,7 @@ export default async function CheckoutPage({ params }: Props) {
     <CheckoutClient
       checkoutProductId={product.id}
       productName={product.name}
-      price={product.price}
+      price={product.priceFullPack}
       description={product.description ?? ""}
       timeline=""
     />

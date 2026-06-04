@@ -29,7 +29,7 @@ export default async function ProfilePage() {
         estimatedAt:  true,
         deliveredAt:  true,
         createdAt:    true,
-        product: { select: { id: true, name: true, price: true } },
+        product: { select: { id: true, name: true, priceMeshOnly: true } },
       },
     }),
     prisma.ownership.findMany({
@@ -45,7 +45,7 @@ export default async function ProfilePage() {
   const orderRows = orders.map((o: any) => ({
     id:           o.id,
     productName:  o.product.name,
-    amount:       o.amountPaid ?? o.product.price,
+    amount:       o.amountPaid ?? o.product.priceMeshOnly,
     status:       o.status as string,
     deliveryNote: (o.deliveryNote as string | null) ?? null,
     estimatedAt:  o.estimatedAt ? (o.estimatedAt as Date).toISOString() : null,
