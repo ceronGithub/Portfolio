@@ -680,9 +680,9 @@ export default function AssetBuySection({
                     showToast("No items selected. Browse and select assets first.", "warning");
                     return;
                   }
-                  // Pass product IDs to /checkout/bundle — server validates prices
-                  const ids = cartEntries.map(e => e.asset.id).join(",");
-                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                  // Pass id:tier tuples so server computes the correct tier price
+                  const items = cartEntries.map(e => `${e.asset.id}:${e.tier}`).join(",");
+                  window.location.href = `/checkout/bundle?items=${items}`;
                 }}
               >
                 {cartEntries.length > 0
@@ -694,8 +694,8 @@ export default function AssetBuySection({
                 disabled={cartEntries.length === 0}
                 onClick={() => {
                   if (cartEntries.length === 0) return;
-                  const ids = cartEntries.map(e => e.asset.id).join(",");
-                  window.location.href = `/checkout/bundle?ids=${ids}`;
+                  const items = cartEntries.map(e => `${e.asset.id}:${e.tier}`).join(",");
+                  window.location.href = `/checkout/bundle?items=${items}`;
                 }}
                 title={cartEntries.length > 0 ? `Checkout (${cartEntries.length} items)` : "No items selected"}
               >
