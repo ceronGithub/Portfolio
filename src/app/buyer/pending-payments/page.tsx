@@ -31,7 +31,7 @@ export default async function PendingPaymentsPage() {
   const userId = (session.user as any).id as string;
 
   const pendingOrders = await prisma.order.findMany({
-    where:   { userId, status: "PENDING" },
+    where:   { userId, status: { in: ["PENDING", "PAID"] } },
     orderBy: { createdAt: "desc" },
     select: {
       id:              true,
@@ -61,6 +61,7 @@ export default async function PendingPaymentsPage() {
             tier,
             paymongoOrderId: o.paymongoOrderId ?? null,
             createdAt:       o.createdAt.toISOString(),
+            status:          o.status,
           };
         })}
     />

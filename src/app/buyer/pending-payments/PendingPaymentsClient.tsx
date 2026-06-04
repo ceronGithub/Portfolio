@@ -17,6 +17,7 @@ interface PendingOrder {
   amount:          number;
   paymongoOrderId: string | null;
   createdAt:       string;
+  status:          string;
 }
 
 interface Props {
@@ -226,6 +227,7 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
         ) : (
           <div className="pendingPaymentsList">
             {orders.map(order => {
+              const isPaid    = order.status === "PAID";
               const days      = daysSince(order.createdAt);
               const isOverdue = days > 7;
               const expired   = isLinkExpired(order.createdAt);
@@ -234,7 +236,7 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
               return (
                 <div
                   key={order.id}
-                  className={`pendingPaymentRow ${isOverdue ? "pendingPaymentRowOverdue" : ""} ${expired ? "pendingPaymentRowExpired" : ""}`}
+                  className={`pendingPaymentRow ${isPaid ? "pendingPaymentRowPaid" : ""} ${isOverdue && !isPaid ? "pendingPaymentRowOverdue" : ""} ${expired && !isPaid ? "pendingPaymentRowExpired" : ""}`}
                 >
                   {/* Icon + Product Info */}
                   <div className="pendingPaymentLeft">
@@ -252,39 +254,48 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
                       <p className="pendingPaymentDate">
                         Order placed {formatDate(order.createdAt)} ({days} day{days !== 1 ? "s" : ""} ago)
                       </p>
-                      <p className={`pendingPaymentLinkStatus ${expired ? "pendingPaymentLinkStatusExpired" : "pendingPaymentLinkStatusActive"}`}>
-                        {linkLabel}
-                      </p>
+                      {!isPaid && (
+                        <p className={`pendingPaymentLinkStatus ${expired ? "pendingPaymentLinkStatusExpired" : "pendingPaymentLinkStatusActive"}`}>
+                          {linkLabel}
+                        </p>
+                      )}
+                      {isPaid && (
+                        <p className="pendingPaymentLinkStatusPaid">✓ Payment confirmed</p>
+                      )}
                     </div>
                   </div>
 
                   {/* Amount + Status + Action */}
                   <div className="pendingPaymentRight">
                     <div className="pendingPaymentAmount">
-                      <p className="pendingPaymentAmountLabel">Amount Due</p>
+                      <p className="pendingPaymentAmountLabel">{isPaid ? "Amount Paid" : "Amount Due"}</p>
                       <p className="pendingPaymentAmountValue">{fmt(order.amount)}</p>
                     </div>
 
-                    {expired && (
-                      <div className="pendingPaymentBadgeExpired">Link Expired</div>
+                    {isPaid ? (
+                      <div className="pendingPaymentBadgePaid">✓ Paid</div>
+                    ) : (
+                      <>
+                        {expired && (
+                          <div className="pendingPaymentBadgeExpired">Link Expired</div>
+                        )}
+                        {!expired && isOverdue && (
+                          <div className="pendingPaymentBadgeOverdue">7+ days</div>
+                        )}
+                        <button
+                          className={`pendingPaymentRetryBtn ${expired ? "pendingPaymentRetryBtnExpired" : ""} ${loadingId === order.id ? "pendingPaymentRetryBtnLoading" : ""}`}
+                          onClick={() => handleRetryPayment(order)}
+                          disabled={loadingId !== null || expired}
+                          title={expired ? "This payment link has expired. Please contact support." : undefined}
+                        >
+                          {expired
+                            ? "Link Expired"
+                            : loadingId === order.id
+                            ? "Processing…"
+                            : "Retry Payment"}
+                        </button>
+                      </>
                     )}
-
-                    {!expired && isOverdue && (
-                      <div className="pendingPaymentBadgeOverdue">7+ days</div>
-                    )}
-
-                    <button
-                      className={`pendingPaymentRetryBtn ${expired ? "pendingPaymentRetryBtnExpired" : ""} ${loadingId === order.id ? "pendingPaymentRetryBtnLoading" : ""}`}
-                      onClick={() => handleRetryPayment(order)}
-                      disabled={loadingId !== null || expired}
-                      title={expired ? "This payment link has expired. Please contact support." : undefined}
-                    >
-                      {expired
-                        ? "Link Expired"
-                        : loadingId === order.id
-                        ? "Processing…"
-                        : "Retry Payment"}
-                    </button>
                   </div>
                 </div>
               );
