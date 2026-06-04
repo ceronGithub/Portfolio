@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     const allOrderIds    = orders.map(o => o.id).join(",");
 
     const link = await createPaymentLink({
-      amount:      total / 100,  // total is in centavos; createPaymentLink expects PHP
+      amount:      total,  // total is PHP; createPaymentLink converts to centavos internally
       description: `Bundle Purchase — ${products.length} items`,
       remarks:     `Orders: ${allOrderIds}`,
       referenceId: primaryOrderId,
