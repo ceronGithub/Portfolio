@@ -34,8 +34,14 @@ export async function POST(
 
   const product = await prisma.product.findUnique({
     where:  { id: productId },
-    select: { id: true, price: true, name: true, isActive: true },
+    select: { id: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, name: true, isActive: true },
   });
+
+  function getTierPrice(p: { priceMeshOnly: number; priceStandard: number; priceFullPack: number }, tier: string): number {
+    if (tier === "mesh_only") return p.priceMeshOnly;
+    if (tier === "standard")  return p.priceStandard;
+    return p.priceFullPack;
+  }
 
   if (product && product.isActive) {
     itemName = product.name;
@@ -50,7 +56,11 @@ export async function POST(
     isSystem  = true;
   }
 
-  const downpayment = Math.round(total * 0.30);
+  const tier        = grantedTier ?? "mesh_only";
+  const correctAmt  = product && product.isActive
+    ? getTierPrice(product, tier)
+    : total;   // system — trust client total
+
   const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   try {
@@ -61,16 +71,16 @@ export async function POST(
         userId,
         systemId: productId,
         status: "PENDING",
-        amountPaid: downpayment,
-        deliveryNote: `tier:${grantedTier ?? "mesh_only"}`,
+        amountPaid:   correctAmt,
+        deliveryNote: `tier:${tier}`,
       };
     } else {
       orderData = {
         userId,
         productId,
         status: "PENDING",
-        amountPaid: downpayment,
-        deliveryNote: `tier:${grantedTier ?? "mesh_only"}`,
+        amountPaid:   correctAmt,
+        deliveryNote: `tier:${tier}`,
       };
     }
 
@@ -78,15 +88,14 @@ export async function POST(
       data: orderData,
     });
 
-    // Create PayMongo payment link
-    // downpayment is in centavos; createPaymentLink expects PHP (it multiplies by 100 internally)
+    // Create PayMongo payment link — amount in PHP (createPaymentLink converts to centavos internally)
     const link = await createPaymentLink({
-      amount:      downpayment / 100,
-      description: `Downpayment — ${itemName}`,
-      remarks:     `Order ${order.id} · 30% downpayment`,
+      amount:      correctAmt,
+      description: `Payment — ${itemName}`,
+      remarks:     `Order ${order.id} · Tier: ${tier}`,
       referenceId: order.id,
-      successUrl:  `${appUrl}/checkout/success?orderId=${order.id}`,
-      failedUrl:   `${appUrl}/checkout/failed?orderId=${order.id}`,
+      successUrl:  `${appUrl}/checkout/success?orders=${encodeURIComponent(order.id)}`,
+      failedUrl:   `${appUrl}/checkout/failed?orders=${encodeURIComponent(order.id)}`,
     });
 
     // Store PayMongo link ID on the order

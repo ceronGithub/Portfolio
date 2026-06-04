@@ -330,6 +330,20 @@
 .apCellName  { font-weight: 600; }
 .apCellMuted { color: var(--sidebar-text); font-weight: 400; font-size: 0.78rem; }
 .apCellMono  { font-variant-numeric: tabular-nums; font-weight: 700; color: #c9a96e; }
+.apCellTierPrices {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  flex-wrap:   wrap;
+}
+.apCellTierPrices span {
+  font-size:     0.72rem;
+  white-space:   nowrap;
+  padding:       2px 5px;
+  border-radius: 4px;
+  background:    rgba(201,169,110,0.08);
+  border:        1px solid rgba(201,169,110,0.18);
+}
 .apCellOwned { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
 .apNone      { color: var(--sidebar-text); font-style: normal; font-weight: 400; }
 
@@ -2050,3 +2064,97 @@
 }
 .apToast--ok  { background: #22c55e; }
 .apToast--err { background: #ef4444; }
+
+/* ── Media Price Editor ───────────────────────────────────────────── */
+.apMediaPriceEditor {
+  padding:       1rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 0.25rem;
+}
+
+.apMediaPriceRow {
+  display:     flex;
+  align-items: center;
+  gap:         1rem;
+  flex-wrap:   wrap;
+  margin-top:  0.5rem;
+}
+
+.apMediaPriceInputGroup {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.3rem;
+}
+
+.apMediaPriceLabel {
+  font-size:   0.68rem;
+  color:       rgba(255,255,255,0.4);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.apMediaPriceInputWrap {
+  display:     flex;
+  align-items: center;
+  gap:         0.3rem;
+  background:  rgba(255,255,255,0.05);
+  border:      1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding:     0 0.6rem;
+}
+
+.apMediaPriceCurrency {
+  color:     #c9a96e;
+  font-size: 0.85rem;
+}
+
+.apMediaPriceInput {
+  background:  transparent;
+  border:      none;
+  outline:     none;
+  color:       #fff;
+  font-size:   0.88rem;
+  font-weight: 600;
+  width:       90px;
+  padding:     0.45rem 0;
+}
+
+.apMediaPriceDerived {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  flex-wrap:   wrap;
+}
+
+.apMediaPriceDerived span {
+  font-size:     0.72rem;
+  font-weight:   700;
+  color:         #c9a96e;
+  padding:       3px 7px;
+  border-radius: 5px;
+  background:    rgba(201,169,110,0.08);
+  border:        1px solid rgba(201,169,110,0.2);
+  cursor:        help;
+}
+
+.apMediaPriceSaveBtn {
+  background:    #22c55e;
+  color:         #000;
+  border:        none;
+  border-radius: 6px;
+  padding:       0.45rem 1rem;
+  font-size:     0.78rem;
+  font-weight:   700;
+  cursor:        pointer;
+  transition:    background 0.15s, opacity 0.15s;
+  white-space:   nowrap;
+}
+.apMediaPriceSaveBtn:hover:not(:disabled) { background: #16a34a; }
+.apMediaPriceSaveBtn:disabled { opacity: 0.45; cursor: default; }
+
+.apMediaPriceError {
+  font-size:  0.72rem;
+  color:      #f87171;
+  margin-top: 0.4rem;
+}

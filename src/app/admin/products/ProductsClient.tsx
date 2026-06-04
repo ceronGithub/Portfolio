@@ -519,6 +519,43 @@ function MediaEditor({ product, onFieldSaved }: {
   product: Product;
   onFieldSaved: (id: string, field: string, value: string | null) => void;
 }) {
+  // ── Tier Price Editor ──────────────────────────────────────────────────────
+  // Admin enters the Full Pack price; Mesh Only (45%) and Standard (75%) are
+  // auto-computed. All three are saved in one PATCH.
+  const [fullPackDraft, setFullPackDraft] = useState(String(product.priceFullPack || ""));
+  const [priceSaving,   setPriceSaving]   = useState(false);
+  const [priceSaved,    setPriceSaved]    = useState(false);
+  const [priceError,    setPriceError]    = useState("");
+
+  const fullPackNum   = parseInt(fullPackDraft.replace(/,/g, ""), 10);
+  const isValidPrice  = !isNaN(fullPackNum) && fullPackNum > 0;
+  const derivedMesh   = isValidPrice ? Math.round(fullPackNum * 0.45) : 0;
+  const derivedStd    = isValidPrice ? Math.round(fullPackNum * 0.75) : 0;
+
+  async function handleSavePrices() {
+    if (!isValidPrice) { setPriceError("Enter a valid Full Pack price."); return; }
+    setPriceSaving(true); setPriceError("");
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        priceMeshOnly: derivedMesh,
+        priceStandard: derivedStd,
+        priceFullPack: fullPackNum,
+      }),
+    });
+    setPriceSaving(false);
+    if (res.ok) {
+      onFieldSaved(product.id, "priceMeshOnly", String(derivedMesh));
+      onFieldSaved(product.id, "priceStandard", String(derivedStd));
+      onFieldSaved(product.id, "priceFullPack", String(fullPackNum));
+      setPriceSaved(true);
+      setTimeout(() => setPriceSaved(false), 2500);
+    } else {
+      setPriceError("Failed to save prices.");
+    }
+  }
+
   const initialSimpleDrafts = Object.fromEntries(
     SIMPLE_MEDIA_FIELDS.map(({ field }) => [field, (product[field as keyof Product] as string | null) ?? ""])
   );
@@ -633,6 +670,49 @@ function MediaEditor({ product, onFieldSaved }: {
 
   return (
     <div className="apMediaEditor">
+
+      {/* ── Tier Price Editor ── */}
+      <div className="apMediaPriceEditor">
+        <p className="apMediaSectionLabel">
+          Tier Prices
+          <span className="apMediaSectionHint"> — enter Full Pack price, others auto-computed</span>
+        </p>
+        <div className="apMediaPriceRow">
+          <div className="apMediaPriceInputGroup">
+            <label className="apMediaPriceLabel">Full Pack (100%)</label>
+            <div className="apMediaPriceInputWrap">
+              <span className="apMediaPriceCurrency">₱</span>
+              <input
+                className="apMediaPriceInput"
+                type="text"
+                inputMode="numeric"
+                value={fullPackDraft}
+                placeholder="e.g. 5500"
+                onChange={e => { setFullPackDraft(e.target.value); setPriceError(""); }}
+              />
+            </div>
+          </div>
+          <div className="apMediaPriceDerived">
+            <span title="Mesh Only = 45% of Full Pack">
+              M ₱{isValidPrice ? derivedMesh.toLocaleString() : "—"}
+            </span>
+            <span title="Standard = 75% of Full Pack">
+              S ₱{isValidPrice ? derivedStd.toLocaleString() : "—"}
+            </span>
+            <span title="Full Pack = 100%">
+              F ₱{isValidPrice ? fullPackNum.toLocaleString() : "—"}
+            </span>
+          </div>
+          <button
+            className="apMediaPriceSaveBtn"
+            onClick={handleSavePrices}
+            disabled={priceSaving || !isValidPrice}
+          >
+            {priceSaving ? "Saving…" : priceSaved ? "✓ Saved" : "Save Prices"}
+          </button>
+        </div>
+        {priceError && <p className="apMediaPriceError">{priceError}</p>}
+      </div>
 
       {/* ── Preview Video + Face PNG — simple text + pick file rows ── */}
       {SIMPLE_MEDIA_FIELDS.map(({ field, isImage }) => {
@@ -1633,8 +1713,12 @@ function ProductsSection({
   }
 
   function handleFieldSaved(productId: string, field: string, value: string | null) {
+    const NUMERIC_FIELDS = new Set(["priceMeshOnly", "priceStandard", "priceFullPack"]);
+    const parsedValue = NUMERIC_FIELDS.has(field) && value !== null
+      ? parseInt(value, 10)
+      : value;
     setProductList(prev => prev.map(p =>
-      p.id === productId ? { ...p, [field]: value } : p
+      p.id === productId ? { ...p, [field]: parsedValue } : p
     ));
     const labelMap: Record<string, string> = {
       previewVideoUrl: "Preview Video",
@@ -1642,12 +1726,20 @@ function ProductsSection({
       fileKeyObj:      "OBJ file",
       fileKeyFbx:      "FBX file",
       fileKeyGlb:      "GLB file",
+      priceMeshOnly:   "Tier prices",
+      priceStandard:   "Tier prices",
+      priceFullPack:   "Tier prices",
     };
     const fieldLabel = labelMap[field] ?? field;
-    if (value) {
-      showToast(`✓ ${fieldLabel} uploaded & saved successfully.`, "ok");
-    } else {
-      showToast(`✓ ${fieldLabel} cleared.`, "ok");
+    // Avoid 3 toasts for 1 save — only toast on priceFullPack (last field saved)
+    if (field === "priceFullPack") {
+      showToast(`✓ ${fieldLabel} updated successfully.`, "ok");
+    } else if (!NUMERIC_FIELDS.has(field)) {
+      if (value) {
+        showToast(`✓ ${fieldLabel} uploaded & saved successfully.`, "ok");
+      } else {
+        showToast(`✓ ${fieldLabel} cleared.`, "ok");
+      }
     }
   }
 
