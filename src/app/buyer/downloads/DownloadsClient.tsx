@@ -33,42 +33,36 @@ interface DownloadItem {
   grantedAt:    string;
 }
 
-// Files available per tier
-function getTierFiles(item: DownloadItem): { label: string; key: string; ext: string }[] {
-  const files: { label: string; key: string; ext: string }[] = [];
+// Files available per tier — returns field name (for secure API) + display info
+function getTierFiles(item: DownloadItem): { label: string; field: string; ext: string }[] {
+  const files: { label: string; field: string; ext: string }[] = [];
   const tier = item.grantedTier;
 
-  // Delivery package (admin-attached zip) always shown if present
-  if (item.fileKey) files.push({ label: "Package", key: item.fileKey, ext: "zip" });
+  // Admin delivery package (Ownership.fileKey)
+  if (item.fileKey)   files.push({ label: "Package",  field: "fileKey",    ext: "zip" });
 
   // PNG preview — all tiers
-  if (item.facePngUrl) files.push({ label: "PNG", key: item.facePngUrl, ext: "png" });
+  if (item.facePngUrl) files.push({ label: "PNG",     field: "facePngUrl", ext: "png" });
 
   // Mesh files — all tiers
-  if (item.fileKeyObj) files.push({ label: "OBJ", key: item.fileKeyObj, ext: "obj" });
-  if (item.fileKeyFbx) files.push({ label: "FBX", key: item.fileKeyFbx, ext: "fbx" });
+  if (item.fileKeyObj) files.push({ label: "OBJ",     field: "fileKeyObj", ext: "obj" });
+  if (item.fileKeyFbx) files.push({ label: "FBX",     field: "fileKeyFbx", ext: "fbx" });
 
-  // GLB — standard + full_pack only
-  if ((tier === "standard" || tier === "full_pack") && item.fileKeyGlb)
-    files.push({ label: "GLB", key: item.fileKeyGlb, ext: "glb" });
-
-  // Preview video (MP4 animation) — standard + full_pack only
-  if ((tier === "standard" || tier === "full_pack") && item.previewVideoUrl)
-    files.push({ label: "Preview MP4", key: item.previewVideoUrl, ext: "mp4" });
-
-  // Core animations — standard + full_pack
+  // GLB + preview + core anims — standard + full_pack
   if (tier === "standard" || tier === "full_pack") {
-    if (item.animIdleUrl)      files.push({ label: "Anim: Idle", key: item.animIdleUrl, ext: "fbx" });
-    if (item.animWalkUrl)      files.push({ label: "Anim: Walk", key: item.animWalkUrl, ext: "fbx" });
-    if (item.animRunUrl)       files.push({ label: "Anim: Run", key: item.animRunUrl, ext: "fbx" });
-    if (item.animAttackOneUrl) files.push({ label: "Anim: Attack 1", key: item.animAttackOneUrl, ext: "fbx" });
-    if (item.animDeathUrl)     files.push({ label: "Anim: Death", key: item.animDeathUrl, ext: "fbx" });
+    if (item.fileKeyGlb)       files.push({ label: "GLB",            field: "fileKeyGlb",       ext: "glb" });
+    if (item.previewVideoUrl)  files.push({ label: "Preview MP4",    field: "previewVideoUrl",  ext: "mp4" });
+    if (item.animIdleUrl)      files.push({ label: "Anim: Idle",     field: "animIdleUrl",      ext: "fbx" });
+    if (item.animWalkUrl)      files.push({ label: "Anim: Walk",     field: "animWalkUrl",      ext: "fbx" });
+    if (item.animRunUrl)       files.push({ label: "Anim: Run",      field: "animRunUrl",       ext: "fbx" });
+    if (item.animAttackOneUrl) files.push({ label: "Anim: Attack 1", field: "animAttackOneUrl", ext: "fbx" });
+    if (item.animDeathUrl)     files.push({ label: "Anim: Death",    field: "animDeathUrl",     ext: "fbx" });
   }
 
-  // Full pack exclusive animations
+  // Full pack exclusive
   if (tier === "full_pack") {
-    if (item.animAttackTwoUrl) files.push({ label: "Anim: Attack 2", key: item.animAttackTwoUrl, ext: "fbx" });
-    if (item.animHitUrl)       files.push({ label: "Anim: Hit", key: item.animHitUrl, ext: "fbx" });
+    if (item.animAttackTwoUrl) files.push({ label: "Anim: Attack 2", field: "animAttackTwoUrl", ext: "fbx" });
+    if (item.animHitUrl)       files.push({ label: "Anim: Hit",      field: "animHitUrl",       ext: "fbx" });
   }
 
   return files;
@@ -119,16 +113,16 @@ export default function DownloadsClient({ downloads }: Props) {
     });
   }, [downloads, tab, search]);
 
-  async function handleDownload(item: DownloadItem) {
-    if (!item.fileKey) return;
-    setDownloading(item.id);
+  async function handleDownload(productId: string, field: string, filename: string) {
+    setDownloading(productId + field);
     try {
+      const url = `/api/buyer/download?productId=${productId}&field=${encodeURIComponent(field)}`;
       const a   = document.createElement("a");
-      a.href     = `/api/drive-video?id=${item.fileKey}`;
-      a.download = item.name;
+      a.href     = url;
+      a.download = filename;
       a.target   = "_blank";
       a.click();
-      showToast("Download started!", "success");
+      showToast(`Downloading ${filename}`, "success");
     } finally {
       setTimeout(() => setDownloading(null), 1200);
     }
@@ -247,7 +241,7 @@ export default function DownloadsClient({ downloads }: Props) {
           <div className="dlList">
             {filtered.map(item => {
               const cat    = getCategory(item.name);
-              const isBusy = downloading === item.id;
+              const isBusy = downloading !== null && downloading.startsWith(item.productId);
 
               const files      = getTierFiles(item);
               const hasAnyFile = files.length > 0;
@@ -277,9 +271,9 @@ export default function DownloadsClient({ downloads }: Props) {
                     {hasAnyFile ? (
                       files.map((f, fIdx) => (
                         <button
-                          key={`${f.key}-${fIdx}`}
+                          key={`${f.field}-${fIdx}`}
                           className={`dlFileBtn ${isBusy ? "dlRowBtnBusy" : ""}`}
-                          onClick={() => openFileKey(f.key, `${item.name}.${f.ext}`)}
+                          onClick={() => handleDownload(item.productId, f.field, `${item.name}.${f.ext}`)}
                           disabled={isBusy}
                           title={`Download ${f.label}`}
                         >
