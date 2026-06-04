@@ -484,8 +484,6 @@ export default function CustomRequestBuilder() {
                     <a
                       className="crbEmailPhotoBtn"
                       href={`mailto:developerceron@gmail.com?subject=${encodeURIComponent(`Custom ${form.assetType} Animation Request`)}&body=${encodeURIComponent(`Hi, I'd like to request a custom ${form.assetType?.toLowerCase()} animation.\n\nPlease find my reference photo attached.\n\nDescription:\n${form.description || "(add your description here)"}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
                     >
                       Send Photo →
                     </a>
