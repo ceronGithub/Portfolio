@@ -281,7 +281,7 @@ export default function LoginPage() {
                 className="authInput"
                 type="password"
                 value={password}
-                onChange={e => setPassword(sanitize(e.target.value))}
+                onChange={e => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
                 autoComplete="current-password"

@@ -148,7 +148,9 @@ export default function RegisterPage() {
   }, [vidIdx]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm({ ...form, [e.target.name]: sanitize(e.target.value) });
+    // Password fields must never be sanitized — stripping chars breaks bcrypt compare on login
+    const isPasswordField = e.target.name === "password" || e.target.name === "confirmPassword";
+    setForm({ ...form, [e.target.name]: isPasswordField ? e.target.value : sanitize(e.target.value) });
   }
 
   async function handleSubmit(e: React.FormEvent) {
