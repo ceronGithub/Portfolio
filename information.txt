@@ -1,6 +1,8 @@
-github & deployment
 developerceron
+github & deployment
 cloudflare
+vercel
+emailjs
 
 ceroncalsena
 gdrive
