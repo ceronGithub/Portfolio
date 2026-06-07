@@ -133,7 +133,7 @@ export default function InquirySection() {
   }
 
   return (
-    <section className="iqSection">
+    <section id="get-in-touch" className="iqSection">
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="iqInner">
 

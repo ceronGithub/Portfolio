@@ -13,7 +13,7 @@ import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type AssetType     = "Character" | "Weapon" | "Interior" | "Exterior" | "AI Animation" | "System" | "Other";
+type AssetType     = "Character" | "Weapon" | "Interior" | "Exterior" | "AI Animation" | "Other";
 type DeliverySpeed = "Standard" | "Rush" | "Urgent";
 
 // ── Character packs ───────────────────────────────────────────────────────────
@@ -55,7 +55,6 @@ const EXTERIOR_CLIPS: { key: ExteriorClip; label: string; desc: string; price: n
 // ── Base prices (for AI Animation, System, Other — clip-based types use pack price) ──
 const BASE_PRICE: Partial<Record<AssetType, number>> = {
   "AI Animation": 7500,
-  System:        33000,
   Other:         8000,
 };
 
@@ -156,11 +155,6 @@ const ICONS: Record<AssetType, React.ReactNode> = {
       <path d="M19 3v18"/>
     </svg>
   ),
-  System: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/>
-    </svg>
-  ),
   Other: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.22 4.22l2.12 2.12m11.32 11.32 2.12 2.12M2 12h3m14 0h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
@@ -227,7 +221,6 @@ const ASSET_ACCENT: Record<AssetType, string> = {
   Interior:       "#60a5fa",
   Exterior:       "#a78bfa",
   "AI Animation": "#f472b6",
-  System:         "#67e8f9",
   Other:          "#888",
 };
 
@@ -235,7 +228,6 @@ const ASSET_BASE_DISPLAY: Partial<Record<AssetType, string>> = {
   Interior:      "from ₱2,500",
   Exterior:      "from ₱3,500",
   "AI Animation": "from ₱7,500",
-  System:        "from ₱33,000",
 };
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -360,12 +352,20 @@ export default function CustomRequestBuilder() {
               <div className="crbStep">
                 <p className="crbStepTitle">What are you looking for?</p>
                 <div className="crbTypeGrid">
-                  {(["Character", "Weapon", "Interior", "Exterior", "AI Animation", "System", "Other"] as AssetType[]).map(t => (
+                  {(["Character", "Weapon", "Interior", "Exterior", "AI Animation", "Other"] as AssetType[]).map(t => (
                     <button
                       key={t}
                       className={`crbTypeBtn ${form.assetType === t ? "crbTypeBtnActive" : ""}`}
                       style={form.assetType === t ? { borderColor: ASSET_ACCENT[t] + "66", background: ASSET_ACCENT[t] + "10" } : {}}
-                      onClick={() => setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "", interiorClip: "", exteriorClip: "" }))}
+                      onClick={() => {
+                        if (t === "Other") {
+                          // Redirect to Get in Touch section — no steps needed for Other
+                          const target = document.getElementById("get-in-touch");
+                          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+                          return;
+                        }
+                        setForm(f => ({ ...f, assetType: t, characterPack: "", weaponPack: "", interiorClip: "", exteriorClip: "" }));
+                      }}
                     >
                       <span className="crbTypeBtnIcon" style={form.assetType === t ? { color: ASSET_ACCENT[t] } : {}}>{ICONS[t]}</span>
                       <span className="crbTypeBtnLabel">{t}</span>
