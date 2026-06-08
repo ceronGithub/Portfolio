@@ -350,71 +350,66 @@ export default function Navbar() {
   const hasScrolledRef = useRef(false); // only trust observer after real scroll
 
   /* ── Scroll-based section detection ─────────────────────────────── */
+  // Stable hashId list avoids stale-closure bugs — does not depend on the items array.
+  const VISITOR_HASH_IDS = ["systems", "pricing", "about", "ai-visuals"];
+
   useEffect(() => {
     if (!isOnVisitor) return;
 
-    const onScroll = () => { hasScrolledRef.current = true; };
-    window.addEventListener("scroll", onScroll, { once: true });
+    const onFirstScroll = () => { hasScrolledRef.current = true; };
+    window.addEventListener("scroll", onFirstScroll, { once: true });
 
-    const hashItems = items.filter(it => it.isHash && it.hashId);
-    if (hashItems.length === 0) return () => window.removeEventListener("scroll", onScroll);
+    // Build hashId → nav index map from the current items snapshot
+    const hashIndexMap = new Map<string, number>();
+    VISITOR_HASH_IDS.forEach(hashId => {
+      const idx = items.findIndex(it => it.hashId === hashId);
+      if (idx !== -1) hashIndexMap.set(hashId, idx);
+    });
 
-    // Track which sections are currently intersecting the middle band
+    if (hashIndexMap.size === 0) return () => window.removeEventListener("scroll", onFirstScroll);
+
     const intersecting = new Set<string>();
 
     const updateActive = () => {
       if (!hasScrolledRef.current) return;
-
-      // If nothing intersecting, check if we're near the top → Home
       if (intersecting.size === 0) {
-        if (window.scrollY < 200) setScrollIndex(null); // back to Home default
+        if (window.scrollY < 200) setScrollIndex(null);
         return;
       }
-
-      // Pick the first hashItem (in nav order) that is currently intersecting
-      const match = hashItems.find(it => intersecting.has(it.hashId!));
-      if (match) {
-        const idx = items.findIndex(it => it.hashId === match.hashId);
-        if (idx !== -1) setScrollIndex(idx);
+      // Pick first match in stable VISITOR_HASH_IDS order
+      for (const hashId of VISITOR_HASH_IDS) {
+        if (intersecting.has(hashId) && hashIndexMap.has(hashId)) {
+          setScrollIndex(hashIndexMap.get(hashId)!);
+          return;
+        }
       }
     };
 
     const observers: IntersectionObserver[] = [];
 
-    hashItems.forEach(item => {
-      const el = document.getElementById(item.hashId!);
+    VISITOR_HASH_IDS.forEach(hashId => {
+      const el = document.getElementById(hashId);
       if (!el) return;
-
       const obs = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) {
-            intersecting.add(item.hashId!);
-          } else {
-            intersecting.delete(item.hashId!);
-          }
+          if (entry.isIntersecting) { intersecting.add(hashId); }
+          else                      { intersecting.delete(hashId); }
           updateActive();
         },
-        {
-          // Fire when section enters top 40% of viewport or bottom 20%
-          rootMargin: "-40% 0px -20% 0px",
-          threshold: 0,
-        }
+        { rootMargin: "-40% 0px -20% 0px", threshold: 0 }
       );
       obs.observe(el);
       observers.push(obs);
     });
 
-    // Also reset to Home when user scrolls back to very top
     const onScrollTop = () => {
       if (!hasScrolledRef.current) return;
-      if (window.scrollY < 200 && intersecting.size === 0) {
-        setScrollIndex(null);
-      }
+      if (window.scrollY < 200 && intersecting.size === 0) setScrollIndex(null);
     };
     window.addEventListener("scroll", onScrollTop, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onFirstScroll);
       window.removeEventListener("scroll", onScrollTop);
       observers.forEach(o => o.disconnect());
     };
