@@ -1606,36 +1606,16 @@ function AddProductForm({ onProductCreated, onClose }: {
 
         <div className="apAddProductField apAddProductFieldFull apAddProductLatestToggle">
           <p className="apMediaLabel" style={{ marginBottom: "0.5rem" }}>Mark as Latest Drop</p>
-          <div className="apLatestRadioGroup">
-            <label className="apLatestToggleLabel">
-              <input
-                type="radio"
-                name="latestDropType"
-                checked={!isLatest}
-                onChange={() => setIsLatest(false)}
-              />
-              None
-            </label>
-            <div className="apLatestRadioDivider" />
-            <label className="apLatestToggleLabel">
-              <input
-                type="radio"
-                name="latestDropType"
-                checked={isLatest && (category === "character" || category === "weapon")}
-                onChange={() => setIsLatest(true)}
-              />
-              Mark as Latest Drop on Character &amp; Weapon
-            </label>
-            <label className="apLatestToggleLabel">
-              <input
-                type="radio"
-                name="latestDropType"
-                checked={isLatest && (category === "interior" || category === "exterior")}
-                onChange={() => setIsLatest(true)}
-              />
-              Mark as Latest Drop on Interior &amp; Exterior
-            </label>
-          </div>
+          <label className="apLatestToggleLabel" style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={isLatest}
+              onChange={e => setIsLatest(e.target.checked)}
+            />
+            {(category === "interior" || category === "exterior")
+              ? "Mark as Latest Drop on Interior & Exterior"
+              : "Mark as Latest Drop on Character & Weapon"}
+          </label>
         </div>
       </div>
       </div>{/* end apAddProductScrollBody */}

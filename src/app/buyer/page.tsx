@@ -38,6 +38,7 @@ export default async function BuyerPage() {
     }),
     prisma.product.findMany({
       where:   { isLatest: true, isActive: true },
+      orderBy: { createdAt: "desc" },
       select:  { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, category: true, packageTier: true, previewVideoUrl: true, facePngUrl: true },
     }),
   ]);
