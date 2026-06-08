@@ -1,11 +1,11 @@
 // NewArchitectureSection — Architecture Studio latest drop teaser.
 // Receives latest products as props from buyer/page.tsx (Server Component).
 // Falls back to "Coming Soon" when no isLatest products exist.
-// Background video plays from previewVideoUrl when a latest drop is active.
+// Background video loops through both interior and exterior preview videos.
 
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import "./new-architecture-section.css";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -28,34 +28,59 @@ interface Props {
 export default function NewArchitectureSection({ latestInterior, latestExterior }: Props) {
   const isLive = latestExterior !== null || latestInterior !== null;
 
-  // Prefer interior video; fall back to exterior if only exterior exists.
-  const bgVideoSrc = latestInterior?.previewVideoUrl ?? latestExterior?.previewVideoUrl ?? null;
+  // Build playlist of available video URLs (filter out nulls)
+  const videoPlaylist = [
+    latestInterior?.previewVideoUrl ?? null,
+    latestExterior?.previewVideoUrl ?? null,
+  ].filter((url): url is string => url !== null);
+
+  // Track which video in the playlist is currently playing
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Play video as soon as src is available — autoplay policies require
-  // muted + playsInline for autoplaying without user interaction.
+  // Current video src — cycles through playlist
+  const currentVideoSrc = videoPlaylist.length > 0
+    ? videoPlaylist[currentVideoIndex % videoPlaylist.length]
+    : null;
+
+  // When src changes, reload and play
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !bgVideoSrc) return;
+    if (!video || !currentVideoSrc) return;
     video.load();
     video.play().catch(() => {});
-  }, [bgVideoSrc]);
+  }, [currentVideoSrc]);
+
+  // Advance to next video on ended — creates the loop across both videos
+  function handleVideoEnded() {
+    if (videoPlaylist.length > 1) {
+      setCurrentVideoIndex(prev => (prev + 1) % videoPlaylist.length);
+    } else {
+      // Single video — just replay
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      }
+    }
+  }
 
   return (
     <section className="newArchSection">
 
       {/* ── Background video — left half ─────────────────────────────── */}
       <div className="newArchBgLeft">
-        {bgVideoSrc ? (
+        {currentVideoSrc ? (
           <video
             ref={videoRef}
-            src={bgVideoSrc}
+            key={currentVideoSrc}
+            src={currentVideoSrc}
             className="newArchBgVideo"
             muted
             playsInline
-            loop
             autoPlay
+            onEnded={handleVideoEnded}
           />
         ) : (
           <div className="newArchBgPlaceholder" />

@@ -113,7 +113,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
       if (fireParticles.current.length < 80 && Math.random() < 0.75)
         fireParticles.current.push(spawnFireParticle(w, h));
 
-      fireParticles.current = fireParticles.current.filter(p => p.life < p.maxLife);
+      fireParticles.current = fireParticles.current.filter((p: FireParticle) => p.life < p.maxLife);
 
       for (const p of fireParticles.current) {
         p.life += 1;
@@ -165,8 +165,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isLive      = latestChar !== null || latestWeapon !== null;
-  const displayItem = latestChar ?? latestWeapon; // prefer character, fallback weapon
+  const isLive = latestChar !== null || latestWeapon !== null;
 
   return (
     <section ref={sectionRef} className="newAssetSection">
@@ -192,7 +191,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
           <div>
             <p className="newAssetLabel">Latest Drop on Character &amp; Weapon</p>
             <h2 className="newAssetTitle">
-              {isLive ? (displayItem?.name ?? "New Asset") : "New Character. Available now"}
+              {isLive ? (latestChar?.name ?? latestWeapon?.name ?? "New Asset") : "New Character. Available now"}
             </h2>
           </div>
           {isLive ? (
@@ -203,7 +202,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
         </div>
 
         <div className="newAssetCards">
-          {/* Character card */}
+          {/* Character asset card */}
           {latestChar && (
             <div className="newAssetCard">
               <div className="newAssetCardInner">
@@ -230,7 +229,27 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
             </div>
           )}
 
-          {/* Weapon card */}
+          {/* Character animation preview card */}
+          {latestChar && (
+            <div className="newAssetCard newAssetCardVideo">
+              {latestChar.previewVideoUrl ? (
+                <video
+                  className="newAssetCardVideoEl"
+                  src={latestChar.previewVideoUrl}
+                  autoPlay muted loop playsInline
+                />
+              ) : (
+                <div className="newAssetCardVideoStatic">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.2}}>
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  <p className="newAssetCardVideoStaticLabel">Character Preview</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Weapon asset card */}
           {latestWeapon && (
             <div className="newAssetCard">
               <div className="newAssetCardInner">
@@ -257,23 +276,37 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
             </div>
           )}
 
-          {/* Animation preview card (character preferred) */}
-          <div className="newAssetCard newAssetCardVideo">
-            {isLive && displayItem?.previewVideoUrl ? (
-              <video
-                className="newAssetCardVideoEl"
-                src={displayItem.previewVideoUrl}
-                autoPlay muted loop playsInline
-              />
-            ) : (
+          {/* Weapon animation preview card */}
+          {latestWeapon && (
+            <div className="newAssetCard newAssetCardVideo">
+              {latestWeapon.previewVideoUrl ? (
+                <video
+                  className="newAssetCardVideoEl"
+                  src={latestWeapon.previewVideoUrl}
+                  autoPlay muted loop playsInline
+                />
+              ) : (
+                <div className="newAssetCardVideoStatic">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.2}}>
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  <p className="newAssetCardVideoStaticLabel">Weapon Preview</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Fallback: no products, show single empty preview slot */}
+          {!latestChar && !latestWeapon && (
+            <div className="newAssetCard newAssetCardVideo">
               <div className="newAssetCardVideoStatic">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.2}}>
                   <polygon points="5 3 19 12 5 21 5 3"/>
                 </svg>
                 <p className="newAssetCardVideoStaticLabel">Animation Preview</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Coming Soon state */}
