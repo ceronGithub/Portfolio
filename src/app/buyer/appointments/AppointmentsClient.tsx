@@ -21,6 +21,7 @@ interface AppointmentItem {
   selectedAddons: AddonSnapshot[];
   scheduledDate:  string;
   message:        string | null;
+  adminNote:      string | null;
   status:         AppointmentStatus;
   createdAt:      string;
 }
@@ -99,6 +100,7 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
         selectedAddons: a.selectedAddons ?? [],
         scheduledDate:  a.scheduledDate,
         message:        a.message ?? null,
+        adminNote:      a.adminNote ?? null,
         status:         a.status,
         createdAt:      a.createdAt,
       })));
@@ -199,12 +201,26 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
                   </svg>
                   <span>Preferred date — {formatDate(a.scheduledDate)}</span>
                 </div>
+                <div className="apBuyerCardMetaItem">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>Submitted — {new Date(a.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}</span>
+                </div>
                 {a.message && (
                   <div className="apBuyerCardMetaItem">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                     <span className="apBuyerCardMessage">{a.message}</span>
+                  </div>
+                )}
+                {a.adminNote && (
+                  <div className="apBuyerCardMetaItem apBuyerCardAdminNote">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                    </svg>
+                    <span className="apBuyerCardAdminNoteText">{a.adminNote}</span>
                   </div>
                 )}
               </div>

@@ -29,6 +29,7 @@ export default async function BuyerAppointmentsPage() {
     selectedAddons: a.selectedAddons as any[],
     scheduledDate: a.scheduledDate,
     message:       a.message ?? null,
+    adminNote:     a.adminNote ?? null,
     status:        a.status,
     createdAt:     a.createdAt.toISOString(),
   }));
