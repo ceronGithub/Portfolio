@@ -1,6 +1,8 @@
 // ReviewSection.tsx — Buyer review / rating section.
-// Uses asset slug IDs (orc-01, axe-03, int-01, etc.) — no Product table.
-// Only buyers who own an asset can review it.
+// Shows a horizontal scrollable row of all owned products.
+// Buyer clicks a product card to open the rating form for that product.
+// Already-reviewed products show their submitted rating.
+// Wired to /api/reviews (GET + POST). Admin sees all via /api/admin/reviews.
 
 "use client";
 
@@ -9,33 +11,6 @@ import "./review-section.css";
 import { sanitize } from "@/lib/utils";
 import { useToast }  from "@/app/buyer/shared/useToast";
 import ToastStack    from "@/app/buyer/shared/ToastStack";
-
-// ── Asset label map ────────────────────────────────────────────────────────
-const ASSET_LABELS: Record<string, string> = {
-  "orc-01": "Orc 01 — Warrior",     "orc-02": "Orc 02 — Fighter",
-  "orc-03": "Orc 03 — Red Skin",    "orc-04": "Orc 04 — Armored",
-  "orc-05": "Orc 05 — Shaman",      "orc-06": "Orc 06 — Berserker",
-  "orc-07": "Orc 07 — Heavy",       "orc-08": "Orc 08 — Scout",
-  "orc-09": "Orc 09 — Elite",       "orc-10": "Orc 10 — Destroyer",
-  "orc-11": "Orc 11 — Warlord",     "orc-12": "Orc 12",
-  "orc-13": "Orc 13",
-  "axe-01": "Axe 01 — Battle Axe",  "axe-02": "Axe 02 — War Axe",
-  "axe-03": "Axe 03 — Runic Axe",   "axe-04": "Axe 04 — Viking Axe",
-  "axe-05": "Axe 05 — Ornate Axe",  "axe-06": "Axe 06 — Broad Axe",
-  "axe-07": "Axe 07 — Bloodied Axe","axe-08": "Axe 08 — Dark Axe",
-  "int-01": "Interior 01 — Suite",  "int-02": "Interior 02 — Living",
-  "int-03": "Interior 03 — Kitchen","int-04": "Interior 04 — Bedroom",
-  "int-05": "Interior 05 — Lobby",  "int-06": "Interior 06 — Office",
-  "int-07": "Interior 07 — Luxury",
-  "ext-drone-01": "Drone Reveal 01","ext-drone-02": "Drone Reveal 02",
-  "ext-proj-01":  "Project 01",     "ext-proj-02":  "Project 02",
-  "ext-proj-03":  "Project 03",     "ext-proj-04":  "Project 04",
-  "ext-proj-05":  "Project 05",
-};
-
-function assetLabel(id: string) {
-  return ASSET_LABELS[id] ?? id;
-}
 
 interface Review {
   id:        string;
@@ -46,9 +21,14 @@ interface Review {
   assetId:   string;
 }
 
+interface OwnedProduct {
+  id:   string;
+  name: string;
+}
+
 interface Props {
-  ownedProductIds: string[];  // asset slug IDs buyer owns
-  ownedProducts:   { id: string; name: string }[]; // kept for compat, not used
+  ownedProductIds: string[];
+  ownedProducts:   OwnedProduct[];
 }
 
 function fmtDate(iso: string) {
@@ -70,7 +50,7 @@ function Stars({ rating, interactive, onRate }: {
         <svg
           key={i}
           className={`rvStar ${i <= display ? "rvStarFilled" : "rvStarEmpty"}`}
-          width="16" height="16" viewBox="0 0 24 24"
+          width="18" height="18" viewBox="0 0 24 24"
           onMouseEnter={() => interactive && setHovered(i)}
           onMouseLeave={() => interactive && setHovered(0)}
           onClick={() => interactive && onRate?.(i)}
@@ -101,16 +81,23 @@ function RatingBar({ label, count, total }: { label: string; count: number; tota
 }
 
 // ── Main export ────────────────────────────────────────────────────────────
-export default function ReviewSection({ ownedProductIds }: Props) {
+export default function ReviewSection({ ownedProducts }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
-  const [reviews,    setReviews]    = useState<Review[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [filterAsset,setFilterAsset]= useState<string>("all");
-  const [formAsset,  setFormAsset]  = useState(ownedProductIds[0] ?? "");
-  const [formRating, setFormRating] = useState(0);
-  const [formText,   setFormText]   = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [submitMsg,  setSubmitMsg]  = useState("");
+
+  // All reviews from DB
+  const [reviews,      setReviews]      = useState<Review[]>([]);
+  const [loading,      setLoading]      = useState(true);
+
+  // Which product card is selected for reviewing
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+  // Form state for the selected product
+  const [formRating,   setFormRating]   = useState(0);
+  const [formText,     setFormText]     = useState("");
+  const [submitting,   setSubmitting]   = useState(false);
+
+  // Filter for the review list below
+  const [filterAsset,  setFilterAsset]  = useState<string>("all");
 
   useEffect(() => {
     fetch("/api/reviews")
@@ -119,16 +106,65 @@ export default function ReviewSection({ ownedProductIds }: Props) {
       .catch(() => setLoading(false));
   }, []);
 
-  // Keep formAsset in sync if ownedProductIds changes
-  useEffect(() => {
-    if (!formAsset && ownedProductIds.length > 0) setFormAsset(ownedProductIds[0]);
-  }, [ownedProductIds]);
+  // Map of assetId → submitted review (so we know which products already have a review)
+  const submittedReviewMap = useMemo(() => {
+    const map: Record<string, Review> = {};
+    for (const review of reviews) {
+      map[review.assetId] = review;
+    }
+    return map;
+  }, [reviews]);
 
+  // When a product card is clicked, open rating form for it (reset form)
+  function handleSelectProduct(productId: string) {
+    // Toggle off if already selected
+    if (selectedProductId === productId) {
+      setSelectedProductId(null);
+      return;
+    }
+    setSelectedProductId(productId);
+    setFormRating(0);
+    setFormText("");
+  }
+
+  async function handleSubmit() {
+    if (!selectedProductId || formRating === 0) {
+      showToast("✕ Please select a product and a rating.", "error");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ assetId: selectedProductId, rating: formRating, comment: formText }),
+      });
+      const data = await res.json();
+      if (res.status === 201) {
+        setReviews(prev => [data, ...prev]);
+        setFormRating(0);
+        setFormText("");
+        setSelectedProductId(null);
+        showToast("✓ Review submitted. Thank you!", "success");
+      } else if (res.status === 409) {
+        showToast("✕ You already reviewed this product.", "error");
+      } else {
+        const msg = data.error ?? "Something went wrong.";
+        showToast(`✕ ${msg}`, "error");
+      }
+    } catch {
+      showToast("✕ Network error. Try again.", "error");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Filter the public review list
   const filtered = useMemo(() =>
     filterAsset === "all" ? reviews : reviews.filter(r => r.assetId === filterAsset),
   [reviews, filterAsset]);
 
-  const scopeCount = filtered.length;
+  const scopeCount: number = filtered.length;
 
   const avgRating = useMemo(() => {
     if (filtered.length === 0) return 0;
@@ -147,136 +183,124 @@ export default function ReviewSection({ ownedProductIds }: Props) {
     Array.from(new Set(reviews.map(r => r.assetId))),
   [reviews]);
 
-  async function handleSubmit() {
-    if (!formAsset || formRating === 0) {
-      showToast("✕ Please select an asset and a rating.", "error");
-      setSubmitMsg("Please select an asset and a rating.");
-      return;
-    }
-    setSubmitting(true);
-    setSubmitMsg("");
-    try {
-      const res = await fetch("/api/reviews", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ assetId: formAsset, rating: formRating, comment: formText }),
-      });
-      const data = await res.json();
-      if (res.status === 201) {
-        setReviews(prev => [data, ...prev]);
-        setFormRating(0);
-        setFormText("");
-        setSubmitMsg("Review submitted. Thank you!");
-        showToast("✓ Review submitted. Thank you!", "success");
-      } else if (res.status === 409) {
-        setSubmitMsg("You already reviewed this asset.");
-        showToast("✕ You already reviewed this asset.", "error");
-      } else {
-        const msg = data.error ?? "Something went wrong.";
-        setSubmitMsg(msg);
-        showToast(`✕ ${msg}`, "error");
-      }
-    } catch {
-      setSubmitMsg("Network error. Try again.");
-      showToast("✕ Network error. Try again.", "error");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   return (
     <section className="rvSection">
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <div className="rvInner">
 
-        {/* Header */}
+        {/* ── Header ── */}
         <div className="rvHeader">
           <div className="rvHeaderLeft">
             <p className="rvEyebrow">Community</p>
-            <h2 className="rvTitle">Reviews & Ratings</h2>
+            <h2 className="rvTitle">Reviews &amp; Ratings</h2>
           </div>
           <p className="rvSub">Honest feedback from verified buyers.</p>
         </div>
 
-        {/* Stats + form row */}
-        <div className="rvTopRow">
+        {/* ── Owned products scroll row ── */}
+        {ownedProducts.length > 0 ? (
+          <div className="rvProductBlock">
+            <p className="rvProductBlockLabel">Rate your purchased products</p>
+            <div className="rvProductScroll">
+              {ownedProducts.map(product => {
+                const alreadyReviewed = submittedReviewMap[product.id];
+                const isSelected      = selectedProductId === product.id;
 
-          {/* Rating summary */}
-          <div className="rvSummary">
-            <div className="rvSummaryScore">
-              <span className="rvSummaryAvg">{avgRating > 0 ? avgRating.toFixed(1) : "—"}</span>
-              <div className="rvSummaryRight">
-                <Stars rating={Math.round(avgRating)} />
-                <p className="rvSummaryCount">{scopeCount} review{scopeCount !== 1 ? "s" : ""}</p>
-              </div>
+                return (
+                  <button
+                    key={product.id}
+                    className={`rvProductCard ${isSelected ? "rvProductCardSelected" : ""} ${alreadyReviewed ? "rvProductCardReviewed" : ""}`}
+                    onClick={() => !alreadyReviewed && handleSelectProduct(product.id)}
+                    disabled={!!alreadyReviewed}
+                    title={alreadyReviewed ? `You rated this ${alreadyReviewed.rating}★` : `Rate ${product.name}`}
+                  >
+                    <p className="rvProductCardName">{product.name}</p>
+                    {alreadyReviewed ? (
+                      <div className="rvProductCardRated">
+                        <Stars rating={alreadyReviewed.rating} />
+                        <span className="rvProductCardRatedLabel">Reviewed</span>
+                      </div>
+                    ) : (
+                      <span className="rvProductCardCta">
+                        {isSelected ? "Rating…" : "Rate →"}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-            <div className="rvRatingBars">
-              {ratingDist.map(({ star, count }) => (
-                <RatingBar key={star} label={`${star}★`} count={count} total={scopeCount} />
-              ))}
+
+            {/* ── Inline rating form — appears below scroll row when a card is selected ── */}
+            {selectedProductId && !submittedReviewMap[selectedProductId] && (
+              <div className="rvInlineForm">
+                <p className="rvInlineFormProduct">
+                  {ownedProducts.find(p => p.id === selectedProductId)?.name}
+                </p>
+
+                <div className="rvFormStarRow">
+                  <span className="rvFormStarLabel">Your rating</span>
+                  <Stars rating={formRating} interactive onRate={setFormRating} />
+                </div>
+
+                <textarea
+                  className="rvFormTextarea"
+                  placeholder="Share your experience (optional, max 500 chars)"
+                  value={formText}
+                  maxLength={500}
+                  rows={3}
+                  onChange={e => setFormText(sanitize(e.target.value))}
+                />
+                <span className="rvFormCharCount">{formText.length}/500</span>
+
+                <div className="rvInlineFormActions">
+                  <button
+                    className="rvFormCancelBtn"
+                    onClick={() => setSelectedProductId(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className={`rvFormSubmit ${submitting ? "rvFormSubmitLoading" : ""}`}
+                    onClick={handleSubmit}
+                    disabled={submitting || formRating === 0}
+                  >
+                    {submitting ? "Submitting…" : "Submit Review"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rvFormLocked">
+            <span className="rvFormLockedIcon">🔒</span>
+            <p>Purchase an asset to leave a review.</p>
+          </div>
+        )}
+
+        {/* ── Rating summary ── */}
+        <div className="rvSummary">
+          <div className="rvSummaryScore">
+            <span className="rvSummaryAvg">{avgRating > 0 ? avgRating.toFixed(1) : "—"}</span>
+            <div className="rvSummaryRight">
+              <Stars rating={Math.round(avgRating)} />
+              <p className="rvSummaryCount">{scopeCount} review{scopeCount !== 1 ? "s" : ""}</p>
             </div>
           </div>
-
-          {/* Submit form — only for buyers who own assets */}
-          {ownedProductIds.length > 0 ? (
-            <div className="rvForm">
-              <p className="rvFormTitle">Leave a Review</p>
-
-              <select
-                className="rvFormSelect"
-                value={formAsset}
-                onChange={e => setFormAsset(sanitize(e.target.value))}
-              >
-                {ownedProductIds.map(id => (
-                  <option key={id} value={id}>{assetLabel(id)}</option>
-                ))}
-              </select>
-
-              <div className="rvFormStarRow">
-                <span className="rvFormStarLabel">Your rating</span>
-                <Stars rating={formRating} interactive onRate={setFormRating} />
-              </div>
-
-              <textarea
-                className="rvFormTextarea"
-                placeholder="Share your experience (optional, max 500 chars)"
-                value={formText}
-                maxLength={500}
-                rows={3}
-                onChange={e => setFormText(sanitize(e.target.value))}
-              />
-              <span className="rvFormCharCount">{formText.length}/500</span>
-
-              <button
-                className={`rvFormSubmit ${submitting ? "rvFormSubmitLoading" : ""}`}
-                onClick={handleSubmit}
-                disabled={submitting}
-              >
-                {submitting ? "Submitting…" : "Submit Review"}
-              </button>
-
-              {submitMsg && (
-                <p className={`rvFormMsg ${submitMsg.includes("Thank") ? "rvFormMsgOk" : "rvFormMsgErr"}`}>
-                  {submitMsg}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="rvFormLocked">
-              <span className="rvFormLockedIcon">🔒</span>
-              <p>Purchase an asset to leave a review.</p>
-            </div>
-          )}
+          <div className="rvRatingBars">
+            {ratingDist.map(({ star, count }: { star: number; count: number }) => (
+              <RatingBar key={star} label={`${star}★`} count={count} total={scopeCount} />
+            ))}
+          </div>
         </div>
 
-        {/* Filter row */}
+        {/* ── Filter row ── */}
         {reviewedAssetIds.length > 0 && (
           <div className="rvFilterRow">
             <button
               className={`rvFilterBtn ${filterAsset === "all" ? "rvFilterBtnActive" : ""}`}
               onClick={() => setFilterAsset("all")}
             >
-              All Assets
+              All
             </button>
             {reviewedAssetIds.map(aid => (
               <button
@@ -284,13 +308,14 @@ export default function ReviewSection({ ownedProductIds }: Props) {
                 className={`rvFilterBtn ${filterAsset === aid ? "rvFilterBtnActive" : ""}`}
                 onClick={() => setFilterAsset(aid)}
               >
-                {assetLabel(aid)}
+                {/* Show product name if available, fallback to assetId */}
+                {ownedProducts.find(p => p.id === aid)?.name ?? aid}
               </button>
             ))}
           </div>
         )}
 
-        {/* Review list */}
+        {/* ── Review list ── */}
         {loading && (
           <div className="rvLoadingRow">
             {[1,2,3].map(i => <div key={i} className="rvCardSkeleton" />)}
@@ -314,7 +339,9 @@ export default function ReviewSection({ ownedProductIds }: Props) {
                   <div className="rvCardInfo">
                     <p className="rvCardName">{review.userName}</p>
                     <p className="rvCardMeta">
-                      {assetLabel(review.assetId)} · {fmtDate(review.createdAt)}
+                      {ownedProducts.find(p => p.id === review.assetId)?.name ?? review.assetId}
+                      {" · "}
+                      {fmtDate(review.createdAt)}
                     </p>
                   </div>
                   <Stars rating={review.rating} />
