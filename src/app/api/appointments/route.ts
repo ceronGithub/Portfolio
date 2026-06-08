@@ -3,7 +3,8 @@ export const dynamic = "force-dynamic";
 // Validates session, builds referenceNo (APT-YYYY-XXXX), saves to DB.
 // No PayMongo — consultation only. EmailJS fires client-side after this succeeds.
 //
-// GET /api/appointments — Returns all appointments for the logged-in buyer.
+// GET /api/appointments — Returns all appointments for the logged-in buyer,
+// including the full AppointmentComment thread (admin notes + buyer notes + replies).
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, referenceNo: appointment.referenceNo, id: appointment.id }, { status: 201 });
 }
 
-// ── GET — fetch buyer's appointments ─────────────────────────────────────
+// ── GET — fetch buyer's appointments with full comment thread ─────────────
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user)
@@ -77,10 +78,49 @@ export async function GET(req: NextRequest) {
   const userId = (session.user as any).id as string;
 
   const appointments = await prisma.appointment.findMany({
-    where:   { userId, deletedAt: null },
+    where:   { userId },
     orderBy: { createdAt: "desc" },
-    include: { comments: { orderBy: { createdAt: "asc" } } },
+    include: {
+      // Fetch all root-level comments (admin + buyer notes); replies nested under each
+      comments: {
+        where:   { parentId: null },
+        orderBy: { createdAt: "asc" },
+        include: {
+          replies: {
+            orderBy: { createdAt: "asc" },
+          },
+        },
+      },
+    },
   });
 
-  return NextResponse.json({ appointments });
+  return NextResponse.json({
+    appointments: appointments.map((a: any) => ({
+      id:             a.id,
+      referenceNo:    a.referenceNo,
+      systemTitle:    a.systemTitle,
+      basePrice:      a.basePrice,
+      quotedPrice:    a.quotedPrice,
+      selectedAddons: a.selectedAddons,
+      scheduledDate:  a.scheduledDate,
+      message:        a.message ?? null,
+      adminNote:      a.adminNote ?? null,
+      status:         a.status,
+      createdAt:      a.createdAt.toISOString(),
+      comments:       a.comments.map((c: any) => ({
+        id:        c.id,
+        role:      c.role,
+        content:   c.content,
+        parentId:  c.parentId,
+        createdAt: c.createdAt.toISOString(),
+        replies:   c.replies.map((r: any) => ({
+          id:        r.id,
+          role:      r.role,
+          content:   r.content,
+          parentId:  r.parentId,
+          createdAt: r.createdAt.toISOString(),
+        })),
+      })),
+    })),
+  });
 }

@@ -307,144 +307,161 @@
   margin:    0;
 }
 
-/* ── Task 2: Removed by buyer ── */
-.adminApCardRemoved {
-  opacity: 0.65;
-  border-left: 3px solid rgba(252,129,129,0.4) !important;
+/* ── Delete button ────────────────────────────────────────────────────── */
+.adminApDeleteBtn {
+  background:    none;
+  border:        1px solid rgba(252,129,129,0.2);
+  border-radius: 5px;
+  color:         #fc8181;
+  cursor:        pointer;
+  padding:       0.22rem 0.5rem;
+  display:       flex;
+  align-items:   center;
+  transition:    background 0.15s, border-color 0.15s;
 }
-.adminApRemovedBadge {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #fc8181;
-  background: rgba(252,129,129,0.08);
-  border: 1px solid rgba(252,129,129,0.2);
+.adminApDeleteBtn:hover { background: rgba(252,129,129,0.08); border-color: rgba(252,129,129,0.5); }
+
+.adminApDeleteConfirm {
+  display:     flex;
+  align-items: center;
+  gap:         0.35rem;
+}
+
+.adminApDeleteConfirmText {
+  font-size:  0.68rem;
+  color:      #fc8181;
+  font-family: "DM Mono", monospace;
+}
+
+.adminApDeleteConfirmYes {
+  background:    rgba(252,129,129,0.15);
+  border:        1px solid rgba(252,129,129,0.5);
   border-radius: 4px;
-  padding: 0.3rem 0.65rem;
-  margin-bottom: 0.5rem;
-  display: inline-block;
+  color:         #fc8181;
+  cursor:        pointer;
+  font-size:     0.68rem;
+  padding:       2px 8px;
+  transition:    background 0.15s;
 }
+.adminApDeleteConfirmYes:hover { background: rgba(252,129,129,0.28); }
+.adminApDeleteConfirmYes:disabled { opacity: 0.45; cursor: wait; }
 
-/* ── Task 3: Admin comment thread ── */
-.adminApCommentsToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255,255,255,0.4);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0.3rem 0;
-  transition: color 0.15s;
+.adminApDeleteConfirmNo {
+  background:    rgba(255,255,255,0.05);
+  border:        1px solid var(--sidebar-border);
+  border-radius: 4px;
+  color:         var(--sidebar-text);
+  cursor:        pointer;
+  font-size:     0.68rem;
+  padding:       2px 8px;
+  transition:    background 0.15s;
 }
-.adminApCommentsToggle:hover { color: rgba(255,255,255,0.7); }
-.adminApCommentsCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  background: rgba(99,179,237,0.18);
-  color: #63b3ed;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0 4px;
-}
+.adminApDeleteConfirmNo:hover { background: rgba(255,255,255,0.08); }
 
-.adminApComments {
-  margin-top: 0.75rem;
-  display: flex;
+/* ── Comment section (admin → buyer) ─────────────────────────────────── */
+.adminApCommentSection {
+  display:        flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap:            0.5rem;
+  padding:        0.8rem 0.9rem;
+  background:     rgba(255,255,255,0.025);
+  border:         1px solid var(--sidebar-border);
+  border-radius:  8px;
 }
-.adminApCommentsTitle {
-  font-size: 0.68rem;
-  font-weight: 700;
+
+.adminApCommentSectionLabel {
+  display:        flex;
+  align-items:    center;
+  gap:            0.35rem;
+  font-family:    "DM Mono", monospace;
+  font-size:      0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color:          var(--sidebar-text);
+  opacity:        0.5;
+  margin:         0;
+}
+
+.adminApCommentBlock {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.3rem;
+}
+
+.adminApCommentItem {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.2rem;
+  padding:        0.5rem 0.65rem;
+  border-radius:  7px;
+}
+
+.adminApCommentItemAdmin {
+  background: rgba(99,179,237,0.08);
+  border:     1px solid rgba(99,179,237,0.2);
+}
+
+.adminApCommentItemBuyer {
+  margin-left: 1rem;
+  background:  rgba(255,255,255,0.03);
+  border:      1px solid rgba(255,255,255,0.07);
+  border-left: 2px solid rgba(255,255,255,0.15);
+}
+
+.adminApCommentMeta {
+  display:     flex;
+  align-items: center;
+  gap:         0.45rem;
+}
+
+.adminApCommentBadge {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.52rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding:        1px 6px;
+  border-radius:  3px;
+  font-weight:    700;
+}
+
+.adminApCommentBadgeAdmin {
+  background: rgba(99,179,237,0.18);
+  color:      #63b3ed;
+}
+
+.adminApCommentBadgeBuyer {
+  background: rgba(104,211,145,0.12);
+  color:      #68d391;
+}
+
+.adminApCommentTime {
+  font-size:   0.58rem;
+  color:       var(--sidebar-text);
+  opacity:     0.4;
+  font-family: "DM Mono", monospace;
+}
+
+.adminApCommentText {
+  font-size:   0.78rem;
+  color:       var(--sidebar-text-hover);
+  margin:      0;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* Buyer notes block */
+.adminApBuyerNoteList  { display: flex; flex-direction: column; gap: 0.6rem; }
+.adminApBuyerNotesHeader {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.56rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
+  color:          var(--sidebar-text);
+  opacity:        0.4;
+  margin:         0.3rem 0 0;
 }
-.adminApCommentsEmpty { font-size: 0.8rem; color: rgba(255,255,255,0.3); font-style: italic; }
 
-.adminApCommentRoot { display: flex; flex-direction: column; gap: 0.4rem; }
+.adminApReplyForm { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.2rem; }
 
-.adminApCommentBubble {
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-.adminApCommentBubbleAdmin {
-  background: rgba(104,211,145,0.09);
-  border: 1px solid rgba(104,211,145,0.18);
-  align-self: flex-end;
-  max-width: 92%;
-}
-.adminApCommentBubbleBuyer {
-  background: rgba(99,179,237,0.09);
-  border: 1px solid rgba(99,179,237,0.18);
-  align-self: flex-start;
-  max-width: 92%;
-}
-.adminApCommentReply { margin-left: 1.5rem; }
-.adminApCommentRole {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.55;
-}
-.adminApCommentContent { font-size: 0.84rem; color: rgba(255,255,255,0.85); line-height: 1.5; }
-.adminApCommentTime { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
-
-.adminApCommentReplyArea { margin-left: 1.5rem; }
-.adminApCommentReplyBtn {
-  font-size: 0.73rem;
-  color: rgba(99,179,237,0.7);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0.2rem 0;
-}
-.adminApCommentReplyBtn:hover { color: #63b3ed; }
-
-.adminApCommentInputRow { display: flex; flex-direction: column; gap: 0.4rem; }
-.adminApCommentInput {
-  width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 6px;
-  color: rgba(255,255,255,0.85);
-  font-size: 0.84rem;
-  padding: 0.6rem 0.75rem;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.adminApCommentInput:focus { border-color: rgba(104,211,145,0.4); }
-.adminApCommentActions { display: flex; gap: 0.5rem; justify-content: flex-end; }
-.adminApCommentSend {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #1a2f4f;
-  background: #68d391;
-  border: none;
-  border-radius: 4px;
-  padding: 0.35rem 0.85rem;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-.adminApCommentSend:disabled { opacity: 0.45; cursor: not-allowed; }
-.adminApCommentCancel {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.4);
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 4px;
-  padding: 0.35rem 0.7rem;
-  cursor: pointer;
-}
-.adminApCommentNewRoot { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.25rem; }
+/* New admin comment form */
+.adminApNewComment { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.3rem; }

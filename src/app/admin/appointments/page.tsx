@@ -1,6 +1,5 @@
 // admin/appointments/page.tsx — Admin appointments dashboard.
-// Shows all consultation requests with status management and threaded comments.
-// Admin sees ALL appointments including buyer-removed ones (marked).
+// Shows all consultation requests with status management, threaded comments, and delete.
 // Protected: ADMIN only.
 
 import { getServerSession } from "next-auth";
@@ -10,6 +9,8 @@ import { redirect }         from "next/navigation";
 import AdminShell           from "@/components/AdminShell";
 import AdminAppointmentsClient from "./AdminAppointmentsClient";
 import "./admin-appointments.css";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminAppointmentsPage() {
   const session = await getServerSession(authOptions);
@@ -21,11 +22,17 @@ export default async function AdminAppointmentsPage() {
     orderBy: { createdAt: "desc" },
     include: {
       user:     { select: { name: true, email: true } },
-      comments: { orderBy: { createdAt: "asc" } },
+      comments: {
+        where:   { parentId: null },
+        orderBy: { createdAt: "asc" },
+        include: {
+          replies: { orderBy: { createdAt: "asc" } },
+        },
+      },
     },
   });
 
-  const serialized = appointments.map((a) => ({
+  const serialized = appointments.map((a: any) => ({
     id:             a.id,
     referenceNo:    a.referenceNo,
     buyerName:      a.buyerName,
@@ -38,15 +45,21 @@ export default async function AdminAppointmentsPage() {
     message:        a.message ?? null,
     status:         a.status,
     adminNote:      a.adminNote ?? null,
-    deletedAt:      a.deletedAt ? a.deletedAt.toISOString() : null,
     createdAt:      a.createdAt.toISOString(),
     user:           a.user,
-    comments:       a.comments.map(c => ({
+    comments: a.comments.map((c: any) => ({
       id:        c.id,
       role:      c.role,
       content:   c.content,
-      parentId:  c.parentId ?? null,
+      parentId:  c.parentId,
       createdAt: c.createdAt.toISOString(),
+      replies:   c.replies.map((r: any) => ({
+        id:        r.id,
+        role:      r.role,
+        content:   r.content,
+        parentId:  r.parentId,
+        createdAt: r.createdAt.toISOString(),
+      })),
     })),
   }));
 

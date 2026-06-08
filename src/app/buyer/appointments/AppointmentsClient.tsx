@@ -1,24 +1,28 @@
 // AppointmentsClient.tsx — Buyer's appointment list.
-// Task 2: Buyer can remove PENDING appointments (soft-delete).
-// Task 3: Bi-directional threaded comments — buyer posts root comments or
-//         replies to admin root comments; admin can do the same.
-// Auto-refreshes every 30s to pick up admin status / comment updates.
+// Shows each appointment as a card: system name, quoted price, date, status badge.
+// Auto-refreshes every 30s to pick up admin status updates.
+// Status timeline shows progress: Pending → Scheduled → Completed.
+// Comment thread: buyer can post multiple notes; buyer can reply to admin comments.
 
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
 import "./appointments.css";
+import { sanitize }  from "@/lib/utils";
+import { useToast }  from "@/app/buyer/shared/useToast";
+import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 type AppointmentStatus = "PENDING" | "SCHEDULED" | "COMPLETED" | "CANCELLED";
 
 interface AddonSnapshot { id: string; label: string; price: number; }
 
-interface CommentItem {
+interface ApptComment {
   id:        string;
-  role:      string;       // "ADMIN" | "BUYER"
+  role:      "ADMIN" | "BUYER";
   content:   string;
   parentId:  string | null;
   createdAt: string;
+  replies:   Omit<ApptComment, "replies">[];
 }
 
 interface AppointmentItem {
@@ -33,7 +37,7 @@ interface AppointmentItem {
   adminNote:      string | null;
   status:         AppointmentStatus;
   createdAt:      string;
-  comments:       CommentItem[];
+  comments:       ApptComment[];
 }
 
 interface Props {
@@ -49,6 +53,12 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" });
 }
 
+function formatCommentTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-PH", {
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+
 const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; desc: string }> = {
   PENDING:   { label: "Pending",   color: "#f6ad55", desc: "Awaiting confirmation from Matthew Studio." },
   SCHEDULED: { label: "Scheduled", color: "#63b3ed", desc: "Consultation confirmed. Check your preferred date." },
@@ -56,6 +66,7 @@ const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; d
   CANCELLED: { label: "Cancelled", color: "#fc8181", desc: "This appointment was cancelled." },
 };
 
+// Status timeline steps (excludes CANCELLED)
 const TIMELINE_STEPS: AppointmentStatus[] = ["PENDING", "SCHEDULED", "COMPLETED"];
 
 function StatusTimeline({ status }: { status: AppointmentStatus }) {
@@ -64,9 +75,9 @@ function StatusTimeline({ status }: { status: AppointmentStatus }) {
   return (
     <div className="apBuyerTimeline">
       {TIMELINE_STEPS.map((step, i) => {
-        const done   = i < currentIdx;
-        const active = i === currentIdx;
-        const cfg    = STATUS_CONFIG[step];
+        const done    = i < currentIdx;
+        const active  = i === currentIdx;
+        const cfg     = STATUS_CONFIG[step];
         return (
           <div key={step} className="apBuyerTimelineStep">
             <div className="apBuyerTimelineTrack">
@@ -91,162 +102,222 @@ function StatusTimeline({ status }: { status: AppointmentStatus }) {
   );
 }
 
-// ── Comment Thread ─────────────────────────────────────────────────────────
-interface CommentThreadProps {
+// ── AdminCommentBlock — one admin comment + buyer replies + reply form ────────
+function AdminCommentBlock({ appointmentId, comment, onReplyPosted, showToast }: {
   appointmentId: string;
-  comments:      CommentItem[];
-  onCommentAdded: (apId: string, comment: CommentItem) => void;
-}
+  comment:       ApptComment;
+  onReplyPosted: (parentId: string, reply: Omit<ApptComment, "replies">) => void;
+  showToast:     (msg: string, type: "success" | "error" | "warning") => void;
+}) {
+  const [replying,  setReplying]  = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [posting,   setPosting]   = useState(false);
 
-function CommentThread({ appointmentId, comments, onCommentAdded }: CommentThreadProps) {
-  const [newRootText,  setNewRootText]  = useState("");
-  const [replyText,    setReplyText]    = useState<Record<string, string>>({});
-  const [replyOpen,    setReplyOpen]    = useState<Record<string, boolean>>({});
-  const [submitting,   setSubmitting]   = useState(false);
-  const [replySubmitting, setReplySubmitting] = useState<Record<string, boolean>>({});
-
-  // Root-level: all comments without a parent
-  const roots = comments.filter(c => c.parentId === null);
-  // Replies by parentId
-  const repliesFor = (parentId: string) => comments.filter(c => c.parentId === parentId);
-
-  const postComment = async (content: string, parentId?: string) => {
-    if (!content.trim()) return;
-    const res = await fetch(`/api/appointments/${appointmentId}/comments`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ content: content.trim(), parentId: parentId ?? null }),
-    });
-    if (!res.ok) return;
-    const { comment } = await res.json();
-    onCommentAdded(appointmentId, comment);
-  };
-
-  const handleRootSubmit = async () => {
-    if (!newRootText.trim()) return;
-    setSubmitting(true);
-    await postComment(newRootText);
-    setNewRootText("");
-    setSubmitting(false);
-  };
-
-  const handleReplySubmit = async (parentId: string) => {
-    const text = replyText[parentId] ?? "";
-    if (!text.trim()) return;
-    setReplySubmitting(prev => ({ ...prev, [parentId]: true }));
-    await postComment(text, parentId);
-    setReplyText(prev => ({ ...prev, [parentId]: "" }));
-    setReplyOpen(prev => ({ ...prev, [parentId]: false }));
-    setReplySubmitting(prev => ({ ...prev, [parentId]: false }));
-  };
+  async function handlePostReply() {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    setPosting(true);
+    try {
+      const res = await fetch(`/api/buyer/appointments/${appointmentId}/reply`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ parentId: comment.id, content: trimmed }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onReplyPosted(comment.id, data.comment);
+        setReplyText("");
+        setReplying(false);
+        showToast("✓ Reply sent.", "success");
+      } else {
+        showToast("✕ Failed to send reply.", "error");
+      }
+    } finally {
+      setPosting(false);
+    }
+  }
 
   return (
-    <div className="apBuyerComments">
-      <p className="apBuyerCommentsTitle">Discussion</p>
+    <div className="apBuyerCommentBlock">
+      {/* Admin comment */}
+      <div className="apBuyerCommentItem apBuyerCommentItemAdmin">
+        <div className="apBuyerCommentMeta">
+          <span className="apBuyerCommentRoleBadge apBuyerCommentRoleBadgeAdmin">Admin</span>
+          <span className="apBuyerCommentTime">{formatCommentTime(comment.createdAt)}</span>
+        </div>
+        <p className="apBuyerCommentText">{comment.content}</p>
+        {!replying && (
+          <button className="apBuyerCommentReplyBtn" onClick={() => { setReplying(true); setReplyText(""); }}>
+            Reply
+          </button>
+        )}
+      </div>
 
-      {/* Root comments */}
-      {roots.length === 0 && (
-        <p className="apBuyerCommentsEmpty">No comments yet. Start the discussion below.</p>
+      {/* Buyer replies to this admin comment */}
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="apBuyerReplyList">
+          {comment.replies.map(reply => (
+            <div key={reply.id} className="apBuyerCommentItem apBuyerCommentItemBuyer">
+              <div className="apBuyerCommentMeta">
+                <span className="apBuyerCommentRoleBadge apBuyerCommentRoleBadgeBuyer">You</span>
+                <span className="apBuyerCommentTime">{formatCommentTime(reply.createdAt)}</span>
+              </div>
+              <p className="apBuyerCommentText">{reply.content}</p>
+            </div>
+          ))}
+        </div>
       )}
 
-      {roots.map(root => {
-        const replies       = repliesFor(root.id);
-        const isAdminRoot   = root.role === "ADMIN";
-        const canReply      = isAdminRoot; // buyer can reply to admin root comments
-        return (
-          <div key={root.id} className="apBuyerCommentRoot">
-            {/* Root comment */}
-            <div className={`apBuyerCommentBubble ${root.role === "ADMIN" ? "apBuyerCommentBubbleAdmin" : "apBuyerCommentBubbleBuyer"}`}>
-              <span className="apBuyerCommentRole">{root.role === "ADMIN" ? "Studio" : "You"}</span>
-              <p className="apBuyerCommentContent">{root.content}</p>
-              <span className="apBuyerCommentTime">
-                {new Date(root.createdAt).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-              </span>
-            </div>
-
-            {/* Replies to this root */}
-            {replies.map(reply => (
-              <div key={reply.id} className={`apBuyerCommentReply apBuyerCommentBubble ${reply.role === "ADMIN" ? "apBuyerCommentBubbleAdmin" : "apBuyerCommentBubbleBuyer"}`}>
-                <span className="apBuyerCommentRole">{reply.role === "ADMIN" ? "Studio" : "You"}</span>
-                <p className="apBuyerCommentContent">{reply.content}</p>
-                <span className="apBuyerCommentTime">
-                  {new Date(reply.createdAt).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-            ))}
-
-            {/* Reply input — only to admin root comments */}
-            {canReply && (
-              <div className="apBuyerCommentReplyArea">
-                {replyOpen[root.id] ? (
-                  <div className="apBuyerCommentInputRow">
-                    <textarea
-                      className="apBuyerCommentInput"
-                      rows={2}
-                      placeholder="Write a reply…"
-                      value={replyText[root.id] ?? ""}
-                      onChange={e => setReplyText(prev => ({ ...prev, [root.id]: e.target.value }))}
-                    />
-                    <div className="apBuyerCommentActions">
-                      <button
-                        className="apBuyerCommentSend"
-                        disabled={!!replySubmitting[root.id] || !(replyText[root.id] ?? "").trim()}
-                        onClick={() => handleReplySubmit(root.id)}
-                      >
-                        {replySubmitting[root.id] ? "Sending…" : "Reply"}
-                      </button>
-                      <button
-                        className="apBuyerCommentCancel"
-                        onClick={() => setReplyOpen(prev => ({ ...prev, [root.id]: false }))}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    className="apBuyerCommentReplyBtn"
-                    onClick={() => setReplyOpen(prev => ({ ...prev, [root.id]: true }))}
-                  >
-                    ↳ Reply
-                  </button>
-                )}
-              </div>
-            )}
+      {/* Inline reply form */}
+      {replying && (
+        <div className="apBuyerReplyForm">
+          <textarea
+            className="apBuyerReplyTextarea"
+            autoFocus
+            value={replyText}
+            disabled={posting}
+            placeholder="Write your reply…"
+            rows={2}
+            onChange={e => setReplyText(sanitize(e.target.value))}
+          />
+          <div className="apBuyerReplyActions">
+            <button className="apBuyerReplySend" onClick={handlePostReply} disabled={posting || !replyText.trim()}>
+              {posting ? "Sending…" : "Send Reply"}
+            </button>
+            <button className="apBuyerReplyCancel" onClick={() => setReplying(false)}>Cancel</button>
           </div>
-        );
-      })}
-
-      {/* New root comment — buyer can always post root comments */}
-      <div className="apBuyerCommentNewRoot">
-        <textarea
-          className="apBuyerCommentInput"
-          rows={2}
-          placeholder="Add a comment or question…"
-          value={newRootText}
-          onChange={e => setNewRootText(e.target.value)}
-        />
-        <div className="apBuyerCommentActions">
-          <button
-            className="apBuyerCommentSend"
-            disabled={submitting || !newRootText.trim()}
-            onClick={handleRootSubmit}
-          >
-            {submitting ? "Sending…" : "Post Comment"}
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────
+// ── BuyerNoteThread — buyer posts multiple standalone notes ───────────────────
+function BuyerNoteThread({ appointmentId, buyerNotes, onNoteAdded, showToast }: {
+  appointmentId: string;
+  buyerNotes:    ApptComment[];
+  onNoteAdded:   (note: ApptComment) => void;
+  showToast:     (msg: string, type: "success" | "error" | "warning") => void;
+}) {
+  const [addingNote,  setAddingNote]  = useState(false);
+  const [noteText,    setNoteText]    = useState("");
+  const [postingNote, setPostingNote] = useState(false);
+
+  async function handlePostNote() {
+    const trimmed = noteText.trim();
+    if (!trimmed) return;
+    setPostingNote(true);
+    try {
+      const res = await fetch(`/api/buyer/appointments/${appointmentId}/note`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ content: trimmed }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onNoteAdded(data.comment);
+        setNoteText("");
+        setAddingNote(false);
+        showToast("✓ Note added.", "success");
+      } else {
+        showToast("✕ Failed to post note.", "error");
+      }
+    } finally {
+      setPostingNote(false);
+    }
+  }
+
+  return (
+    <div className="apBuyerNoteThread">
+      {/* Section header */}
+      <div className="apBuyerNoteThreadHeader">
+        <span className="apBuyerNoteThreadLabel">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Your Notes
+        </span>
+        {!addingNote && (
+          <button className="apBuyerNoteAddBtn" onClick={() => { setAddingNote(true); setNoteText(""); }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Note
+          </button>
+        )}
+      </div>
+
+      {/* Existing buyer notes */}
+      {buyerNotes.length > 0 ? (
+        <div className="apBuyerNoteList">
+          {buyerNotes.map(note => (
+            <div key={note.id} className="apBuyerNoteBlock">
+              <div className="apBuyerCommentItem apBuyerCommentItemBuyer">
+                <div className="apBuyerCommentMeta">
+                  <span className="apBuyerCommentRoleBadge apBuyerCommentRoleBadgeBuyer">You</span>
+                  <span className="apBuyerCommentTime">{formatCommentTime(note.createdAt)}</span>
+                </div>
+                <p className="apBuyerCommentText">{note.content}</p>
+              </div>
+              {/* Admin replies to this buyer note */}
+              {note.replies && note.replies.length > 0 && (
+                <div className="apBuyerReplyList">
+                  {note.replies.map(reply => (
+                    <div key={reply.id} className="apBuyerCommentItem apBuyerCommentItemAdmin">
+                      <div className="apBuyerCommentMeta">
+                        <span className="apBuyerCommentRoleBadge apBuyerCommentRoleBadgeAdmin">Admin</span>
+                        <span className="apBuyerCommentTime">{formatCommentTime(reply.createdAt)}</span>
+                      </div>
+                      <p className="apBuyerCommentText">{reply.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="apBuyerNoteEmpty">No notes yet.</p>
+      )}
+
+      {/* Add note form */}
+      {addingNote && (
+        <div className="apBuyerReplyForm">
+          <textarea
+            className="apBuyerReplyTextarea"
+            autoFocus
+            value={noteText}
+            disabled={postingNote}
+            placeholder="Add a note to your appointment…"
+            rows={3}
+            onChange={e => setNoteText(sanitize(e.target.value))}
+          />
+          <div className="apBuyerReplyActions">
+            <button className="apBuyerReplySend" onClick={handlePostNote} disabled={postingNote || !noteText.trim()}>
+              {postingNote ? "Posting…" : "Post Note"}
+            </button>
+            <button className="apBuyerReplyCancel" onClick={() => { setAddingNote(false); setNoteText(""); }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
 export default function AppointmentsClient({ appointments: initial }: Props) {
-  const [appointments,   setAppointments]   = useState<AppointmentItem[]>(initial);
-  const [lastRefreshed,  setLastRefreshed]  = useState<Date>(new Date());
-  const [removing,       setRemoving]       = useState<Record<string, boolean>>({});
-  const [confirmRemove,  setConfirmRemove]  = useState<string | null>(null);
-  const [expandComments, setExpandComments] = useState<Record<string, boolean>>({});
+  const { toasts, showToast, dismissToast } = useToast();
+  const [appointments, setAppointments] = useState<AppointmentItem[]>(initial);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+
+  // Merge partial changes into a single appointment's comment list
+  function handleUpdateComments(id: string, updater: (prev: ApptComment[]) => ApptComment[]) {
+    setAppointments(prev => prev.map(a =>
+      a.id === id ? { ...a, comments: updater(a.comments) } : a
+    ));
+  }
 
   const refresh = useCallback(async () => {
     try {
@@ -271,34 +342,16 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
     } catch { /* silent */ }
   }, []);
 
+  // Auto-refresh every 30s
   useEffect(() => {
     const id = setInterval(refresh, 30_000);
     return () => clearInterval(id);
   }, [refresh]);
 
-  // Task 2 — soft-delete appointment
-  const handleRemove = useCallback(async (id: string) => {
-    setRemoving(prev => ({ ...prev, [id]: true }));
-    try {
-      const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" });
-      if (!res.ok) return;
-      setAppointments(prev => prev.filter(a => a.id !== id));
-    } finally {
-      setRemoving(prev => ({ ...prev, [id]: false }));
-      setConfirmRemove(null);
-    }
-  }, []);
-
-  // Task 3 — add a comment locally (optimistic + from POST response)
-  const handleCommentAdded = useCallback((apId: string, comment: CommentItem) => {
-    setAppointments(prev => prev.map(a =>
-      a.id === apId ? { ...a, comments: [...a.comments, comment] } : a
-    ));
-  }, []);
-
   if (appointments.length === 0) {
     return (
       <div className="apBuyerPage">
+        <ToastStack toasts={toasts} onDismiss={dismissToast} />
         <div className="apBuyerHeader">
           <p className="apBuyerEyebrow">Consultation History</p>
           <h1 className="apBuyerTitle">Appointments</h1>
@@ -316,6 +369,8 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
 
   return (
     <div className="apBuyerPage">
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
+
       <div className="apBuyerHeader">
         <p className="apBuyerEyebrow">Consultation History</p>
         <h1 className="apBuyerTitle">Appointments</h1>
@@ -328,12 +383,10 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
 
       <div className="apBuyerList">
         {appointments.map(a => {
-          const statusConfig   = STATUS_CONFIG[a.status];
-          const canRemove      = a.status === "PENDING";
-          const isRemoving     = !!removing[a.id];
-          const isConfirming   = confirmRemove === a.id;
-          const commentsOpen   = !!expandComments[a.id];
-          const commentCount   = a.comments.length;
+          const statusConfig = STATUS_CONFIG[a.status];
+          // Separate admin root comments from buyer root notes
+          const adminComments = (a.comments as ApptComment[]).filter(c => c.role === "ADMIN" && !c.parentId);
+          const buyerNotes    = (a.comments as ApptComment[]).filter(c => c.role === "BUYER" && !c.parentId);
 
           return (
             <div key={a.id} className="apBuyerCard">
@@ -344,44 +397,12 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
                   <p className="apBuyerCardSystem">{a.systemTitle}</p>
                   <p className="apBuyerCardRef">{a.referenceNo}</p>
                 </div>
-                <div className="apBuyerCardTopRight">
-                  <span
-                    className="apBuyerCardStatus"
-                    style={{ color: statusConfig.color, borderColor: statusConfig.color + "44", background: statusConfig.color + "12" }}
-                  >
-                    {statusConfig.label}
-                  </span>
-
-                  {/* Task 2 — Remove button (PENDING only) */}
-                  {canRemove && (
-                    isConfirming ? (
-                      <div className="apBuyerRemoveConfirm">
-                        <span className="apBuyerRemoveConfirmText">Remove this appointment?</span>
-                        <button
-                          className="apBuyerRemoveConfirmYes"
-                          disabled={isRemoving}
-                          onClick={() => handleRemove(a.id)}
-                        >
-                          {isRemoving ? "Removing…" : "Yes, remove"}
-                        </button>
-                        <button
-                          className="apBuyerRemoveConfirmNo"
-                          onClick={() => setConfirmRemove(null)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className="apBuyerRemoveBtn"
-                        onClick={() => setConfirmRemove(a.id)}
-                        title="Remove this appointment"
-                      >
-                        Remove
-                      </button>
-                    )
-                  )}
-                </div>
+                <span
+                  className="apBuyerCardStatus"
+                  style={{ color: statusConfig.color, borderColor: statusConfig.color + "44", background: statusConfig.color + "12" }}
+                >
+                  {statusConfig.label}
+                </span>
               </div>
 
               {/* Status timeline */}
@@ -435,36 +456,44 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
                     <span className="apBuyerCardMessage">{a.message}</span>
                   </div>
                 )}
-                {a.adminNote && (
-                  <div className="apBuyerCardMetaItem apBuyerCardAdminNote">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-                    </svg>
-                    <span className="apBuyerCardAdminNoteText">{a.adminNote}</span>
-                  </div>
-                )}
               </div>
 
-              {/* Task 3 — Comments toggle */}
-              <div className="apBuyerCardDivider" />
-              <button
-                className="apBuyerCommentsToggle"
-                onClick={() => setExpandComments(prev => ({ ...prev, [a.id]: !prev[a.id] }))}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                {commentsOpen ? "Hide" : "Discussion"}
-                {commentCount > 0 && <span className="apBuyerCommentsCount">{commentCount}</span>}
-              </button>
-
-              {commentsOpen && (
-                <CommentThread
-                  appointmentId={a.id}
-                  comments={a.comments}
-                  onCommentAdded={handleCommentAdded}
-                />
+              {/* Admin comments thread — admin root comments buyer can reply to */}
+              {adminComments.length > 0 && (
+                <div className="apBuyerCommentThread">
+                  <span className="apBuyerCommentThreadLabel">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Admin Comments
+                  </span>
+                  {adminComments.map((comment: ApptComment) => (
+                    <AdminCommentBlock
+                      key={comment.id}
+                      appointmentId={a.id as string}
+                      comment={comment}
+                      showToast={showToast}
+                      onReplyPosted={(parentId, reply) => {
+                        handleUpdateComments(a.id, prev => prev.map(c =>
+                          c.id === parentId
+                            ? { ...c, replies: [...(c.replies ?? []), reply] }
+                            : c
+                        ));
+                      }}
+                    />
+                  ))}
+                </div>
               )}
+
+              {/* Buyer note thread — multiple standalone notes */}
+              <BuyerNoteThread
+                appointmentId={a.id}
+                buyerNotes={buyerNotes}
+                showToast={showToast}
+                onNoteAdded={(note) => {
+                  handleUpdateComments(a.id, prev => [...prev, note]);
+                }}
+              />
 
             </div>
           );
