@@ -550,43 +550,42 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
   );
 }
 
-// ── DeleteRowBtn — single trash icon; requires one confirm click before deleting ──
+// ── DeleteRowBtn — trash icon; confirm floats above as a tooltip bubble ──
 function DeleteRowBtn({ onConfirmDelete }: { onConfirmDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
 
-  if (confirming) {
-    return (
-      <div className="adminInquiriesDeleteConfirm">
-        <span className="adminInquiriesDeleteConfirmLabel">Delete?</span>
-        <button
-          className="adminInquiriesDeleteConfirmYes"
-          onClick={() => { setConfirming(false); onConfirmDelete(); }}
-        >
-          Yes
-        </button>
-        <button
-          className="adminInquiriesDeleteConfirmNo"
-          onClick={() => setConfirming(false)}
-        >
-          No
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <button
-      className="adminInquiriesDeleteBtn"
-      onClick={() => setConfirming(true)}
-      title="Delete this entry"
-    >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3 6 5 6 21 6"/>
-        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-        <path d="M10 11v6M14 11v6"/>
-        <path d="M9 6V4h6v2"/>
-      </svg>
-    </button>
+    <div className="adminInquiriesDeleteWrap">
+      {confirming && (
+        <div className="adminInquiriesDeleteConfirm">
+          <span className="adminInquiriesDeleteConfirmLabel">Delete?</span>
+          <button
+            className="adminInquiriesDeleteConfirmYes"
+            onClick={() => { setConfirming(false); onConfirmDelete(); }}
+          >
+            Yes
+          </button>
+          <button
+            className="adminInquiriesDeleteConfirmNo"
+            onClick={() => setConfirming(false)}
+          >
+            No
+          </button>
+        </div>
+      )}
+      <button
+        className="adminInquiriesDeleteBtn"
+        onClick={() => setConfirming(prev => !prev)}
+        title="Delete this entry"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+    </div>
   );
 }
 
