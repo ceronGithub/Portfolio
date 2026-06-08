@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
   const weeks  = getLastNWeeks(6);
 
   // ── Core stats ────────────────────────────────────────────────────
-  const [userCount, productCount, orderCount, revenue, activeUsers, systemCount, siteVisitCount] =
+  const [userCount, productCount, orderCount, revenue, activeUsers, systemCount, siteVisitCount, appointmentCount, pendingAppointments] =
     await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
@@ -57,6 +57,13 @@ export default async function AdminDashboardPage() {
       prisma.user.count({ where: { ownership: { some: {} } } }),
       prisma.system.count(),
       prisma.siteVisit.count(),
+      prisma.appointment.count(),
+      prisma.appointment.findMany({
+        where:   { status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+        take:    5,
+        select:  { id: true, referenceNo: true, buyerName: true, systemTitle: true, quotedPrice: true, scheduledDate: true, status: true },
+      }),
     ]);
 
   // ── All paid orders with date — used to compute monthly/weekly splits ──
@@ -170,6 +177,7 @@ export default async function AdminDashboardPage() {
     productCount,
     orderCount,
     systemCount,
+    appointmentCount,
   };
 
   return (
@@ -182,6 +190,7 @@ export default async function AdminDashboardPage() {
         weeklyRevenueProducts={weeklyRevenueProducts}
         dailySiteVisits={dailySiteVisits}
         conversionFunnel={conversionFunnel}
+        pendingAppointments={pendingAppointments}
       />
     </AdminShell>
   );

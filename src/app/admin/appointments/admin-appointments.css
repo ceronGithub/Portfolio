@@ -28,6 +28,8 @@
 .adminApTitle {
   font-size:   1.75rem;
   font-weight: 700;
+  font-family: var(--font-cormorant), Georgia, serif;
+  letter-spacing: -0.02em;
   color:       var(--sidebar-text-hover);
   margin:      0;
 }

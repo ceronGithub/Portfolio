@@ -16,9 +16,15 @@ interface Stats {
   visitorsRegistered: number; visitors: number; notActive: number;
   activeUsers: number; totalUsers: number; totalRevenue: number;
   productCount: number; orderCount: number; systemCount: number;
+  appointmentCount: number;
 }
 
 interface ConversionFunnel { visits: number; registered: number; paid: number; }
+
+interface PendingAppointment {
+  id: string; referenceNo: string; buyerName: string;
+  systemTitle: string; quotedPrice: number; scheduledDate: string; status: string;
+}
 
 interface OverviewClientProps {
   stats: Stats;
@@ -28,6 +34,7 @@ interface OverviewClientProps {
   weeklyRevenueProducts:  RevenuePoint[];
   dailySiteVisits:        RevenuePoint[];
   conversionFunnel:       ConversionFunnel;
+  pendingAppointments:    PendingAppointment[];
 }
 
 // ── Color tokens ───────────────────────────────────────────────────────────
@@ -505,6 +512,7 @@ export default function OverviewClient({
   weeklyRevenueProducts,
   dailySiteVisits,
   conversionFunnel,
+  pendingAppointments,
 }: OverviewClientProps) {
   const headerRef = useReveal();
   const notif = useAdminNotifications(true);
@@ -516,6 +524,7 @@ export default function OverviewClient({
     { value: stats.notActive,             label: "not yet active",     accentColor: "rgba(248,113,113,0.55)" },
     { value: stats.productCount,          label: "products",           accentColor: COLOR_PRODUCTS },
     { value: stats.systemCount,           label: "systems",            accentColor: "#a78bfa"      },
+    { value: stats.appointmentCount,      label: "appointments",       accentColor: "#f6ad55"      },
     { value: formatPeso(stats.totalRevenue), label: "total revenue",   accentColor: "#34d399"      },
   ];
 
@@ -635,6 +644,36 @@ export default function OverviewClient({
           <ConversionFunnelCard funnel={conversionFunnel} />
         </div>
       </div>
+
+      {/* ── Pending Appointments ──────────────────────────────────── */}
+      {pendingAppointments.length > 0 && (
+        <div className="ovChartSection">
+          <div className="ovChartSectionHeader">
+            <span className="ovChartSectionEyebrow">Consultations</span>
+            <h2 className="ovChartSectionTitle">Pending appointments</h2>
+          </div>
+          <div className="ovAppointmentList">
+            {pendingAppointments.map(a => {
+              const [year, month, day] = a.scheduledDate.split("-").map(Number);
+              const dateLabel = new Date(year, month - 1, day).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
+              return (
+                <div key={a.id} className="ovAppointmentRow">
+                  <div className="ovAppointmentLeft">
+                    <span className="ovAppointmentSystem">{a.systemTitle}</span>
+                    <span className="ovAppointmentBuyer">{a.buyerName}</span>
+                  </div>
+                  <div className="ovAppointmentRight">
+                    <span className="ovAppointmentDate">{dateLabel}</span>
+                    <span className="ovAppointmentPrice">{"₱" + a.quotedPrice.toLocaleString("en-PH")}</span>
+                    <span className="ovAppointmentRef">{a.referenceNo}</span>
+                  </div>
+                </div>
+              );
+            })}
+            <a href="/admin/appointments" className="ovAppointmentViewAll">View all appointments →</a>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -1,8 +1,11 @@
 // AppointmentsClient.tsx — Buyer's appointment list.
 // Shows each appointment as a card: system name, quoted price, date, status badge.
+// Auto-refreshes every 30s to pick up admin status updates.
+// Status timeline shows progress: Pending → Scheduled → Completed.
 
 "use client";
 
+import { useEffect, useCallback, useState } from "react";
 import "./appointments.css";
 
 type AppointmentStatus = "PENDING" | "SCHEDULED" | "COMPLETED" | "CANCELLED";
@@ -35,15 +38,80 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" });
 }
 
-// Status display config
-const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string }> = {
-  PENDING:   { label: "Pending",   color: "#f6ad55" },
-  SCHEDULED: { label: "Scheduled", color: "#63b3ed" },
-  COMPLETED: { label: "Completed", color: "#68d391" },
-  CANCELLED: { label: "Cancelled", color: "#fc8181" },
+const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; desc: string }> = {
+  PENDING:   { label: "Pending",   color: "#f6ad55", desc: "Awaiting confirmation from Matthew Studio." },
+  SCHEDULED: { label: "Scheduled", color: "#63b3ed", desc: "Consultation confirmed. Check your preferred date." },
+  COMPLETED: { label: "Completed", color: "#68d391", desc: "Consultation done. Development may now begin." },
+  CANCELLED: { label: "Cancelled", color: "#fc8181", desc: "This appointment was cancelled." },
 };
 
-export default function AppointmentsClient({ appointments }: Props) {
+// Status timeline steps (excludes CANCELLED)
+const TIMELINE_STEPS: AppointmentStatus[] = ["PENDING", "SCHEDULED", "COMPLETED"];
+
+function StatusTimeline({ status }: { status: AppointmentStatus }) {
+  if (status === "CANCELLED") return null;
+  const currentIdx = TIMELINE_STEPS.indexOf(status);
+  return (
+    <div className="apBuyerTimeline">
+      {TIMELINE_STEPS.map((step, i) => {
+        const done    = i < currentIdx;
+        const active  = i === currentIdx;
+        const cfg     = STATUS_CONFIG[step];
+        return (
+          <div key={step} className="apBuyerTimelineStep">
+            <div className="apBuyerTimelineTrack">
+              <div
+                className={`apBuyerTimelineDot ${done ? "apBuyerTimelineDotDone" : active ? "apBuyerTimelineDotActive" : "apBuyerTimelineDotIdle"}`}
+                style={active ? { borderColor: cfg.color, background: cfg.color + "22" } : done ? { background: cfg.color, borderColor: cfg.color } : {}}
+              />
+              {i < TIMELINE_STEPS.length - 1 && (
+                <div className={`apBuyerTimelineLine ${done ? "apBuyerTimelineLineDone" : ""}`} />
+              )}
+            </div>
+            <span
+              className={`apBuyerTimelineLabel ${active ? "apBuyerTimelineLabelActive" : done ? "apBuyerTimelineLabelDone" : ""}`}
+              style={active ? { color: cfg.color } : {}}
+            >
+              {cfg.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function AppointmentsClient({ appointments: initial }: Props) {
+  const [appointments, setAppointments] = useState<AppointmentItem[]>(initial);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+
+  const refresh = useCallback(async () => {
+    try {
+      const res  = await fetch("/api/appointments", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setAppointments(data.appointments.map((a: any) => ({
+        id:             a.id,
+        referenceNo:    a.referenceNo,
+        systemTitle:    a.systemTitle,
+        basePrice:      a.basePrice,
+        quotedPrice:    a.quotedPrice,
+        selectedAddons: a.selectedAddons ?? [],
+        scheduledDate:  a.scheduledDate,
+        message:        a.message ?? null,
+        status:         a.status,
+        createdAt:      a.createdAt,
+      })));
+      setLastRefreshed(new Date());
+    } catch { /* silent */ }
+  }, []);
+
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const id = setInterval(refresh, 30_000);
+    return () => clearInterval(id);
+  }, [refresh]);
+
   if (appointments.length === 0) {
     return (
       <div className="apBuyerPage">
@@ -68,6 +136,10 @@ export default function AppointmentsClient({ appointments }: Props) {
         <p className="apBuyerEyebrow">Consultation History</p>
         <h1 className="apBuyerTitle">Appointments</h1>
         <p className="apBuyerSub">{appointments.length} {appointments.length === 1 ? "request" : "requests"} total</p>
+        <p className="apBuyerRefreshed">
+          Last updated {lastRefreshed.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" })}
+          <button className="apBuyerRefreshBtn" onClick={refresh}>↻ Refresh</button>
+        </p>
       </div>
 
       <div className="apBuyerList">
@@ -89,6 +161,14 @@ export default function AppointmentsClient({ appointments }: Props) {
                   {statusConfig.label}
                 </span>
               </div>
+
+              {/* Status timeline */}
+              <StatusTimeline status={a.status} />
+
+              {/* Status description */}
+              <p className="apBuyerStatusDesc" style={{ color: statusConfig.color + "bb" }}>
+                {statusConfig.desc}
+              </p>
 
               {/* Divider */}
               <div className="apBuyerCardDivider" />

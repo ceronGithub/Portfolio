@@ -229,8 +229,8 @@ export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerNa
 
       // 2. Build add-ons text for email
       const addonsText = selectedAddons.length > 0
-        ? selectedAddons.map(a => `  • ${a.label} — ${fmt(a.price)}`).join("\n")
-        : "  None selected";
+        ? selectedAddons.map(a => `• ${a.label} — ${fmt(a.price)}`).join("<br/>")
+        : "None selected";
 
       // 3. Build shared template params — uses systemproducts template (template_ija0n6t)
       const emailParams = {
