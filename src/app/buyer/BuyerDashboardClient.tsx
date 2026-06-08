@@ -339,7 +339,7 @@ export default function BuyerDashboardClient({ items, buyerEmail, buyerName, own
       />
 
       {/* ── Contact ── */}
-      <InquirySection />
+      <InquirySection buyerEmail={buyerEmail} />
       <CustomRequestBuilder />
 
       {/* ── Floating Request Tracker Button ── */}

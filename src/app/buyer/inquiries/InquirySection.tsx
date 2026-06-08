@@ -89,9 +89,13 @@ const CONTACT_ITEMS = [
   },
 ];
 
-export default function InquirySection() {
+interface Props {
+  buyerEmail?: string;
+}
+
+export default function InquirySection({ buyerEmail = "" }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
-  const [form,   setForm]   = useState({ name: "", email: "", subject: "", message: "" });
+  const [form,   setForm]   = useState({ name: "", email: buyerEmail, subject: "", message: "" });
   const [status, setStatus] = useState<Status>("idle");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -191,7 +195,7 @@ export default function InquirySection() {
                 <p className="iqSuccessDesc">I'll get back to you within 24 hours.</p>
                 <button
                   className="iqSuccessReset"
-                  onClick={() => { setForm({ name: "", email: "", subject: "", message: "" }); setStatus("idle"); }}
+                  onClick={() => { setForm({ name: "", email: buyerEmail, subject: "", message: "" }); setStatus("idle"); }}
                 >
                   Send another
                 </button>
