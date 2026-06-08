@@ -74,3 +74,27 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+// ── DELETE /api/admin/inquiries?type=custom|contact&id=<id> ──────────────────
+// Permanently removes a custom request (Inquiry + cascade comments) or a contact message.
+export async function DELETE(req: NextRequest) {
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const inquiryId   = req.nextUrl.searchParams.get("id");
+  const inquiryType = req.nextUrl.searchParams.get("type"); // "custom" | "contact"
+  if (!inquiryId || !inquiryType) {
+    return NextResponse.json({ error: "id and type required" }, { status: 400 });
+  }
+
+  if (inquiryType === "custom") {
+    // InquiryComment rows are cascade-deleted via the Prisma schema relation
+    await prisma.inquiry.delete({ where: { id: inquiryId } });
+  } else if (inquiryType === "contact") {
+    await (prisma as any).contactMessage.delete({ where: { id: inquiryId } });
+  } else {
+    return NextResponse.json({ error: "type must be custom or contact" }, { status: 400 });
+  }
+
+  return NextResponse.json({ deleted: true });
+}

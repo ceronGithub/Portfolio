@@ -550,6 +550,46 @@ function CommentThread({ inquiryId, initialComments, onCommentsChange }: {
   );
 }
 
+// ── DeleteRowBtn — single trash icon; requires one confirm click before deleting ──
+function DeleteRowBtn({ onConfirmDelete }: { onConfirmDelete: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+
+  if (confirming) {
+    return (
+      <div className="adminInquiriesDeleteConfirm">
+        <span className="adminInquiriesDeleteConfirmLabel">Delete?</span>
+        <button
+          className="adminInquiriesDeleteConfirmYes"
+          onClick={() => { setConfirming(false); onConfirmDelete(); }}
+        >
+          Yes
+        </button>
+        <button
+          className="adminInquiriesDeleteConfirmNo"
+          onClick={() => setConfirming(false)}
+        >
+          No
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      className="adminInquiriesDeleteBtn"
+      onClick={() => setConfirming(true)}
+      title="Delete this entry"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+      </svg>
+    </button>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function InquiriesClient({
@@ -586,6 +626,28 @@ export default function InquiriesClient({
 
   function updateComments(id: string, comments: InquiryComment[]) {
     setCustomRequests(prev => prev.map(r => r.id === id ? { ...r, comments } : r));
+  }
+
+  // ── Delete handlers ───────────────────────────────────────────────────────
+
+  async function deleteCustomRequest(id: string) {
+    const res = await fetch(`/api/admin/inquiries?id=${id}&type=custom`, { method: "DELETE" });
+    if (res.ok) {
+      setCustomRequests(prev => prev.filter(r => r.id !== id));
+      showToast("✓ Custom request deleted.", "ok");
+    } else {
+      showToast("✕ Failed to delete request.", "err");
+    }
+  }
+
+  async function deleteContactMessage(id: string) {
+    const res = await fetch(`/api/admin/inquiries?id=${id}&type=contact`, { method: "DELETE" });
+    if (res.ok) {
+      setContactMessages(prev => prev.filter(c => c.id !== id));
+      showToast("✓ Contact message deleted.", "ok");
+    } else {
+      showToast("✕ Failed to delete message.", "err");
+    }
   }
 
   const pendingCount = customRequests.filter(r => r.status === "pending").length;
@@ -648,6 +710,7 @@ export default function InquiriesClient({
               <span>Speed</span>
               <span>Date</span>
               <span>Status</span>
+              <span></span>
             </div>
             {customRequests.map(r => (
               <div key={r.id} className="adminInquiriesTableRowCustom">
@@ -678,6 +741,7 @@ export default function InquiriesClient({
                   type="custom"
                   onUpdate={updateCustomStatus}
                 />
+                <DeleteRowBtn onConfirmDelete={() => deleteCustomRequest(r.id)} />
               </div>
             ))}
           </div>
@@ -702,6 +766,7 @@ export default function InquiriesClient({
               <span>Message</span>
               <span>Date</span>
               <span>Status</span>
+              <span></span>
             </div>
             {contactMessages.map(c => (
               <div key={c.id} className="adminInquiriesTableRowContact">
@@ -718,6 +783,7 @@ export default function InquiriesClient({
                   type="contact"
                   onUpdate={updateContactStatus}
                 />
+                <DeleteRowBtn onConfirmDelete={() => deleteContactMessage(c.id)} />
               </div>
             ))}
           </div>
