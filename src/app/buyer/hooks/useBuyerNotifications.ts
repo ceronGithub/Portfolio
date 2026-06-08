@@ -5,17 +5,19 @@
 import { useState, useEffect, useRef } from "react";
 
 export interface BuyerNotificationCounts {
-  total:           number;
-  pendingOrders:   number;
-  activeOrders:    number;
-  recentDelivered: number;
-  confirmedVc:     number;
-  resolvedBugs:    number;
+  total:                number;
+  pendingOrders:        number;
+  activeOrders:         number;
+  recentDelivered:      number;
+  confirmedVc:          number;
+  resolvedBugs:         number;
+  scheduledAppointments: number;
 }
 
 const ZERO: BuyerNotificationCounts = {
   total: 0, pendingOrders: 0, activeOrders: 0,
   recentDelivered: 0, confirmedVc: 0, resolvedBugs: 0,
+  scheduledAppointments: 0,
 };
 
 const POLL_MS = 30_000;
@@ -30,12 +32,13 @@ export function useBuyerNotifications(isBuyer: boolean): BuyerNotificationCounts
       if (!res.ok) return;
       const data = await res.json();
       setCounts({
-        total:           data.total           ?? 0,
-        pendingOrders:   data.pendingOrders   ?? 0,
-        activeOrders:    data.activeOrders    ?? 0,
-        recentDelivered: data.recentDelivered ?? 0,
-        confirmedVc:     data.confirmedVc     ?? 0,
-        resolvedBugs:    data.resolvedBugs    ?? 0,
+        total:                 data.total                 ?? 0,
+        pendingOrders:         data.pendingOrders         ?? 0,
+        activeOrders:          data.activeOrders          ?? 0,
+        recentDelivered:       data.recentDelivered       ?? 0,
+        confirmedVc:           data.confirmedVc           ?? 0,
+        resolvedBugs:          data.resolvedBugs          ?? 0,
+        scheduledAppointments: data.scheduledAppointments ?? 0,
       });
     } catch { /* silent */ }
   }

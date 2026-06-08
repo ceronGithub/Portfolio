@@ -1,12 +1,13 @@
 export const dynamic = 'force-dynamic';
 // GET /api/buyer/notifications
 // Buyer-only. Returns unread counts relevant to the logged-in buyer.
-// pendingOrders  → buyer orders still in PENDING status (awaiting downpayment)
-// activeOrders   → orders in PAID / IN_DEVELOPMENT / IN_TESTING (in progress)
-// recentDelivered → orders marked DELIVERED in last 7 days
-// confirmedVc    → VCSchedule rows with status CONFIRMED (upcoming calls)
-// resolvedBugs   → BugReport rows resolved in last 7 days
-// total          → sum of all above
+// pendingOrders        → buyer orders still in PENDING status (awaiting downpayment)
+// activeOrders         → orders in PAID / IN_DEVELOPMENT / IN_TESTING (in progress)
+// recentDelivered      → orders marked DELIVERED in last 7 days
+// confirmedVc          → VCSchedule rows with status CONFIRMED (upcoming calls)
+// resolvedBugs         → BugReport rows resolved in last 7 days
+// scheduledAppointments → Appointment rows with status SCHEDULED (confirmed by admin)
+// total                → sum of all above
 
 import { NextResponse }    from "next/server";
 import { getServerSession } from "next-auth";
@@ -20,7 +21,7 @@ export async function GET() {
   const userId       = (session.user as any).id as string;
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs] =
+  const [pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs, scheduledAppointments] =
     await Promise.all([
       prisma.order.count({ where: { userId, status: "PENDING" } }),
       prisma.order.count({ where: { userId, status: { in: ["PAID", "IN_DEVELOPMENT", "IN_TESTING"] } } }),
@@ -31,9 +32,13 @@ export async function GET() {
       prisma.bugReport.count({
         where: { status: "RESOLVED", resolvedAt: { gte: sevenDaysAgo }, order: { userId } },
       }),
+      // Count appointments where admin confirmed a schedule (status: SCHEDULED)
+      prisma.appointment.count({
+        where: { userId, status: "SCHEDULED" },
+      }),
     ]);
 
-  const total = pendingOrders + activeOrders + recentDelivered + confirmedVc + resolvedBugs;
+  const total = pendingOrders + activeOrders + recentDelivered + confirmedVc + resolvedBugs + scheduledAppointments;
 
-  return NextResponse.json({ total, pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs });
+  return NextResponse.json({ total, pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs, scheduledAppointments });
 }

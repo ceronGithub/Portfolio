@@ -1,5 +1,6 @@
 // buyer/appointments/page.tsx — Buyer's appointment history.
 // Lists all consultation requests with status, reference number, and system details.
+// Soft-deleted (deletedAt != null) appointments are hidden from the buyer.
 
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
@@ -15,12 +16,15 @@ export default async function BuyerAppointmentsPage() {
   const userId = (session.user as any).id as string;
 
   const appointments = await prisma.appointment.findMany({
-    where:   { userId },
+    where:   { userId, deletedAt: null },
     orderBy: { createdAt: "desc" },
+    include: {
+      comments: { orderBy: { createdAt: "asc" } },
+    },
   });
 
   // Serialize for client
-  const serialized = appointments.map((a: typeof appointments[number]) => ({
+  const serialized = appointments.map((a) => ({
     id:            a.id,
     referenceNo:   a.referenceNo,
     systemTitle:   a.systemTitle,
@@ -32,6 +36,13 @@ export default async function BuyerAppointmentsPage() {
     adminNote:     a.adminNote ?? null,
     status:        a.status,
     createdAt:     a.createdAt.toISOString(),
+    comments:      a.comments.map(c => ({
+      id:        c.id,
+      role:      c.role,
+      content:   c.content,
+      parentId:  c.parentId ?? null,
+      createdAt: c.createdAt.toISOString(),
+    })),
   }));
 
   return <AppointmentsClient appointments={serialized} />;

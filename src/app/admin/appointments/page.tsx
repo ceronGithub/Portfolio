@@ -1,5 +1,6 @@
 // admin/appointments/page.tsx — Admin appointments dashboard.
-// Shows all consultation requests with status management.
+// Shows all consultation requests with status management and threaded comments.
+// Admin sees ALL appointments including buyer-removed ones (marked).
 // Protected: ADMIN only.
 
 import { getServerSession } from "next-auth";
@@ -19,11 +20,12 @@ export default async function AdminAppointmentsPage() {
   const appointments = await prisma.appointment.findMany({
     orderBy: { createdAt: "desc" },
     include: {
-      user: { select: { name: true, email: true } },
+      user:     { select: { name: true, email: true } },
+      comments: { orderBy: { createdAt: "asc" } },
     },
   });
 
-  const serialized = appointments.map((a: typeof appointments[number]) => ({
+  const serialized = appointments.map((a) => ({
     id:             a.id,
     referenceNo:    a.referenceNo,
     buyerName:      a.buyerName,
@@ -36,8 +38,16 @@ export default async function AdminAppointmentsPage() {
     message:        a.message ?? null,
     status:         a.status,
     adminNote:      a.adminNote ?? null,
+    deletedAt:      a.deletedAt ? a.deletedAt.toISOString() : null,
     createdAt:      a.createdAt.toISOString(),
     user:           a.user,
+    comments:       a.comments.map(c => ({
+      id:        c.id,
+      role:      c.role,
+      content:   c.content,
+      parentId:  c.parentId ?? null,
+      createdAt: c.createdAt.toISOString(),
+    })),
   }));
 
   return (

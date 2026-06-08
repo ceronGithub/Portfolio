@@ -63,7 +63,9 @@ export async function GET() {
       status:         true,
       createdAt:      true,
       comments: {
-        where:   { parentId: null, role: "ADMIN" },
+        // Fetch ALL root-level comments: admin posts (role ADMIN) + buyer standalone notes (role BUYER)
+        // parentId: null = root level only; child replies are nested under each root via `replies`
+        where:   { parentId: null },
         orderBy: { createdAt: "asc" },
         select: {
           id:        true,

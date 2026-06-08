@@ -447,10 +447,32 @@ model Appointment {
   status         AppointmentStatus @default(PENDING)
   adminNote      String?           // admin-only note
 
+  // Soft-delete — buyer can remove PENDING appointments
+  deletedAt      DateTime?         // null = active; non-null = removed by buyer
+
   // Relation
   userId         String
   user           User              @relation(fields: [userId], references: [id])
+  comments       AppointmentComment[]
 
   @@index([userId])
   @@index([status])
+}
+
+// ── Appointment Comment Thread ───────────────────────────────────────────────
+// Bi-directional thread: both buyer and admin can start root comments.
+// Either side can reply to the other's root comments (parentId = root comment id).
+model AppointmentComment {
+  id            String   @id @default(cuid())
+  appointmentId String
+  role          String                        // "ADMIN" | "BUYER"
+  content       String
+  parentId      String?                       // null = root comment; non-null = reply
+  createdAt     DateTime @default(now())
+
+  appointment Appointment          @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  parent      AppointmentComment?  @relation("ApCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     AppointmentComment[] @relation("ApCommentReplies")
+
+  @@index([appointmentId])
 }

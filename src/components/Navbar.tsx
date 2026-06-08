@@ -278,7 +278,12 @@ export default function Navbar() {
     { label: "Orders",            href: "/buyer/orders",           icon: <IconOrders />    },
     { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />      },
     { label: "Maintenance",       href: "/buyer/maintenance",      icon: <IconMaintenance /> },
-    { label: "Appointments",      href: "/buyer/appointments",     icon: <IconCalendar />    },
+    { label: "Appointments",      href: "/buyer/appointments",     icon: (
+      <span style={{ position: "relative", display: "inline-flex" }}>
+        <IconCalendar />
+        <NotifBadge count={buyerNotif.scheduledAppointments} />
+      </span>
+    )},
     { label: "Profile",           href: "/buyer/profile",          icon: <IconAbout />        },
     { label: "Sign Out",          href: "#",                       icon: <IconSignOut />,  signOut: true },
   ];

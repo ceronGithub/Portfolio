@@ -43,14 +43,6 @@ export async function POST(
   });
   if (!parent) return NextResponse.json({ error: "Parent comment not found" }, { status: 404 });
 
-  // Prevent duplicate buyer reply on the same admin comment
-  const existingReply = await prisma.inquiryComment.findFirst({
-    where: { parentId, role: "BUYER" },
-  });
-  if (existingReply) {
-    return NextResponse.json({ error: "You already replied to this comment." }, { status: 409 });
-  }
-
   const comment = await prisma.inquiryComment.create({
     data: { inquiryId, role: "BUYER", content, parentId },
   });
