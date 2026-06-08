@@ -51,6 +51,8 @@ export default function CheckoutSuccessPage() {
         fulfilledRef.current = true;
         clearInterval(intervalRef.current!);
         setState("fulfilled");
+        // Auto-redirect to buyer dashboard after 3s so owned assets reload
+        setTimeout(() => { window.location.href = "/buyer"; }, 3000);
       } else if (attempt >= MAX_ATTEMPTS) {
         clearInterval(intervalRef.current!);
         setState("timeout");
@@ -63,6 +65,8 @@ export default function CheckoutSuccessPage() {
         fulfilledRef.current = true;
         clearInterval(intervalRef.current!);
         setState("fulfilled");
+        // Auto-redirect to buyer dashboard after 3s so owned assets reload
+        setTimeout(() => { window.location.href = "/buyer"; }, 3000);
       }
     });
 
@@ -124,6 +128,7 @@ export default function CheckoutSuccessPage() {
             </h1>
             <p style={{ color:"rgba(255,255,255,0.5)", fontSize:"0.9rem", lineHeight:1.6, marginBottom:"2rem" }}>
               Your assets are now unlocked and ready to download.
+              Redirecting to your dashboard in 3 seconds…
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem" }}>
               <Link href="/buyer/downloads" style={{

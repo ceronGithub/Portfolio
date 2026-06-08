@@ -1,5 +1,5 @@
 // CheckoutClient.tsx — Checkout page UI.
-// Shows product summary, price breakdown (downpayment 30% + remainder),
+// Shows product summary, full price payment breakdown,
 // payment method selector (GCash / Credit Card / Bank Transfer).
 // On Place Order: calls API → gets PayMongo checkoutUrl → redirects buyer.
 
@@ -38,8 +38,7 @@ export default function CheckoutClient({
   const [error,   setError]   = useState<string | null>(null);
 
   // ── Price breakdown ──────────────────────────────────────────────────────
-  const downpayment = Math.round(price * 0.30);
-  const remainder   = price - downpayment;
+  // Full price is charged upfront — no DP split.
 
   // ── Place order → get PayMongo URL → redirect ────────────────────────────
   async function handlePlaceOrder() {
@@ -98,16 +97,8 @@ export default function CheckoutClient({
             </div>
             <div className="checkoutBreakdownDivider" />
             <div className="checkoutBreakdownRow checkoutBreakdownDown">
-              <span>
-                Downpayment <span className="checkoutBreakdownPct">(30%)</span>
-              </span>
-              <span className="checkoutBreakdownDownAmt">{fmt(downpayment)}</span>
-            </div>
-            <div className="checkoutBreakdownRow checkoutBreakdownRem">
-              <span>
-                Remainder <span className="checkoutBreakdownPct">(due on delivery)</span>
-              </span>
-              <span>{fmt(remainder)}</span>
+              <span>Total due</span>
+              <span className="checkoutBreakdownDownAmt">{fmt(price)}</span>
             </div>
           </div>
 
@@ -124,7 +115,7 @@ export default function CheckoutClient({
           <p className="checkoutEyebrow">Payment Method</p>
           <p className="checkoutPayNote">
             Select your preferred payment channel for the{" "}
-            <strong>{fmt(downpayment)}</strong> downpayment.
+            <strong>{fmt(price)}</strong> total.
           </p>
 
           {/* Method options */}
@@ -171,7 +162,7 @@ export default function CheckoutClient({
           {/* Total due */}
           <div className="checkoutDueRow">
             <span className="checkoutDueLabel">Due now</span>
-            <span className="checkoutDueAmount">{fmt(downpayment)}</span>
+            <span className="checkoutDueAmount">{fmt(price)}</span>
           </div>
 
           {/* Error */}
@@ -188,13 +179,12 @@ export default function CheckoutClient({
             {placing ? (
               <><span className="checkoutBtnSpinner" /> Redirecting to PayMongo…</>
             ) : (
-              <>Pay {fmt(downpayment)} via {method === "gcash" ? "GCash" : method === "card" ? "Card" : "Bank Transfer"}</>
+              <>Pay {fmt(price)} via {method === "gcash" ? "GCash" : method === "card" ? "Card" : "Bank Transfer"}</>
             )}
           </button>
 
           <p className="checkoutDisclaimer">
-            By placing this order you agree to the 30/70 payment terms.
-            Remainder is due upon project delivery.
+            One-time full payment. Access is granted immediately after payment confirmation.
           </p>
         </div>
 
