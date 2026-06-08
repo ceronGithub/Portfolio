@@ -68,6 +68,8 @@ function BuyNowModal({
             href={entry.checkoutHref}
             className="wlBuyModalConfirm"
             style={{ background: entry.accent }}
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Confirm Purchase →
           </a>

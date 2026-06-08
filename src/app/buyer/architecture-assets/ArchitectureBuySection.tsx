@@ -206,7 +206,7 @@ export default function ArchitectureBuySection({
                   }
                   // Interior/Exterior = flat price, always full_pack tier
                   const items = cartItems.map(a => `${a.id}:full_pack`).join(",");
-                  window.location.href = `/checkout/bundle?items=${items}`;
+                  window.open(`/checkout/bundle?items=${items}`, "_blank", "noopener,noreferrer");
                 }}
               >
                 {cartItems.length > 0 ? `BUY (${cartItems.length})` : "BUY"}
@@ -218,7 +218,7 @@ export default function ArchitectureBuySection({
                   if (cartItems.length === 0) return;
                   // Interior/Exterior = flat price, always full_pack tier
                   const items = cartItems.map(a => `${a.id}:full_pack`).join(",");
-                  window.location.href = `/checkout/bundle?items=${items}`;
+                  window.open(`/checkout/bundle?items=${items}`, "_blank", "noopener,noreferrer");
                 }}
                 title={cartItems.length > 0 ? `Checkout (${cartItems.length} items)` : "No items selected"}
               >

@@ -115,7 +115,7 @@ export default function CartDrawer({ isOpen, onClose, entries, onRemove, onClear
             </div>
 
             {/* CTAs */}
-            <a href={bundleHref} className="cartCheckoutBtn" onClick={() => { onClose(); onClear(); }}>
+            <a href={bundleHref} className="cartCheckoutBtn" target="_blank" rel="noopener noreferrer" onClick={() => { onClose(); onClear(); }}>
               Checkout Bundle →
             </a>
 

@@ -108,7 +108,7 @@ export default function NewArchitectureSection({ latestInterior, latestExterior 
                 <p className="newArchMetaName">{latestExterior.name}</p>
                 <p className="newArchMetaPrice">₱{latestExterior.priceMeshOnly.toLocaleString()}</p>
                 <p className="newArchMetaNote">Exterior · editable Blender file</p>
-                <a href={`/checkout/${latestExterior.id}`} className="newArchBuyBtn">
+                <a href={`/checkout/${latestExterior.id}`} className="newArchBuyBtn" target="_blank" rel="noopener noreferrer">
                   Buy Now →
                 </a>
               </div>
@@ -121,7 +121,7 @@ export default function NewArchitectureSection({ latestInterior, latestExterior 
                 <p className="newArchMetaName">{latestInterior.name}</p>
                 <p className="newArchMetaPrice">₱{latestInterior.priceMeshOnly.toLocaleString()}</p>
                 <p className="newArchMetaNote">Interior · editable Blender file</p>
-                <a href={`/checkout/${latestInterior.id}`} className="newArchBuyBtn">
+                <a href={`/checkout/${latestInterior.id}`} className="newArchBuyBtn" target="_blank" rel="noopener noreferrer">
                   Buy Now →
                 </a>
               </div>

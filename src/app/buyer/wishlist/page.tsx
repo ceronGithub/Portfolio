@@ -111,9 +111,9 @@ export default function WishlistPage() {
                 </div>
 
                 <div className="wlPageCardActions">
-                  <Link href={checkoutHref} className="wlPageBuyBtn" style={{ background: accent, color: "#0d0d0d" }}>
+                  <a href={checkoutHref} className="wlPageBuyBtn" style={{ background: accent, color: "#0d0d0d" }} target="_blank" rel="noopener noreferrer">
                     Buy Now
-                  </Link>
+                  </a>
                   <button
                     className="wlPageRemoveBtn"
                     onClick={() => toggleWishlist(id)}

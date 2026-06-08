@@ -703,7 +703,7 @@ export default function AssetBuySection({
                   }
                   // Pass id:tier tuples so server computes the correct tier price
                   const items = cartEntries.map(e => `${e.asset.id}:${e.tier}`).join(",");
-                  window.location.href = `/checkout/bundle?items=${items}`;
+                  window.open(`/checkout/bundle?items=${items}`, "_blank", "noopener,noreferrer");
                 }}
               >
                 {cartEntries.length > 0
@@ -716,7 +716,7 @@ export default function AssetBuySection({
                 onClick={() => {
                   if (cartEntries.length === 0) return;
                   const items = cartEntries.map(e => `${e.asset.id}:${e.tier}`).join(",");
-                  window.location.href = `/checkout/bundle?items=${items}`;
+                  window.open(`/checkout/bundle?items=${items}`, "_blank", "noopener,noreferrer");
                 }}
                 title={cartEntries.length > 0 ? `Checkout (${cartEntries.length} items)` : "No items selected"}
               >

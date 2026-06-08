@@ -217,7 +217,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
                 <p className="newAssetCardCat">Character</p>
                 <p className="newAssetCardName">{latestChar.name}</p>
                 <p className="newAssetCardPrice">₱{latestChar.priceMeshOnly.toLocaleString()}</p>
-                <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn">
+                <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn" target="_blank" rel="noopener noreferrer">
                   Buy Now →
                 </a>
                 <ul className="newAssetCardIncludes">
@@ -264,7 +264,7 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
                 <p className="newAssetCardCat">Weapon</p>
                 <p className="newAssetCardName">{latestWeapon.name}</p>
                 <p className="newAssetCardPrice">₱{latestWeapon.priceMeshOnly.toLocaleString()}</p>
-                <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn">
+                <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn" target="_blank" rel="noopener noreferrer">
                   Buy Now →
                 </a>
                 <ul className="newAssetCardIncludes">
