@@ -48,3 +48,27 @@ export async function PATCH(
   const order = await prisma.order.update({ where: { id }, data });
   return NextResponse.json({ order });
 }
+// ── DELETE /api/admin/orders/[id] — removes the order record from DB ─────────
+// Admin-only. Hard delete — no cascade needed (Order has no child relations).
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+
+  try {
+    await prisma.order.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    // P2025 = record not found
+    if (err?.code === "P2025") {
+      return NextResponse.json({ error: "Order not found." }, { status: 404 });
+    }
+    return NextResponse.json({ error: err?.message ?? "Server error" }, { status: 500 });
+  }
+}

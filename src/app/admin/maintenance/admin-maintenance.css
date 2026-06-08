@@ -921,3 +921,57 @@
 .adminShell:not(.adminShellDark) .amNoteTime      { color: var(--sidebar-text, #aaa); }
 .adminShell:not(.adminShellDark) .amDeleteBtn     { color: var(--sidebar-text, #ccc); }
 .adminShell:not(.adminShellDark) .amDeleteBtn:hover { color: #ef4444; }
+/* ── Client card delete button ─────────────────────────────────────── */
+.amClientDeleteBtn {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239,68,68,0);
+  border: 1px solid rgba(239,68,68,0);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.18);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  z-index: 2;
+}
+.amClientDeleteBtn:hover {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.4);
+  color: #fc8181;
+}
+
+/* Two-step confirm inline row */
+.amClientDeleteConfirm {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: flex;
+  gap: 0.3rem;
+  z-index: 3;
+}
+.amClientDeleteConfirmBtn {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  color: #fc8181;
+  cursor: pointer;
+}
+.amClientDeleteConfirmBtn:hover { background: rgba(239,68,68,0.25); }
+.amClientDeleteCancelBtn {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+}
+.amClientDeleteCancelBtn:hover { background: rgba(255,255,255,0.1); }

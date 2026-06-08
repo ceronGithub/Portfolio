@@ -335,11 +335,13 @@ function StatusSelector({
 
 // ── Main ──────────────────────────────────────────────────────────────
 export default function OrdersClient({ orders: initialOrders }: Props) {
-  const [orders,       setOrders]  = useState<Order[]>(initialOrders);
-  const [activeFilter, setFilter]  = useState<FilterTab>("ALL");
-  const [pendingId,    setPending] = useState<string | null>(null);
-  const [expandedId,   setExpanded]= useState<string | null>(null);
-  const [toast,        setToast]   = useState<{ msg: string; type: "ok"|"err"|"info" } | null>(null);
+  const [orders,          setOrders]         = useState<Order[]>(initialOrders);
+  const [activeFilter,    setFilter]         = useState<FilterTab>("ALL");
+  const [pendingId,       setPending]        = useState<string | null>(null);
+  const [expandedId,      setExpanded]       = useState<string | null>(null);
+  const [toast,           setToast]          = useState<{ msg: string; type: "ok"|"err"|"info" } | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId]= useState<string | null>(null);
+  const [deletingId,      setDeletingId]     = useState<string | null>(null);
 
   const filtered = activeFilter === "ALL"
     ? orders
@@ -393,6 +395,22 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
       o.id === orderId ? { ...o, deliveryNote: note, estimatedAt } : o
     ));
     showToast("Delivery details saved.", "ok");
+  }
+
+  // Deletes an order from the DB and removes it from local state.
+  async function handleDeleteOrder(orderId: string) {
+    setDeletingId(orderId);
+    setConfirmDeleteId(null);
+    const res = await fetch(`/api/admin/orders/${orderId}`, { method: "DELETE" });
+    if (res.ok) {
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      if (expandedId === orderId) setExpanded(null);
+      showToast("✓ Order deleted.", "ok");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.error ?? "Failed to delete order.", "err");
+    }
+    setDeletingId(null);
   }
 
   return (
@@ -485,6 +503,36 @@ export default function OrdersClient({ orders: initialOrders }: Props) {
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
                   </button>
+                  {/* Delete — two-step confirm */}
+                  {confirmDeleteId === order.id ? (
+                    <>
+                      <button
+                        className="apActionBtn apActionBtnDelete apActionBtnDeleteConfirm"
+                        style={{ fontSize: "0.7rem" }}
+                        onClick={() => handleDeleteOrder(order.id)}
+                        disabled={deletingId === order.id}
+                      >
+                        {deletingId === order.id ? "…" : "Confirm"}
+                      </button>
+                      <button
+                        className="apActionBtn apActionBtnDeactivate"
+                        style={{ fontSize: "0.7rem" }}
+                        onClick={() => setConfirmDeleteId(null)}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="apActionBtn apActionBtnDelete"
+                      style={{ fontSize: "0.7rem" }}
+                      onClick={() => setConfirmDeleteId(order.id)}
+                      disabled={deletingId === order.id}
+                      title="Delete this order"
+                    >
+                      🗑
+                    </button>
+                  )}
                 </span>
               </div>
 

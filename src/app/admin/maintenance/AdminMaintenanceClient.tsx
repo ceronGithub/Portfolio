@@ -732,7 +732,26 @@ function ClientDetail({ order, showToast }: {
 // ── Main Export ───────────────────────────────────────────────────────────────
 export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) {
   const { toasts, showToast, dismissToast } = useToast();
-  const [selected, setSelected] = useState<Order | null>(orders[0] ?? null);
+  const [selected,        setSelected]        = useState<Order | null>(orders[0] ?? null);
+  const [orderList,       setOrderList]       = useState<Order[]>(orders);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingId,      setDeletingId]      = useState<string | null>(null);
+
+  // Deletes a maintenance order (and all tasks/bugs/vc) from DB and removes from list.
+  async function handleDeleteClient(orderId: string) {
+    setDeletingId(orderId);
+    setConfirmDeleteId(null);
+    const res = await fetch(`/api/admin/maintenance/${orderId}`, { method: "DELETE" });
+    if (res.ok) {
+      setOrderList(prev => prev.filter(o => o.id !== orderId));
+      if (selected?.id === orderId) setSelected(null);
+      showToast("✓ Client record deleted.", "success");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showToast(`✕ ${data.error ?? "Failed to delete client."}`, "error");
+    }
+    setDeletingId(null);
+  }
 
   return (
     <div className="amPage">
@@ -740,21 +759,57 @@ export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) 
       <div className="amHeader">
         <p className="amEyebrow">Support</p>
         <h1 className="amTitle">Maintenance Clients</h1>
-        <p className="amCount">{orders.length} active client{orders.length !== 1 ? "s" : ""}</p>
+        <p className="amCount">{orderList.length} active client{orderList.length !== 1 ? "s" : ""}</p>
       </div>
 
-      {!orders.length
+      {!orderList.length
         ? <div className="amEmpty">No active maintenance clients yet.</div>
         : (
           <div className="amLayout">
             {/* Left — Client List */}
             <div className="amClientList">
-              {orders.map(o => (
+              {orderList.map(o => (
                 <div
                   key={o.id}
                   className={`amClientCard${selected?.id === o.id ? " active" : ""}`}
                   onClick={() => setSelected(o)}
+                  style={{ position: "relative" }}
                 >
+                  {/* Delete icon — top-right corner, two-step confirm */}
+                  {confirmDeleteId === o.id ? (
+                    <div
+                      className="amClientDeleteConfirm"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <button
+                        className="amClientDeleteConfirmBtn"
+                        onClick={() => handleDeleteClient(o.id)}
+                        disabled={deletingId === o.id}
+                      >
+                        {deletingId === o.id ? "…" : "Confirm"}
+                      </button>
+                      <button
+                        className="amClientDeleteCancelBtn"
+                        onClick={() => setConfirmDeleteId(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="amClientDeleteBtn"
+                      onClick={e => { e.stopPropagation(); setConfirmDeleteId(o.id); }}
+                      disabled={deletingId === o.id}
+                      title="Delete this client record"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14H6L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                        <path d="M9 6V4h6v2"/>
+                      </svg>
+                    </button>
+                  )}
                   <p className="amClientName">{o.user.name}</p>
                   <p className="amClientEmail">{o.user.email}</p>
                   <div className="amClientMeta">

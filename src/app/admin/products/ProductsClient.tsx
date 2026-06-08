@@ -1479,14 +1479,14 @@ function AddProductForm({ onProductCreated, onClose }: {
         {(category === "character" || category === "weapon") && (
         <div className="apAddProductField">
           <FileUploadField
-            label="Face PNG (R2 + GDrive)"
+            label="Face PNG (GDrive)"
             accept="image/*"
-            defaultDestination="both"
+            defaultDestination="gdrive"
             driveFolderIdRef={driveFolderIdRef}
             customFileName={nameSlug ? `${nameSlug}-face` : undefined}
             onUploaded={r => {
-              if (r.r2Url) setFacePngUrl(r.r2Url);
-              else if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`);
+              if (r.driveId) setFacePngUrl(`/api/drive-video?id=${r.driveId}`);
+              else if (r.r2Url) setFacePngUrl(r.r2Url);
               if (r.driveId) setMediaDriveIds(prev => ({ ...prev, facePngUrl: r.driveId! }));
             }}
           />
@@ -1497,17 +1497,17 @@ function AddProductForm({ onProductCreated, onClose }: {
         {/* ── 3D Model — Character & Weapon only ── */}
         {(category === "character" || category === "weapon") && (
         <div className="apAddProductField apAddProductFieldFull">
-          <label className="apMediaLabel" style={{ marginBottom: "0.35rem" }}>3D Model (OBJ / FBX / GLB) — Both</label>
+          <label className="apMediaLabel" style={{ marginBottom: "0.35rem" }}>3D Model (OBJ / FBX / GLB) — GDrive</label>
           <div className="apThreeDSlots">
             {/* OBJ slot */}
             <div className="apThreeDSlot">
               <FileUploadField
                 label="OBJ"
                 accept=".obj"
-                defaultDestination="both"
+                defaultDestination="gdrive"
                 driveFolderIdRef={driveFolderIdRef}
                 customFileName={nameSlug ? `${nameSlug}-obj` : undefined}
-                onUploaded={r => { if (r.r2Url) setThreeDObjUrl(r.r2Url); else if (r.driveId) setThreeDObjUrl(r.driveId); }}
+                onUploaded={r => { if (r.driveId) setThreeDObjUrl(r.driveId); else if (r.r2Url) setThreeDObjUrl(r.r2Url); }}
               />
               {threeDObjUrl && (
                 <div className="apThreeDUploaded">
@@ -1528,10 +1528,10 @@ function AddProductForm({ onProductCreated, onClose }: {
               <FileUploadField
                 label="FBX"
                 accept=".fbx"
-                defaultDestination="both"
+                defaultDestination="gdrive"
                 driveFolderIdRef={driveFolderIdRef}
                 customFileName={nameSlug ? `${nameSlug}-fbx` : undefined}
-                onUploaded={r => { if (r.r2Url) setThreeDFbxUrl(r.r2Url); else if (r.driveId) setThreeDFbxUrl(r.driveId); }}
+                onUploaded={r => { if (r.driveId) setThreeDFbxUrl(r.driveId); else if (r.r2Url) setThreeDFbxUrl(r.r2Url); }}
               />
               {threeDFbxUrl && (
                 <div className="apThreeDUploaded">
@@ -1552,10 +1552,10 @@ function AddProductForm({ onProductCreated, onClose }: {
               <FileUploadField
                 label="GLB"
                 accept=".glb,.gltf"
-                defaultDestination="both"
+                defaultDestination="gdrive"
                 driveFolderIdRef={driveFolderIdRef}
                 customFileName={nameSlug ? `${nameSlug}-glb` : undefined}
-                onUploaded={r => { if (r.r2Url) setThreeDGlbUrl(r.r2Url); else if (r.driveId) setThreeDGlbUrl(r.driveId); }}
+                onUploaded={r => { if (r.driveId) setThreeDGlbUrl(r.driveId); else if (r.r2Url) setThreeDGlbUrl(r.r2Url); }}
               />
               {threeDGlbUrl && (
                 <div className="apThreeDUploaded">
