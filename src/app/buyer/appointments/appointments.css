@@ -1,0 +1,195 @@
+/* appointments.css — Buyer appointments list page styles. */
+
+.apBuyerPage {
+  max-width:   720px;
+  margin:      0 auto;
+  padding:     2.5rem 1.5rem 4rem;
+  display:     flex;
+  flex-direction: column;
+  gap:         2rem;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.apBuyerHeader {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+}
+
+.apBuyerEyebrow {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.3);
+  margin:         0;
+}
+
+.apBuyerTitle {
+  font-size:   1.75rem;
+  font-weight: 700;
+  color:       #f0ede8;
+  margin:      0;
+  line-height: 1.15;
+}
+
+.apBuyerSub {
+  font-size: 0.8rem;
+  color:     rgba(255,255,255,0.3);
+  margin:    0;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+.apBuyerEmpty {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  text-align:     center;
+  gap:            0.6rem;
+  padding:        4rem 1rem;
+  background:     rgba(255,255,255,0.02);
+  border:         1px solid rgba(255,255,255,0.06);
+  border-radius:  12px;
+}
+
+.apBuyerEmptyTitle {
+  font-size:   0.95rem;
+  font-weight: 600;
+  color:       rgba(255,255,255,0.4);
+  margin:      0;
+}
+
+.apBuyerEmptySub {
+  font-size: 0.78rem;
+  color:     rgba(255,255,255,0.25);
+  margin:    0;
+}
+
+/* ── List ────────────────────────────────────────────────────────────── */
+.apBuyerList {
+  display:        flex;
+  flex-direction: column;
+  gap:            1rem;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────── */
+.apBuyerCard {
+  background:     rgba(255,255,255,0.03);
+  border:         1px solid rgba(255,255,255,0.07);
+  border-radius:  10px;
+  padding:        1.1rem 1.25rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.85rem;
+  transition:     border-color 0.18s;
+}
+.apBuyerCard:hover { border-color: rgba(255,255,255,0.12); }
+
+/* top row */
+.apBuyerCardTop {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             0.75rem;
+}
+
+.apBuyerCardLeft {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.2rem;
+}
+
+.apBuyerCardSystem {
+  font-size:   0.92rem;
+  font-weight: 600;
+  color:       #e8e4de;
+  margin:      0;
+}
+
+.apBuyerCardRef {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.65rem;
+  color:          rgba(255,255,255,0.3);
+  letter-spacing: 0.06em;
+}
+
+.apBuyerCardStatus {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding:        0.2rem 0.55rem;
+  border:         1px solid;
+  border-radius:  4px;
+  white-space:    nowrap;
+  flex-shrink:    0;
+}
+
+.apBuyerCardDivider {
+  height:     1px;
+  background: rgba(255,255,255,0.05);
+}
+
+/* Prices */
+.apBuyerCardPrices {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.3rem;
+}
+
+.apBuyerCardPriceRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+}
+
+.apBuyerCardPriceRowAddon .apBuyerCardPriceLabel {
+  color:     rgba(255,255,255,0.35);
+  font-size: 0.75rem;
+}
+
+.apBuyerCardPriceRowTotal {
+  padding-top: 0.3rem;
+  border-top:  1px solid rgba(255,255,255,0.05);
+  margin-top:  0.1rem;
+}
+
+.apBuyerCardPriceLabel {
+  font-size:   0.78rem;
+  color:       rgba(255,255,255,0.45);
+}
+
+.apBuyerCardPriceValue {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.78rem;
+  color:          rgba(255,255,255,0.65);
+}
+
+.apBuyerCardPriceTotal {
+  font-size:   0.85rem;
+  font-weight: 700;
+  color:       #e8e4de !important;
+}
+
+/* Meta */
+.apBuyerCardMeta {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+}
+
+.apBuyerCardMetaItem {
+  display:     flex;
+  align-items: flex-start;
+  gap:         0.4rem;
+  font-size:   0.74rem;
+  color:       rgba(255,255,255,0.35);
+  line-height: 1.5;
+}
+
+.apBuyerCardMetaItem svg { margin-top: 2px; flex-shrink: 0; opacity: 0.4; }
+
+.apBuyerCardMessage {
+  font-style: italic;
+  color:      rgba(255,255,255,0.3);
+}

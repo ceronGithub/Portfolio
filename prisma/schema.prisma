@@ -55,6 +55,7 @@ model User {
   reviews   Review[]
   inquiries          Inquiry[]
   maintenanceOrders  MaintenanceOrder[]
+  appointments       Appointment[]
 }
 model Product {
   id                String          @id @default(cuid())
@@ -409,4 +410,47 @@ model GoogleToken {
   accessToken  String?                              // cached, refreshed automatically
   accessExpiry DateTime?                            // when the cached access token expires
   updatedAt    DateTime @updatedAt
+}
+
+// ── Appointments ────────────────────────────────────────────────────────────
+// Created when a buyer schedules a consultation for a system.
+// Stores a snapshot of the system, selected add-ons, and quoted price.
+
+enum AppointmentStatus {
+  PENDING      // Just submitted — awaiting developer acknowledgment
+  SCHEDULED    // VC confirmed by developer
+  COMPLETED    // VC done — moving to proposal / DP
+  CANCELLED
+}
+
+model Appointment {
+  id             String            @id @default(cuid())
+  createdAt      DateTime          @default(now())
+
+  // Buyer info
+  buyerName      String
+  buyerEmail     String
+
+  // System snapshot at time of request
+  systemId       String
+  systemTitle    String
+  basePrice      Int
+  selectedAddons Json              // [{ id, label, price }]
+  quotedPrice    Int               // basePrice + addons total
+
+  // Scheduling
+  scheduledDate  String            // ISO date string (YYYY-MM-DD), minimum +1 day from createdAt
+  message        String?           // optional buyer note
+
+  // Tracking
+  referenceNo    String            @unique
+  status         AppointmentStatus @default(PENDING)
+  adminNote      String?           // admin-only note
+
+  // Relation
+  userId         String
+  user           User              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }

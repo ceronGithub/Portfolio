@@ -6,7 +6,7 @@ emailjs
 
 ceroncalsena
 gdrive
-supabase : xFdC9ZnXKyGv3xsH
+supabase : sGp7XMDdpf8jb06C
 bucker remove
 
 paymongo

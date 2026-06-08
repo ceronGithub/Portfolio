@@ -6,10 +6,15 @@
 "use client";
 
 import { useState } from "react";
+import emailjs       from "@emailjs/browser";
 import "./custom-request-builder.css";
 import { sanitize } from "@/lib/utils";
 import { useToast }  from "@/app/buyer/shared/useToast";
 import ToastStack    from "@/app/buyer/shared/ToastStack";
+
+const EMAILJS_SERVICE_ID  = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID  ?? "";
+const EMAILJS_PUBLIC_KEY  = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY  ?? "";
+const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CUSTOM_REQUEST_TEMPLATE_ID ?? "";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -275,6 +280,26 @@ export default function CustomRequestBuilder() {
         }),
       });
       if (res.status === 201 || res.status === 200) {
+        // ── Fire EmailJS notification to developer ──────────────────────────
+        if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
+          const deliveryTime = form.deliverySpeed
+            ? ({ Standard: "4–6 weeks", Rush: "2–3 weeks", Urgent: "1–2 weeks" } as Record<string, string>)[form.deliverySpeed] ?? ""
+            : "";
+          await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            {
+              subject_line:  `Custom Request: ${form.assetType} — ${estimate ? fmt(estimate) : "TBD"}`,
+              title:         form.assetType,
+              detail_1:      form.deliverySpeed ? `${form.deliverySpeed} · ${deliveryTime}` : "—",
+              detail_2:      form.description ?? "—",
+              quoted_price:  estimate ? fmt(estimate) : "TBD",
+              reference_no:  "—",
+              buyer_email:   "developerceron@gmail.com",
+            },
+            EMAILJS_PUBLIC_KEY
+          ).catch(() => {}); // silent fail — DB record is the source of truth
+        }
         showToast("✓ Custom request submitted. I'll review and get back to you soon.", "success");
         setSubmitted(true);
       } else {

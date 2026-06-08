@@ -1,0 +1,444 @@
+/* appointment-modal.css — AppointmentModal styles.
+   Dark theme matching the shop aesthetic (#0a0a0a base, accent-driven highlights).
+   Custom date picker, form fields, success state. */
+
+/* ── Overlay ─────────────────────────────────────────────────────────── */
+.apModalOverlay {
+  position:        fixed;
+  inset:           0;
+  background:      rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  z-index:         9999;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         1.5rem;
+  animation:       apOverlayIn 0.18s ease;
+}
+
+@keyframes apOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal container ─────────────────────────────────────────────────── */
+.apModal {
+  width:            100%;
+  max-width:        500px;
+  max-height:       90vh;
+  overflow-y:       auto;
+  background:       #111;
+  border:           1px solid rgba(255,255,255,0.08);
+  border-radius:    14px;
+  padding:          1.75rem;
+  display:          flex;
+  flex-direction:   column;
+  gap:              1.25rem;
+  animation:        apModalIn 0.22s cubic-bezier(0.22,1,0.36,1);
+  scrollbar-width:  thin;
+  scrollbar-color:  rgba(255,255,255,0.1) transparent;
+}
+
+@keyframes apModalIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.apModalHeader {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+}
+
+.apModalHeaderLeft {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+}
+
+.apModalTag {
+  display:        inline-block;
+  font-family:    "DM Mono", monospace;
+  font-size:      0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding:        0.2rem 0.55rem;
+  border:         1px solid;
+  border-radius:  4px;
+  width:          fit-content;
+}
+
+.apModalTitle {
+  font-size:   1.15rem;
+  font-weight: 600;
+  color:       #f0ede8;
+  margin:      0;
+  line-height: 1.2;
+}
+
+.apModalClose {
+  background:    none;
+  border:        none;
+  color:         rgba(255,255,255,0.35);
+  font-size:     1rem;
+  cursor:        pointer;
+  padding:       0.25rem;
+  line-height:   1;
+  transition:    color 0.18s ease;
+  flex-shrink:   0;
+}
+.apModalClose:hover { color: rgba(255,255,255,0.8); }
+
+/* ── System summary card ─────────────────────────────────────────────── */
+.apModalSummary {
+  background:    rgba(255,255,255,0.03);
+  border:        1px solid;
+  border-radius: 8px;
+  padding:       0.9rem 1rem;
+  display:       flex;
+  flex-direction: column;
+  gap:           0.5rem;
+}
+
+.apModalSummaryRow {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  gap:             0.5rem;
+}
+
+.apModalSummarySystem {
+  font-size:   0.9rem;
+  font-weight: 600;
+  color:       #e8e4de;
+}
+
+.apModalSummaryPrice {
+  font-family: "DM Mono", monospace;
+  font-size:   0.9rem;
+  font-weight: 600;
+}
+
+.apModalAddons {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.25rem;
+  padding-top:    0.25rem;
+  border-top:     1px solid rgba(255,255,255,0.06);
+}
+
+.apModalAddonRow {
+  display:         flex;
+  justify-content: space-between;
+  font-size:       0.75rem;
+  color:           rgba(255,255,255,0.5);
+  font-family:     "DM Mono", monospace;
+}
+
+.apModalSummaryNote {
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.35);
+  margin:      0;
+  line-height: 1.5;
+  padding-top: 0.35rem;
+  border-top:  1px solid rgba(255,255,255,0.05);
+}
+
+/* ── Section ─────────────────────────────────────────────────────────── */
+.apModalSection {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.45rem;
+}
+
+.apModalSectionLabel {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.4);
+  margin:         0;
+}
+
+.apModalSectionSub {
+  font-size:   0.73rem;
+  color:       rgba(255,255,255,0.3);
+  margin:      0;
+  line-height: 1.5;
+}
+
+.apModalOptional {
+  color:       rgba(255,255,255,0.25);
+  font-size:   0.6rem;
+  margin-left: 0.3rem;
+}
+
+/* ── Date picker ─────────────────────────────────────────────────────── */
+.apDatePicker {
+  background:    rgba(255,255,255,0.03);
+  border:        1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding:       0.9rem;
+}
+
+.apDatePickerHeader {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   0.75rem;
+}
+
+.apDatePickerMonthLabel {
+  font-size:   0.8rem;
+  font-weight: 600;
+  color:       #e8e4de;
+}
+
+.apDatePickerNav {
+  background:    none;
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  color:         rgba(255,255,255,0.5);
+  cursor:        pointer;
+  padding:       0.3rem 0.4rem;
+  display:       flex;
+  align-items:   center;
+  transition:    border-color 0.18s, color 0.18s;
+  line-height:   1;
+}
+.apDatePickerNav:hover:not(:disabled) {
+  border-color: rgba(255,255,255,0.25);
+  color:        rgba(255,255,255,0.85);
+}
+.apDatePickerNav:disabled { opacity: 0.25; cursor: default; }
+
+/* 7-column grid */
+.apDatePickerGrid {
+  display:               grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:                   3px;
+}
+
+.apDatePickerDayLabel {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.6rem;
+  text-align:     center;
+  color:          rgba(255,255,255,0.25);
+  letter-spacing: 0.06em;
+  padding-bottom: 0.4rem;
+}
+
+.apDatePickerCell {
+  aspect-ratio: 1 / 1;
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size:    0.75rem;
+  transition:   background 0.15s, color 0.15s;
+}
+
+.apDatePickerCellEmpty {
+  background: transparent;
+}
+
+.apDatePickerCellDay {
+  background:    none;
+  border:        1px solid transparent;
+  color:         rgba(255,255,255,0.7);
+  cursor:        pointer;
+}
+.apDatePickerCellDay:hover:not(.apDatePickerCellDisabled):not(.apDatePickerCellSelected) {
+  background:   rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.apDatePickerCellDisabled {
+  color:  rgba(255,255,255,0.18);
+  cursor: default;
+}
+
+.apDatePickerCellSelected {
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.apModalDateSelected {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.7rem;
+  margin:         0;
+  padding-top:    0.25rem;
+}
+
+/* ── Textarea ─────────────────────────────────────────────────────────── */
+.apModalTextarea {
+  background:    rgba(255,255,255,0.04);
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color:         #e8e4de;
+  font-size:     0.82rem;
+  font-family:   inherit;
+  padding:       0.7rem 0.9rem;
+  resize:        vertical;
+  outline:       none;
+  transition:    border-color 0.18s;
+  width:         100%;
+  box-sizing:    border-box;
+  line-height:   1.55;
+}
+.apModalTextarea:focus {
+  border-color: rgba(255,255,255,0.22);
+}
+.apModalTextarea::placeholder { color: rgba(255,255,255,0.22); }
+
+/* ── DP info note ─────────────────────────────────────────────────────── */
+.apModalDpNote {
+  display:       flex;
+  gap:           0.6rem;
+  align-items:   flex-start;
+  background:    rgba(255,255,255,0.03);
+  border:        1px solid rgba(255,255,255,0.06);
+  border-radius: 7px;
+  padding:       0.7rem 0.9rem;
+  font-size:     0.73rem;
+  color:         rgba(255,255,255,0.4);
+  line-height:   1.55;
+}
+
+/* ── Error ────────────────────────────────────────────────────────────── */
+.apModalError {
+  font-size:  0.78rem;
+  color:      #fc8181;
+  margin:     0;
+  text-align: center;
+}
+
+/* ── Submit button ────────────────────────────────────────────────────── */
+.apModalSubmit {
+  background:    #22c55e;
+  border:        none;
+  border-radius: 8px;
+  color:         #000;
+  font-size:     0.88rem;
+  font-weight:   700;
+  letter-spacing: 0.02em;
+  padding:       0.8rem 1.25rem;
+  cursor:        pointer;
+  transition:    opacity 0.18s, transform 0.18s;
+  width:         100%;
+}
+.apModalSubmit:hover:not(:disabled) {
+  opacity:   0.88;
+  transform: translateY(-1px);
+}
+.apModalSubmit:disabled { opacity: 0.45; cursor: default; }
+.apModalSubmitLoading   { opacity: 0.65; cursor: wait;    }
+
+/* ── Success state ────────────────────────────────────────────────────── */
+.apModalSuccess {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  text-align:     center;
+  gap:            0.75rem;
+  padding:        0.5rem 0;
+  animation:      apModalIn 0.25s cubic-bezier(0.22,1,0.36,1);
+}
+
+.apSuccessIcon {
+  width:         64px;
+  height:        64px;
+  border-radius: 50%;
+  border:        1px solid;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.apSuccessLabel {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin:         0;
+}
+
+.apSuccessTitle {
+  font-size:   1.5rem;
+  font-weight: 700;
+  color:       #f0ede8;
+  margin:      0;
+  line-height: 1.15;
+}
+
+.apSuccessSub {
+  font-size:   0.82rem;
+  color:       rgba(255,255,255,0.45);
+  margin:      0;
+  line-height: 1.6;
+  max-width:   360px;
+}
+
+.apSuccessRef {
+  display:       flex;
+  flex-direction: column;
+  align-items:   center;
+  gap:           0.25rem;
+  background:    rgba(255,255,255,0.04);
+  border:        1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding:       0.75rem 1.5rem;
+  width:         100%;
+}
+
+.apSuccessRefLabel {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.3);
+}
+
+.apSuccessRefNo {
+  font-family: "DM Mono", monospace;
+  font-size:   1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.apSuccessDate {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  font-size:   0.75rem;
+  color:       rgba(255,255,255,0.35);
+}
+
+.apSuccessNote {
+  font-size:   0.72rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.6;
+  max-width:   380px;
+  margin:      0;
+  border-top:  1px solid rgba(255,255,255,0.05);
+  padding-top: 0.75rem;
+}
+
+.apSuccessClose {
+  background:    rgba(255,255,255,0.06);
+  border:        1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color:         rgba(255,255,255,0.6);
+  font-size:     0.82rem;
+  padding:       0.55rem 1.5rem;
+  cursor:        pointer;
+  transition:    background 0.18s, color 0.18s;
+  margin-top:    0.25rem;
+}
+.apSuccessClose:hover {
+  background: rgba(255,255,255,0.1);
+  color:      #fff;
+}

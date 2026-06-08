@@ -168,6 +168,18 @@ function IconMaintenance({ size = 22 }: { size?: number }) {
   );
 }
 
+// Calendar icon — used for /buyer/appointments and /admin/appointments
+function IconCalendar({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  );
+}
+
 /* ── NotifBadge — red dot with count on admin nav item ────────────────── */
 function NotifBadge({ count }: { count: number }) {
   if (count === 0) return null;
@@ -266,6 +278,7 @@ export default function Navbar() {
     { label: "Orders",            href: "/buyer/orders",           icon: <IconOrders />    },
     { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />      },
     { label: "Maintenance",       href: "/buyer/maintenance",      icon: <IconMaintenance /> },
+    { label: "Appointments",      href: "/buyer/appointments",     icon: <IconCalendar />    },
     { label: "Profile",           href: "/buyer/profile",          icon: <IconAbout />        },
     { label: "Sign Out",          href: "#",                       icon: <IconSignOut />,  signOut: true },
   ];
@@ -285,6 +298,7 @@ export default function Navbar() {
     { label: "Reviews",       href: "/admin/reviews",       icon: <IconAbout />    },
     { label: "Testimonials",  href: "/admin/testimonials",  icon: <IconSystems />  },
     { label: "Inquiries",     href: "/admin/inquiries",     icon: <IconPricing />  },
+    { label: "Appointments",  href: "/admin/appointments",  icon: <IconCalendar /> },
     { label: isDark ? "Light" : "Dark", href: "#", icon: isDark ? <IconSun /> : <IconMoon />, toggleTheme: true },
     { label: "Sign Out", href: "#",                icon: <IconSignOut />, signOut: true              },
   ];
