@@ -22,8 +22,9 @@ export default async function BuyerPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
-  const userName = session.user?.name ?? session.user?.email ?? "Buyer";
-  const userId   = (session.user as any).id as string;
+  const userName   = session.user?.name ?? session.user?.email ?? "Buyer";
+  const buyerEmail = session.user?.email ?? "";
+  const userId     = (session.user as any).id as string;
 
   const [systems, ownerships, latestProducts] = await Promise.all([
     prisma.system.findMany({
@@ -116,6 +117,8 @@ export default async function BuyerPage() {
       <DashboardHero userName={userName} />
       <BuyerDashboardClient
         items={items}
+        buyerEmail={buyerEmail}
+        buyerName={userName}
         ownedAssetIds={ownedAssetIds}
         ownedProducts={ownedProducts}
         latestCharacter={latestCharacter}

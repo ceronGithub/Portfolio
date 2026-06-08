@@ -23,10 +23,12 @@ interface SystemItem {
 }
 
 interface Props {
-  item:          SystemItem;
-  totalPrice:    number;
+  item:           SystemItem;
+  totalPrice:     number;
+  buyerEmail:     string;
+  buyerName:      string;
   selectedAddons: AddonSnapshot[];
-  onClose:       () => void;
+  onClose:        () => void;
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
@@ -187,7 +189,7 @@ function DatePicker({
 }
 
 /* ─── Main Modal ─────────────────────────────────────────────────── */
-export default function AppointmentModal({ item, totalPrice, selectedAddons, onClose }: Props) {
+export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerName, selectedAddons, onClose }: Props) {
   const [message,       setMessage]       = useState("");
   const [scheduledDate, setScheduledDate] = useState(toDateString(getTomorrow()));
   const [submitting,    setSubmitting]    = useState(false);
@@ -234,11 +236,12 @@ export default function AppointmentModal({ item, totalPrice, selectedAddons, onC
       const emailParams = {
         subject_line:  `Appointment Request: ${item.name} — ${fmt(totalPrice)}`,
         title:         item.name,
+        buyer_name:    buyerName,
         detail_1:      formatDisplayDate(scheduledDate),
         detail_2:      addonsText,
         quoted_price:  fmt(totalPrice),
         reference_no:  ref,
-        buyer_email:   "developerceron@gmail.com",
+        buyer_email:   buyerEmail,
         cc_email:      "developerceron@gmail.com",
       };
 

@@ -23,6 +23,8 @@ interface SystemItem {
 }
 interface Props {
   items: SystemItem[];
+  buyerEmail:        string;
+  buyerName:         string;
   wishlistIds?:      Set<string>;
   onToggleWishlist?: (id: string) => void;
 }
@@ -61,7 +63,7 @@ function buildDriveEmbedUrl(url: string): string {
 }
 
 /* ─── Demo Modal ─────────────────────────────────────────────────────── */
-function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void }) {
+function DemoModal({ item, buyerEmail, buyerName, onClose }: { item: SystemItem; buyerEmail: string; buyerName: string; onClose: () => void }) {
   const grouped = groupBy(item.addons, "category");
   const [selectedAddons,   setSelectedAddons]   = useState<Record<string, boolean>>({});
   const [appointmentOpen,  setAppointmentOpen]  = useState(false);
@@ -245,6 +247,8 @@ function DemoModal({ item, onClose }: { item: SystemItem; onClose: () => void })
         <AppointmentModal
           item={item}
           totalPrice={totalPrice}
+          buyerEmail={buyerEmail}
+          buyerName={buyerName}
           selectedAddons={selectedList.map(a => ({ id: a.id, label: a.label, price: a.price }))}
           onClose={() => setAppointmentOpen(false)}
         />
@@ -437,7 +441,7 @@ function SystemCard({
 }
 
 /* ─── Main ───────────────────────────────────────────────────────────── */
-export default function SystemsClient({ items, wishlistIds, onToggleWishlist }: Props) {
+export default function SystemsClient({ items, buyerEmail, buyerName, wishlistIds, onToggleWishlist }: Props) {
   const [modalItem,   setModalItem]   = useState<SystemItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging,  setIsDragging]  = useState(false);
@@ -565,7 +569,7 @@ export default function SystemsClient({ items, wishlistIds, onToggleWishlist }: 
 
       </section>
 
-      {modalItem && <DemoModal item={modalItem} onClose={() => setModalItem(null)} />}
+      {modalItem && <DemoModal item={modalItem} buyerEmail={buyerEmail} buyerName={buyerName} onClose={() => setModalItem(null)} />}
     </div>
   );
 }

@@ -58,6 +58,8 @@ interface LatestProduct {
 
 interface Props {
   items:           SystemItem[];
+  buyerEmail:      string;
+  buyerName:       string;
   ownedAssetIds:   string[];
   ownedProducts:   { id: string; name: string }[];
   latestCharacter: LatestProduct | null;
@@ -152,7 +154,7 @@ function buildWishlistEntries(
   return entries;
 }
 
-export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProducts, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
+export default function BuyerDashboardClient({ items, buyerEmail, buyerName, ownedAssetIds, ownedProducts, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
   const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
   const { cartIds, addToCart, removeFromCart, clearCart, hydrated: cartHydrated } = useCart();
@@ -296,6 +298,8 @@ export default function BuyerDashboardClient({ items, ownedAssetIds, ownedProduc
       {/* ── Systems ── */}
       <SystemsClient
         items={items}
+        buyerEmail={buyerEmail}
+        buyerName={buyerName}
         wishlistIds={wishlistIds}
         onToggleWishlist={toggleWishlist}
       />
