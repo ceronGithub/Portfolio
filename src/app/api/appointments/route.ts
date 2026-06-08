@@ -1,10 +1,7 @@
 export const dynamic = "force-dynamic";
 // POST /api/appointments — Creates an appointment ticket.
-// Validates session, builds referenceNo (APT-YYYY-XXXX), saves to DB.
-// No PayMongo — consultation only. EmailJS fires client-side after this succeeds.
-//
-// GET /api/appointments — Returns all appointments for the logged-in buyer,
-// including the full AppointmentComment thread (admin notes + buyer notes + replies).
+// GET  /api/appointments — Returns all appointments for the logged-in buyer, with full comment thread.
+// DELETE /api/appointments?id=xxx — Buyer deletes their own appointment (PENDING only).
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
@@ -32,18 +29,16 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { systemId, systemTitle, basePrice, selectedAddons, quotedPrice, scheduledDate, message } = body;
 
-  // ── Validation ────────────────────────────────────────────────────────
   if (!systemId || !systemTitle || typeof basePrice !== "number" || typeof quotedPrice !== "number")
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   if (!scheduledDate)
     return NextResponse.json({ error: "scheduledDate required" }, { status: 400 });
 
-  // Enforce minimum +1 day from today
-  const today     = new Date();
+  const today   = new Date();
   today.setHours(0, 0, 0, 0);
-  const minDate   = new Date(today);
+  const minDate = new Date(today);
   minDate.setDate(minDate.getDate() + 1);
-  const picked    = new Date(scheduledDate);
+  const picked  = new Date(scheduledDate);
   if (picked < minDate)
     return NextResponse.json({ error: "scheduledDate must be at least tomorrow" }, { status: 400 });
 
@@ -51,18 +46,9 @@ export async function POST(req: NextRequest) {
 
   const appointment = await prisma.appointment.create({
     data: {
-      userId,
-      buyerName,
-      buyerEmail,
-      systemId,
-      systemTitle,
-      basePrice,
-      selectedAddons: selectedAddons ?? [],
-      quotedPrice,
-      scheduledDate,
-      message:        message ?? null,
-      referenceNo,
-      status:         "PENDING",
+      userId, buyerName, buyerEmail, systemId, systemTitle, basePrice,
+      selectedAddons: selectedAddons ?? [], quotedPrice, scheduledDate,
+      message: message ?? null, referenceNo, status: "PENDING",
     },
   });
 
@@ -81,15 +67,10 @@ export async function GET(req: NextRequest) {
     where:   { userId },
     orderBy: { createdAt: "desc" },
     include: {
-      // Fetch all root-level comments (admin + buyer notes); replies nested under each
       comments: {
         where:   { parentId: null },
         orderBy: { createdAt: "asc" },
-        include: {
-          replies: {
-            orderBy: { createdAt: "asc" },
-          },
-        },
+        include: { replies: { orderBy: { createdAt: "asc" } } },
       },
     },
   });
@@ -108,19 +89,37 @@ export async function GET(req: NextRequest) {
       status:         a.status,
       createdAt:      a.createdAt.toISOString(),
       comments:       a.comments.map((c: any) => ({
-        id:        c.id,
-        role:      c.role,
-        content:   c.content,
-        parentId:  c.parentId,
+        id: c.id, role: c.role, content: c.content, parentId: c.parentId,
         createdAt: c.createdAt.toISOString(),
-        replies:   c.replies.map((r: any) => ({
-          id:        r.id,
-          role:      r.role,
-          content:   r.content,
-          parentId:  r.parentId,
+        replies: c.replies.map((r: any) => ({
+          id: r.id, role: r.role, content: r.content, parentId: r.parentId,
           createdAt: r.createdAt.toISOString(),
         })),
       })),
     })),
   });
+}
+
+// ── DELETE — buyer removes their own appointment ──────────────────────────
+// Only PENDING appointments can be deleted by the buyer.
+// Query param: ?id=appointmentId
+export async function DELETE(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const userId = (session.user as any).id as string;
+  const id     = req.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  // Verify ownership + must be PENDING
+  const appointment = await prisma.appointment.findFirst({ where: { id, userId } });
+  if (!appointment) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+  if (appointment.status !== "PENDING")
+    return NextResponse.json({ error: "Only PENDING appointments can be removed." }, { status: 403 });
+
+  // AppointmentComment rows cascade via FK
+  await prisma.appointment.delete({ where: { id } });
+
+  return NextResponse.json({ ok: true });
 }

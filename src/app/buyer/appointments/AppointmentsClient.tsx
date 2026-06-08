@@ -3,6 +3,7 @@
 // Auto-refreshes every 30s to pick up admin status updates.
 // Status timeline shows progress: Pending → Scheduled → Completed.
 // Comment thread: buyer can post multiple notes; buyer can reply to admin comments.
+// Buyer can delete PENDING appointments with a 2-step confirm.
 
 "use client";
 
@@ -311,8 +312,26 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
   const [appointments, setAppointments] = useState<AppointmentItem[]>(initial);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [deletingId,    setDeletingId]    = useState<string | null>(null);
 
-  // Merge partial changes into a single appointment's comment list
+  // ── Delete PENDING appointment ────────────────────────────────────────
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/appointments?id=${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error ?? "✕ Failed to remove appointment.", "error");
+        return;
+      }
+      setAppointments(prev => prev.filter(a => a.id !== id));
+      setConfirmDelete(null);
+      showToast("✓ Appointment removed.", "success");
+    } finally {
+      setDeletingId(null);
+    }
+  }
   function handleUpdateComments(id: string, updater: (prev: ApptComment[]) => ApptComment[]) {
     setAppointments(prev => prev.map(a =>
       a.id === id ? { ...a, comments: updater(a.comments) } : a
@@ -397,12 +416,39 @@ export default function AppointmentsClient({ appointments: initial }: Props) {
                   <p className="apBuyerCardSystem">{a.systemTitle}</p>
                   <p className="apBuyerCardRef">{a.referenceNo}</p>
                 </div>
-                <span
-                  className="apBuyerCardStatus"
-                  style={{ color: statusConfig.color, borderColor: statusConfig.color + "44", background: statusConfig.color + "12" }}
-                >
-                  {statusConfig.label}
-                </span>
+                <div className="apBuyerCardTopRight">
+                  <span
+                    className="apBuyerCardStatus"
+                    style={{ color: statusConfig.color, borderColor: statusConfig.color + "33", background: statusConfig.color + "0f" }}
+                  >
+                    {statusConfig.label}
+                  </span>
+                  {/* Delete — only available on PENDING appointments */}
+                  {a.status === "PENDING" && (
+                    confirmDelete === a.id ? (
+                      <div className="apBuyerDeleteConfirm">
+                        <span className="apBuyerDeleteConfirmText">Remove?</span>
+                        <button
+                          className="apBuyerDeleteConfirmYes"
+                          onClick={() => handleDelete(a.id)}
+                          disabled={deletingId === a.id}
+                        >
+                          {deletingId === a.id ? "…" : "Yes"}
+                        </button>
+                        <button className="apBuyerDeleteConfirmNo" onClick={() => setConfirmDelete(null)}>No</button>
+                      </div>
+                    ) : (
+                      <button className="apBuyerDeleteBtn" onClick={() => setConfirmDelete(a.id)} title="Remove appointment">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M10 11v6M14 11v6"/>
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
 
               {/* Status timeline */}
