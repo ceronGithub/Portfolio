@@ -103,9 +103,10 @@ function DatePicker({
   }
 
   function isDisabled(day: number): boolean {
-    const d = new Date(viewYear, viewMonth, day);
-    d.setHours(0, 0, 0, 0);
-    return d < tomorrow;
+    // Compare as YYYY-MM-DD strings to avoid any timezone offset issues
+    const cellIso = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const tomorrowIso = toDateString(tomorrow);
+    return cellIso < tomorrowIso;
   }
 
   function isSelected(day: number): boolean {
@@ -229,7 +230,7 @@ export default function AppointmentModal({ item, totalPrice, selectedAddons, onC
         ? selectedAddons.map(a => `  • ${a.label} — ${fmt(a.price)}`).join("\n")
         : "  None selected";
 
-      // 3. Build shared template params — same variables used by custom_request_template
+      // 3. Build shared template params — uses systemproducts template (template_ija0n6t)
       const emailParams = {
         subject_line:  `Appointment Request: ${item.name} — ${fmt(totalPrice)}`,
         title:         item.name,
@@ -238,9 +239,10 @@ export default function AppointmentModal({ item, totalPrice, selectedAddons, onC
         quoted_price:  fmt(totalPrice),
         reference_no:  ref,
         buyer_email:   "developerceron@gmail.com",
+        cc_email:      "developerceron@gmail.com",
       };
 
-      // 4. Single send to developer — fire and forget, DB is source of truth
+      // 4. Send to developer — CC developer as well for paper trail
       await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_CUSTOM_REQUEST_TEMPLATE_ID!,

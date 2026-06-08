@@ -1,5 +1,6 @@
 /* appointment-modal.css — AppointmentModal styles.
    Dark theme matching the shop aesthetic (#0a0a0a base, accent-driven highlights).
+   Font: Plus Jakarta Sans (matches visitor/shop site font).
    Custom date picker, form fields, success state. */
 
 /* ── Overlay ─────────────────────────────────────────────────────────── */
@@ -37,6 +38,7 @@
   animation:        apModalIn 0.22s cubic-bezier(0.22,1,0.36,1);
   scrollbar-width:  thin;
   scrollbar-color:  rgba(255,255,255,0.1) transparent;
+  font-family:      "Plus Jakarta Sans", sans-serif;
 }
 
 @keyframes apModalIn {
@@ -60,9 +62,9 @@
 
 .apModalTag {
   display:        inline-block;
-  font-family:    "DM Mono", monospace;
+  font-family:    "Plus Jakarta Sans", sans-serif;
   font-size:      0.6rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   padding:        0.2rem 0.55rem;
   border:         1px solid;
@@ -116,7 +118,7 @@
 }
 
 .apModalSummaryPrice {
-  font-family: "DM Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size:   0.9rem;
   font-weight: 600;
 }
@@ -134,7 +136,7 @@
   justify-content: space-between;
   font-size:       0.75rem;
   color:           rgba(255,255,255,0.5);
-  font-family:     "DM Mono", monospace;
+  font-family:     "Plus Jakarta Sans", sans-serif;
 }
 
 .apModalSummaryNote {
@@ -154,9 +156,9 @@
 }
 
 .apModalSectionLabel {
-  font-family:    "DM Mono", monospace;
+  font-family:    "Plus Jakarta Sans", sans-serif;
   font-size:      0.65rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color:          rgba(255,255,255,0.4);
   margin:         0;
@@ -222,7 +224,7 @@
 }
 
 .apDatePickerDayLabel {
-  font-family:    "DM Mono", monospace;
+  font-family:    "Plus Jakarta Sans", sans-serif;
   font-size:      0.6rem;
   text-align:     center;
   color:          rgba(255,255,255,0.25);
@@ -266,7 +268,7 @@
 }
 
 .apModalDateSelected {
-  font-family:    "DM Mono", monospace;
+  font-family:    "Plus Jakarta Sans", sans-serif;
   font-size:      0.7rem;
   margin:         0;
   padding-top:    0.25rem;
@@ -359,9 +361,9 @@
 }
 
 .apSuccessLabel {
-  font-family:    "DM Mono", monospace;
+  font-family:    "Plus Jakarta Sans", sans-serif;
   font-size:      0.65rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   margin:         0;
 }
@@ -395,15 +397,15 @@
 }
 
 .apSuccessRefLabel {
-  font-family:    "DM Mono", monospace;
+  font-family:    "Plus Jakarta Sans", sans-serif;
   font-size:      0.6rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color:          rgba(255,255,255,0.3);
 }
 
 .apSuccessRefNo {
-  font-family: "DM Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size:   1.1rem;
   font-weight: 700;
   letter-spacing: 0.08em;

@@ -14,7 +14,7 @@ import ToastStack    from "@/app/buyer/shared/ToastStack";
 
 const EMAILJS_SERVICE_ID  = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID  ?? "";
 const EMAILJS_PUBLIC_KEY  = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY  ?? "";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CUSTOM_REQUEST_TEMPLATE_ID ?? "";
+const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_INQUIRY_TEMPLATE_ID ?? "";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -285,20 +285,31 @@ export default function CustomRequestBuilder() {
           const deliveryTime = form.deliverySpeed
             ? ({ Standard: "4–6 weeks", Rush: "2–3 weeks", Urgent: "1–2 weeks" } as Record<string, string>)[form.deliverySpeed] ?? ""
             : "";
+          const messageBody = [
+            `Asset Type:    ${form.assetType}`,
+            `Delivery:      ${form.deliverySpeed ? `${form.deliverySpeed} · ${deliveryTime}` : "—"}`,
+            `Est. Quote:    ${estimate ? fmt(estimate) : "TBD"}`,
+            form.characterPack  ? `Character Pack: ${form.characterPack}`  : "",
+            form.weaponPack     ? `Weapon Pack:    ${form.weaponPack}`     : "",
+            form.interiorClip   ? `Interior Clip:  ${form.interiorClip}`   : "",
+            form.exteriorClip   ? `Exterior Clip:  ${form.exteriorClip}`   : "",
+            form.reference      ? `Reference:      ${form.reference}`      : "",
+            "",
+            `Description:`,
+            form.description ?? "—",
+          ].filter(l => l !== null && l !== undefined && !(l === "" && false)).join("\n");
+
           await emailjs.send(
             EMAILJS_SERVICE_ID,
             EMAILJS_TEMPLATE_ID,
             {
-              subject_line:  `Custom Request: ${form.assetType} — ${estimate ? fmt(estimate) : "TBD"}`,
-              title:         form.assetType,
-              detail_1:      form.deliverySpeed ? `${form.deliverySpeed} · ${deliveryTime}` : "—",
-              detail_2:      form.description ?? "—",
-              quoted_price:  estimate ? fmt(estimate) : "TBD",
-              reference_no:  "—",
-              buyer_email:   "developerceron@gmail.com",
+              from_name:  "Matthew Studio — Custom Request",
+              from_email: "developerceron@gmail.com",
+              subject:    `Custom Request: ${form.assetType} — ${estimate ? fmt(estimate) : "TBD"}`,
+              message:    messageBody,
             },
             EMAILJS_PUBLIC_KEY
-          ).catch(() => {}); // silent fail — DB record is the source of truth
+          ).catch(() => {}); // silent fail — DB record is source of truth
         }
         showToast("✓ Custom request submitted. I'll review and get back to you soon.", "success");
         setSubmitted(true);
