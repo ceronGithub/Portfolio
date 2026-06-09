@@ -24,7 +24,7 @@ export default function CheckoutSuccessPage() {
 
     async function tryFulfill(): Promise<boolean> {
       try {
-        const res = await fetch("/api/checkout/fulfill", {
+        const res = await fetch("/api/fulfill", {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify({ orderIds }),

@@ -94,9 +94,10 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    revalidatePath("/buyer/downloads",  "layout");
-    revalidatePath("/buyer/orders",     "layout");
-    revalidatePath("/admin/orders",     "layout");
+    revalidatePath("/buyer/downloads",       "layout");
+    revalidatePath("/buyer/orders",          "layout");
+    revalidatePath("/buyer/pending-payments", "layout");
+    revalidatePath("/admin/orders",          "layout");
 
     return NextResponse.json({ ok: true, unlocked: orders.length });
   }
