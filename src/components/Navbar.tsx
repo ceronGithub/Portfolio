@@ -249,12 +249,12 @@ export default function Navbar() {
   const notif       = useAdminNotifications(isAdmin && isOnAdmin);
   const buyerNotif  = useBuyerNotifications(!isAdmin && isOnBuyer);
 
-  /* ── Mobile hamburger — triggers at ≤700px ─────────────────────── */
-  const [isMobile, setIsMobile]       = useState(false);
+  /* ── Mobile hamburger — triggers at ≤1000px ─────────────────────── */
+  const [isMobile, setIsMobile]       = useState<boolean | null>(null);
   const [menuOpen, setMenuOpen]       = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 700);
+    const check = () => setIsMobile(window.innerWidth <= 1000);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -534,7 +534,10 @@ export default function Navbar() {
   /* ── Hide on auth pages (after all hooks) ───────────────────────── */
   if (hideOn.includes(pathname)) return null;
 
-  /* ── Mobile hamburger render (≤700px) ──────────────────────────── */
+  /* ── Mobile hamburger render (≤1000px) ─────────────────────────── */
+  // null = not yet measured (SSR / first paint) — render nothing to avoid flash
+  if (isMobile === null) return null;
+
   if (isMobile) {
     return (
       <>

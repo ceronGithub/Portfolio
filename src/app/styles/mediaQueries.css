@@ -68,26 +68,7 @@
   }
 }
 
-/* — Floating Pill Navbar: Tablet (768px) — */
-@media (max-width: 768px) {
-  .floatNavItem {
-    width: 62px;
-  }
-
-  .floatBubble {
-    width: 66px;
-    height: 64px;
-    border-radius: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  .floatNavItem.floatNavActive .floatNavIcon {
-    transform: translateY(-6px) scale(1.3);
-  }
-}
-
-/* ≤700px: pill is hidden — hamburger takes over (see Navbar.tsx isMobile) */
+/* ≤1000px: pill is hidden — hamburger takes over (see Navbar.tsx isMobile) */
 
 /* — Admin Shell: Tablet — */
 @media (max-width: 768px) {
