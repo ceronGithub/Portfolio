@@ -814,16 +814,28 @@ function SystemsCarousel() {
 }
 
 
-/* ─── Testimonials ──────────────────────────────────────────────────── */
+/* ─── Client Reviews (iPhone carousel) ─────────────────────────────── */
 
+// Testimonial is the display shape used by the iPhone carousel.
+// Built from the Review model returned by /api/reviews.
 type Testimonial = {
   id: string;
   name: string;
-  project: string;
-  rate: number;
+  project: string;  // mapped from assetId
+  rate: number;     // rating (1–5) × 20 → percentage for RateBar
   comment: string;
   initials: string;
   accent: string;
+};
+
+// Raw shape returned by /api/reviews GET
+type ReviewRow = {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  userName: string;
+  assetId: string;
 };
 
 const accentColors = ["#7dc9a0", "#7eb8d4", "#c4b5fd", "#f9a8d4", "#67e8f9", "#fcd34d", "#fdba74", "#86efac"];
@@ -832,8 +844,18 @@ function getInitials(name: string) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-// Testimonials are now DB-backed via /api/testimonials.
-// loadTestimonials and saveTestimonials removed — replaced by fetch calls.
+// Convert a ReviewRow from /api/reviews into the Testimonial display shape
+function reviewToTestimonial(r: ReviewRow, index: number): Testimonial {
+  return {
+    id:       r.id,
+    name:     r.userName,
+    project:  r.assetId,
+    rate:     r.rating * 20,          // 1–5 stars → 20–100%
+    comment:  r.comment ?? "",
+    initials: getInitials(r.userName),
+    accent:   accentColors[index % accentColors.length],
+  };
+}
 
 function RateBar({ rate, accent }: { rate: number; accent: string }) {
   return (
@@ -859,7 +881,7 @@ function PhoneCard({ t }: { t: Testimonial }) {
         </div>
       </div>
       <RateBar rate={t.rate} accent={t.accent} />
-      <p className="tPhoneCardComment">&ldquo;{t.comment}&rdquo;</p>
+      {t.comment && <p className="tPhoneCardComment">&ldquo;{t.comment}&rdquo;</p>}
     </div>
   );
 }
@@ -868,15 +890,14 @@ function TestimonialsSection() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [active, setActive] = useState(0);
 
-  // ── Fetch approved testimonials from DB on mount ──────────────────────────
+  // ── Fetch buyer reviews from /api/reviews and map to carousel display shape ──
   useEffect(() => {
-    fetch("/api/testimonials")
+    fetch("/api/reviews")
       .then(res => res.json())
-      .then((data: Testimonial[]) => {
+      .then((data: ReviewRow[]) => {
         if (Array.isArray(data) && data.length > 0) {
-          setTestimonials(data);
+          setTestimonials(data.map(reviewToTestimonial));
         }
-        // If DB has no approved testimonials yet, carousel stays empty — no fake seeds
       })
       .catch(() => {});
   }, []);
