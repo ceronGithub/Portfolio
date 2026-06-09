@@ -95,12 +95,20 @@
     padding: 0 6px;
     /* Allow pill to shrink if items still too wide */
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .floatPill::-webkit-scrollbar {
+    display: none;
   }
 
   .floatNavItem {
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
   }
 
   .floatNavIcon svg {
@@ -121,11 +129,12 @@
 }
 
 /* — Floating Pill Navbar: Small mobile (375px) — */
-/* Ultra-compact: 7 items × 42px + 12px padding = 306px */
+/* Ultra-compact: scrollable pill for 8–11 item navbars */
 @media (max-width: 375px) {
   .floatNavItem {
     width: 42px;
     height: 44px;
+    flex-shrink: 0;
   }
 
   .floatNavIcon svg {
@@ -142,6 +151,13 @@
   .floatPill {
     height: 52px;
     padding: 0 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .floatPill::-webkit-scrollbar {
+    display: none;
   }
 }
 

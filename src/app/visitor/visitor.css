@@ -1992,13 +1992,21 @@
     grid-template-columns: 1fr;
   }
   .vMagCard {
-    min-height: 380px;
+    min-height: 340px;
+  }
+  .vMagCardVideo {
+    min-height: 260px;
+    max-height: 320px;
   }
 }
 
 @media (max-width: 480px) {
   .vMagCard {
-    min-height: 320px;
+    min-height: 280px;
+  }
+  .vMagCardVideo {
+    min-height: 220px;
+    max-height: 260px;
   }
   .vMagCardInfo {
     padding: 1.5rem 1.25rem;

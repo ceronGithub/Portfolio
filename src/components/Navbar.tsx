@@ -490,6 +490,13 @@ export default function Navbar() {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [activeIndex, pathname, recalcBubble]);
 
+  // Scroll active item into view on mobile (pill is horizontally scrollable)
+  useEffect(() => {
+    const btn = itemRefs.current[activeIndex];
+    if (!btn) return;
+    btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeIndex]);
+
   // Recalc on window resize — always snap, no animation
   useEffect(() => {
     const onResize = () => recalcBubble(activeIndex, false);
