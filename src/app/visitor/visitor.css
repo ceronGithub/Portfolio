@@ -2569,6 +2569,24 @@
   justify-content: center;
 }
 
+/* Visitor-only read-only note — replaces the leave-a-review button */
+.tAddBuyerNote {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  margin: 0;
+}
+
+.tAddBuyerNoteLink {
+  color: rgba(200, 245, 66, 0.6);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.tAddBuyerNoteLink:hover {
+  color: #c8f542;
+}
+
 .tAddBtn {
   background: transparent;
   border: 0.5px solid rgba(255, 255, 255, 0.15);

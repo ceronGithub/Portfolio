@@ -9,7 +9,6 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
 import { ArchitectureIntroSection, ArchitectureVideosSection } from "./architecture";
 import { ModelingIntro, ModelingMagazine }                     from "./modeling";
-import { sanitize }       from "@/lib/utils";
 import { useTrackVisit }  from "./useTrackVisit";
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
@@ -868,9 +867,6 @@ function PhoneCard({ t }: { t: Testimonial }) {
 function TestimonialsSection() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [active, setActive] = useState(0);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", project: "", rate: 80, comment: "" });
-  const [submitted, setSubmitted] = useState(false);
 
   // ── Fetch approved testimonials from DB on mount ──────────────────────────
   useEffect(() => {
@@ -890,26 +886,6 @@ function TestimonialsSection() {
   const prev = () => setActive(a => ((a - 1) + total) % total);
   const next = () => setActive(a => (a + 1) % total);
 
-  // ── Submit testimonial to DB (pending admin approval) ──────────────────────
-  async function handleSubmit() {
-    if (!form.name.trim() || !form.project.trim() || !form.comment.trim()) return;
-    try {
-      await fetch("/api/testimonials", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          name:    form.name.trim(),
-          project: form.project.trim(),
-          rate:    form.rate,
-          comment: form.comment.trim(),
-        }),
-      });
-    } catch { /* fire and forget — submission is best-effort */ }
-    setForm({ name: "", project: "", rate: 80, comment: "" });
-    setSubmitted(true);
-    setTimeout(() => { setSubmitted(false); setShowForm(false); }, 2000);
-  }
-
   if (total === 0) return (
     <section className="vTestimonials" id="testimonials">
       <div className="vTestimonialsInner">
@@ -925,45 +901,11 @@ function TestimonialsSection() {
           </Reveal>
         </div>
 
-        {/* Add testimonial — always visible even when no approved testimonials yet */}
+        {/* Reviews are submitted by buyers from their dashboard — visitors view only */}
         <div className="tAddWrap">
-          {!showForm ? (
-            <button className="tAddBtn" onClick={() => setShowForm(true)}>
-              + Leave a review
-            </button>
-          ) : (
-            <div className="tForm">
-              <h3 className="tFormTitle">Share your experience</h3>
-              <div className="tFormGrid">
-                <div className="tFormField">
-                  <label className="tFormLabel">Your name</label>
-                  <input className="tFormInput" placeholder="e.g. Juan dela Cruz" value={form.name}
-                    onChange={e => setForm(f => ({ ...f, name: sanitize(e.target.value) }))} />
-                </div>
-                <div className="tFormField">
-                  <label className="tFormLabel">Project / System</label>
-                  <input className="tFormInput" placeholder="e.g. Inventory Control System" value={form.project}
-                    onChange={e => setForm(f => ({ ...f, project: sanitize(e.target.value) }))} />
-                </div>
-              </div>
-              <div className="tFormField">
-                <label className="tFormLabel">Satisfaction rate — <span style={{ color: accentColors[0] }}>{form.rate}%</span></label>
-                <input type="range" min={1} max={100} value={form.rate} className="tFormRange"
-                  onChange={e => setForm(f => ({ ...f, rate: Number(e.target.value) }))} />
-              </div>
-              <div className="tFormField">
-                <label className="tFormLabel">Your comment</label>
-                <textarea className="tFormTextarea" rows={3} placeholder="Tell us about your experience..."
-                  value={form.comment} onChange={e => setForm(f => ({ ...f, comment: sanitize(e.target.value) }))} />
-              </div>
-              <div className="tFormActions">
-                <button className="tFormCancel" onClick={() => setShowForm(false)}>Cancel</button>
-                <button className="tFormSubmit" onClick={handleSubmit}>
-                  {submitted ? "✓ Submitted!" : "Submit Review"}
-                </button>
-              </div>
-            </div>
-          )}
+          <p className="tAddBuyerNote">
+            <a href="/login" className="tAddBuyerNoteLink">Sign in as a buyer</a> to leave a review.
+          </p>
         </div>
       </div>
     </section>
@@ -1092,45 +1034,11 @@ function TestimonialsSection() {
           ))}
         </div>
 
-        {/* Add testimonial */}
+        {/* Reviews are submitted by buyers from their dashboard — visitors view only */}
         <div className="tAddWrap">
-          {!showForm ? (
-            <button className="tAddBtn" onClick={() => setShowForm(true)}>
-              + Leave a review
-            </button>
-          ) : (
-            <div className="tForm">
-              <h3 className="tFormTitle">Share your experience</h3>
-              <div className="tFormGrid">
-                <div className="tFormField">
-                  <label className="tFormLabel">Your name</label>
-                  <input className="tFormInput" placeholder="e.g. Juan dela Cruz" value={form.name}
-                    onChange={e => setForm(f => ({ ...f, name: sanitize(e.target.value) }))} />
-                </div>
-                <div className="tFormField">
-                  <label className="tFormLabel">Project / System</label>
-                  <input className="tFormInput" placeholder="e.g. Inventory Control System" value={form.project}
-                    onChange={e => setForm(f => ({ ...f, project: sanitize(e.target.value) }))} />
-                </div>
-              </div>
-              <div className="tFormField">
-                <label className="tFormLabel">Satisfaction rate — <span style={{ color: accentColors[testimonials.length % accentColors.length] }}>{form.rate}%</span></label>
-                <input type="range" min={1} max={100} value={form.rate} className="tFormRange"
-                  onChange={e => setForm(f => ({ ...f, rate: Number(e.target.value) }))} />
-              </div>
-              <div className="tFormField">
-                <label className="tFormLabel">Your comment</label>
-                <textarea className="tFormTextarea" rows={3} placeholder="Tell us about your experience..."
-                  value={form.comment} onChange={e => setForm(f => ({ ...f, comment: sanitize(e.target.value) }))} />
-              </div>
-              <div className="tFormActions">
-                <button className="tFormCancel" onClick={() => setShowForm(false)}>Cancel</button>
-                <button className="tFormSubmit" onClick={handleSubmit}>
-                  {submitted ? "✓ Submitted!" : "Submit Review"}
-                </button>
-              </div>
-            </div>
-          )}
+          <p className="tAddBuyerNote">
+            <a href="/login" className="tAddBuyerNoteLink">Sign in as a buyer</a> to leave a review.
+          </p>
         </div>
 
       </div>
