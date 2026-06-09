@@ -1881,6 +1881,9 @@
   margin-bottom: 3rem;
   position:      relative;
   z-index:       51;
+  background:    #080809;
+  border-radius: 24px;
+  padding:       1.25rem;
 }
 
 .vMagCard {
@@ -1990,6 +1993,7 @@
 @media (max-width: 900px) {
   .vMagCardRow {
     grid-template-columns: 1fr;
+    padding: 0.75rem;
   }
   .vMagCard {
     min-height: 340px;
@@ -2001,6 +2005,9 @@
 }
 
 @media (max-width: 480px) {
+  .vMagCardRow {
+    padding: 0.5rem;
+  }
   .vMagCard {
     min-height: 280px;
   }
