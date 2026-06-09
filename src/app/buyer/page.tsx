@@ -26,7 +26,7 @@ export default async function BuyerPage() {
   const buyerEmail = session.user?.email ?? "";
   const userId     = (session.user as any).id as string;
 
-  const [systems, ownerships, paidSystemOrders, latestProducts, paidProductOrders] = await Promise.all([
+  const [systems, ownerships, paidSystemOrders, latestProducts, paidProductOrders, completedSystemOrders] = await Promise.all([
     prisma.system.findMany({
       where:   { isActive: true },
       orderBy: { createdAt: "asc" },
@@ -51,6 +51,12 @@ export default async function BuyerPage() {
     prisma.order.findMany({
       where:  { userId, status: "PAID", productId: { not: null } },
       select: { productId: true },
+    }),
+    // For review eligibility — only systems with DELIVERED orders
+    // Buyer can only leave a review once the project is handed over.
+    prisma.order.findMany({
+      where:  { userId, status: "DELIVERED", systemId: { not: null } },
+      select: { systemId: true },
     }),
   ]);
 
@@ -128,6 +134,12 @@ export default async function BuyerPage() {
     .filter((s: any) => ownedSystemIds.has(s.id))
     .map((s: any) => ({ id: s.id, name: s.title }));
 
+  // Only systems with COMPLETED or DELIVERED orders are eligible for review
+  const completedSystemIds   = new Set(completedSystemOrders.map((o: any) => o.systemId as string));
+  const completedSystemList  = systems
+    .filter((s: any) => completedSystemIds.has(s.id))
+    .map((s: any) => ({ id: s.id, name: s.title }));
+
   // Group latest products by category for the Latest Drop sections
   const latestCharacter  = latestProducts.find((p: any) => p.category === "character") ?? null;
   const latestWeapon     = latestProducts.find((p: any) => p.category === "weapon")    ?? null;
@@ -143,7 +155,7 @@ export default async function BuyerPage() {
         buyerName={userName}
         ownedAssetIds={ownedAssetIds}
         ownedProducts={ownedProducts}
-        ownedSystems={ownedSystemList}
+        ownedSystems={completedSystemList}
         latestCharacter={latestCharacter}
         latestWeapon={latestWeapon}
         latestInterior={latestInterior}

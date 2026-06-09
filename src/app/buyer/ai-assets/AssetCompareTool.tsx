@@ -240,7 +240,7 @@ export default function AssetCompareTool({
           label:    p.name,
           category: p.category,
           videoSrc: p.previewVideoUrl ?? "",
-          price:    p.price,
+          price:    p.priceMeshOnly ?? p.priceStandard ?? p.priceFullPack ?? 0,
           polyNote: POLY_MAP[nameToSlug(p.name)] ?? "",
         });
 

@@ -362,7 +362,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "What tech stack do you use?",
-    answer: `Back-End:\n• PHP (Laravel)\n• C# (.NET MVC)\n• Node.js (Express)\n\nFront-End:\n• React / Next.js\n• JavaScript / TypeScript\n• Bootstrap, Sass, Tailwind CSS\n\nDatabases:\n• MySQL / MariaDB\n• PostgreSQL (Supabase, Neon)\n• Firebase / MongoDB Atlas\n\nAPIs & Integrations:\n• REST APIs, OAuth 2.0, Webhooks\n• PayMongo, Google APIs, OpenAI, Anthropic\n• Postman, JSON / XML\n\nAI & Automation:\n• Claude (Sonnet / Haiku), GPT-4, Gemini\n• LLM Prompt Engineering\n• AI Image & Video (ElevenLabs, Suno, Hailuo)\n\nDesktop:\n• C# Windows Forms (WFA)\n\nTools & Workflow:\n• Git / GitHub / GitLab\n• VS Code, Visual Studio\n• Asana, Laragon, XAMPP`,
+    answer: `Back-End:\n• PHP (Laravel)\n• C# (.NET MVC)\n• Node.js (Express)\n\nFront-End:\n• React + Three.js\n• React + Next.js (AI Webflow Assisted)\n• JavaScript / TypeScript\n• Bootstrap, Sass, Tailwind CSS\n\nDatabases:\n• MySQL / MariaDB\n• PostgreSQL (Supabase, Neon)\n• Firebase / MongoDB Atlas\n\nAPIs & Integrations:\n• REST APIs, OAuth 2.0, Webhooks\n• PayMongo, Google APIs, OpenAI, Anthropic\n• Postman, JSON / XML\n\nAI & Automation:\n• Claude (Sonnet / Haiku), GPT-4, Gemini\n• LLM Prompt Engineering\n• AI Image & Video (ElevenLabs, Suno, Hailuo)\n\nDesktop:\n• C# Windows Forms (WFA)\n\nTools & Workflow:\n• Git / GitHub / GitLab\n• VS Code, Visual Studio\n• Asana, Laragon, XAMPP`,
   },
   {
     question: "How do I get started?",

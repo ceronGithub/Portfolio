@@ -336,7 +336,7 @@ export default function ReviewSection({ ownedProducts, ownedSystems }: Props) {
         ) : (
           <div className="rvFormLocked">
             <span className="rvFormLockedIcon">🔒</span>
-            <p>Purchase a product or system to leave a review.</p>
+            <p>Reviews unlock once your project is completed or a digital asset is purchased.</p>
           </div>
         )}
 
