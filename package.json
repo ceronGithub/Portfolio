@@ -2,6 +2,9 @@
   "name": "matthew-studio",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "tsx --env-file=.env prisma/seedSystems.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && prisma migrate deploy && next build",
