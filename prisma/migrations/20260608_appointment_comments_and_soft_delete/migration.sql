@@ -1,17 +1,15 @@
 -- Migration: Appointment soft-delete + bi-directional comment thread
--- Task 2: Buyer can remove PENDING appointments (soft-delete via deletedAt)
--- Task 3: Bi-directional threaded comments on appointments
 
 -- ── Soft-delete column ────────────────────────────────────────────────────
-ALTER TABLE "Appointment" ADD COLUMN "deletedAt" TIMESTAMP(3);
+ALTER TABLE "Appointment" ADD COLUMN IF NOT EXISTS "deletedAt" TIMESTAMP(3);
 
 -- ── AppointmentComment thread ─────────────────────────────────────────────
-CREATE TABLE "AppointmentComment" (
+CREATE TABLE IF NOT EXISTS "AppointmentComment" (
   "id"            TEXT NOT NULL PRIMARY KEY,
   "appointmentId" TEXT NOT NULL,
-  "role"          TEXT NOT NULL,        -- 'ADMIN' | 'BUYER'
+  "role"          TEXT NOT NULL,
   "content"       TEXT NOT NULL,
-  "parentId"      TEXT,                 -- null = root; non-null = reply
+  "parentId"      TEXT,
   "createdAt"     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "AppointmentComment_appointmentId_fkey"
     FOREIGN KEY ("appointmentId") REFERENCES "Appointment"("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -19,4 +17,4 @@ CREATE TABLE "AppointmentComment" (
     FOREIGN KEY ("parentId") REFERENCES "AppointmentComment"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX "AppointmentComment_appointmentId_idx" ON "AppointmentComment"("appointmentId");
+CREATE INDEX IF NOT EXISTS "AppointmentComment_appointmentId_idx" ON "AppointmentComment"("appointmentId");
