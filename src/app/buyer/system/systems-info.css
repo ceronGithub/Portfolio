@@ -394,6 +394,30 @@
   margin: 0;
 }
 
+/* Formatted (multi-line) FAQ answer — tech stack bulleted list */
+.sysInfoFaqAnswerFormatted {
+  display:        flex;
+  flex-direction: column;
+  gap:            0;
+}
+
+.sysInfoFaqSubhead {
+  font-family:    'Syne', sans-serif;
+  font-size:      0.72rem;
+  font-weight:    700;
+  color:          rgba(255,255,255,0.55);
+  letter-spacing: 0.04em;
+  margin:         0.75rem 0 0.15rem !important;
+}
+
+.sysInfoFaqBullet {
+  font-size:   0.8rem;
+  color:       rgba(255,255,255,0.32) !important;
+  padding-left: 0.5rem;
+  margin:      0.1rem 0 0 !important;
+  line-height: 1.6;
+}
+
 /* ════════════════════════════════════════════════════
    SPRINT TRACK  (mirrors visitor .vSprint*)
 ════════════════════════════════════════════════════ */

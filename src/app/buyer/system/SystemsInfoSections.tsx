@@ -56,13 +56,24 @@ const SPRINT_STEPS = [
     bullets: ["Sprint-by-sprint delivery plan", "Milestone & deadline mapping", "Database & system architecture", "UI/UX wireframe overview"],
   },
   {
-    num: "04", title: "Client Approval",
+    num: "04", title: "Requirements & Account Setup",
+    icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M8 21h8M12 17v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    desc: "Before development begins, the client provides the necessary accounts and credentials the developer will need throughout the project.",
+    bullets: [
+      "Client creates a dedicated project email — developer will have access during the build",
+      "Developer creates a private GitHub repo to store all project code",
+      "Paid APIs & third-party integrations (e.g. PayMongo, SMS, Google APIs) must be provided by the buyer",
+      "Domain registration is shouldered by the buyer — deployment to that domain is included in the package",
+    ],
+  },
+  {
+    num: "05", title: "Client Approval",
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     desc: "The full roadmap is sent to you for review. You approve every feature, every sprint, every milestone. We don't start building until you sign off.",
     bullets: ["Roadmap sent via email & VC", "Client reviews all features", "Revisions handled before coding", "Formal sign-off required"],
   },
   {
-    num: "05", title: "Sprint Execution & Delivery",
+    num: "06", title: "Sprint Execution & Delivery",
     icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     desc: "Once approved, we execute — sprint by sprint, with regular progress updates. Each sprint delivers a working slice. You see real progress every week.",
     bullets: ["Agile sprint cycles (1–2 weeks)", "Weekly progress updates", "Testing per sprint before next", "Final UAT & deployment"],
@@ -156,13 +167,6 @@ function CompareSection() {
               ))}
             </tbody>
           </table>
-          {/* Price row */}
-          <div className="sysInfoCmpPriceRow">
-            <span className="sysInfoCmpPriceFeature">Typical price range</span>
-            <span className="sysInfoCmpPriceUs">₱2,999 – ₱15,000</span>
-            <span className="sysInfoCmpPriceOther">₱50,000 – ₱300,000+</span>
-            <span className="sysInfoCmpPriceOther">₱500 – ₱5,000 + monthly fees</span>
-          </div>
         </div>
       </div>
     </section>
@@ -181,7 +185,13 @@ const COST_FACTORS = [
     icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="18" cy="18" r="2.5" stroke="currentColor" strokeWidth="1.5"/><path d="M8.5 11L15.5 7M8.5 13L15.5 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     title: "Third-Party Integrations",
     body:
-      "Connecting to payment gateways, SMS APIs, email services, government systems, or external databases adds scoping and testing time.",
+      "Paid API credentials and third-party service accounts must be provided by the buyer. The developer will be granted temporary access during development only — once the project is complete, developer access is revoked and full ownership is returned to the buyer.",
+  },
+  {
+    icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    title: "Domain & Monthly Subscriptions",
+    body:
+      "Domain registration, renewal fees, and any monthly subscription costs (hosting, SaaS tools, cloud services) are shouldered by the buyer. Deployment to the buyer's domain is included in the package — the cost of the domain itself is not.",
   },
   {
     icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
@@ -352,8 +362,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "What tech stack do you use?",
-    answer:
-      "Back-End: PHP (Laravel), C# (.NET MVC). Front-End: JavaScript, Bootstrap, Sass, Flexbox, CSS Grid. Databases: MySQL, MariaDB, Supabase, Firebase, MongoDB Atlas. APIs & Integration: REST APIs, Postman, OAuth 2.0, JSON/XML, third-party integrations (Gmail, Anthropic, OpenAI, Google APIs), webhooks. AI & Automation: Claude Sonnet/Haiku, OpenAI GPT-4, Google Gemini, LLM Prompt Engineering, AI Video & Image (ElevenLabs, Suno, Hailuo AI, Whisk). Desktop: C# Windows Forms (WFA). Google Workspace: Calendar, Sheets, Drive, Docs. Tools: Git, VS Code, Visual Studio, Postman, Asana, GitLab, MS Office. Dev Environment: Laragon, XAMPP. AI-assisted workflow: React + Node.js, React + Three.js, React + Next.js.",
+    answer: `Back-End:\n• PHP (Laravel)\n• C# (.NET MVC)\n• Node.js (Express)\n\nFront-End:\n• React / Next.js\n• JavaScript / TypeScript\n• Bootstrap, Sass, Tailwind CSS\n\nDatabases:\n• MySQL / MariaDB\n• PostgreSQL (Supabase, Neon)\n• Firebase / MongoDB Atlas\n\nAPIs & Integrations:\n• REST APIs, OAuth 2.0, Webhooks\n• PayMongo, Google APIs, OpenAI, Anthropic\n• Postman, JSON / XML\n\nAI & Automation:\n• Claude (Sonnet / Haiku), GPT-4, Gemini\n• LLM Prompt Engineering\n• AI Image & Video (ElevenLabs, Suno, Hailuo)\n\nDesktop:\n• C# Windows Forms (WFA)\n\nTools & Workflow:\n• Git / GitHub / GitLab\n• VS Code, Visual Studio\n• Asana, Laragon, XAMPP`,
   },
   {
     question: "How do I get started?",
@@ -396,7 +405,19 @@ function FaqSection() {
                 </button>
                 {isOpen && (
                   <div className="sysInfoFaqAnswer">
-                    <p>{item.answer}</p>
+                    {item.answer.includes("\n") ? (
+                      <div className="sysInfoFaqAnswerFormatted">
+                        {item.answer.split("\n").map((line, li) => {
+                          if (line === "") return <br key={li} />;
+                          if (line.startsWith("•")) return (
+                            <p key={li} className="sysInfoFaqBullet">{line}</p>
+                          );
+                          return <p key={li} className="sysInfoFaqSubhead">{line}</p>;
+                        })}
+                      </div>
+                    ) : (
+                      <p>{item.answer}</p>
+                    )}
                   </div>
                 )}
               </div>

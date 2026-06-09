@@ -216,7 +216,6 @@ export default function NewAssetSection({ latestCharacter, latestWeapon, ownedAs
               </div>
               <div className="newAssetCardMeta">
                 <p className="newAssetCardCat">Character</p>
-                <p className="newAssetCardName">{latestChar.name}</p>
                 <p className="newAssetCardPrice">₱{latestChar.priceMeshOnly.toLocaleString()}</p>
                 {ownedAssetIds.has(latestChar.id) ? (
                   <span className="newAssetCardOwnedBadge">✓ Owned</span>
@@ -267,7 +266,6 @@ export default function NewAssetSection({ latestCharacter, latestWeapon, ownedAs
               </div>
               <div className="newAssetCardMeta">
                 <p className="newAssetCardCat">Weapon</p>
-                <p className="newAssetCardName">{latestWeapon.name}</p>
                 <p className="newAssetCardPrice">₱{latestWeapon.priceMeshOnly.toLocaleString()}</p>
                 {ownedAssetIds.has(latestWeapon.id) ? (
                   <span className="newAssetCardOwnedBadge">✓ Owned</span>

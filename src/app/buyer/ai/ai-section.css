@@ -11,33 +11,35 @@
 }
 
 .aiSectionHeader {
-  text-align: center;
+  text-align: left;
   margin-bottom: 3rem;
   padding: 0 1.5rem;
 }
 
 .aiSectionLabel {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #555;
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  color:          rgba(255,255,255,0.2);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.75rem;
+  letter-spacing: 0.3em;
+  margin-bottom:  0.5rem;
 }
 
 .aiSectionTitle {
-  font-size:      clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight:    600;
-  font-style:     italic;
-  font-family:    var(--font-cormorant), Georgia, serif;
+  font-family:    'Syne', sans-serif;
+  font-size:      clamp(2rem, 4vw, 3.2rem);
+  font-weight:    800;
   color:          #fff;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.04em;
+  line-height:    1.1;
   margin-bottom:  0.75rem;
+  font-style:     normal;
 }
 
 .aiSectionSub {
-  font-size: 0.95rem;
-  color: #555;
+  font-family: 'DM Mono', monospace;
+  font-size:   0.68rem;
+  color:       rgba(255,255,255,0.22);
 }
 
 /* ================================================

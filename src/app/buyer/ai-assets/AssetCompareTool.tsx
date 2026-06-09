@@ -106,14 +106,18 @@ function CompareSlot({
           {characters.length > 0 && (
             <optgroup label="Characters">
               {characters.map(a => (
-                <option key={a.id} value={a.id}>{a.label}</option>
+                <option key={a.id} value={a.id}>
+                  {ownedAssetIds.has(a.id) ? `✓ ${a.label}` : a.label}
+                </option>
               ))}
             </optgroup>
           )}
           {weapons.length > 0 && (
             <optgroup label="Weapons">
               {weapons.map(a => (
-                <option key={a.id} value={a.id}>{a.label}</option>
+                <option key={a.id} value={a.id}>
+                  {ownedAssetIds.has(a.id) ? `✓ ${a.label}` : a.label}
+                </option>
               ))}
             </optgroup>
           )}

@@ -51,30 +51,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "comment max 500 chars" }, { status: 400 });
   }
 
-  // Verify buyer owns this product. assetId is either:
-  // - A cuid (for new products)
-  // - A slug like "orc-01" (for legacy assets)
-  // Try to find product by slug first, fallback to cuid.
+  // Verify buyer owns this product OR system.
+  // assetId is either a product cuid/slug OR a system cuid.
+  // Try product first, then fall back to system order check.
   const product = await prisma.product.findFirst({
     where: {
       OR: [
-        { slug: assetId },      // Try slug match first
-        { id: assetId },        // Fallback to cuid
+        { slug: assetId },
+        { id: assetId },
       ],
     },
     select: { id: true, slug: true },
   });
 
-  if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
-  }
-
-  // Check ownership using product cuid
-  const ownership = await prisma.ownership.findUnique({
-    where: { userId_productId: { userId, productId: product.id } },
-  });
-  if (!ownership) {
-    return NextResponse.json({ error: "You don't own this product" }, { status: 403 });
+  if (product) {
+    // Product — check Ownership table
+    const ownership = await prisma.ownership.findUnique({
+      where: { userId_productId: { userId, productId: product.id } },
+    });
+    if (!ownership) {
+      // Also check via paid Order
+      const paidOrder = await prisma.order.findFirst({
+        where: { userId, productId: product.id, status: "PAID" },
+      });
+      if (!paidOrder) {
+        return NextResponse.json({ error: "You don't own this product" }, { status: 403 });
+      }
+    }
+  } else {
+    // Not a product — check if it's an owned system via paid Order
+    const paidSystemOrder = await prisma.order.findFirst({
+      where: { userId, systemId: assetId, status: "PAID" },
+    });
+    if (!paidSystemOrder) {
+      return NextResponse.json({ error: "You don't own this item" }, { status: 403 });
+    }
   }
 
   // Check if already reviewed using the original assetId
