@@ -681,6 +681,27 @@ export default function AssetBuySection({
             </div>
           )}
 
+          {/* Owned assets summary — shown when buyer already owns items in this category */}
+          {(() => {
+            const ownedInCategory = [...characterAssets, ...weaponAssets].filter(a => ownedAssetIds.has(a.id));
+            if (ownedInCategory.length === 0) return null;
+            return (
+              <div className="assetOwnedBanner">
+                <span className="assetOwnedBannerIcon">✓</span>
+                <span className="assetOwnedBannerText">
+                  You already own {ownedInCategory.length} asset{ownedInCategory.length !== 1 ? "s" : ""}
+                  {" "}({ownedInCategory.map(a => a.label).join(", ")})
+                </span>
+                <button
+                  className="assetOwnedBannerLink"
+                  onClick={() => setBrowseOpen(true)}
+                >
+                  Browse more →
+                </button>
+              </div>
+            );
+          })()}
+
           {/* CTA bar */}
           <div className="assetBuyCTABar">
             {cartEntries.length >= 2 && (

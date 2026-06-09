@@ -26,7 +26,7 @@ export default async function BuyerPage() {
   const buyerEmail = session.user?.email ?? "";
   const userId     = (session.user as any).id as string;
 
-  const [systems, ownerships, latestProducts] = await Promise.all([
+  const [systems, ownerships, paidSystemOrders, latestProducts] = await Promise.all([
     prisma.system.findMany({
       where:   { isActive: true },
       orderBy: { createdAt: "asc" },
@@ -36,6 +36,11 @@ export default async function BuyerPage() {
       where:  { userId },
       select: { productId: true },
     }),
+    // Fetch paid system orders — systemId is stored on Order, not Ownership
+    prisma.order.findMany({
+      where:  { userId, status: "PAID", systemId: { not: null } },
+      select: { systemId: true },
+    }),
     prisma.product.findMany({
       where:   { isLatest: true, isActive: true },
       orderBy: { createdAt: "desc" },
@@ -44,6 +49,8 @@ export default async function BuyerPage() {
   ]);
 
   const ownedProductIds = ownerships.map((o: any) => o.productId);
+  // Build a set of owned system IDs from paid orders
+  const ownedSystemIds  = new Set(paidSystemOrders.map((o: any) => o.systemId as string));
 
   // Fetch product names separately — safe even if Product table is empty
   const ownedProductRecords = ownedProductIds.length > 0
@@ -89,7 +96,7 @@ export default async function BuyerPage() {
     features:      s.features ?? [],
     demoVideoUrl:  s.demoVideoUrl ?? demoVideoFallbacks[s.tag] ?? null,
     bgVideoUrl:    s.bgVideoUrl   ?? bgVideoFallbacks[s.tag]   ?? null,
-    owned:         ownedSet.has(s.id),
+    owned:         ownedSystemIds.has(s.id),  // checks paid system orders, not product ownership
     // displayStatus — safe fallback to "visible" if migration hasn't run yet
     displayStatus: (s as any).displayStatus ?? "visible",
     addons:        s.addons.map((a: any) => ({

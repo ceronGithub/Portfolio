@@ -647,3 +647,20 @@
 
 .archModalSkeletonLineLong  { width: 55%; }
 .archModalSkeletonLineShort { width: 30%; }
+/* ── Owned Assets Banner ─────────────────────────────────────────────────── */
+/* Reused from asset-buy-section — same class names for consistency           */
+.assetOwnedBanner {
+  display:         flex;
+  align-items:     center;
+  gap:             0.75rem;
+  padding:         0.7rem 1.25rem;
+  background:      rgba(34, 197, 94, 0.08);
+  border:          1px solid rgba(34, 197, 94, 0.22);
+  border-radius:   10px;
+  margin-bottom:   1rem;
+  flex-wrap:       wrap;
+}
+.assetOwnedBannerIcon  { font-size: 1rem; color: #22c55e; flex-shrink: 0; }
+.assetOwnedBannerText  { font-size: 0.82rem; color: rgba(255,255,255,0.65); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.assetOwnedBannerLink  { background: none; border: none; color: #22c55e; font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 0; flex-shrink: 0; transition: opacity 0.15s; }
+.assetOwnedBannerLink:hover { opacity: 0.75; }

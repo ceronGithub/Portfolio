@@ -234,6 +234,27 @@ export default function ArchitectureBuySection({
             </div>
           </div>
 
+          {/* Owned assets summary — shown when buyer already owns architecture assets */}
+          {(() => {
+            const ownedInArch = [...interiorAssets, ...exteriorAssets].filter(a => ownedAssetIds.has(a.id));
+            if (ownedInArch.length === 0) return null;
+            return (
+              <div className="assetOwnedBanner">
+                <span className="assetOwnedBannerIcon">✓</span>
+                <span className="assetOwnedBannerText">
+                  You already own {ownedInArch.length} asset{ownedInArch.length !== 1 ? "s" : ""}
+                  {" "}({ownedInArch.map(a => a.label).join(", ")})
+                </span>
+                <button
+                  className="assetOwnedBannerLink"
+                  onClick={() => setBrowseOpen(true)}
+                >
+                  Browse more →
+                </button>
+              </div>
+            );
+          })()}
+
           {/* Cart pills */}
           {cartItems.length > 0 && (
             <div className="archCartPills">

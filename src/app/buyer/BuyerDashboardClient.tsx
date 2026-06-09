@@ -274,6 +274,7 @@ export default function BuyerDashboardClient({ items, buyerEmail, buyerName, own
       {/* ── Architecture Studio ── */}
       <ArchitectureAssetsIntro />
       <ArchitectureBuySection
+        ownedAssetIds={ownedSet}
         wishlistIds={wishlistIds}
         onAddToWishlist={toggleWishlist}
         onAddToCart={addToCart}
