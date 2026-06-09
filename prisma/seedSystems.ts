@@ -691,6 +691,47 @@ async function main() {
   }
 
   console.log("Done. All systems and addons seeded.");
+
+  // ── Seed DesignTiers for external systems (those with public websites) ──
+  // Internal systems (HR, Warehouse, Inventory, Finance) have no website — skip.
+  // Four tiers: Static (base, included), Dynamic, Modern, AI-Powered.
+  const externalSystemTags = ["Construction", "Education", "E-commerce", "CRM", "Booking", "Restaurant"];
+
+  const designTierTemplates = [
+    { name: "Static",     slug: "static",     tagline: "Clean, fast, content-focused website. No animations.",          priceModifier: 0,     sortOrder: 0 },
+    { name: "Dynamic",    slug: "dynamic",    tagline: "Smooth page transitions, scroll effects & interactive sections.", priceModifier: 8000,  sortOrder: 1 },
+    { name: "Modern",     slug: "modern",     tagline: "Premium UI with GSAP animations, parallax & motion design.",     priceModifier: 15000, sortOrder: 2 },
+    { name: "AI-Powered", slug: "ai-powered", tagline: "AI chat widget, smart content blocks & personalized UX.",        priceModifier: 25000, sortOrder: 3 },
+  ];
+
+  for (const tag of externalSystemTags) {
+    const system = await prisma.system.findUnique({ where: { tag } });
+    if (!system) { console.log(`⚠ System not found: ${tag}`); continue; }
+
+    for (const tier of designTierTemplates) {
+      await prisma.$executeRaw`
+        INSERT INTO "DesignTier" (id, "systemId", name, slug, tagline, "priceModifier", "sortOrder", "createdAt")
+        VALUES (
+          gen_random_uuid(),
+          ${system.id},
+          ${tier.name},
+          ${tier.slug},
+          ${tier.tagline},
+          ${tier.priceModifier},
+          ${tier.sortOrder},
+          NOW()
+        )
+        ON CONFLICT ("systemId", slug) DO UPDATE
+          SET name = EXCLUDED.name,
+              tagline = EXCLUDED.tagline,
+              "priceModifier" = EXCLUDED."priceModifier",
+              "sortOrder" = EXCLUDED."sortOrder"
+      `;
+    }
+    console.log("✓ DesignTiers seeded: " + tag);
+  }
+
+  console.log("Done. All design tiers seeded.");
 }
 
 main()
