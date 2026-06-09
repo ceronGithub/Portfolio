@@ -268,7 +268,7 @@ export default function BuyerDashboardClient({ items, buyerEmail, buyerName, own
         openToId={browseOpenId}
         onOpenToIdConsumed={() => setBrowseOpenId(null)}
       />
-      <NewAssetSection latestCharacter={latestCharacter} latestWeapon={latestWeapon} />
+      <NewAssetSection latestCharacter={latestCharacter} latestWeapon={latestWeapon} ownedAssetIds={ownedSet} />
       <AssetCompareTool ownedAssetIds={ownedSet} />
 
       {/* ── Architecture Studio ── */}
@@ -281,7 +281,7 @@ export default function BuyerDashboardClient({ items, buyerEmail, buyerName, own
         onRegisterAddToCart={fn => { addAllToCartArchRef.current = fn; }}
         onTrackView={handleTrackView}
       />
-      <NewArchitectureSection latestInterior={latestInterior} latestExterior={latestExterior} />
+      <NewArchitectureSection latestInterior={latestInterior} latestExterior={latestExterior} ownedAssetIds={ownedSet} />
 
       {/* ── Reviews ── */}
       <ReviewSection

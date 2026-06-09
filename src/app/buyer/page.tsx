@@ -26,7 +26,7 @@ export default async function BuyerPage() {
   const buyerEmail = session.user?.email ?? "";
   const userId     = (session.user as any).id as string;
 
-  const [systems, ownerships, paidSystemOrders, latestProducts] = await Promise.all([
+  const [systems, ownerships, paidSystemOrders, latestProducts, paidProductOrders] = await Promise.all([
     prisma.system.findMany({
       where:   { isActive: true },
       orderBy: { createdAt: "asc" },
@@ -46,9 +46,18 @@ export default async function BuyerPage() {
       orderBy: { createdAt: "desc" },
       select:  { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, category: true, packageTier: true, previewVideoUrl: true, facePngUrl: true },
     }),
+    // Also check PAID product orders — covers cases where webhook hasn't fired yet
+    // and Ownership row hasn't been created. Merge with Ownership for full owned set.
+    prisma.order.findMany({
+      where:  { userId, status: "PAID", productId: { not: null } },
+      select: { productId: true },
+    }),
   ]);
 
-  const ownedProductIds = ownerships.map((o: any) => o.productId);
+  const ownedFromOwnership = ownerships.map((o: any) => o.productId);
+  const ownedFromOrders    = paidProductOrders.map((o: any) => o.productId as string);
+  // Deduplicate: union of Ownership table + PAID product orders
+  const ownedProductIds = [...new Set([...ownedFromOwnership, ...ownedFromOrders])];
   // Build a set of owned system IDs from paid orders
   const ownedSystemIds  = new Set(paidSystemOrders.map((o: any) => o.systemId as string));
 

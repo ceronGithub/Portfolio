@@ -38,6 +38,7 @@ function getIncludes(tier: string, category: string): string[] {
 interface Props {
   latestCharacter: LatestProduct | null;
   latestWeapon:    LatestProduct | null;
+  ownedAssetIds?:  Set<string>;
 }
 
 // ── FireParticle — single particle in the fire canvas animation ───────
@@ -74,7 +75,7 @@ function normalizeFacePngUrl(url: string | null): string | null {
   return url;
 }
 
-export default function NewAssetSection({ latestCharacter, latestWeapon }: Props) {
+export default function NewAssetSection({ latestCharacter, latestWeapon, ownedAssetIds = new Set() }: Props) {
   const sectionRef    = useRef<HTMLDivElement>(null);
   const fireCanvasRef = useRef<HTMLCanvasElement>(null);
   const fireRafRef    = useRef<number>(0);
@@ -217,9 +218,13 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
                 <p className="newAssetCardCat">Character</p>
                 <p className="newAssetCardName">{latestChar.name}</p>
                 <p className="newAssetCardPrice">₱{latestChar.priceMeshOnly.toLocaleString()}</p>
-                <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn" target="_blank" rel="noopener noreferrer">
-                  Buy Now →
-                </a>
+                {ownedAssetIds.has(latestChar.id) ? (
+                  <span className="newAssetCardOwnedBadge">✓ Owned</span>
+                ) : (
+                  <a href={`/checkout/${latestChar.id}`} className="newAssetCardBuyBtn" target="_blank" rel="noopener noreferrer">
+                    Buy Now →
+                  </a>
+                )}
                 <ul className="newAssetCardIncludes">
                   {getIncludes(latestChar.packageTier, latestChar.category).map(item => (
                     <li key={item}><span className="newAssetIncludeCheck">✓</span>{item}</li>
@@ -264,9 +269,13 @@ export default function NewAssetSection({ latestCharacter, latestWeapon }: Props
                 <p className="newAssetCardCat">Weapon</p>
                 <p className="newAssetCardName">{latestWeapon.name}</p>
                 <p className="newAssetCardPrice">₱{latestWeapon.priceMeshOnly.toLocaleString()}</p>
-                <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn" target="_blank" rel="noopener noreferrer">
-                  Buy Now →
-                </a>
+                {ownedAssetIds.has(latestWeapon.id) ? (
+                  <span className="newAssetCardOwnedBadge">✓ Owned</span>
+                ) : (
+                  <a href={`/checkout/${latestWeapon.id}`} className="newAssetCardBuyBtn" target="_blank" rel="noopener noreferrer">
+                    Buy Now →
+                  </a>
+                )}
                 <ul className="newAssetCardIncludes">
                   {getIncludes(latestWeapon.packageTier, latestWeapon.category).map(item => (
                     <li key={item}><span className="newAssetIncludeCheck">✓</span>{item}</li>

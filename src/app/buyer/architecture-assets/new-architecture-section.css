@@ -116,6 +116,21 @@
 }
 .newArchBuyBtn:hover { opacity: 0.85; }
 
+/* Owned badge — replaces Buy Now when buyer already owns this asset */
+.newArchOwnedBadge {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           0.3rem;
+  padding:       0.4rem 1rem;
+  background:    rgba(34, 197, 94, 0.12);
+  color:         #22c55e;
+  border:        1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 6px;
+  font-size:     0.75rem;
+  font-weight:   700;
+  width:         fit-content;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .newArchSection  { justify-content: flex-start; }

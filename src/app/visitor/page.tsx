@@ -910,7 +910,64 @@ function TestimonialsSection() {
     setTimeout(() => { setSubmitted(false); setShowForm(false); }, 2000);
   }
 
-  if (total === 0) return null;
+  if (total === 0) return (
+    <section className="vTestimonials" id="testimonials">
+      <div className="vTestimonialsInner">
+        <div className="vSprintHeader">
+          <Reveal>
+            <span className="vSectionEyebrow">Client Reviews</span>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <h2 className="vSectionTitle">What clients say.</h2>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="vSectionSub">Real feedback from real clients. Every system. Every sprint.</p>
+          </Reveal>
+        </div>
+
+        {/* Add testimonial — always visible even when no approved testimonials yet */}
+        <div className="tAddWrap">
+          {!showForm ? (
+            <button className="tAddBtn" onClick={() => setShowForm(true)}>
+              + Leave a review
+            </button>
+          ) : (
+            <div className="tForm">
+              <h3 className="tFormTitle">Share your experience</h3>
+              <div className="tFormGrid">
+                <div className="tFormField">
+                  <label className="tFormLabel">Your name</label>
+                  <input className="tFormInput" placeholder="e.g. Juan dela Cruz" value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: sanitize(e.target.value) }))} />
+                </div>
+                <div className="tFormField">
+                  <label className="tFormLabel">Project / System</label>
+                  <input className="tFormInput" placeholder="e.g. Inventory Control System" value={form.project}
+                    onChange={e => setForm(f => ({ ...f, project: sanitize(e.target.value) }))} />
+                </div>
+              </div>
+              <div className="tFormField">
+                <label className="tFormLabel">Satisfaction rate — <span style={{ color: accentColors[0] }}>{form.rate}%</span></label>
+                <input type="range" min={1} max={100} value={form.rate} className="tFormRange"
+                  onChange={e => setForm(f => ({ ...f, rate: Number(e.target.value) }))} />
+              </div>
+              <div className="tFormField">
+                <label className="tFormLabel">Your comment</label>
+                <textarea className="tFormTextarea" rows={3} placeholder="Tell us about your experience..."
+                  value={form.comment} onChange={e => setForm(f => ({ ...f, comment: sanitize(e.target.value) }))} />
+              </div>
+              <div className="tFormActions">
+                <button className="tFormCancel" onClick={() => setShowForm(false)}>Cancel</button>
+                <button className="tFormSubmit" onClick={handleSubmit}>
+                  {submitted ? "✓ Submitted!" : "Submit Review"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 
   const activeT = testimonials[active];
 

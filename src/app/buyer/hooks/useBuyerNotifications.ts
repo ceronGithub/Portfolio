@@ -12,12 +12,13 @@ export interface BuyerNotificationCounts {
   confirmedVc:          number;
   resolvedBugs:         number;
   scheduledAppointments: number;
+  downloadsCount:       number;
 }
 
 const ZERO: BuyerNotificationCounts = {
   total: 0, pendingOrders: 0, activeOrders: 0,
   recentDelivered: 0, confirmedVc: 0, resolvedBugs: 0,
-  scheduledAppointments: 0,
+  scheduledAppointments: 0, downloadsCount: 0,
 };
 
 const POLL_MS = 30_000;
@@ -39,6 +40,7 @@ export function useBuyerNotifications(isBuyer: boolean): BuyerNotificationCounts
         confirmedVc:           data.confirmedVc           ?? 0,
         resolvedBugs:          data.resolvedBugs          ?? 0,
         scheduledAppointments: data.scheduledAppointments ?? 0,
+        downloadsCount:        data.downloadsCount        ?? 0,
       });
     } catch { /* silent */ }
   }

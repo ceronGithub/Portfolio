@@ -21,7 +21,7 @@ export async function GET() {
   const userId       = (session.user as any).id as string;
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs, scheduledAppointments] =
+  const [pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs, scheduledAppointments, downloadsCount] =
     await Promise.all([
       prisma.order.count({ where: { userId, status: "PENDING" } }),
       prisma.order.count({ where: { userId, status: { in: ["PAID", "IN_DEVELOPMENT", "IN_TESTING"] } } }),
@@ -36,9 +36,11 @@ export async function GET() {
       prisma.appointment.count({
         where: { userId, status: "SCHEDULED" },
       }),
+      // Total owned downloadable assets for this buyer
+      prisma.ownership.count({ where: { userId } }),
     ]);
 
   const total = pendingOrders + activeOrders + recentDelivered + confirmedVc + resolvedBugs + scheduledAppointments;
 
-  return NextResponse.json({ total, pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs, scheduledAppointments });
+  return NextResponse.json({ total, pendingOrders, activeOrders, recentDelivered, confirmedVc, resolvedBugs, scheduledAppointments, downloadsCount });
 }

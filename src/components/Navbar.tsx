@@ -274,7 +274,12 @@ export default function Navbar() {
         <NotifBadge count={buyerNotif.total} />
       </span>
     )},
-    { label: "Downloads",         href: "/buyer/downloads",        icon: <IconDownload />  },
+    { label: "Downloads",         href: "/buyer/downloads",        icon: (
+      <span style={{ position: "relative", display: "inline-flex" }}>
+        <IconDownload />
+        <NotifBadge count={buyerNotif.downloadsCount} />
+      </span>
+    )},
     { label: "Orders",            href: "/buyer/orders",           icon: <IconOrders />    },
     { label: "Pending Payments",  href: "/buyer/pending-payments", icon: <IconPending />      },
     { label: "Maintenance",       href: "/buyer/maintenance",      icon: <IconMaintenance /> },
@@ -310,7 +315,7 @@ export default function Navbar() {
 
   // Visitor page logged in: full nav with Dash shortcut
   const visitorLoggedIn: NavItem[] = [
-    { label: "Home",    href: "/",            icon: <IconHome />    },
+    { label: "Home",    href: "/visitor",      icon: <IconHome />    },
     { label: "Systems", href: "/#systems",    icon: <IconSystems />, isHash: true, hashId: "systems"    },
     { label: "Pricing", href: "/#pricing",    icon: <IconPricing />, isHash: true, hashId: "pricing"    },
     { label: "About",   href: "/#about",      icon: <IconAbout />,   isHash: true, hashId: "about"      },
@@ -325,7 +330,7 @@ export default function Navbar() {
 
   // Visitor page guest: full nav with Sign In + Sign Up
   const visitorGuest: NavItem[] = [
-    { label: "Home",    href: "/",            icon: <IconHome />    },
+    { label: "Home",    href: "/visitor",      icon: <IconHome />    },
     { label: "Systems", href: "/#systems",    icon: <IconSystems />, isHash: true, hashId: "systems"    },
     { label: "Pricing", href: "/#pricing",    icon: <IconPricing />, isHash: true, hashId: "pricing"    },
     { label: "About",   href: "/#about",      icon: <IconAbout />,   isHash: true, hashId: "about"      },
@@ -347,7 +352,6 @@ export default function Navbar() {
   const [clickedIndex, setClickedIndex]   = useState<number | null>(null);
   const [scrollIndex,  setScrollIndex]    = useState<number | null>(null);
   const clickLockRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasScrolledRef = useRef(false); // only trust observer after real scroll
 
   /* ── Scroll-based section detection ─────────────────────────────── */
   // Stable hashId list avoids stale-closure bugs — does not depend on the items array.
@@ -356,9 +360,6 @@ export default function Navbar() {
   useEffect(() => {
     if (!isOnVisitor) return;
 
-    const onFirstScroll = () => { hasScrolledRef.current = true; };
-    window.addEventListener("scroll", onFirstScroll, { once: true });
-
     // Build hashId → nav index map from the current items snapshot
     const hashIndexMap = new Map<string, number>();
     VISITOR_HASH_IDS.forEach(hashId => {
@@ -366,12 +367,12 @@ export default function Navbar() {
       if (idx !== -1) hashIndexMap.set(hashId, idx);
     });
 
-    if (hashIndexMap.size === 0) return () => window.removeEventListener("scroll", onFirstScroll);
+    if (hashIndexMap.size === 0) return;
 
     const intersecting = new Set<string>();
 
     const updateActive = () => {
-      if (!hasScrolledRef.current) return;
+      // At very top of page with nothing intersecting → clear scrollIndex (Home active)
       if (intersecting.size === 0) {
         if (window.scrollY < 200) setScrollIndex(null);
         return;
@@ -396,20 +397,18 @@ export default function Navbar() {
           else                      { intersecting.delete(hashId); }
           updateActive();
         },
-        { rootMargin: "-40% 0px -20% 0px", threshold: 0 }
+        { rootMargin: "-30% 0px -30% 0px", threshold: 0 }
       );
       obs.observe(el);
       observers.push(obs);
     });
 
     const onScrollTop = () => {
-      if (!hasScrolledRef.current) return;
       if (window.scrollY < 200 && intersecting.size === 0) setScrollIndex(null);
     };
     window.addEventListener("scroll", onScrollTop, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", onFirstScroll);
       window.removeEventListener("scroll", onScrollTop);
       observers.forEach(o => o.disconnect());
     };
@@ -449,7 +448,6 @@ export default function Navbar() {
       prevPathnameForReset.current = pathname;
       setClickedIndex(null);
       setScrollIndex(null);
-      hasScrolledRef.current = false;
     }
   }, [pathname]);
 
@@ -518,15 +516,15 @@ export default function Navbar() {
     // Lock bubble to clicked item immediately — before any scroll happens
     setClickedIndex(index);
 
-    // Release click lock after 1s so scroll tracking resumes
+    // Release click lock after 400ms so scroll observer takes over quickly
     if (clickLockRef.current) clearTimeout(clickLockRef.current);
-    clickLockRef.current = setTimeout(() => setClickedIndex(null), 1000);
+    clickLockRef.current = setTimeout(() => setClickedIndex(null), 400);
 
     if (item.isHash && item.hashId) {
       if (isOnVisitor) {
         document.getElementById(item.hashId)?.scrollIntoView({ behavior: "smooth" });
       } else {
-        router.push(item.href);
+        router.push("/visitor" + item.href.replace("/", ""));
       }
       return;
     }
