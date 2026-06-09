@@ -397,40 +397,47 @@ export default function Navbar() {
           if (window.scrollY < 200) setScrollIndex(null);
           return;
         }
-        // Pick first match in stable page-flow order
+        // Pick last visible section in page-flow order
+        // — last-match means the deepest section on screen wins, which is what the user is reading
+        let activeHashId: string | null = null;
         for (const hashId of VISITOR_HASH_IDS) {
           if (intersecting.has(hashId) && hashIndexMap.has(hashId)) {
-            setScrollIndex(hashIndexMap.get(hashId)!);
-            return;
+            activeHashId = hashId;
           }
+        }
+        if (activeHashId) {
+          setScrollIndex(hashIndexMap.get(activeHashId)!);
         }
       }, 40);
     };
 
     const observers: IntersectionObserver[] = [];
 
-    // Seed intersecting from current scroll position on mount
-    // (IO only fires on change — if already scrolled, we need to check manually)
-    VISITOR_HASH_IDS.forEach(hashId => {
-      const el = document.getElementById(hashId);
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const topThreshold  = vh * 0.15;
-      const botThreshold  = vh * 0.85;
-      if (rect.top < botThreshold && rect.bottom > topThreshold) {
-        intersecting.add(hashId);
-      }
-    });
-    // Apply seeded state immediately (no debounce needed on mount)
-    if (intersecting.size > 0) {
+    // Seed intersecting from current scroll position on mount/navigation.
+    // Deferred one tick so DOM is fully painted after navigation (e.g. return from /login).
+    const seedTimer = setTimeout(() => {
+      VISITOR_HASH_IDS.forEach(hashId => {
+        const el = document.getElementById(hashId);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const topThreshold  = vh * 0.15;
+        const botThreshold  = vh * 0.85;
+        if (rect.top < botThreshold && rect.bottom > topThreshold) {
+          intersecting.add(hashId);
+        }
+      });
+      // Apply seeded state — last visible section in page-flow order wins
+      let activeHashId: string | null = null;
       for (const hashId of VISITOR_HASH_IDS) {
         if (intersecting.has(hashId) && hashIndexMap.has(hashId)) {
-          setScrollIndex(hashIndexMap.get(hashId)!);
-          break;
+          activeHashId = hashId;
         }
       }
-    }
+      if (activeHashId) {
+        setScrollIndex(hashIndexMap.get(activeHashId)!);
+      }
+    }, 0);
 
     VISITOR_HASH_IDS.forEach(hashId => {
       const el = document.getElementById(hashId);
@@ -441,9 +448,8 @@ export default function Navbar() {
           else                      { intersecting.delete(hashId); }
           updateActive();
         },
-        // Wider margin so adjacent sections overlap in detection window
-        // — eliminates the dead zone that causes the bubble to snap to Home
-        { rootMargin: "-15% 0px -15% 0px", threshold: 0 }
+        // Tighter margin — sections exit the set promptly when scrolled past
+        { rootMargin: "-25% 0px -25% 0px", threshold: 0 }
       );
       obs.observe(el);
       observers.push(obs);
@@ -455,6 +461,7 @@ export default function Navbar() {
     window.addEventListener("scroll", onScrollTop, { passive: true });
 
     return () => {
+      clearTimeout(seedTimer);
       if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current);
       window.removeEventListener("scroll", onScrollTop);
       observers.forEach(o => o.disconnect());
@@ -545,13 +552,15 @@ export default function Navbar() {
     btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [activeIndex]);
 
-  // Recalc on window resize — always snap, no animation
+  // Always-current activeIndex ref so the resize handler never reads a stale value
+  const activeIndexRef = useRef(activeIndex);
+  useEffect(() => { activeIndexRef.current = activeIndex; }, [activeIndex]);
+
+  // Recalc bubble position on window resize — always snap, no animation
   useEffect(() => {
-    const onResize = () => recalcBubble(activeIndex, false);
+    const onResize = () => recalcBubble(activeIndexRef.current, false);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  // activeIndex intentionally not in deps — resize handler uses latest via closure ref
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recalcBubble]);
 
   /* ── Hide on auth pages (after all hooks) ───────────────────────── */
@@ -565,11 +574,15 @@ export default function Navbar() {
     }
     if (item.toggleTheme) { toggleAdminTheme(); return; }
 
-    // Lock active to clicked item
-    setClickedIndex(index);
-    if (clickLockRef.current) clearTimeout(clickLockRef.current);
-    // Longer lock for hamburger — gives route change time to settle
-    clickLockRef.current = setTimeout(() => setClickedIndex(null), 1200);
+    // Don't lock clickedIndex for routes where the navbar hides (e.g. /login, /register)
+    // — avoids the bubble freezing on Sign In / Sign Up before navigation completes
+    const destinationHidden = hideOn.includes(item.href);
+    if (!destinationHidden) {
+      setClickedIndex(index);
+      if (clickLockRef.current) clearTimeout(clickLockRef.current);
+      // Longer lock for hamburger — gives route change time to settle
+      clickLockRef.current = setTimeout(() => setClickedIndex(null), 1200);
+    }
 
     if (item.isHash && item.hashId) {
       if (isOnVisitor) {
