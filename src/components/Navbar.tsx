@@ -224,7 +224,8 @@ function calcLeft(
   if (!btn || !pill) return null;
   const pillRect = pill.getBoundingClientRect();
   const btnRect  = btn.getBoundingClientRect();
-  return btnRect.left - pillRect.left + btnRect.width / 2 - BUBBLE_W / 2;
+  // Add scrollLeft so the bubble position is correct even when pill is scrolled
+  return btnRect.left - pillRect.left + pill.scrollLeft + btnRect.width / 2 - BUBBLE_W / 2;
 }
 
 /* ── Component ──────────────────────────────────────────────────────── */
@@ -247,6 +248,20 @@ export default function Navbar() {
   // Notification counts — polled every 30 s when on admin or buyer pages
   const notif       = useAdminNotifications(isAdmin && isOnAdmin);
   const buyerNotif  = useBuyerNotifications(!isAdmin && isOnBuyer);
+
+  /* ── Mobile hamburger — triggers at ≤700px ─────────────────────── */
+  const [isMobile, setIsMobile]       = useState(false);
+  const [menuOpen, setMenuOpen]       = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 700);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Close menu on route change
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
 
   /* ── Admin theme state — synced with localStorage "adminTheme" ──── */
   const [isDark, setIsDark] = useState(false);
@@ -356,6 +371,7 @@ export default function Navbar() {
   /* ── Scroll-based section detection ─────────────────────────────── */
   // Stable hashId list avoids stale-closure bugs — does not depend on the items array.
   const VISITOR_HASH_IDS = ["systems", "pricing", "about", "ai-visuals"];
+  const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!isOnVisitor) return;
@@ -372,18 +388,23 @@ export default function Navbar() {
     const intersecting = new Set<string>();
 
     const updateActive = () => {
-      // At very top of page with nothing intersecting → clear scrollIndex (Home active)
-      if (intersecting.size === 0) {
-        if (window.scrollY < 200) setScrollIndex(null);
-        return;
-      }
-      // Pick first match in stable VISITOR_HASH_IDS order
-      for (const hashId of VISITOR_HASH_IDS) {
-        if (intersecting.has(hashId) && hashIndexMap.has(hashId)) {
-          setScrollIndex(hashIndexMap.get(hashId)!);
+      // Debounce: wait for rapid-fire IO callbacks to settle before moving bubble
+      if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current);
+      scrollDebounceRef.current = setTimeout(() => {
+        if (intersecting.size === 0) {
+          // Nothing visible — only reset to Home if actually near top
+          // Mid-page dead zones: keep last scrollIndex, don't jump
+          if (window.scrollY < 200) setScrollIndex(null);
           return;
         }
-      }
+        // Pick first match in stable page-flow order
+        for (const hashId of VISITOR_HASH_IDS) {
+          if (intersecting.has(hashId) && hashIndexMap.has(hashId)) {
+            setScrollIndex(hashIndexMap.get(hashId)!);
+            return;
+          }
+        }
+      }, 40);
     };
 
     const observers: IntersectionObserver[] = [];
@@ -397,7 +418,9 @@ export default function Navbar() {
           else                      { intersecting.delete(hashId); }
           updateActive();
         },
-        { rootMargin: "-30% 0px -30% 0px", threshold: 0 }
+        // Wider margin so adjacent sections overlap in detection window
+        // — eliminates the dead zone that causes the bubble to snap to Home
+        { rootMargin: "-15% 0px -15% 0px", threshold: 0 }
       );
       obs.observe(el);
       observers.push(obs);
@@ -409,6 +432,7 @@ export default function Navbar() {
     window.addEventListener("scroll", onScrollTop, { passive: true });
 
     return () => {
+      if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current);
       window.removeEventListener("scroll", onScrollTop);
       observers.forEach(o => o.disconnect());
     };
@@ -475,12 +499,13 @@ export default function Navbar() {
   useEffect(() => {
     // Page changed = navigated to a new route
     const pageChanged = prevPathname.current !== null && prevPathname.current !== pathname;
-    // Animate only on same-page activeIndex changes (hash scroll / click)
-    // Never animate on page navigation — always snap
+    // Only animate on deliberate click — scroll detection snaps instantly
+    // This prevents the twitching caused by rapid IO callbacks fighting each other
     const shouldAnimate = !pageChanged
       && prevActiveIndex.current !== null
       && prevActiveIndex.current !== activeIndex
-      && activeIndex !== -1;
+      && activeIndex !== -1
+      && clickedIndex !== null; // only animate if user clicked
 
     prevActiveIndex.current = activeIndex;
     prevPathname.current    = pathname;
@@ -488,7 +513,7 @@ export default function Navbar() {
     recalcBubble(activeIndex, shouldAnimate);
 
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [activeIndex, pathname, recalcBubble]);
+  }, [activeIndex, pathname, recalcBubble, clickedIndex]);
 
   // Scroll active item into view on mobile (pill is horizontally scrollable)
   useEffect(() => {
@@ -508,6 +533,48 @@ export default function Navbar() {
 
   /* ── Hide on auth pages (after all hooks) ───────────────────────── */
   if (hideOn.includes(pathname)) return null;
+
+  /* ── Mobile hamburger render (≤700px) ──────────────────────────── */
+  if (isMobile) {
+    return (
+      <>
+        {/* Hamburger trigger button */}
+        <button
+          className="hamburgerBtn"
+          onClick={() => setMenuOpen(v => !v)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+        >
+          <span className={`hamburgerBar ${menuOpen ? "hamburgerBarOpen1" : ""}`} />
+          <span className={`hamburgerBar ${menuOpen ? "hamburgerBarOpen2" : ""}`} />
+          <span className={`hamburgerBar ${menuOpen ? "hamburgerBarOpen3" : ""}`} />
+        </button>
+
+        {/* Backdrop */}
+        {menuOpen && (
+          <div className="hamburgerBackdrop" onClick={() => setMenuOpen(false)} />
+        )}
+
+        {/* Slide-up menu */}
+        <nav className={`hamburgerMenu ${menuOpen ? "hamburgerMenuOpen" : ""}`}>
+          <div className="hamburgerMenuInner">
+            {items.map((item, i) => {
+              const isActive = i === activeIndex;
+              return (
+                <button
+                  key={item.label}
+                  className={`hamburgerMenuItem ${isActive ? "hamburgerMenuItemActive" : ""}`}
+                  onClick={() => { handleClick(item, i); setMenuOpen(false); }}
+                >
+                  <span className="hamburgerMenuIcon">{item.icon}</span>
+                  <span className="hamburgerMenuLabel">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      </>
+    );
+  }
 
   /* ── Click handler ──────────────────────────────────────────────── */
   function handleClick(item: NavItem, index: number) {
