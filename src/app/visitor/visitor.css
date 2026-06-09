@@ -2587,6 +2587,25 @@
   color: #c8f542;
 }
 
+/* Empty state shown inside the phone screen when no testimonials yet */
+.tPhoneEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 100%;
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.tPhoneEmptyText {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1.5;
+  margin: 0;
+}
+
 .tAddBtn {
   background: transparent;
   border: 0.5px solid rgba(255, 255, 255, 0.15);

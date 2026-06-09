@@ -886,38 +886,12 @@ function TestimonialsSection() {
   const prev = () => setActive(a => ((a - 1) + total) % total);
   const next = () => setActive(a => (a + 1) % total);
 
-  if (total === 0) return (
-    <section className="vTestimonials" id="testimonials">
-      <div className="vTestimonialsInner">
-        <div className="vSprintHeader">
-          <Reveal>
-            <span className="vSectionEyebrow">Client Reviews</span>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <h2 className="vSectionTitle">What clients say.</h2>
-          </Reveal>
-          <Reveal delay={0.2}>
-            <p className="vSectionSub">Real feedback from real clients. Every system. Every sprint.</p>
-          </Reveal>
-        </div>
-
-        {/* Reviews are submitted by buyers from their dashboard — visitors view only */}
-        <div className="tAddWrap">
-          <p className="tAddBuyerNote">
-            <a href="/login" className="tAddBuyerNoteLink">Sign in as a buyer</a> to leave a review.
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-
-  const activeT = testimonials[active];
-
-  // Compute indices for side cards
-  const leftIdx = ((active - 1) + total) % total;
-  const rightIdx = (active + 1) % total;
-  const leftT = testimonials[leftIdx];
-  const rightT = testimonials[rightIdx];
+  // Always render the iPhone carousel — show empty state inside the phone screen when no testimonials yet
+  const activeT  = total > 0 ? testimonials[active] : null;
+  const leftIdx  = total > 1 ? ((active - 1) + total) % total : -1;
+  const rightIdx = total > 1 ? (active + 1) % total : -1;
+  const leftT    = leftIdx  >= 0 ? testimonials[leftIdx]  : null;
+  const rightT   = rightIdx >= 0 ? testimonials[rightIdx] : null;
 
   return (
     <section className="vTestimonials" id="testimonials">
@@ -935,11 +909,11 @@ function TestimonialsSection() {
           </Reveal>
         </div>
 
-        {/* ── Carousel ── */}
+        {/* ── Carousel ── always visible; empty state shown inside phone screen */}
         <div className="tCarouselWrap">
 
-          {/* Left side card */}
-          {total > 1 && (
+          {/* Left side card — only when multiple testimonials */}
+          {leftT && (
             <button className="tSideCard tSideCardLeft" onClick={prev} aria-label="Previous">
               <div className="tSideCardInner">
                 <div className="tSideAvatar" style={{ background: leftT.accent + "33", color: leftT.accent }}>
@@ -954,13 +928,13 @@ function TestimonialsSection() {
             </button>
           )}
 
-          {/* Phone mockup */}
+          {/* Phone mockup — always rendered */}
           <div className="tPhoneMockup">
-            {/* Phone shell */}
             <div className="tPhoneShell">
               <div className="tPhoneNotch" />
               <div className="tPhoneScreen">
-                {/* Instagram-style header */}
+
+                {/* Instagram-style story bubbles — only when testimonials exist */}
                 <div className="tPhoneInstaHeader">
                   <div className="tPhoneInstaStories">
                     {testimonials.map((t, i) => (
@@ -977,22 +951,33 @@ function TestimonialsSection() {
                     ))}
                   </div>
                 </div>
-                {/* Active card inside screen */}
+
+                {/* Active card — or empty state placeholder */}
                 <div className="tPhoneScreenContent">
-                  <motion.div
-                    key={activeT.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <PhoneCard t={activeT} />
-                  </motion.div>
+                  {activeT ? (
+                    <motion.div
+                      key={activeT.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <PhoneCard t={activeT} />
+                    </motion.div>
+                  ) : (
+                    <div className="tPhoneEmptyState">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <p className="tPhoneEmptyText">Reviews from verified buyers<br/>will appear here.</p>
+                    </div>
+                  )}
                 </div>
+
                 {/* Instagram-style actions */}
                 <div className="tPhoneInstaActions">
                   <div className="tPhoneInstaAction">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    <span>{activeT.rate}</span>
+                    <span>{activeT?.rate ?? "—"}</span>
                   </div>
                   <div className="tPhoneInstaAction">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -1006,8 +991,8 @@ function TestimonialsSection() {
             </div>
           </div>
 
-          {/* Right side card */}
-          {total > 1 && (
+          {/* Right side card — only when multiple testimonials */}
+          {rightT && (
             <button className="tSideCard tSideCardRight" onClick={next} aria-label="Next">
               <div className="tSideCardInner">
                 <div className="tSideAvatar" style={{ background: rightT.accent + "33", color: rightT.accent }}>
@@ -1024,15 +1009,17 @@ function TestimonialsSection() {
 
         </div>
 
-        {/* Dot indicators */}
-        <div className="tDots">
-          {testimonials.map((_, i) => (
-            <button key={i} className={"tDot" + (i === active ? " tDotActive" : "")}
-              style={i === active ? { background: activeT.accent } : {}}
-              onClick={() => setActive(i)} aria-label={`Go to testimonial ${i + 1}`}
-            />
-          ))}
-        </div>
+        {/* Dot indicators — only when testimonials exist */}
+        {total > 0 && activeT && (
+          <div className="tDots">
+            {testimonials.map((_, i) => (
+              <button key={i} className={"tDot" + (i === active ? " tDotActive" : "")}
+                style={i === active ? { background: activeT.accent } : {}}
+                onClick={() => setActive(i)} aria-label={`Go to testimonial ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Reviews are submitted by buyers from their dashboard — visitors view only */}
         <div className="tAddWrap">
