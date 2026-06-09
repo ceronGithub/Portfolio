@@ -164,7 +164,12 @@ const POLL_INTERVAL_MS = 4000;
 
 export default function PendingPaymentsClient({ orders = [] }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
-  const [loadingId,    setLoadingId]    = useState<string | null>(null);
+  const [loadingId,  setLoadingId]  = useState<string | null>(null);
+
+  // Defers time-dependent values (linkAvailabilityLabel, daysSince, isLinkExpired)
+  // to the client only — prevents SSR/client hydration mismatch caused by Date.now() drift.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
 
   // Live status map — keyed by orderId, starts from server-rendered prop values
   const [statusMap, setStatusMap] = useState<Record<string, string>>(() => {
@@ -299,10 +304,11 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
           <div className="pendingPaymentsList">
             {orders.map(order => {
               const isPaid    = (statusMap[order.id] ?? order.status) === "PAID";
-              const days      = daysSince(order.createdAt);
-              const isOverdue = days > 7;
-              const expired   = isLinkExpired(order.createdAt);
-              const linkLabel = linkAvailabilityLabel(order.createdAt);
+              // Time-dependent values computed client-side only to avoid SSR hydration mismatch
+              const days      = isMounted ? daysSince(order.createdAt) : 0;
+              const isOverdue = isMounted && days > 7;
+              const expired   = isMounted && isLinkExpired(order.createdAt);
+              const linkLabel = isMounted ? linkAvailabilityLabel(order.createdAt) : "";
 
               return (
                 <div
