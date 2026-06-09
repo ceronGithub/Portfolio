@@ -41,6 +41,10 @@ interface AddonItem {
   price: number; category: string; weeks: number;
 }
 
+interface DesignTierItem {
+  id: string; name: string; slug: string; tagline: string;
+  priceModifier: number; demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
+}
 interface SystemItem {
   id: string; name: string; tag: string; accent: string;
   description: string; basePrice: number; timeline: string;
@@ -48,6 +52,7 @@ interface SystemItem {
   demoVideoUrl: string | null; bgVideoUrl: string | null;
   owned: boolean; addons: AddonItem[];
   displayStatus: string;
+  designTiers: DesignTierItem[];
 }
 
 interface LatestProduct {

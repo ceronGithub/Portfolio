@@ -14,12 +14,17 @@ interface AddonItem {
   id: string; label: string; desc: string;
   price: number; category: string; weeks: number;
 }
+interface DesignTierItem {
+  id: string; name: string; slug: string; tagline: string;
+  priceModifier: number; demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
+}
 interface SystemItem {
   id: string; name: string; tag: string; accent: string;
   description: string; basePrice: number; timeline: string;
   features: string[];
   demoVideoUrl: string | null; bgVideoUrl: string | null; owned: boolean; addons: AddonItem[];
   displayStatus: string; // "visible" | "coming_soon" | "ongoing" | "hidden"
+  designTiers: DesignTierItem[];
 }
 interface Props {
   items: SystemItem[];
@@ -67,6 +72,10 @@ function DemoModal({ item, buyerEmail, buyerName, onClose }: { item: SystemItem;
   const grouped = groupBy(item.addons, "category");
   const [selectedAddons,   setSelectedAddons]   = useState<Record<string, boolean>>({});
   const [appointmentOpen,  setAppointmentOpen]  = useState(false);
+  // Design tier selection — default to first tier (index 0) if tiers exist
+  const [selectedTierIdx,  setSelectedTierIdx]  = useState<number>(0);
+  const activeTier = item.designTiers?.[selectedTierIdx] ?? null;
+  const tierPriceBonus = activeTier?.priceModifier ?? 0;
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -81,7 +90,7 @@ function DemoModal({ item, buyerEmail, buyerName, onClose }: { item: SystemItem;
   // Live computed values
   const selectedList    = item.addons.filter(a => selectedAddons[a.id]);
   const addonsTotal     = selectedList.reduce((s, a) => s + a.price, 0);
-  const totalPrice      = item.basePrice + addonsTotal;
+  const totalPrice      = item.basePrice + addonsTotal + tierPriceBonus;
   const addonWeeksExtra = Math.round(selectedList.length * 0.3 * 2) / 2;
   const [baseMin, baseMax] = item.timeline
     ? item.timeline.replace(" weeks","").split("–").map(Number)
@@ -109,6 +118,62 @@ function DemoModal({ item, buyerEmail, buyerName, onClose }: { item: SystemItem;
 
           <div className="demoModalBody">
             <div className="demoModalLeft">
+              {/* ── Design Tier Selector ── shown only for systems with website tiers */}
+              {item.designTiers?.length > 0 && (
+                <div className="demoDesignTiers">
+                  <p className="demoModalSectionLabel">Website Design Style</p>
+                  <div className="demoDesignTierGrid">
+                    {item.designTiers.map((tier, idx) => {
+                      const isActive = selectedTierIdx === idx;
+                      return (
+                        <button
+                          key={tier.id}
+                          className={"demoDesignTierCard" + (isActive ? " demoDesignTierCardActive" : "")}
+                          style={isActive ? { borderColor: item.accent, background: item.accent + "12" } : {}}
+                          onClick={() => setSelectedTierIdx(idx)}
+                        >
+                          <div className="demoDesignTierTop">
+                            <span className="demoDesignTierName" style={isActive ? { color: item.accent } : {}}>{tier.name}</span>
+                            {tier.priceModifier > 0 && (
+                              <span className="demoDesignTierPrice" style={{ color: item.accent }}>+{fmt(tier.priceModifier)}</span>
+                            )}
+                            {tier.priceModifier === 0 && (
+                              <span className="demoDesignTierPriceIncluded">Included</span>
+                            )}
+                          </div>
+                          {tier.tagline && (
+                            <p className="demoDesignTierTagline">{tier.tagline}</p>
+                          )}
+                          {isActive && (
+                            <div className="demoDesignTierCheck" style={{ background: item.accent }}>
+                              <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+                                <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Live demo link for selected tier */}
+                  {activeTier?.liveUrl && (
+                    <a
+                      href={activeTier.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="demoDesignTierLiveLink"
+                      style={{ borderColor: item.accent + "44", color: item.accent }}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                      </svg>
+                      View Live Demo — {activeTier.name}
+                    </a>
+                  )}
+                </div>
+              )}
+
               <p className="demoModalSectionLabel">Walkthrough Video</p>
               <div className="demoModalVideoWrap">
                 {item.demoVideoUrl ? (
@@ -162,8 +227,8 @@ function DemoModal({ item, buyerEmail, buyerName, onClose }: { item: SystemItem;
                   <span className="demoModalMetaLabel">Total Price</span>
                   <span className="demoModalMetaValue" style={{ color: item.accent }}>
                     {fmt(totalPrice)}
-                    {addonsTotal > 0 && (
-                      <span className="demoModalMetaExtra"> +{fmt(addonsTotal)}</span>
+                    {(addonsTotal + tierPriceBonus) > 0 && (
+                      <span className="demoModalMetaExtra"> +{fmt(addonsTotal + tierPriceBonus)}</span>
                     )}
                   </span>
                 </div>

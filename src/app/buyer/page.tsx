@@ -100,6 +100,23 @@ export default async function BuyerPage() {
     HR:            `${R2}/systems/hr-bg.mp4`,
   };
 
+  // Fetch designTiers via raw SQL — safe fallback if Prisma client is stale after migration
+  let designTiersMap: Record<string, any[]> = {};
+  try {
+    const rawTiers = await prisma.$queryRaw<any[]>`
+      SELECT id, "systemId", name, slug, tagline, "priceModifier", "demoVideoUrl", "liveUrl", "sortOrder"
+      FROM "DesignTier"
+      ORDER BY "systemId", "sortOrder" ASC
+    `;
+    for (const tier of rawTiers) {
+      if (!designTiersMap[tier.systemId]) designTiersMap[tier.systemId] = [];
+      designTiersMap[tier.systemId].push(tier);
+    }
+  } catch {
+    // Table may not exist yet — degrade gracefully, no design tiers shown
+    designTiersMap = {};
+  }
+
   const items = systems.map((s: any) => ({
     id:            s.id,
     name:          s.title,
@@ -114,6 +131,16 @@ export default async function BuyerPage() {
     owned:         ownedSystemIds.has(s.id),  // checks paid system orders, not product ownership
     // displayStatus — safe fallback to "visible" if migration hasn't run yet
     displayStatus: (s as any).displayStatus ?? "visible",
+    designTiers:   (designTiersMap[s.id] ?? []).map((t: any) => ({
+      id:            t.id,
+      name:          t.name,
+      slug:          t.slug,
+      tagline:       t.tagline ?? "",
+      priceModifier: t.priceModifier,
+      demoVideoUrl:  t.demoVideoUrl ?? null,
+      liveUrl:       t.liveUrl ?? null,
+      sortOrder:     t.sortOrder,
+    })),
     addons:        s.addons.map((a: any) => ({
       id:       a.id,
       label:    a.label,

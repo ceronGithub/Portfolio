@@ -20,11 +20,16 @@ const techStack = [
 
 // Systems data is now fetched from DB inside SystemsCarousel via /api/systems.
 // This type is used for the carousel cards and the configurator modal.
+type DesignTierEntry = {
+  id: string; name: string; slug: string; tagline: string;
+  priceModifier: number; demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
+};
 type VisitorSystemEntry = {
   id: string; tag: string; title: string; basePrice: number; accent: string;
   description: string; timeline: string; deploy: string;
   features: string[]; displayStatus: string;
   addons: { id: string; addonKey: string; label: string; price: number; category: string; description: string | null }[];
+  designTiers: DesignTierEntry[];
 };
 
 const process = [
@@ -286,6 +291,7 @@ type ConfigSystem = {
   tag: string; title: string; base: number; accent: string;
   baseFeatures: string[]; addons: AddOn[];
   timeline?: string;
+  designTiers: DesignTierEntry[];
 };
 
 // configuratorSystems is built from DB data at runtime in SystemsCarousel.
@@ -378,6 +384,7 @@ function SystemsCarousel() {
           accent:       s.accent,
           timeline:     s.timeline,
           baseFeatures: s.features,
+          designTiers:  (s.designTiers ?? []) as DesignTierEntry[],
           addons:       s.addons.map(a => ({
             id:       a.id,
             label:    a.label,
@@ -405,6 +412,10 @@ function SystemsCarousel() {
   const [modalSys,  setModalSys]  = useState<ConfigSystem | null>(null);
   const [selected,  setSelected]  = useState<Record<string, boolean>>({});
   const [activeCat, setActiveCat] = useState("All");
+  // Design tier selection — reset to 0 when modal opens
+  const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
+  const activeTier     = modalSys?.designTiers?.[selectedTierIdx] ?? null;
+  const tierPriceBonus = activeTier?.priceModifier ?? 0;
 
   /* Open modal — match carousel system tag to DB configurator data,
      then pre-check any add-on whose label fuzzy-matches a carousel feature */
@@ -428,6 +439,7 @@ function SystemsCarousel() {
     });
 
     setSelected(preChecked);
+    setSelectedTierIdx(0);
     setActiveCat("All");
     setModalSys(cfg);
     document.body.style.overflow = "hidden";
@@ -452,7 +464,7 @@ function SystemsCarousel() {
 
   /* Live price */
   const addonsTotal  = modalSys ? modalSys.addons.filter(a => selected[a.id]).reduce((s, a) => s + a.price, 0) : 0;
-  const totalPrice   = (modalSys?.base ?? 0) + addonsTotal;
+  const totalPrice   = (modalSys?.base ?? 0) + addonsTotal + tierPriceBonus;
   const selectedAddons = modalSys?.addons.filter(a => selected[a.id]) ?? [];
   const categories   = modalSys ? ["All", ...Array.from(new Set(modalSys.addons.map(a => a.category)))] : [];
   const visibleAddons = modalSys ? (activeCat === "All" ? modalSys.addons : modalSys.addons.filter(a => a.category === activeCat)) : [];
@@ -662,6 +674,60 @@ function SystemsCarousel() {
               {/* Left — base features + add-ons */}
               <div className="vConfigModalLeft">
 
+                {/* ── Design Tier Selector ── only for systems with tiers */}
+                {(modalSys.designTiers?.length ?? 0) > 0 && (
+                  <div className="vDesignTiers">
+                    <p className="vConfigModalSectionLabel" style={{ marginBottom: "0.5rem" }}>
+                      Website Design Style
+                    </p>
+                    <div className="vDesignTierGrid">
+                      {modalSys.designTiers.map((tier, idx) => {
+                        const isActive = selectedTierIdx === idx;
+                        return (
+                          <button
+                            key={tier.id}
+                            className={"vDesignTierCard" + (isActive ? " vDesignTierCardActive" : "")}
+                            style={isActive ? { borderColor: modalSys.accent, background: modalSys.accent + "12" } : {}}
+                            onClick={() => setSelectedTierIdx(idx)}
+                          >
+                            <div className="vDesignTierTop">
+                              <span className="vDesignTierName" style={isActive ? { color: modalSys.accent } : {}}>{tier.name}</span>
+                              {tier.priceModifier > 0 ? (
+                                <span className="vDesignTierPrice" style={{ color: modalSys.accent }}>+₱{tier.priceModifier.toLocaleString()}</span>
+                              ) : (
+                                <span className="vDesignTierIncluded">Included</span>
+                              )}
+                            </div>
+                            {tier.tagline && <p className="vDesignTierTagline">{tier.tagline}</p>}
+                            {isActive && (
+                              <div className="vDesignTierCheck" style={{ background: modalSys.accent }}>
+                                <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+                                  <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {activeTier?.liveUrl && (
+                      <a
+                        href={activeTier.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="vDesignTierLiveLink"
+                        style={{ borderColor: modalSys.accent + "44", color: modalSys.accent }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                        View Live Demo — {activeTier.name}
+                      </a>
+                    )}
+                  </div>
+                )}
+
                 {/* Base features — locked/pre-checked */}
                 <div className="vConfigModalSection">
                   <p className="vConfigModalSectionLabel">
@@ -741,6 +807,12 @@ function SystemsCarousel() {
                     <span>Base system</span>
                     <span>₱{modalSys.base.toLocaleString()}</span>
                   </div>
+                  {activeTier && tierPriceBonus > 0 && (
+                    <div className="vConfigModalRow vConfigModalRowAddon">
+                      <span>+ {activeTier.name} design</span>
+                      <span>₱{tierPriceBonus.toLocaleString()}</span>
+                    </div>
+                  )}
                   {selectedAddons.length > 0 && (
                     <div className="vConfigModalAddonRows">
                       {selectedAddons.map(a => (

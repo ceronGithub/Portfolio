@@ -38,13 +38,31 @@ export async function GET() {
             description: true,
           },
         },
+
       },
     });
 
-    // Merge: raw SQL displayStatus takes priority over Prisma ORM result
+    // Fetch designTiers via raw SQL — safe even if Prisma client is stale after migration
+    let designTiersMap: Record<string, any[]> = {};
+    try {
+      const rawTiers = await prisma.$queryRaw<any[]>`
+        SELECT id, "systemId", name, slug, tagline, "priceModifier", "demoVideoUrl", "liveUrl", "sortOrder"
+        FROM "DesignTier"
+        ORDER BY "systemId", "sortOrder" ASC
+      `;
+      for (const tier of rawTiers) {
+        if (!designTiersMap[tier.systemId]) designTiersMap[tier.systemId] = [];
+        designTiersMap[tier.systemId].push(tier);
+      }
+    } catch {
+      designTiersMap = {};
+    }
+
+    // Merge: raw SQL displayStatus + designTiers take priority over Prisma ORM result
     const merged = systems.map((s: typeof systems[number]) => ({
       ...s,
       displayStatus: statusMap.get(s.id) ?? s.displayStatus ?? "visible",
+      designTiers:   designTiersMap[s.id] ?? [],
     }));
 
     return NextResponse.json({ systems: merged });

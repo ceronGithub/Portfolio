@@ -5095,3 +5095,99 @@
   font-family: 'DM Mono', monospace;
   font-size:   0.75rem;
 }
+/* ── Design Tier Selector — visitor config modal ──────────────────────── */
+.vDesignTiers {
+  margin-bottom: 1.25rem;
+}
+
+.vDesignTierGrid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   0.45rem;
+  margin-bottom:         0.6rem;
+}
+
+.vDesignTierCard {
+  position:       relative;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.18rem;
+  padding:        0.6rem 0.7rem;
+  border-radius:  8px;
+  border:         1px solid rgba(255,255,255,0.08);
+  background:     rgba(255,255,255,0.03);
+  cursor:         pointer;
+  text-align:     left;
+  transition:     border-color 0.18s, background 0.18s;
+}
+.vDesignTierCard:hover {
+  border-color: rgba(255,255,255,0.18);
+  background:   rgba(255,255,255,0.06);
+}
+
+.vDesignTierTop {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             0.4rem;
+}
+
+.vDesignTierName {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.68rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.8);
+  transition:     color 0.18s;
+}
+
+.vDesignTierPrice {
+  font-family: "DM Mono", monospace;
+  font-size:   0.62rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vDesignTierIncluded {
+  font-family: "DM Mono", monospace;
+  font-size:   0.58rem;
+  color:       #22c55e;
+  white-space: nowrap;
+}
+
+.vDesignTierTagline {
+  font-size:   0.64rem;
+  color:       rgba(255,255,255,0.42);
+  line-height: 1.35;
+  margin:      0;
+}
+
+.vDesignTierCheck {
+  position:        absolute;
+  top:             0.4rem;
+  right:           0.4rem;
+  width:           16px;
+  height:          16px;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+
+.vDesignTierLiveLink {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            0.4rem;
+  font-family:    "DM Mono", monospace;
+  font-size:      0.62rem;
+  letter-spacing: 0.04em;
+  padding:        0.42rem 0.75rem;
+  border-radius:  6px;
+  border:         1px solid;
+  text-decoration:none;
+  transition:     opacity 0.18s;
+}
+.vDesignTierLiveLink:hover {
+  opacity: 0.72;
+}

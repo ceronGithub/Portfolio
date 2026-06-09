@@ -1717,3 +1717,103 @@
   cursor:         default;
   letter-spacing: 0.04em;
 }
+/* ── Design Tier Selector — inside DemoModal ─────────────────────────── */
+.demoDesignTiers {
+  margin-bottom: 1.25rem;
+}
+
+.demoDesignTierGrid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   0.5rem;
+  margin-top:            0.5rem;
+  margin-bottom:         0.6rem;
+}
+
+.demoDesignTierCard {
+  position:      relative;
+  display:       flex;
+  flex-direction:column;
+  gap:           0.2rem;
+  padding:       0.65rem 0.75rem;
+  border-radius: 8px;
+  border:        1px solid rgba(255,255,255,0.08);
+  background:    rgba(255,255,255,0.03);
+  cursor:        pointer;
+  text-align:    left;
+  transition:    border-color 0.18s, background 0.18s;
+}
+.demoDesignTierCard:hover {
+  border-color: rgba(255,255,255,0.18);
+  background:   rgba(255,255,255,0.06);
+}
+.demoDesignTierCardActive {
+  /* borderColor + background set via inline style from accent */
+}
+
+.demoDesignTierTop {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             0.4rem;
+}
+
+.demoDesignTierName {
+  font-family:    "DM Mono", monospace;
+  font-size:      0.7rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.85);
+  transition:     color 0.18s;
+}
+
+.demoDesignTierPrice {
+  font-family: "DM Mono", monospace;
+  font-size:   0.65rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.demoDesignTierPriceIncluded {
+  font-family: "DM Mono", monospace;
+  font-size:   0.6rem;
+  color:       #22c55e;
+  white-space: nowrap;
+}
+
+.demoDesignTierTagline {
+  font-size:   0.67rem;
+  color:       rgba(255,255,255,0.45);
+  line-height: 1.35;
+  margin:      0;
+}
+
+.demoDesignTierCheck {
+  position:      absolute;
+  top:           0.45rem;
+  right:         0.45rem;
+  width:         16px;
+  height:        16px;
+  border-radius: 50%;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+}
+
+.demoDesignTierLiveLink {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           0.4rem;
+  font-family:   "DM Mono", monospace;
+  font-size:     0.65rem;
+  letter-spacing:0.04em;
+  padding:       0.45rem 0.8rem;
+  border-radius: 6px;
+  border:        1px solid;
+  text-decoration: none;
+  transition:    opacity 0.18s;
+}
+.demoDesignTierLiveLink:hover {
+  opacity: 0.75;
+}
