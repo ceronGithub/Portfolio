@@ -701,7 +701,7 @@ async function main() {
     { name: "Static",     slug: "static",     tagline: "Clean, fast, content-focused website. No animations.",          priceModifier: 0,     sortOrder: 0 },
     { name: "Dynamic",    slug: "dynamic",    tagline: "Smooth page transitions, scroll effects & interactive sections.", priceModifier: 8000,  sortOrder: 1 },
     { name: "Modern",     slug: "modern",     tagline: "Premium UI with GSAP animations, parallax & motion design.",     priceModifier: 15000, sortOrder: 2 },
-    { name: "AI-Powered", slug: "ai-powered", tagline: "AI chat widget, smart content blocks & personalized UX.",        priceModifier: 25000, sortOrder: 3 },
+    { name: "AI-Powered", slug: "ai-powered", tagline: "AI chat widget, smart content blocks & personalized UX.",        priceModifier: 35000, sortOrder: 3 },
   ];
 
   for (const tag of externalSystemTags) {

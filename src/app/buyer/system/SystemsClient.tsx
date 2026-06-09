@@ -315,6 +315,7 @@ function DemoModal({ item, buyerEmail, buyerName, onClose }: { item: SystemItem;
           buyerEmail={buyerEmail}
           buyerName={buyerName}
           selectedAddons={selectedList.map(a => ({ id: a.id, label: a.label, price: a.price }))}
+          selectedTier={activeTier ? { name: activeTier.name, priceModifier: activeTier.priceModifier } : null}
           onClose={() => setAppointmentOpen(false)}
         />
       )}

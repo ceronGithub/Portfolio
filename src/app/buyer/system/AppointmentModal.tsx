@@ -11,6 +11,7 @@ import "./appointment-modal.css";
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 interface AddonSnapshot { id: string; label: string; price: number; }
+interface TierSnapshot  { name: string; priceModifier: number; }
 
 interface SystemItem {
   id:          string;
@@ -28,6 +29,7 @@ interface Props {
   buyerEmail:     string;
   buyerName:      string;
   selectedAddons: AddonSnapshot[];
+  selectedTier:   TierSnapshot | null;
   onClose:        () => void;
 }
 
@@ -189,7 +191,7 @@ function DatePicker({
 }
 
 /* ─── Main Modal ─────────────────────────────────────────────────── */
-export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerName, selectedAddons, onClose }: Props) {
+export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerName, selectedAddons, selectedTier, onClose }: Props) {
   const [message,       setMessage]       = useState("");
   const [scheduledDate, setScheduledDate] = useState(toDateString(getTomorrow()));
   const [submitting,    setSubmitting]    = useState(false);
@@ -213,6 +215,7 @@ export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerNa
           systemTitle:   item.name,
           basePrice:     item.basePrice,
           selectedAddons,
+          selectedTier:  selectedTier ? { name: selectedTier.name, priceModifier: selectedTier.priceModifier } : null,
           quotedPrice:   totalPrice,
           scheduledDate,
           message:       message || null,
@@ -232,26 +235,50 @@ export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerNa
         ? selectedAddons.map(a => `• ${a.label} — ${fmt(a.price)}`).join("<br/>")
         : "None selected";
 
+      const tierText = selectedTier
+        ? `${selectedTier.name}${selectedTier.priceModifier > 0 ? ` (+${fmt(selectedTier.priceModifier)})` : " (Included)"}`
+        : "None";
+
       // 3. Build shared template params — uses systemproducts template (template_ija0n6t)
-      const emailParams = {
+      const devParams = {
         subject_line:  `Appointment Request: ${item.name} — ${fmt(totalPrice)}`,
         title:         item.name,
         buyer_name:    buyerName,
         detail_1:      formatDisplayDate(scheduledDate),
-        detail_2:      addonsText,
+        detail_2:      `${addonsText}<br/><br/>Design Style: ${tierText}`,
         quoted_price:  fmt(totalPrice),
         reference_no:  ref,
         buyer_email:   buyerEmail,
         cc_email:      "developerceron@gmail.com",
       };
 
-      // 4. Send to developer — CC developer as well for paper trail
+      const buyerParams = {
+        subject_line:  `Appointment Confirmed — ${item.name}`,
+        title:         item.name,
+        buyer_name:    buyerName,
+        detail_1:      formatDisplayDate(scheduledDate),
+        detail_2:      `${addonsText}<br/><br/>Design Style: ${tierText}`,
+        quoted_price:  fmt(totalPrice),
+        reference_no:  ref,
+        buyer_email:   buyerEmail,
+        cc_email:      "developerceron@gmail.com",
+      };
+
+      // 4. Send to developer
       await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_CUSTOM_REQUEST_TEMPLATE_ID!,
-        emailParams,
+        devParams,
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
-      ).catch(() => {}); // silent fail
+      ).catch(() => {});
+
+      // 5. Send confirmation to buyer
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_CUSTOM_REQUEST_TEMPLATE_ID!,
+        { ...buyerParams, cc_email: buyerEmail },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+      ).catch(() => {});
 
       setReferenceNo(ref);
     } catch (err: any) {
@@ -353,6 +380,14 @@ export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerNa
                   <span style={{ color: "#22c55e" }}>+{fmt(a.price)}</span>
                 </div>
               ))}
+            </div>
+          )}
+          {selectedTier && (
+            <div className="apModalAddonRow" style={{ marginTop: "0.4rem", borderTop: `1px solid ${item.accent}18`, paddingTop: "0.4rem" }}>
+              <span style={{ opacity: 0.7 }}>Design Style — {selectedTier.name}</span>
+              <span style={{ color: item.accent }}>
+                {selectedTier.priceModifier > 0 ? `+${fmt(selectedTier.priceModifier)}` : "Included"}
+              </span>
             </div>
           )}
           <p className="apModalSummaryNote">
