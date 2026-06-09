@@ -227,7 +227,7 @@ function SlideStack({ r2Prefix, category, accent, gradient }: {
   );
 }
 
-/* ─── Magazine split section — text left, slide stack right ─────────── */
+/* ─── Magazine split section — buyer-style card pair: info left, video right ── */
 function MagazineSection({
   label, labelAccent, title, titleAccent, italicLine,
   desc, accent, gradient, r2Prefix, ctaLabel, delay,
@@ -243,41 +243,43 @@ function MagazineSection({
   return (
     <motion.div
       ref={ref}
-      className="vMagSection"
+      className="vMagCardRow"
       initial={{ opacity: 0, y: 48 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="vMagLeft" style={{ background: gradient }}>
-        <div className="vMagLeftInner">
-          <span className="vAiCardCategory" style={{ color: accent }}>{label}</span>
-          <h3 className="vMagTitle">
-            {title}<br />
-            <em className="vMagItalic" style={{ color: accent }}>{italicLine}</em>
-          </h3>
-          <p className="vMagDesc">{desc}</p>
-          <div className="vAiSteps">
-            {[
-              ["01", "Create an account",       "Register with your email. Free, 30 seconds."],
-              ["02", "Purchase the collection", "One-time payment. No subscription, no renewal."],
-              ["03", "Download forever",        "Instant access. Re-download anytime from your dashboard."],
-            ].map(([num, t, sub]) => (
-              <div className="vAiStep" key={num}>
-                <span className="vAiStepNum" style={{ color: accent }}>{num}</span>
-                <div><strong>{t}</strong><p>{sub}</p></div>
-              </div>
-            ))}
-          </div>
-          <a href="/register" className="vAiGetAccessBtn" style={{ background: accent }}>
-            {ctaLabel}
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M1 12L12 1M12 1H6M12 1v6" stroke="#0d0c0b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
+      {/* ── Info card — left ── */}
+      <div className="vMagCard vMagCardInfo" style={{ background: gradient }}>
+        <span className="vAiCardCategory" style={{ color: accent }}>{label}</span>
+        <h3 className="vMagCardTitle">
+          {title}<br />
+          <em className="vMagItalic" style={{ color: accent }}>{italicLine}</em>
+        </h3>
+        <p className="vMagCardDesc">{desc}</p>
+        <div className="vAiSteps">
+          {[
+            ["01", "Create an account",       "Register with your email. Free, 30 seconds."],
+            ["02", "Purchase the collection", "One-time payment. No subscription, no renewal."],
+            ["03", "Download forever",        "Instant access. Re-download anytime from your dashboard."],
+          ].map(([num, t, sub]) => (
+            <div className="vAiStep" key={num}>
+              <span className="vAiStepNum" style={{ color: accent }}>{num}</span>
+              <div><strong>{t}</strong><p>{sub}</p></div>
+            </div>
+          ))}
         </div>
+        <a href="/register" className="vAiGetAccessBtn" style={{ background: accent }}>
+          {ctaLabel}
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M1 12L12 1M12 1H6M12 1v6" stroke="#0d0c0b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </a>
       </div>
-      <div className="vMagRight">
+
+      {/* ── Video card — right ── */}
+      <div className="vMagCard vMagCardVideo">
         <SlideStack r2Prefix={r2Prefix} category={label} accent={accent} gradient={gradient} />
+        <span className="vMagCardVideoLabel" style={{ color: accent }}>{label} Preview</span>
       </div>
     </motion.div>
   );

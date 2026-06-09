@@ -68,7 +68,7 @@
   }
 }
 
-/* — Floating Pill Navbar: Tablet — */
+/* — Floating Pill Navbar: Tablet (768px) — */
 @media (max-width: 768px) {
   .floatNavItem {
     width: 62px;
@@ -78,6 +78,70 @@
     width: 70px;
     height: 116px;
     margin-left: -4px;
+  }
+}
+
+/* — Floating Pill Navbar: Mobile (480px) — */
+/* 7 items × 48px + 20px padding = 356px — fits 375px screen */
+@media (max-width: 480px) {
+  .floatNav {
+    bottom: 1rem;
+    /* Prevent pill from going wider than screen */
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .floatPill {
+    height: 56px;
+    padding: 0 6px;
+    /* Allow pill to shrink if items still too wide */
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .floatNavItem {
+    width: 48px;
+    height: 48px;
+  }
+
+  .floatNavIcon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .floatNavLabel {
+    font-size: 0.55rem;
+    top: 38px;
+  }
+
+  .floatBubble {
+    width: 54px;
+    height: 86px;
+    border-radius: 22px;
+  }
+}
+
+/* — Floating Pill Navbar: Small mobile (375px) — */
+/* Ultra-compact: 7 items × 42px + 12px padding = 306px */
+@media (max-width: 375px) {
+  .floatNavItem {
+    width: 42px;
+    height: 44px;
+  }
+
+  .floatNavIcon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .floatBubble {
+    width: 48px;
+    height: 80px;
+    border-radius: 18px;
+  }
+
+  .floatPill {
+    height: 52px;
+    padding: 0 4px;
   }
 }
 
@@ -138,32 +202,6 @@
 
 /* — Mobile: 480px and below — */
 @media (max-width: 480px) {
-
-  /* Floating pill — compact on mobile */
-  .floatNav {
-    bottom: 1.25rem;
-  }
-
-  .floatPill {
-    height: 56px;
-    padding: 0 4px;
-  }
-
-  .floatNavItem {
-    width: 48px;
-    height: 44px;
-  }
-
-  .floatBubble {
-    width: 48px;
-    height: 68px;
-    top: -14px;
-  }
-
-  .floatNavIcon svg {
-    width: 19px;
-    height: 19px;
-  }
 
   /* Navbar */
   .navBadge {
