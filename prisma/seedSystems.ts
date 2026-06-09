@@ -11,7 +11,7 @@ const systemsData = [
     tag: "HR", title: "Payroll & HR System", basePrice: 33000, accent: "#67e8f9",
     timeline: "8–11 weeks", deploy: "Web / IIS",
     description: "BIR-compliant payroll and HR management in one place.",
-    features: ["Payroll computation (daily/monthly/weekly)","Employee records & 201 file","Payslip generation & printing","Basic attendance & time logging","Government deduction tracking (SSS/PhilHealth/Pag-IBIG)","User roles: HR Admin & Employee view"],
+    features: ["Payroll computation with daily/monthly/weekly pay modes","Employee records with complete 201 file management","Payslip generation with itemized deductions & printing","Attendance & time logging with overtime computation","Government deduction auto-computation (SSS, PhilHealth, Pag-IBIG)","Leave management with balance tracking","Multi-level user roles: HR Admin, Payroll Officer & Employee view"],
     addons: [
       { addonKey:"hr1",  label:"Automated Payroll Processing",       price:5000,  category:"Payroll",         description:"Auto-compute salary based on attendance, deductions, and allowances every cutoff." },
       { addonKey:"hr2",  label:"Overtime Computation",               price:4000,  category:"Payroll",         description:"Auto-calculate OT pay based on hours rendered and applicable multipliers." },
@@ -82,7 +82,7 @@ const systemsData = [
     tag: "Construction", title: "Construction Project System", basePrice: 45000, accent: "#7eb8d4",
     timeline: "10–12 weeks", deploy: "Web / IIS",
     description: "Full project oversight engineered for construction enterprises.",
-    features: ["Project creation with start/end dates","Task assignment & milestone tracking","Basic budget input & expenditure logging","Team & worker roster management","Project status board (Kanban-style)","Admin & Project Manager user roles","Company landing / hero page (public)","About us & services overview page","Contact page with Google Maps"],
+    features: ["Project creation with full timeline & milestone tracking","Task assignment with Kanban-style status board","Budget input with running expenditure log & variance tracking","Client-visible project status updates (read-only portal)","Team & worker roster with role assignments","Admin & Project Manager user roles","Company landing / hero page (public)","About us & services overview page","Contact page with Google Maps"],
     addons: [
       { addonKey:"co1",  label:"Project Management",                   price:5000,  category:"Core Modules",    description:"Tasks, milestones, and workflows for full project lifecycle management." },
       { addonKey:"co2",  label:"Document Management",                  price:5000,  category:"Core Modules",    description:"Centralized storage for drawings, contracts, and project files with version control." },
@@ -188,7 +188,7 @@ const systemsData = [
     tag: "Education", title: "School & Enrollment System", basePrice: 37500, accent: "#86efac",
     timeline: "9–12 weeks", deploy: "Web / IIS",
     description: "Complete enrollment and grade management for schools.",
-    features: ["Student enrollment & profile management","Section & year-level management","Basic grade encoding per subject","School year & semester setup","Tuition fee structure setup","Admin & Registrar user roles","School landing / hero page (public)","About the school & vision page","Contact & location page"],
+    features: ["Student enrollment with complete academic profile management","Section, year-level & strand/course assignment","Per-subject grade encoding with GWA auto-computation","School year & semester configuration","Tuition fee tracking with payment status per student","Admin & Registrar user roles","School landing / hero page (public)","About the school & vision page","Contact & location page"],
     addons: [
       { addonKey:"ed1",  label:"Grade Management & GWA Computation",        price:4000, category:"Academic",        description:"Auto-compute GWA and honor roll eligibility based on subject grades per grading period." },
       { addonKey:"ed2",  label:"Tuition & Fee Payment Tracking",             price:3500, category:"Finance",         description:"Track student tuition payments, balances, and payment schedules per school year." },
@@ -227,7 +227,7 @@ const systemsData = [
     tag: "E-commerce", title: "POS + Mini E-commerce", basePrice: 42000, accent: "#f9a8d4",
     timeline: "9–11 weeks", deploy: "Web",
     description: "Sell in-store and online from one dashboard.",
-    features: ["In-store POS terminal (touch-friendly)","Product catalog with categories & variants","Cash & manual payment transactions","Order history & receipt printing","Stock deduction per sale","Cashier & Admin user roles","Store landing / brand hero page (public)","About the brand & our story page","Contact page"],
+    features: ["In-store POS terminal (touch-friendly, keyboard-free)","Product catalog with categories, variants & SKU support","Cash & manual payment processing with official receipt generation","Order history with printable receipts & transaction logs","Real-time stock deduction per sale with low-stock alerts","Cashier & Admin user roles","Store landing / brand hero page (public)","About the brand & our story page","Contact page"],
     addons: [
       { addonKey:"pos1",  label:"Multi-Branch POS",                    price:6000,  category:"Core POS",      description:"Manage multiple store locations from one dashboard with per-branch reporting." },
       { addonKey:"pos2",  label:"Multi-Cashier System",                price:5500,  category:"Core POS",      description:"Multiple cashier accounts with individual session tracking and shift reports." },
@@ -296,7 +296,7 @@ const systemsData = [
     tag: "Warehouse", title: "Warehouse Management System", basePrice: 37500, accent: "#7dc9a0",
     timeline: "8–10 weeks", deploy: "Web / IIS",
     description: "Industrial-grade stock control built for warehouse scale.",
-    features: ["Stock in / stock out with quantity tracking","Product catalog with SKU & categories","Basic supplier records & contact info","Manual low-stock alert thresholds","Stock movement history log","Warehouse Staff & Admin user roles"],
+    features: ["Stock in / stock out with full quantity tracking & timestamps","Product catalog with SKU, unit of measure & category tagging","Supplier records with contact info & product sourcing links","Low-stock alert thresholds with notification triggers","Complete stock movement history & audit log","Stock adjustment with reason logging & variance tracking","Summary stock reports by product, category & date range","Warehouse Staff & Admin user roles"],
     addons: [
       { addonKey:"wh1",  label:"Multi-Warehouse Support",          price:7500, category:"Inventory",    description:"Manage inventory across multiple warehouse locations from one unified dashboard." },
       { addonKey:"wh2",  label:"Batch & Lot Tracking",             price:5000, category:"Inventory",    description:"Track production batches and lot numbers with full expiry and traceability per batch." },
@@ -357,7 +357,7 @@ const systemsData = [
     tag: "Inventory", title: "Inventory Control System", basePrice: 27000, accent: "#8fc99a",
     timeline: "6–8 weeks", deploy: "Web / Desktop",
     description: "Real-time stock visibility in one unified platform.",
-    features: ["Real-time stock level tracking","Product records with unit & category","Low-stock alert with threshold setting","Manual purchase order creation","Stock adjustment & variance logging","Admin & Staff user roles"],
+    features: ["Real-time stock level tracking across all product records","Product records with unit of measure, category & reorder points","Low-stock alerts with configurable threshold per product","Purchase order creation with item-level status tracking","Stock adjustment with reason codes & full variance logging","Multi-status stock management (available, reserved, damaged)","Stock valuation summary & movement reports","Admin & Staff user roles"],
     addons: [
       { addonKey:"inv1",  label:"Multi-Warehouse Management",       price:8000,  category:"Core",          description:"Manage multiple warehouse branches with per-location stock visibility and transfers." },
       { addonKey:"inv2",  label:"Real-Time Inventory Sync",         price:7000,  category:"Core",          description:"Instant stock updates across all locations and channels as transactions occur." },
@@ -423,7 +423,7 @@ const systemsData = [
     tag: "CRM", title: "CRM System", basePrice: 30000, accent: "#fcd34d",
     timeline: "7–9 weeks", deploy: "Web",
     description: "Manage leads and clients from pipeline to close.",
-    features: ["Lead & prospect record management","Contact profiles with interaction history","Follow-up notes & task reminders","Deal status & stage tracking","Basic lead source tagging","Sales Rep & Admin user roles","Company landing / hero page (public)","About us & services page","Contact page"],
+    features: ["Lead & prospect records with full pipeline stage tracking","Contact profiles with complete interaction history & notes","Follow-up task reminders with due dates & priority flags","Deal stages with win/loss tracking & estimated value","Lead source tagging with conversion reporting","Sales Rep & Admin user roles","Company landing / hero page (public)","About us & services page","Contact page"],
     addons: [
       { addonKey:"crm_c1",  label:"Lead Management",                price:3500,   category:"Core CRM",   description:"Capture, assign, and track leads from source to close with full history." },
       { addonKey:"crm_c2",  label:"Customer Database",              price:3500,   category:"Core CRM",   description:"Centralized customer records with contact info, tags, and purchase history." },
@@ -536,7 +536,7 @@ const systemsData = [
     tag: "Booking", title: "Booking & Appointment System", basePrice: 22500, accent: "#b8a0d4",
     timeline: "5–7 weeks", deploy: "Web",
     description: "Online scheduling built for clinics and salons.",
-    features: ["Online booking form (web-accessible)","Staff calendar & schedule management","Client records & appointment history","Manual booking confirmation","Service catalog with duration & pricing","Staff & Admin user roles","Clinic / salon landing page (public)","About us & our story page","Contact & location page"],
+    features: ["Online booking form (web-accessible, no login required)","Staff calendar with daily/weekly schedule management","Client records with full appointment history","Booking confirmation with staff assignment & time slot validation","Service catalog with duration, pricing & availability settings","Staff & Admin user roles","Clinic / salon landing page (public)","About us & our story page","Contact & location page"],
     addons: [
       { addonKey:"bk1", label:"SMS / Email Reminders",        price:3000, category:"Automation",    description:"Auto-send appointment reminders to clients via SMS and email before their schedule." },
       { addonKey:"bk2", label:"Walk-in Queue Management",     price:4000, category:"Operations",    description:"Manage walk-in client queue with estimated wait time display for in-clinic use." },
@@ -571,7 +571,7 @@ const systemsData = [
     tag: "Finance", title: "Invoice & Emailing System", basePrice: 18000, accent: "#c4b5fd",
     timeline: "5–6 weeks", deploy: "Web",
     description: "Generate, send, and track invoices all in one flow.",
-    features: ["Professional invoice creation & numbering","Manual email sending to clients","Payment status tracking (Paid/Pending/Overdue)","Client records & billing info","Invoice line items with tax computation","Admin user role with full access"],
+    features: ["Professional invoice creation with auto-incrementing reference numbers","Manual email delivery to clients directly from the system","Payment status tracking with Paid / Pending / Overdue states","Client records with billing info & invoice history","Line-item invoices with per-item tax rate & total computation","Recurring invoice templates for repeat billing","Overdue reminders with manual follow-up logging","Admin & Staff user roles with permission separation"],
     addons: [
       { addonKey:"fi1",  label:"Custom Invoice Templates",       price:5000,  category:"Core Invoice",   description:"Personalized invoice designs with your branding, logo, and color scheme." },
       { addonKey:"fi2",  label:"PDF Export with Branding",       price:3500,  category:"Core Invoice",   description:"One-click PDF generation with your company header and signature field." },
@@ -628,7 +628,7 @@ const systemsData = [
     tag: "Restaurant", title: "Restaurant Ordering System", basePrice: 27000, accent: "#fdba74",
     timeline: "6–8 weeks", deploy: "Web",
     description: "QR ordering and kitchen management for F&B operations.",
-    features: ["QR code menu (scan to order)","Table-based order taking","Basic kitchen order display (KDS)","Daily sales log & shift summary","Menu management with pricing","Cashier & Admin user roles","Restaurant landing / hero page (public)","About the restaurant & our story","Contact & location page with Google Maps"],
+    features: ["QR code menu with scan-to-order flow (no app install needed)","Table-based order taking with seat & quantity tracking","Real-time kitchen order display (KDS) with status updates","Auto-generated daily sales log & shift-end summary report","Menu management with categories, pricing & availability toggles","Cashier & Admin user roles","Restaurant landing / hero page (public)","About the restaurant & our story","Contact & location page with Google Maps"],
     addons: [
       { addonKey:"re1", label:"Advanced Kitchen Display (KDS)", price:5000, category:"Operations",   description:"Multi-station KDS with order routing, priority flags, and completion timers." },
       { addonKey:"re2", label:"Table Management & Floor Plan",  price:5000, category:"Operations",   description:"Visual floor plan with table status - available, occupied, reserved, and billing." },
