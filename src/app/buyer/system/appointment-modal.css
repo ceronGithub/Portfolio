@@ -444,3 +444,9 @@
   background: rgba(255,255,255,0.1);
   color:      #fff;
 }
+
+.apSuccessCloseCount {
+  font-size:   0.78rem;
+  opacity:     0.5;
+  margin-left: 0.25rem;
+}

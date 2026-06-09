@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import emailjs                   from "@emailjs/browser";
 import "./appointment-modal.css";
 
@@ -261,6 +261,19 @@ export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerNa
     }
   }
 
+  // ── Auto-close after success — 4 second countdown ────────────────
+  const [autoCloseCount, setAutoCloseCount] = useState(4);
+  useEffect(() => {
+    if (!referenceNo) return;
+    const interval = setInterval(() => {
+      setAutoCloseCount(prev => {
+        if (prev <= 1) { clearInterval(interval); onClose(); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [referenceNo, onClose]);
+
   // ── Success state ─────────────────────────────────────────────────
   if (referenceNo) {
     return (
@@ -301,7 +314,9 @@ export default function AppointmentModal({ item, totalPrice, buyerEmail, buyerNa
               so you can see and feel it before committing further.
             </p>
 
-            <button className="apSuccessClose" onClick={onClose}>Close</button>
+            <button className="apSuccessClose" onClick={onClose}>
+              Close {autoCloseCount > 0 && <span className="apSuccessCloseCount">({autoCloseCount})</span>}
+            </button>
           </div>
         </div>
       </div>

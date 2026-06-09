@@ -62,6 +62,7 @@ interface Props {
   buyerName:       string;
   ownedAssetIds:   string[];
   ownedProducts:   { id: string; name: string }[];
+  ownedSystems:    { id: string; name: string }[];
   latestCharacter: LatestProduct | null;
   latestWeapon:    LatestProduct | null;
   latestInterior:  LatestProduct | null;
@@ -154,7 +155,7 @@ function buildWishlistEntries(
   return entries;
 }
 
-export default function BuyerDashboardClient({ items, buyerEmail, buyerName, ownedAssetIds, ownedProducts, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
+export default function BuyerDashboardClient({ items, buyerEmail, buyerName, ownedAssetIds, ownedProducts, ownedSystems, latestCharacter, latestWeapon, latestInterior, latestExterior }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
   const { wishlistIds, toggleWishlist, clearWishlist, hydrated } = useWishlist();
   const { cartIds, addToCart, removeFromCart, clearCart, hydrated: cartHydrated } = useCart();
@@ -287,6 +288,7 @@ export default function BuyerDashboardClient({ items, buyerEmail, buyerName, own
       <ReviewSection
         ownedProductIds={ownedAssetIds}
         ownedProducts={ownedProducts}
+        ownedSystems={ownedSystems}
       />
 
       {/* ── Contact ── */}

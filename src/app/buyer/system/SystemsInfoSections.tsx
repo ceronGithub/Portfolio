@@ -103,13 +103,17 @@ function HowWeBuildSection() {
 
 /* ─── Compare Options ────────────────────────────────────────────────── */
 const COMPARE_ROWS = [
-  { feature: "Custom-built to your workflow",       us: true,  saas: false, freelancer: "maybe" },
-  { feature: "Full source code ownership",          us: true,  saas: false, freelancer: "maybe" },
-  { feature: "No monthly subscription fees",        us: true,  saas: false, freelancer: true    },
-  { feature: "Dedicated support after delivery",    us: true,  saas: "paid", freelancer: false  },
-  { feature: "Scalable modular architecture",       us: true,  saas: "limited", freelancer: "maybe" },
-  { feature: "Transparent pricing before you pay",  us: true,  saas: false, freelancer: "maybe" },
-  { feature: "30 / 70 payment structure",           us: true,  saas: false, freelancer: false   },
+  { feature: "Custom to your business",  us: true,  agency: true,  template: false },
+  { feature: "Fixed price upfront",       us: true,  agency: false, template: true  },
+  { feature: "Source code ownership",     us: true,  agency: false, template: false },
+  { feature: "1 month free support",      us: true,  agency: false, template: false },
+  { feature: "Sprint-based delivery",     us: true,  agency: true,  template: false },
+  { feature: "Lifetime access",           us: true,  agency: false, template: true  },
+  { feature: "Philippine peso pricing",   us: true,  agency: false, template: false },
+  { feature: "No monthly fees",           us: true,  agency: false, template: true  },
+  { feature: "Dedicated project manager", us: true,  agency: true,  template: false },
+  { feature: "Ready in 2–6 weeks",        us: true,  agency: false, template: true  },
+  { feature: "Scalable architecture",     us: true,  agency: true,  template: false },
 ];
 
 function CompareCell({ value }: { value: boolean | string }) {
@@ -123,19 +127,22 @@ function CompareSection() {
   return (
     <section className="sysInfoSection sysInfoSectionCompare">
       <div className="sysInfoInner">
-        <p className="sysInfoLabel">Comparison</p>
+        <p className="sysInfoLabel">Why Matthew Studio</p>
         <h2 className="sysInfoTitle">Compare your options.</h2>
         <p className="sysInfoSub">
-          See how a fully custom-built system stacks up against off-the-shelf SaaS tools and typical freelancers.
+          Not all solutions are equal. Here&apos;s how we stack up against the alternatives.
         </p>
         <div className="sysInfoCmpWrap">
           <table className="sysInfoCmpTable">
             <thead>
               <tr>
                 <th className="sysInfoCmpThFeature">Feature</th>
-                <th className="sysInfoCmpTh sysInfoCmpThUs">Us</th>
-                <th className="sysInfoCmpTh">SaaS Tools</th>
-                <th className="sysInfoCmpTh">Other Freelancers</th>
+                <th className="sysInfoCmpTh sysInfoCmpThUs">
+                  Matthew Studio
+                  <span className="sysInfoCmpUsBadge">Recommended</span>
+                </th>
+                <th className="sysInfoCmpTh">Agency</th>
+                <th className="sysInfoCmpTh">Template</th>
               </tr>
             </thead>
             <tbody>
@@ -143,12 +150,19 @@ function CompareSection() {
                 <tr key={row.feature} className="sysInfoCmpRow">
                   <td className="sysInfoCmpFeature">{row.feature}</td>
                   <td className="sysInfoCmpCell sysInfoCmpCellUs"><CompareCell value={row.us} /></td>
-                  <td className="sysInfoCmpCell"><CompareCell value={row.saas} /></td>
-                  <td className="sysInfoCmpCell"><CompareCell value={row.freelancer} /></td>
+                  <td className="sysInfoCmpCell"><CompareCell value={row.agency} /></td>
+                  <td className="sysInfoCmpCell"><CompareCell value={row.template} /></td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {/* Price row */}
+          <div className="sysInfoCmpPriceRow">
+            <span className="sysInfoCmpPriceFeature">Typical price range</span>
+            <span className="sysInfoCmpPriceUs">₱2,999 – ₱15,000</span>
+            <span className="sysInfoCmpPriceOther">₱50,000 – ₱300,000+</span>
+            <span className="sysInfoCmpPriceOther">₱500 – ₱5,000 + monthly fees</span>
+          </div>
         </div>
       </div>
     </section>

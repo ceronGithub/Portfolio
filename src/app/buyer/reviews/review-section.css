@@ -100,14 +100,8 @@
   display:        flex;
   flex-direction: column;
   gap:            0.6rem;
-  cursor:         pointer;
   text-align:     left;
   transition:     border-color 0.2s, background 0.2s;
-}
-
-.rvProductCard:hover:not(:disabled) {
-  border-color: #2e2e2e;
-  background:   #111;
 }
 
 /* Selected state — highlighted border */
@@ -116,10 +110,9 @@
   background:   rgba(201, 163, 110, 0.04) !important;
 }
 
-/* Already reviewed state — dimmed, no hover */
+/* Already reviewed state — slightly dimmed */
 .rvProductCardReviewed {
-  cursor:  default;
-  opacity: 0.65;
+  opacity: 0.8;
 }
 
 .rvProductCardName {
@@ -134,6 +127,22 @@
   text-overflow: ellipsis;
 }
 
+/* Rate → button inside card */
+.rvProductCardRateBtn {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.6rem;
+  color:          #c9a96e;
+  letter-spacing: 0.06em;
+  background:     none;
+  border:         none;
+  cursor:         pointer;
+  padding:        0;
+  text-align:     left;
+  transition:     color 0.2s;
+}
+
+.rvProductCardRateBtn:hover { color: #e0be84; }
+
 .rvProductCardCta {
   font-family:    'DM Mono', monospace;
   font-size:      0.6rem;
@@ -142,6 +151,12 @@
 }
 
 .rvProductCardRated {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+}
+
+.rvProductCardRatedActions {
   display:     flex;
   align-items: center;
   gap:         0.5rem;
@@ -152,6 +167,25 @@
   font-size:      0.58rem;
   color:          #22c55e;
   letter-spacing: 0.06em;
+}
+
+/* Edit button on reviewed cards */
+.rvProductCardEditBtn {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.58rem;
+  letter-spacing: 0.06em;
+  color:          rgba(255,255,255,0.35);
+  background:     transparent;
+  border:         1px solid rgba(255,255,255,0.12);
+  border-radius:  99px;
+  padding:        0.1rem 0.55rem;
+  cursor:         pointer;
+  transition:     color 0.2s, border-color 0.2s;
+}
+
+.rvProductCardEditBtn:hover {
+  color:        #c9a96e;
+  border-color: rgba(201,163,110,0.4);
 }
 
 /* ── Inline rating form — slides in below the scroll row ── */

@@ -123,6 +123,11 @@ export default async function BuyerPage() {
   const ownedAssetIds  = ownedProductIds;
   const ownedProducts  = ownedProductRecords.map((p: any) => ({ id: p.id, name: p.name }));
 
+  // Build owned system list for Reviews section
+  const ownedSystemList = systems
+    .filter((s: any) => ownedSystemIds.has(s.id))
+    .map((s: any) => ({ id: s.id, name: s.title }));
+
   // Group latest products by category for the Latest Drop sections
   const latestCharacter  = latestProducts.find((p: any) => p.category === "character") ?? null;
   const latestWeapon     = latestProducts.find((p: any) => p.category === "weapon")    ?? null;
@@ -138,6 +143,7 @@ export default async function BuyerPage() {
         buyerName={userName}
         ownedAssetIds={ownedAssetIds}
         ownedProducts={ownedProducts}
+        ownedSystems={ownedSystemList}
         latestCharacter={latestCharacter}
         latestWeapon={latestWeapon}
         latestInterior={latestInterior}

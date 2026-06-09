@@ -1074,6 +1074,7 @@ const faqs = [
     accent: "#7eb8d4",
     q: "What tech stack do you use?",
     a: (<>We build across multiple stacks depending on deployment target:<br /><br />
+      <strong>Modern Web / SaaS Deployment</strong> — <strong>Next.js</strong> (React framework) for full-stack applications with SSR, API routes, and edge deployment. Ideal for public-facing systems, digital storefronts, and SaaS products. Hosted on Vercel or cloud infrastructure with full source code handover.<br /><br />
       <strong>Public / Web Deployment</strong> — <strong>Laravel</strong> (PHP) for backend APIs and server-side logic, <strong>ReactJS</strong> for the frontend. Hosted on cloud infrastructure with full source code handover.<br /><br />
       <strong>IIS / Enterprise Intranet Deployment</strong> — <strong>ASP.NET + C#</strong>, deployed on Windows Server via IIS. Ideal for companies running internal networks, government setups, or corporate environments that require on-premise hosting.<br /><br />
       <strong>Desktop Applications</strong> — <strong>C# Windows Forms (WFA)</strong> for standalone desktop systems. No browser required — runs directly on Windows machines.<br /><br />
@@ -1544,8 +1545,8 @@ export default function VisitorPage() {
                 ),
                 desc: "Every third-party service — payment gateways, SMS APIs, email providers, government portals — adds development and maintenance overhead.",
                 low: { label: "None", detail: "Standalone system, no external APIs", price: "No added cost" },
-                high: { label: "Multiple", detail: "PayMongo, BIR, SMS, email, maps, etc.", price: "+₱3,000 – ₱8,000 each" },
-                factors: ["Payment gateways (PayMongo)", "Government APIs (BIR, SSS)", "SMS & email providers", "Third-party data feeds"],
+                high: { label: "Multiple", detail: "PayMongo, SMS, email, maps, etc.", price: "+₱3,000 – ₱8,000 each" },
+                factors: ["Payment gateways (PayMongo)", "SMS & email providers", "Third-party data feeds", "External APIs & webhooks"],
               },
               {
                 num: "03",
