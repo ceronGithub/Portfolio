@@ -409,6 +409,29 @@ export default function Navbar() {
 
     const observers: IntersectionObserver[] = [];
 
+    // Seed intersecting from current scroll position on mount
+    // (IO only fires on change — if already scrolled, we need to check manually)
+    VISITOR_HASH_IDS.forEach(hashId => {
+      const el = document.getElementById(hashId);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const topThreshold  = vh * 0.15;
+      const botThreshold  = vh * 0.85;
+      if (rect.top < botThreshold && rect.bottom > topThreshold) {
+        intersecting.add(hashId);
+      }
+    });
+    // Apply seeded state immediately (no debounce needed on mount)
+    if (intersecting.size > 0) {
+      for (const hashId of VISITOR_HASH_IDS) {
+        if (intersecting.has(hashId) && hashIndexMap.has(hashId)) {
+          setScrollIndex(hashIndexMap.get(hashId)!);
+          break;
+        }
+      }
+    }
+
     VISITOR_HASH_IDS.forEach(hashId => {
       const el = document.getElementById(hashId);
       if (!el) return;
@@ -534,6 +557,31 @@ export default function Navbar() {
   /* ── Hide on auth pages (after all hooks) ───────────────────────── */
   if (hideOn.includes(pathname)) return null;
 
+  /* ── Click handler — defined before renders so hamburger can use it ─ */
+  function handleClick(item: NavItem, index: number) {
+    if (item.signOut) {
+      signOut({ callbackUrl: "/login", redirect: true });
+      return;
+    }
+    if (item.toggleTheme) { toggleAdminTheme(); return; }
+
+    // Lock active to clicked item
+    setClickedIndex(index);
+    if (clickLockRef.current) clearTimeout(clickLockRef.current);
+    // Longer lock for hamburger — gives route change time to settle
+    clickLockRef.current = setTimeout(() => setClickedIndex(null), 1200);
+
+    if (item.isHash && item.hashId) {
+      if (isOnVisitor) {
+        document.getElementById(item.hashId)?.scrollIntoView({ behavior: "smooth" });
+      } else {
+        router.push("/visitor" + item.href.replace("/", ""));
+      }
+      return;
+    }
+    router.push(item.href);
+  }
+
   /* ── Mobile hamburger render (≤1000px) ─────────────────────────── */
   // null = not yet measured (SSR / first paint) — render nothing to avoid flash
   if (isMobile === null) return null;
@@ -577,35 +625,6 @@ export default function Navbar() {
         </nav>
       </>
     );
-  }
-
-  /* ── Click handler ──────────────────────────────────────────────── */
-  function handleClick(item: NavItem, index: number) {
-    if (item.signOut) {
-      // Force a hard redirect after sign-out clears the JWT cookie.
-      // redirect: true tells next-auth to do a full page navigation
-      // to callbackUrl — bypassing any client-side router caching.
-      signOut({ callbackUrl: "/login", redirect: true });
-      return;
-    }
-    if (item.toggleTheme) { toggleAdminTheme(); return; }
-
-    // Lock bubble to clicked item immediately — before any scroll happens
-    setClickedIndex(index);
-
-    // Release click lock after 400ms so scroll observer takes over quickly
-    if (clickLockRef.current) clearTimeout(clickLockRef.current);
-    clickLockRef.current = setTimeout(() => setClickedIndex(null), 400);
-
-    if (item.isHash && item.hashId) {
-      if (isOnVisitor) {
-        document.getElementById(item.hashId)?.scrollIntoView({ behavior: "smooth" });
-      } else {
-        router.push("/visitor" + item.href.replace("/", ""));
-      }
-      return;
-    }
-    router.push(item.href);
   }
 
   return (
