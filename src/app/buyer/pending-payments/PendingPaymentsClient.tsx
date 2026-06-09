@@ -159,9 +159,19 @@ function linkAvailabilityLabel(isoStr: string): string {
   return `Link expires in ${hoursLeft}h ${minutesLeft}m`;
 }
 
+// Polling interval in milliseconds — checks DB every 4 seconds while any order is PENDING
+const POLL_INTERVAL_MS = 4000;
+
 export default function PendingPaymentsClient({ orders = [] }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
-  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [loadingId,    setLoadingId]    = useState<string | null>(null);
+
+  // Live status map — keyed by orderId, starts from server-rendered prop values
+  const [statusMap, setStatusMap] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    orders.forEach(o => { initial[o.id] = o.status; });
+    return initial;
+  });
 
   // ── Auto-mark expired orders on mount ───────────────────────────────
   // For every order whose payment link has passed the 24h window, silently
@@ -176,6 +186,65 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
         }).catch(() => { /* silent — best-effort */ });
       }
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Poll payment statuses while any order is still PENDING ──────────
+  // Fires every POLL_INTERVAL_MS. Stops automatically once all orders are settled.
+  // Shows a toast the moment a PENDING order flips to PAID.
+  useEffect(() => {
+    const pendingIds = orders
+      .filter(o => !isLinkExpired(o.createdAt))
+      .map(o => o.id);
+
+    if (pendingIds.length === 0) return;
+
+    let isMounted = true;
+
+    async function pollStatuses() {
+      const query = pendingIds.join(",");
+      try {
+        const res = await fetch(`/api/buyer/pending-payment/statuses?ids=${encodeURIComponent(query)}`);
+        if (!res.ok || !isMounted) return;
+
+        const data: { statuses: Record<string, string> } = await res.json();
+
+        setStatusMap(prev => {
+          const updated = { ...prev };
+          let anyNewlyPaid = false;
+
+          for (const [orderId, newStatus] of Object.entries(data.statuses)) {
+            if (prev[orderId] !== "PAID" && newStatus === "PAID") {
+              anyNewlyPaid = true;
+            }
+            updated[orderId] = newStatus;
+          }
+
+          if (anyNewlyPaid) {
+            showToast("✓ Payment confirmed! Your order is now paid.", "success");
+          }
+
+          return updated;
+        });
+      } catch {
+        // Silent — network hiccup, next poll will retry
+      }
+    }
+
+    const intervalId = setInterval(() => {
+      // Stop polling if all tracked orders are no longer PENDING
+      const allSettled = pendingIds.every(id => statusMap[id] !== "PENDING");
+      if (allSettled) {
+        clearInterval(intervalId);
+        return;
+      }
+      pollStatuses();
+    }, POLL_INTERVAL_MS);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -211,9 +280,11 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
         <div className="pendingPaymentsHeader">
           <h1 className="pendingPaymentsTitle">Pending Payments</h1>
           <p className="pendingPaymentsSubtitle">
-            {orders.length === 0
-              ? "You have no pending payments. All orders are settled!"
-              : `You have ${orders.length} payment${orders.length !== 1 ? "s" : ""} waiting for completion.`}
+            {(() => {
+              const pendingCount = orders.filter(o => (statusMap[o.id] ?? o.status) === "PENDING").length;
+              if (pendingCount === 0) return "You have no pending payments. All orders are settled!";
+              return `You have ${pendingCount} payment${pendingCount !== 1 ? "s" : ""} waiting for completion.`;
+            })()}
           </p>
         </div>
 
@@ -227,7 +298,7 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
         ) : (
           <div className="pendingPaymentsList">
             {orders.map(order => {
-              const isPaid    = order.status === "PAID";
+              const isPaid    = (statusMap[order.id] ?? order.status) === "PAID";
               const days      = daysSince(order.createdAt);
               const isOverdue = days > 7;
               const expired   = isLinkExpired(order.createdAt);
