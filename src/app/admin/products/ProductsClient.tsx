@@ -6,7 +6,7 @@
 // Protocol v23 Rule 17 design standards applied.
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -1849,7 +1849,7 @@ function ProductsSection({
         />
       )}
 
-      <div className="apTable">
+      <div className="apTableWrap">
         {/* ── Filter bar ── */}
         <div className="apProductFilterBar">
           <input
@@ -1871,22 +1871,6 @@ function ProductsSection({
           </select>
         </div>
 
-        {/* ── Sortable column headers ── */}
-        <div className="apTableHead apGrid--productsV2">
-          {(["name","category","price","latest"] as const).map(col => (
-            <span
-              key={col}
-              className={"apTableSortHeader" + (sortCol === col ? " apTableSortHeaderActive" : "")}
-              onClick={() => toggleSort(col)}
-            >
-              {col.charAt(0).toUpperCase() + col.slice(1)}
-              <span className="apTableSortIcon">
-                {sortCol === col ? (sortDir === "asc" ? " ↑" : " ↓") : " ↕"}
-              </span>
-            </span>
-          ))}
-          <span>Actions</span>
-        </div>
         {displayList.length === 0 && productList.length > 0 && (
           <div className="apEmpty">
             <p className="apEmptyTitle">No results</p>
@@ -1903,96 +1887,116 @@ function ProductsSection({
             <p className="apEmptyHint">Click "Add New Product" above to create one.</p>
           </div>
         )}
-        {displayList.map(p => (
-          <div key={p.id}>
-            <div className="apTableRow apGrid--productsV2">
-              <span className="apCell apCellName">{p.name}</span>
-              <span className="apCell apCellMuted" style={{ textTransform: "capitalize" }}>{p.category}</span>
-              <span className="apCell apCellMono apCellTierPrices">
-                {(p.category === "interior" || p.category === "exterior") ? (
-                  <span title="Flat Price">₱{p.priceFullPack.toLocaleString()}</span>
-                ) : (
-                  <>
-                    <span title="Mesh Only">M ₱{p.priceMeshOnly.toLocaleString()}</span>
-                    <span title="Standard">S ₱{p.priceStandard.toLocaleString()}</span>
-                    <span title="Full Pack">F ₱{p.priceFullPack.toLocaleString()}</span>
-                  </>
-                )}
-              </span>
-              <span className="apCell">
-                <button
-                  className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}
-                  style={{ fontSize: "0.72rem" }}
-                  onClick={() => handleToggleLatest(p.id, p.isLatest)}
-                  disabled={togglingLatest === p.id}
-                  title="Toggle Latest Drop flag"
+        {productList.length > 0 && (
+        <table className="apProductsTable">
+          <thead>
+            <tr>
+              {(["name","category","price","latest"] as const).map(col => (
+                <th
+                  key={col}
+                  className={"apProductsTh" + (sortCol === col ? " apProductsThActive" : "")}
+                  onClick={() => toggleSort(col)}
                 >
-                  {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
-                </button>
-              </span>
-              <span className="apCell" style={{ display:"flex",gap:"0.4rem",flexWrap:"wrap",alignItems:"center" }}>
-                <button
-                  className="apActionBtn apActionBtnActivate"
-                  onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
-                  disabled={togglingId === p.id || p.isActive}
-                  style={{ opacity: p.isActive ? 0.28 : 1 }}
-                >
-                  {togglingId === p.id && !p.isActive ? "…" : "Activate"}
-                </button>
-                <button
-                  className="apActionBtn apActionBtnDeactivate"
-                  onClick={() => { if (p.isActive) onToggle(p.id, p.isActive); }}
-                  disabled={togglingId === p.id || !p.isActive}
-                  style={{ opacity: !p.isActive ? 0.28 : 1 }}
-                >
-                  {togglingId === p.id && p.isActive ? "…" : "Deactivate"}
-                </button>
-                <button
-                  className={`apActionBtn ${expandedRow === p.id ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
-                  style={{ fontSize: "0.72rem" }}
-                  onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
-                >
-                  {expandedRow === p.id ? "▲ Media" : "✎ Media"}
-                </button>
-                {/* Delete — two-step confirm */}
-                {confirmDeleteId === p.id ? (
-                  <>
+                  {col.charAt(0).toUpperCase() + col.slice(1)}
+                  <span className="apTableSortIcon">
+                    {sortCol === col ? (sortDir === "asc" ? " ↑" : " ↓") : " ↕"}
+                  </span>
+                </th>
+              ))}
+              <th className="apProductsTh">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {displayList.map(p => (
+              <React.Fragment key={p.id}>
+                <tr className="apProductsTr">
+                  <td className="apProductsTd apCellName">{p.name}</td>
+                  <td className="apProductsTd apCellMuted" style={{ textTransform: "capitalize" }}>{p.category}</td>
+                  <td className="apProductsTd apCellTierPrices">
+                    {(p.category === "interior" || p.category === "exterior") ? (
+                      <span title="Flat Price">₱{p.priceFullPack.toLocaleString()}</span>
+                    ) : (
+                      <>
+                        <span title="Mesh Only">M ₱{p.priceMeshOnly.toLocaleString()}</span>
+                        <span title="Standard">S ₱{p.priceStandard.toLocaleString()}</span>
+                        <span title="Full Pack">F ₱{p.priceFullPack.toLocaleString()}</span>
+                      </>
+                    )}
+                  </td>
+                  <td className="apProductsTd">
                     <button
-                      className="apActionBtn apActionBtnDelete apActionBtnDeleteConfirm"
-                      onClick={() => handleDeleteProduct(p)}
-                      disabled={deletingId === p.id}
+                      className={`apActionBtn ${p.isLatest ? "apActionBtnActivate" : "apActionBtnDeactivate"}`}
+                      onClick={() => handleToggleLatest(p.id, p.isLatest)}
+                      disabled={togglingLatest === p.id}
                     >
-                      {deletingId === p.id ? "…" : "Confirm"}
+                      {togglingLatest === p.id ? "…" : p.isLatest ? "✦ Latest" : "Set Latest"}
+                    </button>
+                  </td>
+                  <td className="apProductsTd apProductsActionsTd">
+                    <button
+                      className="apActionBtn apActionBtnActivate"
+                      onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
+                      disabled={togglingId === p.id || p.isActive}
+                      style={{ opacity: p.isActive ? 0.28 : 1 }}
+                    >
+                      {togglingId === p.id && !p.isActive ? "…" : "Activate"}
                     </button>
                     <button
                       className="apActionBtn apActionBtnDeactivate"
-                      style={{ fontSize: "0.7rem" }}
-                      onClick={() => setConfirmDeleteId(null)}
+                      onClick={() => { if (p.isActive) onToggle(p.id, p.isActive); }}
+                      disabled={togglingId === p.id || !p.isActive}
+                      style={{ opacity: !p.isActive ? 0.28 : 1 }}
                     >
-                      Cancel
+                      {togglingId === p.id && p.isActive ? "…" : "Deactivate"}
                     </button>
-                  </>
-                ) : (
-                  <button
-                    className="apActionBtn apActionBtnDelete"
-                    style={{ fontSize: "0.72rem" }}
-                    onClick={() => setConfirmDeleteId(p.id)}
-                    disabled={deletingId === p.id}
-                    title="Delete product + files from R2/Drive"
-                  >
-                    🗑 Delete
-                  </button>
+                    <button
+                      className={`apActionBtn ${expandedRow === p.id ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
+                      onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
+                    >
+                      {expandedRow === p.id ? "▲ Media" : "✎ Media"}
+                    </button>
+                    {confirmDeleteId === p.id ? (
+                      <>
+                        <button
+                          className="apActionBtn apActionBtnDelete apActionBtnDeleteConfirm"
+                          onClick={() => handleDeleteProduct(p)}
+                          disabled={deletingId === p.id}
+                        >
+                          {deletingId === p.id ? "…" : "Confirm"}
+                        </button>
+                        <button
+                          className="apActionBtn apActionBtnDeactivate"
+                          onClick={() => setConfirmDeleteId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="apActionBtn apActionBtnDelete"
+                        onClick={() => setConfirmDeleteId(p.id)}
+                        disabled={deletingId === p.id}
+                        title="Delete product + files from R2/Drive"
+                      >
+                        🗑 Delete
+                      </button>
+                    )}
+                  </td>
+                </tr>
+                {expandedRow === p.id && (
+                  <tr key={p.id + "-media"} className="apProductsMediaRow">
+                    <td colSpan={5} className="apProductsMediaTd">
+                      <div className="apMediaEditorWrap">
+                        <MediaEditor product={p} onFieldSaved={handleFieldSaved} />
+                      </div>
+                    </td>
+                  </tr>
                 )}
-              </span>
-            </div>
-            {/* Expanded media editor row */}
-            {expandedRow === p.id && (
-              <div className="apMediaEditorWrap">
-                <MediaEditor product={p} onFieldSaved={handleFieldSaved} />
-              </div>
-            )}
-          </div>
-        ))}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+        )}
       </div>
     </div>
   );
