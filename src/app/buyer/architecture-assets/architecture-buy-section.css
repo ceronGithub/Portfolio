@@ -40,27 +40,33 @@
 
 .archBuyBgFade {
   position: absolute; inset: 0;
-  background: linear-gradient(to right, transparent 20%, rgba(0,0,0,0.75) 60%, #000 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.85) 100%);
 }
 
-/* Content */
+/* Content — centered over the video */
 .archBuyContent {
   position:        relative;
   z-index:         10;
-  margin-left:     42%;
-  width:           54%;
-  padding:         5rem 3rem 5rem 2rem;
+  margin-left:     auto;
+  margin-right:    auto;
+  width:           100%;
+  max-width:       760px;
+  padding:         5rem 2rem;
   display:         flex;
   flex-direction:  column;
   gap:             2.5rem;
+  align-items:     center;
+  text-align:      center;
 }
 
 .archBuyHeaderRow {
   display:         flex;
-  align-items:     flex-start;
-  justify-content: space-between;
-  gap:             1.5rem;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             1rem;
   flex-wrap:       wrap;
+  width:           100%;
 }
 
 .archBuyLabel {
@@ -474,7 +480,7 @@
 }
 
 @media (max-width: 768px) {
-  .archBuyContent   { margin-left: 0; width: 100%; padding: 4rem 1.5rem; }
+  .archBuyContent   { margin-left: auto; margin-right: auto; width: 100%; padding: 4rem 1.5rem; }
   .archBuyBgLeft    { width: 100%; opacity: 0.08; }
   .archBuyCards     { grid-template-columns: 1fr; }
   .archBuyHeaderRow { flex-direction: column; }

@@ -4,7 +4,7 @@
 /* ── Floating wishlist button — fixed bottom-right ── */
 .buyerWishlistFloatBtn {
   position:        fixed;
-  bottom:          2rem;
+  bottom:          6rem;
   right:           2rem;
   z-index:         350;
   width:           52px;
@@ -51,7 +51,7 @@
 /* ── Floating cart button — fixed bottom-right, above wishlist ── */
 .buyerCartFloatBtn {
   position:        fixed;
-  bottom:          5.5rem;
+  bottom:          9.5rem;
   right:           2rem;
   z-index:         350;
   width:           52px;
@@ -100,7 +100,7 @@
 
 .buyerRecentFloatBtn {
   position:        fixed;
-  bottom:          9rem;
+  bottom:          13rem;
   right:           2rem;
   z-index:         350;
   width:           52px;
@@ -151,7 +151,7 @@
 
 .buyerRecentPopup {
   position:       fixed;
-  bottom:         12rem;
+  bottom:         16rem;
   right:          2rem;
   z-index:        400;
   width:          280px;
@@ -281,7 +281,7 @@
 
 .buyerTrackerFloatBtn {
   position:        fixed;
-  bottom:          12.5rem;
+  bottom:          16.5rem;
   right:           2rem;
   z-index:         350;
   width:           52px;

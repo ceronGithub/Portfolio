@@ -510,44 +510,54 @@ function SystemCard({
 export default function SystemsClient({ items, buyerEmail, buyerName, wishlistIds, onToggleWishlist }: Props) {
   const [modalItem,   setModalItem]   = useState<SystemItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isDragging,  setIsDragging]  = useState(false);
-  const [dragStartX,  setDragStartX]  = useState(0);
-  const [dragDelta,   setDragDelta]   = useState(0);
-  const vpRef    = useRef<HTMLDivElement>(null);
-  const [vpWidth, setVpWidth] = useState(0);
+  const vpRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const CARD_W = 400;
   const GAP    = 28;
   const total  = items.length;
 
+  const clamp = useCallback((i: number) => Math.max(0, Math.min(i, total - 1)), [total]);
+
+  // goTo: update active index and scroll the card into center
+  const goTo = useCallback((i: number) => {
+    const idx = clamp(i);
+    setActiveIndex(idx);
+    const card = cardRefs.current[idx];
+    const vp   = vpRef.current;
+    if (!card || !vp) return;
+    // Scroll so the card center aligns with the viewport center
+    const vpW    = vp.offsetWidth;
+    const cardW  = card.offsetWidth;
+    const target = card.offsetLeft - (vpW - cardW) / 2;
+    vp.scrollTo({ left: target, behavior: "smooth" });
+  }, [clamp]);
+
+  // Sync activeIndex when user manually scrolls (snap)
   useEffect(() => {
-    const update = () => { if (vpRef.current) setVpWidth(vpRef.current.offsetWidth); };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    const vp = vpRef.current;
+    if (!vp) return;
+    function onScroll() {
+      if (!vp) return;
+      const vpCenter = vp.scrollLeft + vp.offsetWidth / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      cardRefs.current.forEach((card, i) => {
+        if (!card) return;
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(vpCenter - cardCenter);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      setActiveIndex(closest);
+    }
+    vp.addEventListener("scroll", onScroll, { passive: true });
+    return () => vp.removeEventListener("scroll", onScroll);
   }, []);
 
-  const clamp = useCallback((i: number) => Math.max(0, Math.min(i, total - 1)), [total]);
-  const goTo  = useCallback((i: number) => setActiveIndex(clamp(i)), [clamp]);
-
-  const centerOffset = (vpWidth - CARD_W) / 2;
-  const translateX   = centerOffset - activeIndex * (CARD_W + GAP) + dragDelta;
-
-  function onMouseDown(e: React.MouseEvent) { setIsDragging(true); setDragStartX(e.clientX); setDragDelta(0); }
-  function onMouseMove(e: React.MouseEvent) { if (!isDragging) return; setDragDelta(e.clientX - dragStartX); }
-  function onMouseUp() {
-    if (!isDragging) return;
-    setIsDragging(false);
-    if (dragDelta < -60) goTo(activeIndex + 1);
-    else if (dragDelta > 60) goTo(activeIndex - 1);
-    setDragDelta(0);
-  }
-  function onTouchStart(e: React.TouchEvent) { setDragStartX(e.touches[0].clientX); setDragDelta(0); }
-  function onTouchEnd(e: React.TouchEvent) {
-    const d = e.changedTouches[0].clientX - dragStartX;
-    if (d < -60) goTo(activeIndex + 1); else if (d > 60) goTo(activeIndex - 1);
-    setDragDelta(0);
-  }
+  // Center first card on mount
+  useEffect(() => {
+    goTo(0);
+  }, []);
 
   const activeBgVideo = items[activeIndex]?.bgVideoUrl ?? null;
 
@@ -582,31 +592,24 @@ export default function SystemsClient({ items, buyerEmail, buyerName, wishlistId
           <div
             ref={vpRef}
             className="vSysCarouselViewport"
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onMouseLeave={onMouseUp}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
           >
-            <div
-              className="vSysCarouselTrack"
-              style={{
-                transform:  `translate3d(${translateX}px, 0, 0)`,
-                transition: isDragging ? "none" : "transform 0.48s cubic-bezier(0.25,1,0.5,1)",
-              }}
-            >
+            <div className="vSysCarouselTrack">
               {items.map((item, index) => (
-                <SystemCard
+                <div
                   key={item.id}
-                  item={item}
-                  index={index}
-                  isActive={index === activeIndex}
-                  onClick={() => goTo(index)}
-                  onPreviewClick={() => setModalItem(item)}
-                  isWishlisted={wishlistIds?.has(item.id) ?? false}
-                  onToggleWishlist={onToggleWishlist}
-                />
+                  ref={(el: HTMLDivElement | null) => { cardRefs.current[index] = el; }}
+                  className="vSysCarouselSnapItem"
+                >
+                  <SystemCard
+                    item={item}
+                    index={index}
+                    isActive={index === activeIndex}
+                    onClick={() => goTo(index)}
+                    onPreviewClick={() => setModalItem(item)}
+                    isWishlisted={wishlistIds?.has(item.id) ?? false}
+                    onToggleWishlist={onToggleWishlist}
+                  />
+                </div>
               ))}
             </div>
           </div>

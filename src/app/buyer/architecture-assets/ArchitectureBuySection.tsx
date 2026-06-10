@@ -73,6 +73,17 @@ export default function ArchitectureBuySection({
   const [exteriorAssets, setExteriorAssets] = useState<ArchAssetItem[]>([]);
   const [assetsLoading,  setAssetsLoading]  = useState(false);
 
+  // Fetch first interior asset on mount to show a default background video
+  useEffect(() => {
+    fetch("/api/products?category=interior")
+      .then(r => r.json())
+      .then(data => {
+        const firstVideo = (data.products ?? []).find((p: any) => p.previewVideoUrl)?.previewVideoUrl;
+        if (firstVideo) setBgSrc(firstVideo);
+      })
+      .catch(() => {});
+  }, []);
+
   // Fetch from /api/products when modal opens or tab switches
   useEffect(() => {
     if (!browseOpen) return;
@@ -175,18 +186,18 @@ export default function ArchitectureBuySection({
 
         {/* Left background — cycles through all selected asset videos */}
         <div className="archBuyBgLeft">
-          {bgSrc ? (
-            <video
-              ref={bgVideoRef}
-              src={bgSrc}
-              className="archBuyBgVideo"
-              muted playsInline
-              loop={cartItems.length === 1}
-              onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
-            />
-          ) : (
-            <div className="archBuyBgPlaceholder" />
-          )}
+          <video
+            ref={bgVideoRef}
+            src={bgSrc || undefined}
+            className="archBuyBgVideo"
+            style={{ opacity: bgSrc ? 1 : 0 }}
+            autoPlay
+            muted
+            playsInline
+            loop={cartItems.length <= 1}
+            onEnded={cartItems.length > 1 ? () => setCycleIndex(prev => prev + 1) : undefined}
+          />
+          {!bgSrc && <div className="archBuyBgPlaceholder" />}
           <div className="archBuyBgFade" />
         </div>
 

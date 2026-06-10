@@ -243,6 +243,7 @@ export default function BuyerDashboardClient({ items, buyerEmail, buyerName, own
   return (
     <>
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
+
       {/* ── Latest Drop Ticker — sticky top bar, renders only when drops exist ── */}
       <LatestDropTicker
         latestCharacter={latestCharacter}

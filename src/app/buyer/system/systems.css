@@ -830,21 +830,35 @@
   gap: 1.5rem;
 }
 
+/* Viewport: CSS scroll-snap — browser natively centers each card */
 .vSysCarouselViewport {
-  width: 100%;
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-  -webkit-user-select: none;
+  width:                100%;
+  overflow-x:           scroll;
+  overflow-y:           hidden;
+  scroll-snap-type:     x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width:      none;   /* Firefox */
+  cursor:               grab;
 }
-.vSysCarouselViewport:active { cursor: grabbing; }
+.vSysCarouselViewport:active  { cursor: grabbing; }
+.vSysCarouselViewport::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
+/* Track: flex row with padding so first/last cards can center */
 .vSysCarouselTrack {
-  display:      flex;
-  gap:          28px;
-  will-change:  transform;
-  padding:      1rem 0 2rem;
-  align-items:  center;
+  display:     flex;
+  gap:         28px;
+  padding:     1.5rem 0 2rem;
+  align-items: center;
+  /* Left/right padding = 50vw - half card width — allows first and last to center */
+  padding-left:  calc(50% - 200px);
+  padding-right: calc(50% - 200px);
+}
+
+/* Snap item wrapper — each card snaps to center */
+.vSysCarouselSnapItem {
+  scroll-snap-align:  center;
+  scroll-snap-stop:   always;
+  flex-shrink:        0;
 }
 
 /* ── Controls ─────────────────────────────────── */
