@@ -27,20 +27,21 @@
   display: block;
 }
 
-/* Selected asset video fills the left bg */
+/* Selected asset video fills the left bg — contain so full video is visible */
 .archBuyBgVideo {
   position:        absolute;
   inset:           0;
   width:           100%;
   height:          100%;
-  object-fit:      cover;
-  object-position: center;
+  object-fit:      contain;
+  object-position: 30% 55%;
   display:         block;
+  background:      #000;
 }
 
 .archBuyBgFade {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.20) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.20) 100%);
 }
 
 /* Content — centered over the video */
