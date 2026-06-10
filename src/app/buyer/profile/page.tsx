@@ -1,6 +1,7 @@
 // /buyer/profile/page.tsx — Server Component.
 // Fetches orders + ownerships; merges manually-granted items into order history.
 
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { prisma }           from "@/lib/prisma";

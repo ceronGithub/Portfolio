@@ -2,6 +2,7 @@
 // Fetches buyer's active maintenance order + all related data.
 // If no active order, shows package selection to avail.
 
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { prisma }           from "@/lib/prisma";

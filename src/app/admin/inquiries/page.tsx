@@ -2,6 +2,7 @@
 // Two tabs: Custom Requests (from Inquiry model) + Contact Messages (from ContactMessage model).
 // Protected: ADMIN only.
 
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";

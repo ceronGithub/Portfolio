@@ -3,6 +3,7 @@
 // Price is always recomputed from product.price + tier stored in deliveryNote —
 // never trusts a stale or incorrectly stored amountPaid value.
 
+export const dynamic = "force-dynamic";
 import { getServerSession }  from "next-auth";
 import { authOptions }       from "@/lib/auth";
 import { prisma }            from "@/lib/prisma";

@@ -2,6 +2,7 @@
 // Lists all orders with status, customer, product, amount, and date.
 // Revenue is recomputed from product price + tier — never trusts stale amountPaid.
 // Protected: ADMIN only.
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";

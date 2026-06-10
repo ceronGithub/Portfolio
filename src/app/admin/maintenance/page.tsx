@@ -1,5 +1,6 @@
 // admin/maintenance/page.tsx — Server Component.
 // Fetches all active maintenance orders with buyer info, tasks, bugs, VC schedules.
+export const dynamic = "force-dynamic";
 import { getServerSession }      from "next-auth";
 import { authOptions }           from "@/lib/auth";
 import { prisma }                from "@/lib/prisma";

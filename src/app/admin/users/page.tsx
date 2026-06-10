@@ -1,6 +1,7 @@
 // admin/users/page.tsx — User Management page.
 // 3 user cards + 1 action log card (4 tabs: Ban / Delete / Deactivate / Activate).
 // Protected: ADMIN only.
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";

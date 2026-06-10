@@ -2,6 +2,7 @@
 // Lists all buyer reviews with star rating, buyer name, asset, date, delete.
 // Protected: ADMIN only.
 
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";

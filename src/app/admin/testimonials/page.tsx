@@ -2,6 +2,7 @@
 // Shows all testimonials (pending + approved). Admin can approve or delete.
 // Protected: ADMIN only.
 
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";

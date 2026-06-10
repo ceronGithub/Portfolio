@@ -2,6 +2,7 @@
 // Fetches all orders for the logged-in buyer, newest first.
 // Renders OrdersClient with full order + product data + owned product IDs.
 
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { prisma }           from "@/lib/prisma";

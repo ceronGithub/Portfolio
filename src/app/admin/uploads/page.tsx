@@ -3,6 +3,7 @@
 // Checks if Google Drive is connected (access token in cookies).
 // Passes connection status to UploadsClient.
 
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
 import { redirect }         from "next/navigation";

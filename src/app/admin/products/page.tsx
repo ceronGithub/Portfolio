@@ -2,6 +2,7 @@
 // Lists all products (systems) with active status, base price,
 // add-on count. Allows toggling isActive via client action.
 // Protected: ADMIN only.
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
