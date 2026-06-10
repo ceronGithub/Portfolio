@@ -142,11 +142,17 @@
 }
 
 /* ── Table ────────────────────────────────────────── */
+/* overflow-x: auto on wrapper + min-width on table = horizontal scroll on narrow viewports */
 .apTableWrap {
   overflow-x: auto;
+  width: 100%;
   scrollbar-width: thin;
   scrollbar-color: var(--sidebar-border) transparent;
 }
+
+.apTableWrap::-webkit-scrollbar { height: 5px; }
+.apTableWrap::-webkit-scrollbar-track { background: transparent; }
+.apTableWrap::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 999px; }
 
 .apTableWrap::-webkit-scrollbar { width: 5px; height: 5px; }
 .apTableWrap::-webkit-scrollbar-track { background: transparent; }
@@ -155,9 +161,8 @@
 /* ── HTML table styles for Products table ── */
 .apProductsTable {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
-  table-layout: auto;
-  min-width: 860px; /* guarantees all 5 columns visible before horizontal scroll kicks in */
 }
 
 .apProductsTh {
@@ -196,27 +201,21 @@
   white-space: nowrap;
 }
 
-/* Price cell — badges inline, never wrap */
-.apProductsTd.apCellTierPrices { white-space: nowrap; }
-
-.apCellTierPrices span {
-  display: inline-block;
-  margin-right: 0.25rem;
+.apProductsActionsTd {
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-/* Actions column — td is table-cell; inner div is flex */
-.apProductsActionsTd { width: 1%; white-space: nowrap; }
-
-.apProductsActionsTd > div,
+/* Inner flex wrapper for the action buttons inside the td */
 .apProductsActionsInner {
-  display:     flex;
-  flex-wrap:   wrap;
-  gap:         0.3rem;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
   align-items: center;
 }
 
 .apProductsMediaRow { background: rgba(255,255,255,0.02); }
-.apProductsMediaTd  { padding: 0; white-space: normal; }
+.apProductsMediaTd  { padding: 0; }
 
 .apTableHead {
   display: grid;
@@ -826,6 +825,7 @@
   background: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
   border-radius: 14px;
+  overflow: hidden;
   transition: border-color 0.2s ease;
 }
 .apSystemCard:hover { border-color: rgba(201, 169, 110, 0.25); }
@@ -1046,24 +1046,12 @@
 @media (max-width: 1100px) {
   .apGrid--products   { grid-template-columns: 1.5fr 2fr 1fr 1fr 1.5fr; }
   .apGrid--productsV2 { grid-template-columns: 1.5fr 1.2fr 1fr 1fr 1.5fr; }
-  /* Table: tighten padding on wide columns */
-  .apProductsTd,
-  .apProductsTh { padding: 0.55rem 0.75rem; }
-
 }
 
 @media (max-width: 860px) {
   .apMediaRow { grid-template-columns: 130px 1fr auto auto; }
   .apAddProductGrid { grid-template-columns: 1fr; }
   .apSystemEditorGrid { grid-template-columns: 1fr; }
-  /* Table: tighter padding, smaller font */
-  .apProductsTd,
-  .apProductsTh { padding: 0.5rem 0.6rem; font-size: 0.75rem; }
-
-  /* Systems: allow title to truncate */
-  .apSystemTitle { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .apSystemHeader { flex-wrap: wrap; gap: 0.5rem; }
-  .apSystemHeaderRight { flex-shrink: 0; }
 }
 
 @media (max-width: 760px) {
@@ -1076,22 +1064,6 @@
   .apAnalyticsBar { gap: 0.5rem; }
   .apMediaRow { grid-template-columns: 1fr; gap: 0.4rem; }
   .apMediaLabel { font-size: 0.68rem; }
-  /* Table: compact on small screens, rely on horizontal scroll */
-  .apProductsTd,
-  .apProductsTh { padding: 0.45rem 0.5rem; font-size: 0.72rem; }
-
-  /* Systems: tighter header layout */
-  .apSystemHeader      { flex-wrap: wrap; row-gap: 0.4rem; }
-  .apSystemHeaderLeft  { flex-wrap: wrap; gap: 0.3rem; }
-  .apSystemTitle       { font-size: 0.85rem; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .apSystemHeaderRight { width: 100%; justify-content: flex-start; padding-top: 0.25rem; }
-  .apSystemTag         { font-size: 0.6rem; }
-  .apSystemAddonCount  { font-size: 0.7rem; }
-  /* Card + product filter */
-  .apCardHeader        { flex-wrap: wrap; gap: 0.5rem; }
-  .apProductFilterBar  { flex-direction: column; gap: 0.5rem; }
-  .apProductFilterInput,
-  .apProductFilterSelect { width: 100%; }
 }
 /* ══════════════════════════════════════════════════════════════════
    MediaEditor — grouped fields (Tier Prices, Files, Animations)

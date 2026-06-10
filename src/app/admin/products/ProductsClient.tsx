@@ -1934,54 +1934,54 @@ function ProductsSection({
                   </td>
                   <td className="apProductsTd apProductsActionsTd">
                     <div className="apProductsActionsInner">
-                    <button
-                      className="apActionBtn apActionBtnActivate"
-                      onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
-                      disabled={togglingId === p.id || p.isActive}
-                      style={{ opacity: p.isActive ? 0.28 : 1 }}
-                    >
-                      {togglingId === p.id && !p.isActive ? "…" : "Activate"}
-                    </button>
-                    <button
-                      className="apActionBtn apActionBtnDeactivate"
-                      onClick={() => { if (p.isActive) onToggle(p.id, p.isActive); }}
-                      disabled={togglingId === p.id || !p.isActive}
-                      style={{ opacity: !p.isActive ? 0.28 : 1 }}
-                    >
-                      {togglingId === p.id && p.isActive ? "…" : "Deactivate"}
-                    </button>
-                    <button
-                      className={`apActionBtn ${expandedRow === p.id ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
-                      onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
-                    >
-                      {expandedRow === p.id ? "▲ Media" : "✎ Media"}
-                    </button>
-                    {confirmDeleteId === p.id ? (
-                      <>
-                        <button
-                          className="apActionBtn apActionBtnDelete apActionBtnDeleteConfirm"
-                          onClick={() => handleDeleteProduct(p)}
-                          disabled={deletingId === p.id}
-                        >
-                          {deletingId === p.id ? "…" : "Confirm"}
-                        </button>
-                        <button
-                          className="apActionBtn apActionBtnDeactivate"
-                          onClick={() => setConfirmDeleteId(null)}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
                       <button
-                        className="apActionBtn apActionBtnDelete"
-                        onClick={() => setConfirmDeleteId(p.id)}
-                        disabled={deletingId === p.id}
-                        title="Delete product + files from R2/Drive"
+                        className="apActionBtn apActionBtnActivate"
+                        onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
+                        disabled={togglingId === p.id || p.isActive}
+                        style={{ opacity: p.isActive ? 0.28 : 1 }}
                       >
-                        🗑 Delete
+                        {togglingId === p.id && !p.isActive ? "…" : "Activate"}
                       </button>
-                    )}
+                      <button
+                        className="apActionBtn apActionBtnDeactivate"
+                        onClick={() => { if (p.isActive) onToggle(p.id, p.isActive); }}
+                        disabled={togglingId === p.id || !p.isActive}
+                        style={{ opacity: !p.isActive ? 0.28 : 1 }}
+                      >
+                        {togglingId === p.id && p.isActive ? "…" : "Deactivate"}
+                      </button>
+                      <button
+                        className={`apActionBtn ${expandedRow === p.id ? "apActionBtnDeactivate" : "apActionBtnActivate"}`}
+                        onClick={() => setExpandedRow(prev => prev === p.id ? null : p.id)}
+                      >
+                        {expandedRow === p.id ? "▲ Media" : "✎ Media"}
+                      </button>
+                      {confirmDeleteId === p.id ? (
+                        <>
+                          <button
+                            className="apActionBtn apActionBtnDelete apActionBtnDeleteConfirm"
+                            onClick={() => handleDeleteProduct(p)}
+                            disabled={deletingId === p.id}
+                          >
+                            {deletingId === p.id ? "…" : "Confirm"}
+                          </button>
+                          <button
+                            className="apActionBtn apActionBtnDeactivate"
+                            onClick={() => setConfirmDeleteId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="apActionBtn apActionBtnDelete"
+                          onClick={() => setConfirmDeleteId(p.id)}
+                          disabled={deletingId === p.id}
+                          title="Delete product + files from R2/Drive"
+                        >
+                          🗑 Delete
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
