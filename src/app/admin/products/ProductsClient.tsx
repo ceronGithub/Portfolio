@@ -1933,6 +1933,7 @@ function ProductsSection({
                     </button>
                   </td>
                   <td className="apProductsTd apProductsActionsTd">
+                    <div className="apProductsActionsInner">
                     <button
                       className="apActionBtn apActionBtnActivate"
                       onClick={() => { if (!p.isActive) onToggle(p.id, p.isActive); }}
@@ -1981,6 +1982,7 @@ function ProductsSection({
                         🗑 Delete
                       </button>
                     )}
+                    </div>
                   </td>
                 </tr>
                 {expandedRow === p.id && (
