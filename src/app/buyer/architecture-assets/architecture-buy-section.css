@@ -40,7 +40,7 @@
 
 .archBuyBgFade {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.85) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.20) 100%);
 }
 
 /* Content — centered over the video */
