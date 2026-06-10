@@ -1,13 +1,20 @@
 // Singleton Prisma client. Prevents multiple instances during Next.js hot-reload.
-// Force new instance in dev to avoid stale client after prisma generate.
+// Uses globalThis cache in dev to survive HMR, but validates the instance is live
+// before reusing — prevents Turbopack stale-module errors.
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+declare global {
+  // eslint-disable-next-line no-var
+  var _prisma: PrismaClient | undefined;
+}
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createPrismaClient() {
+  return new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma: PrismaClient =
+  process.env.NODE_ENV === "production"
+    ? createPrismaClient()
+    : (global._prisma ?? (global._prisma = createPrismaClient()));

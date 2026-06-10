@@ -15,11 +15,18 @@
   flex: 1;
   min-height: 100vh;
   overflow: hidden;
-  display: none; /* hidden on mobile, shown on md+ */
+  display: block;
 }
 
-@media (min-width: 900px) {
-  .authLeft { display: block; }
+/* Below 900px: video panel becomes a fixed fullscreen background behind the form */
+@media (max-width: 899px) {
+  .authLeft {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    min-height: 100vh;
+    width: 100%;
+  }
 }
 
 .authVideoBg {
@@ -150,24 +157,29 @@
   flex-shrink: 0;
 }
 
+/* Below 900px: form floats over the video background */
 @media (max-width: 899px) {
   .authRight {
     max-width: 100%;
     width: 100%;
+    background: transparent;
+    position: relative;
+    z-index: 10;
   }
 }
 
 .authCard {
   width: 100%;
   max-width: 400px;
-  background: rgba(255,255,255,0.03);
-  border: 0.5px solid rgba(255,255,255,0.09);
+  background: rgba(20,18,28,0.38);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 20px;
   padding: 2.5rem 2.25rem;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset,
-              0 32px 80px rgba(0,0,0,0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22),
+              inset 0 -1px 0 rgba(255,255,255,0.06),
+              0 24px 64px rgba(0,0,0,0.45);
+  backdrop-filter: blur(10px);
+  /* -webkit-backdrop-filter: blur(10px); */
 }
 
 /* Card header */

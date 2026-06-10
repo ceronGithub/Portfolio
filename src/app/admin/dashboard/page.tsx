@@ -1,6 +1,7 @@
 // admin/dashboard/page.tsx — Overview page.
 // Fetches accurate revenue and stats from DB for all admin widgets.
 // Protected: ADMIN only.
+export const dynamic = "force-dynamic";
 import { prisma }           from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions }      from "@/lib/auth";
