@@ -92,6 +92,133 @@ function fmtTime(d: string) {
   return new Date(d).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+// ── MaintenancePlanEditor — admin-editable package config ─────────────────────
+// Allows admin to update name, price, bugLimit, revisionLimit per package.
+// Updates are written to a config endpoint and reflected in buyer UI on reload.
+// NOTE: features list is static (defined in code). Only pricing + limits are editable here.
+function MaintenancePlanEditor({ showToast }: {
+  showToast: (msg: string, type: "success" | "warning" | "error") => void;
+}) {
+  const [open,    setOpen]    = useState(false);
+  const [saving,  setSaving]  = useState(false);
+
+  // Local editable state for each package — initialized from PKG_CONFIG, refreshed from API on open
+  const [basicPrice,        setBasicPrice]        = useState(String(PKG_CONFIG.BASIC.price.replace(/[₱,]/g,"")));
+  const [basicBugLimit,     setBasicBugLimit]      = useState(String(PKG_CONFIG.BASIC.bugLimit));
+  const [basicRevLimit,     setBasicRevLimit]      = useState(String(PKG_CONFIG.BASIC.revisionLimit));
+  const [priorityPrice,     setPriorityPrice]      = useState(String(PKG_CONFIG.PRIORITY.price.replace(/[₱,]/g,"")));
+  const [priorityBugLimit,  setPriorityBugLimit]   = useState(String(PKG_CONFIG.PRIORITY.bugLimit));
+  const [priorityRevLimit,  setPriorityRevLimit]   = useState(String(PKG_CONFIG.PRIORITY.revisionLimit));
+  const [fullPrice,         setFullPrice]          = useState(String(PKG_CONFIG.FULL.price.replace(/[₱,]/g,"")));
+  const [fullBugLimit,      setFullBugLimit]       = useState(String(PKG_CONFIG.FULL.bugLimit));
+  const [fullRevLimit,      setFullRevLimit]       = useState(String(PKG_CONFIG.FULL.revisionLimit));
+
+  // Fetch live config from file when the editor is opened
+  useEffect(() => {
+    if (!open) return;
+    fetch("/api/admin/maintenance/plans")
+      .then(r => r.json())
+      .then(d => {
+        if (!d.plans) return;
+        const { BASIC, PRIORITY, FULL } = d.plans;
+        if (BASIC)    { setBasicPrice(String(BASIC.price));       setBasicBugLimit(String(BASIC.bugLimit));       setBasicRevLimit(String(BASIC.revisionLimit)); }
+        if (PRIORITY) { setPriorityPrice(String(PRIORITY.price)); setPriorityBugLimit(String(PRIORITY.bugLimit)); setPriorityRevLimit(String(PRIORITY.revisionLimit)); }
+        if (FULL)     { setFullPrice(String(FULL.price));         setFullBugLimit(String(FULL.bugLimit));         setFullRevLimit(String(FULL.revisionLimit)); }
+      })
+      .catch(() => {/* keep defaults */});
+  }, [open]);
+
+  // Saves updated plan config to API
+  async function savePlans() {
+    setSaving(true);
+    const res = await fetch("/api/admin/maintenance/plans", {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        BASIC:    { price: parseInt(basicPrice, 10) || 0,    bugLimit: parseInt(basicBugLimit, 10) || 0,    revisionLimit: parseInt(basicRevLimit, 10) || 0 },
+        PRIORITY: { price: parseInt(priorityPrice, 10) || 0, bugLimit: parseInt(priorityBugLimit, 10) || 0, revisionLimit: parseInt(priorityRevLimit, 10) || 0 },
+        FULL:     { price: parseInt(fullPrice, 10) || 0,     bugLimit: parseInt(fullBugLimit, 10) || 0,     revisionLimit: parseInt(fullRevLimit, 10) || 0 },
+      }),
+    });
+    if (res.ok) {
+      showToast("✓ Maintenance plan pricing updated.", "success");
+      setOpen(false);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      showToast(`✕ ${d.error ?? "Failed to save."}`, "error");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="amPlanEditor">
+      <div className="amPlanEditorHeader">
+        <div>
+          <p className="amPlanEditorTitle">Package Pricing & Limits</p>
+          <p className="amPlanEditorSub">Update prices and usage limits for all maintenance packages.</p>
+        </div>
+        <button
+          className={`amPlanEditorToggle${open ? " active" : ""}`}
+          onClick={() => setOpen(prev => !prev)}
+        >
+          {open ? "▲ Close" : "✎ Edit Plans"}
+        </button>
+      </div>
+
+      {open && (
+        <div className="amPlanGrid">
+          {([
+            { key: "BASIC",    label: "Basic",           price: basicPrice,    setPrice: setBasicPrice,    bugLimit: basicBugLimit,    setBugLimit: setBasicBugLimit,    revLimit: basicRevLimit,    setRevLimit: setBasicRevLimit    },
+            { key: "PRIORITY", label: "Priority Support", price: priorityPrice, setPrice: setPriorityPrice, bugLimit: priorityBugLimit, setBugLimit: setPriorityBugLimit, revLimit: priorityRevLimit, setRevLimit: setPriorityRevLimit },
+            { key: "FULL",     label: "Full Maintenance", price: fullPrice,     setPrice: setFullPrice,     bugLimit: fullBugLimit,     setBugLimit: setFullBugLimit,     revLimit: fullRevLimit,     setRevLimit: setFullRevLimit     },
+          ] as const).map(pkg => (
+            <div key={pkg.key} className="amPlanCard">
+              <p className="amPlanCardLabel">{pkg.label}</p>
+              <div className="amPlanCardFields">
+                <div className="amPlanField">
+                  <label className="amPlanFieldLabel">Price (₱/mo)</label>
+                  <input
+                    className="amPlanInput"
+                    type="number" min="0"
+                    value={pkg.price}
+                    onChange={e => pkg.setPrice(e.target.value)}
+                  />
+                </div>
+                <div className="amPlanField">
+                  <label className="amPlanFieldLabel">Bug limit/mo</label>
+                  <input
+                    className="amPlanInput"
+                    type="number" min="0"
+                    value={pkg.bugLimit}
+                    onChange={e => pkg.setBugLimit(e.target.value)}
+                  />
+                </div>
+                <div className="amPlanField">
+                  <label className="amPlanFieldLabel">Revision limit/mo</label>
+                  <input
+                    className="amPlanInput"
+                    type="number" min="0"
+                    value={pkg.revLimit}
+                    onChange={e => pkg.setRevLimit(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+          <div className="amPlanSaveRow">
+            <button className="amPlanSaveBtn" disabled={saving} onClick={savePlans}>
+              {saving ? "Saving…" : "Save Plan Changes"}
+            </button>
+            <p className="amPlanSaveNote">
+              Price changes apply to new checkouts. Active subscribers keep their current rate.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Tasks Tab ─────────────────────────────────────────────────────────────────
 function TasksTab({ orderId, initTasks, revisionLimit, showToast }: {
   orderId: string;
@@ -761,6 +888,8 @@ export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) 
         <h1 className="amTitle">Maintenance Clients</h1>
         <p className="amCount">{orderList.length} active client{orderList.length !== 1 ? "s" : ""}</p>
       </div>
+
+      <MaintenancePlanEditor showToast={showToast} />
 
       {!orderList.length
         ? <div className="amEmpty">No active maintenance clients yet.</div>

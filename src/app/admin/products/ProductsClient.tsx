@@ -34,6 +34,11 @@ interface Addon {
   price: number; category: string; description: string | null;
 }
 
+interface DesignTier {
+  id: string; name: string; slug: string; tagline: string;
+  priceModifier: number; demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
+}
+
 interface System {
   id: string; tag: string; title: string; basePrice: number;
   accent: string; timeline: string; deploy: string;
@@ -41,6 +46,7 @@ interface System {
   bgVideoUrl: string | null; demoVideoUrl: string | null;
   displayStatus: string;
   addons: Addon[];
+  designTiers?: DesignTier[];
 }
 
 interface Props { products: Product[]; systems: System[]; }
@@ -2197,6 +2203,265 @@ function SystemFullEditor({ system, accent, onSaved }: {
   );
 }
 
+// ── DesignTierEditor — CRUD for website design tiers per system ────────
+// Shows existing tiers with inline edit and delete.
+// Add-new-tier form at the bottom.
+function DesignTierEditor({ systemId, accent }: { systemId: string; accent: string }) {
+  const [tiers,      setTiers]      = useState<DesignTier[]>([]);
+  const [loaded,     setLoaded]     = useState(false);
+  const [editId,     setEditId]     = useState<string | null>(null);
+  const [deleteId,   setDeleteId]   = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [saving,     setSaving]     = useState(false);
+  const [error,      setError]      = useState("");
+
+  // Fields for editing an existing tier
+  const [editName,     setEditName]     = useState("");
+  const [editTagline,  setEditTagline]  = useState("");
+  const [editPrice,    setEditPrice]    = useState("0");
+  const [editDemo,     setEditDemo]     = useState("");
+  const [editLive,     setEditLive]     = useState("");
+  const [editSort,     setEditSort]     = useState("0");
+
+  // Fields for adding a new tier
+  const [newName,      setNewName]      = useState("");
+  const [newSlug,      setNewSlug]      = useState("");
+  const [newTagline,   setNewTagline]   = useState("");
+  const [newPrice,     setNewPrice]     = useState("0");
+  const [newDemo,      setNewDemo]      = useState("");
+  const [newLive,      setNewLive]      = useState("");
+  const [newSort,      setNewSort]      = useState("0");
+  const [addError,     setAddError]     = useState("");
+  const [addSaving,    setAddSaving]    = useState(false);
+  const [showAddForm,  setShowAddForm]  = useState(false);
+
+  // Fetch design tiers for this system on mount
+  useEffect(() => {
+    fetch(`/api/admin/systems/${systemId}/design-tiers`)
+      .then(r => r.json())
+      .then(d => { setTiers(d.tiers ?? []); setLoaded(true); })
+      .catch(() => setLoaded(true));
+  }, [systemId]);
+
+  // Opens inline edit row for a tier
+  function openEdit(tier: DesignTier) {
+    setEditId(tier.id);
+    setEditName(tier.name);
+    setEditTagline(tier.tagline ?? "");
+    setEditPrice(String(tier.priceModifier));
+    setEditDemo(tier.demoVideoUrl ?? "");
+    setEditLive(tier.liveUrl ?? "");
+    setEditSort(String(tier.sortOrder));
+    setError("");
+  }
+
+  // Saves edited tier via PATCH
+  async function saveEdit(tierId: string) {
+    if (!editName.trim()) { setError("Name is required."); return; }
+    setSaving(true); setError("");
+    const res = await fetch(`/api/admin/systems/${systemId}/design-tiers/${tierId}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        name:          editName.trim(),
+        tagline:       editTagline.trim() || null,
+        priceModifier: parseInt(editPrice, 10) || 0,
+        demoVideoUrl:  editDemo.trim() || null,
+        liveUrl:       editLive.trim() || null,
+        sortOrder:     parseInt(editSort, 10) || 0,
+      }),
+    });
+    if (res.ok) {
+      const { tier } = await res.json();
+      setTiers(prev => prev.map(t => t.id === tierId ? tier : t));
+      setEditId(null);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      setError(d.error ?? "Save failed.");
+    }
+    setSaving(false);
+  }
+
+  // Deletes a tier via DELETE
+  async function deleteTier(tierId: string) {
+    setDeletingId(tierId);
+    const res = await fetch(`/api/admin/systems/${systemId}/design-tiers/${tierId}`, { method: "DELETE" });
+    if (res.ok) {
+      setTiers(prev => prev.filter(t => t.id !== tierId));
+      setDeleteId(null);
+    }
+    setDeletingId(null);
+  }
+
+  // Creates a new tier via POST
+  async function addTier() {
+    if (!newName.trim() || !newSlug.trim()) { setAddError("Name and slug are required."); return; }
+    setAddSaving(true); setAddError("");
+    const res = await fetch(`/api/admin/systems/${systemId}/design-tiers`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        name:          newName.trim(),
+        slug:          newSlug.trim(),
+        tagline:       newTagline.trim() || null,
+        priceModifier: parseInt(newPrice, 10) || 0,
+        demoVideoUrl:  newDemo.trim() || null,
+        liveUrl:       newLive.trim() || null,
+        sortOrder:     parseInt(newSort, 10) || 0,
+      }),
+    });
+    if (res.ok) {
+      const { tier } = await res.json();
+      setTiers(prev => [...prev, tier].sort((a, b) => a.sortOrder - b.sortOrder));
+      setNewName(""); setNewSlug(""); setNewTagline("");
+      setNewPrice("0"); setNewDemo(""); setNewLive(""); setNewSort("0");
+      setShowAddForm(false);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      setAddError(d.error ?? "Failed to add tier.");
+    }
+    setAddSaving(false);
+  }
+
+  if (!loaded) return <p className="apMediaLabel" style={{ padding: "0.5rem 0" }}>Loading tiers…</p>;
+
+  return (
+    <div className="apDesignTierEditor">
+      <p className="apSystemEditorTitle">Website Design Tiers</p>
+      <p className="apMediaLabel" style={{ marginBottom: "0.75rem", opacity: 0.5, fontSize: "0.7rem" }}>
+        Control which design style options appear in the Configure modal for buyers and visitors.
+      </p>
+
+      {/* Existing tiers list */}
+      {tiers.length === 0 ? (
+        <p className="apEmptyHint" style={{ marginBottom: "0.75rem" }}>No design tiers yet — add one below.</p>
+      ) : (
+        <div className="apDesignTierList">
+          {tiers.map(tier => (
+            <div key={tier.id} className="apDesignTierRow">
+              {editId === tier.id ? (
+                /* ── Inline edit form ── */
+                <div className="apDesignTierEditForm">
+                  <div className="apSystemEditorGrid" style={{ gap: "0.5rem" }}>
+                    <div className="apSystemEditorField">
+                      <label className="apMediaLabel">Name</label>
+                      <input className="apMediaInput" value={editName} onChange={e => setEditName(e.target.value)} />
+                    </div>
+                    <div className="apSystemEditorField">
+                      <label className="apMediaLabel">Price Modifier (₱)</label>
+                      <input className="apMediaInput" type="number" min="0" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                    </div>
+                    <div className="apSystemEditorField">
+                      <label className="apMediaLabel">Sort Order</label>
+                      <input className="apMediaInput" type="number" min="0" value={editSort} onChange={e => setEditSort(e.target.value)} />
+                    </div>
+                    <div className="apSystemEditorField apSystemEditorFieldFull">
+                      <label className="apMediaLabel">Tagline (short description)</label>
+                      <input className="apMediaInput" value={editTagline} onChange={e => setEditTagline(e.target.value)} />
+                    </div>
+                    <div className="apSystemEditorField apSystemEditorFieldFull">
+                      <label className="apMediaLabel">Demo Video URL (Google Drive)</label>
+                      <input className="apMediaInput" value={editDemo} onChange={e => setEditDemo(e.target.value)} placeholder="drive.google.com/file/d/…/view" />
+                    </div>
+                    <div className="apSystemEditorField apSystemEditorFieldFull">
+                      <label className="apMediaLabel">Live Demo URL</label>
+                      <input className="apMediaInput" value={editLive} onChange={e => setEditLive(e.target.value)} placeholder="https://…" />
+                    </div>
+                  </div>
+                  {error && <p className="apAddAddonError">{error}</p>}
+                  <div className="apAddAddonFormActions">
+                    <button className="apPriceSaveBtn" style={{ background: accent, color: "#0d0d0d" }} disabled={saving} onClick={() => saveEdit(tier.id)}>
+                      {saving ? "Saving…" : "Save"}
+                    </button>
+                    <button className="apActionBtn" onClick={() => { setEditId(null); setError(""); }}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                /* ── Read row ── */
+                <div className="apDesignTierRowInner">
+                  <div className="apDesignTierRowLeft">
+                    <span className="apDesignTierName" style={{ color: accent }}>{tier.name}</span>
+                    {tier.priceModifier > 0
+                      ? <span className="apDesignTierPrice">+₱{tier.priceModifier.toLocaleString()}</span>
+                      : <span className="apDesignTierIncluded">Included</span>
+                    }
+                    {tier.tagline && <span className="apDesignTierTagline">{tier.tagline}</span>}
+                  </div>
+                  <div className="apDesignTierRowActions">
+                    <button className="apActionBtn" style={{ fontSize: "0.67rem" }} onClick={() => openEdit(tier)}>Edit</button>
+                    {deleteId === tier.id ? (
+                      <>
+                        <button className="apActionBtnDelete apActionBtn" disabled={deletingId === tier.id} onClick={() => deleteTier(tier.id)}>
+                          {deletingId === tier.id ? "…" : "Confirm Delete"}
+                        </button>
+                        <button className="apActionBtn" onClick={() => setDeleteId(null)}>Cancel</button>
+                      </>
+                    ) : (
+                      <button className="apActionBtnDelete apActionBtn" style={{ fontSize: "0.67rem" }} onClick={() => setDeleteId(tier.id)}>Delete</button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add new tier */}
+      {showAddForm ? (
+        <div className="apDesignTierAddForm">
+          <p className="apAddAddonFormTitle">Add Design Tier</p>
+          <div className="apSystemEditorGrid" style={{ gap: "0.5rem" }}>
+            <div className="apSystemEditorField">
+              <label className="apMediaLabel">Name</label>
+              <input className="apMediaInput" value={newName} placeholder="e.g. Modern" onChange={e => setNewName(e.target.value)} />
+            </div>
+            <div className="apSystemEditorField">
+              <label className="apMediaLabel">Slug</label>
+              <input className="apMediaInput" value={newSlug} placeholder="e.g. modern" onChange={e => setNewSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} />
+            </div>
+            <div className="apSystemEditorField">
+              <label className="apMediaLabel">Price Modifier (₱)</label>
+              <input className="apMediaInput" type="number" min="0" value={newPrice} onChange={e => setNewPrice(e.target.value)} />
+            </div>
+            <div className="apSystemEditorField">
+              <label className="apMediaLabel">Sort Order</label>
+              <input className="apMediaInput" type="number" min="0" value={newSort} onChange={e => setNewSort(e.target.value)} />
+            </div>
+            <div className="apSystemEditorField apSystemEditorFieldFull">
+              <label className="apMediaLabel">Tagline</label>
+              <input className="apMediaInput" value={newTagline} placeholder="Short description shown to buyers" onChange={e => setNewTagline(e.target.value)} />
+            </div>
+            <div className="apSystemEditorField apSystemEditorFieldFull">
+              <label className="apMediaLabel">Demo Video URL (Google Drive)</label>
+              <input className="apMediaInput" value={newDemo} placeholder="drive.google.com/file/d/…/view" onChange={e => setNewDemo(e.target.value)} />
+            </div>
+            <div className="apSystemEditorField apSystemEditorFieldFull">
+              <label className="apMediaLabel">Live Demo URL</label>
+              <input className="apMediaInput" value={newLive} placeholder="https://…" onChange={e => setNewLive(e.target.value)} />
+            </div>
+          </div>
+          {addError && <p className="apAddAddonError">{addError}</p>}
+          <div className="apAddAddonFormActions">
+            <button className="apPriceSaveBtn" style={{ background: accent, color: "#0d0d0d" }} disabled={addSaving} onClick={addTier}>
+              {addSaving ? "Adding…" : "Add Tier"}
+            </button>
+            <button className="apActionBtn" onClick={() => { setShowAddForm(false); setAddError(""); }}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button
+          className="apAddAddonBtn"
+          onClick={() => setShowAddForm(true)}
+          style={{ marginTop: "0.5rem" }}
+        >
+          + Add Design Tier
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ── SystemCard — single accordion card ────────────────────────────────
 function SystemCard({ system, isExpanded, onToggleExpand }: {
   system: System; isExpanded: boolean;
@@ -2295,6 +2560,9 @@ function SystemCard({ system, isExpanded, onToggleExpand }: {
               onSaved={handleFieldsSaved}
             />
           )}
+
+          {/* Design Tier editor — always visible when expanded */}
+          <DesignTierEditor systemId={localSystem.id} accent={localSystem.accent} />
 
           {/* Addon groups */}
           {Object.keys(groupedAddons).length === 0 ? (

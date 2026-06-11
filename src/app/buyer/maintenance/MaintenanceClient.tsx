@@ -99,19 +99,21 @@ function PackageSelection() {
   const [loading, setLoading] = useState<Pkg | null>(null);
   const [error, setError]     = useState("");
 
+  // Redirects buyer to PayMongo checkout for the selected maintenance package.
   async function avail(pkg: Pkg) {
     setLoading(pkg);
     setError("");
     try {
-      const res = await fetch("/api/maintenance/avail", {
+      const res = await fetch("/api/maintenance/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ packageType: pkg }),
       });
-      if (res.ok) window.location.reload();
-      else {
-        const d = await res.json();
-        setError(d.error ?? "Something went wrong.");
+      const data = await res.json();
+      if (res.ok && data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        setError(data.error ?? "Something went wrong.");
       }
     } catch { setError("Network error. Please try again."); }
     finally { setLoading(null); }
@@ -148,7 +150,7 @@ function PackageSelection() {
                 disabled={loading !== null}
                 onClick={() => avail(pkg)}
               >
-                {loading === pkg ? "Availing…" : "Avail Package"}
+                {loading === pkg ? "Redirecting…" : "Avail Package"}
               </button>
             </div>
           );

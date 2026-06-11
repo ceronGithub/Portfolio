@@ -1,0 +1,17 @@
+{
+  "BASIC": {
+    "price": 5,
+    "bugLimit": 3,
+    "revisionLimit": 2
+  },
+  "PRIORITY": {
+    "price": 8500,
+    "bugLimit": 5,
+    "revisionLimit": 4
+  },
+  "FULL": {
+    "price": 15000,
+    "bugLimit": 8,
+    "revisionLimit": 6
+  }
+}

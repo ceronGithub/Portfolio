@@ -14,28 +14,37 @@ export default function CheckoutSuccessPage() {
   const searchParams              = useSearchParams();
   const [state, setState]         = useState<FulfillState>("polling");
   const [attempts, setAttempts]   = useState(0);
+  const [isMaintenance, setIsMaintenance] = useState(false);
   const intervalRef               = useRef<ReturnType<typeof setInterval> | null>(null);
   const fulfilledRef              = useRef(false);
 
   useEffect(() => {
     const raw      = searchParams.get("orders") ?? "";
     const orderIds = raw.split(",").map(s => s.trim()).filter(Boolean);
+    const type     = searchParams.get("type") ?? "";
     if (orderIds.length === 0) { setState("error"); return; }
+
+    const isMaint = type === "maintenance";
+    setIsMaintenance(isMaint);
 
     async function tryFulfill(): Promise<boolean> {
       try {
-        const res = await fetch("/api/fulfill", {
+        const endpoint = isMaint
+          ? "/api/maintenance/fulfill"
+          : "/api/fulfill";
+        const body = isMaint
+          ? JSON.stringify({ orderId: orderIds[0] })
+          : JSON.stringify({ orderIds });
+        const res = await fetch(endpoint, {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ orderIds }),
+          body,
         });
         if (res.ok) return true;
-        // 402 = not paid yet — keep polling
-        // other errors = stop
         if (res.status !== 402) { setState("error"); return true; }
         return false;
       } catch {
-        return false; // network error — keep trying
+        return false;
       }
     }
 
@@ -51,8 +60,9 @@ export default function CheckoutSuccessPage() {
         fulfilledRef.current = true;
         clearInterval(intervalRef.current!);
         setState("fulfilled");
-        // Auto-redirect to buyer dashboard after 3s so owned assets reload
-        setTimeout(() => { window.location.href = "/buyer"; }, 3000);
+        // Maintenance → go to maintenance page; assets → go to buyer dashboard
+        const redirectTarget = isMaint ? "/buyer/maintenance" : "/buyer";
+        setTimeout(() => { window.location.href = redirectTarget; }, 3000);
       } else if (attempt >= MAX_ATTEMPTS) {
         clearInterval(intervalRef.current!);
         setState("timeout");
@@ -65,8 +75,8 @@ export default function CheckoutSuccessPage() {
         fulfilledRef.current = true;
         clearInterval(intervalRef.current!);
         setState("fulfilled");
-        // Auto-redirect to buyer dashboard after 3s so owned assets reload
-        setTimeout(() => { window.location.href = "/buyer"; }, 3000);
+        const redirectTarget = isMaint ? "/buyer/maintenance" : "/buyer";
+        setTimeout(() => { window.location.href = redirectTarget; }, 3000);
       }
     });
 
@@ -127,17 +137,29 @@ export default function CheckoutSuccessPage() {
               Payment Confirmed
             </h1>
             <p style={{ color:"rgba(255,255,255,0.5)", fontSize:"0.9rem", lineHeight:1.6, marginBottom:"2rem" }}>
-              Your assets are now unlocked and ready to download.
-              Redirecting to your dashboard in 3 seconds…
+              {isMaintenance
+                ? "Your maintenance package is now active. Redirecting to Maintenance…"
+                : "Your assets are now unlocked and ready to download. Redirecting to your dashboard in 3 seconds…"
+              }
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem" }}>
-              <Link href="/buyer/downloads" style={{
-                display:"block", padding:"0.85rem 1.5rem",
-                background:"#22c55e", color:"#000", borderRadius:"10px",
-                fontWeight:700, fontSize:"0.9rem", textDecoration:"none",
-              }}>
-                Go to Downloads →
-              </Link>
+              {isMaintenance ? (
+                <Link href="/buyer/maintenance" style={{
+                  display:"block", padding:"0.85rem 1.5rem",
+                  background:"#22c55e", color:"#000", borderRadius:"10px",
+                  fontWeight:700, fontSize:"0.9rem", textDecoration:"none",
+                }}>
+                  Go to Maintenance →
+                </Link>
+              ) : (
+                <Link href="/buyer/downloads" style={{
+                  display:"block", padding:"0.85rem 1.5rem",
+                  background:"#22c55e", color:"#000", borderRadius:"10px",
+                  fontWeight:700, fontSize:"0.9rem", textDecoration:"none",
+                }}>
+                  Go to Downloads →
+                </Link>
+              )}
               <Link href="/buyer/orders" style={{
                 display:"block", padding:"0.85rem 1.5rem",
                 background:"rgba(255,255,255,0.05)", color:"rgba(255,255,255,0.7)",

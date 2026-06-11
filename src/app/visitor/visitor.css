@@ -623,11 +623,11 @@
 /* ── Footer ───────────────────────────────────── */
 /* ── Footer logo image ── */
 .vNavLogoImg {
-  height:           36px;
-  width:            36px;
+  height:           clamp(44px, 8vw, 72px);
+  width:            clamp(44px, 8vw, 72px);
   object-fit:       cover;
   object-position:  center;
-  border-radius:    8px;
+  border-radius:    14px;
   display:          block;
 }
 
@@ -1050,6 +1050,10 @@
   .vFooterCopy,
   .vFooterTagline {
     font-size: 0.68rem;
+  }
+  .vNavLogoImg {
+    height: clamp(38px, 10vw, 56px);
+    width:  clamp(38px, 10vw, 56px);
   }
 
   /* AI section */
