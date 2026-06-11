@@ -130,14 +130,17 @@ function PackageSelection() {
     setLoading(pkg);
     setError("");
     try {
-      const res = await fetch("/api/maintenance/checkout", {
-        method: "POST",
+      const res  = await fetch("/api/maintenance/checkout", {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageType: pkg }),
+        body:    JSON.stringify({ packageType: pkg }),
       });
       const data = await res.json();
       if (res.ok && data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
+      } else if (res.ok && data.alreadyPending) {
+        // Pending order exists — redirect to pending payments page
+        window.location.href = "/buyer/pending-payments";
       } else {
         setError(data.error ?? "Something went wrong.");
       }

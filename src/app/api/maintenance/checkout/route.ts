@@ -60,6 +60,10 @@ export async function POST(req: NextRequest) {
   const itemName  = PKG_NAMES[packageType];
   const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+  // PayMongo minimum is ₱20
+  if (amount < 20)
+    return NextResponse.json({ error: `Package price (₱${amount}) is below the minimum allowed amount. Please update the price in Admin → Maintenance.` }, { status: 400 });
+
   try {
     // Create PENDING Order — no productId/systemId, uses deliveryNote to identify type
     const order = await (prisma as any).order.create({
