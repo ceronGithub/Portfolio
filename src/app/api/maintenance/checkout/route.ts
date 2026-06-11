@@ -10,10 +10,6 @@ import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
 import { prisma }                    from "@/lib/prisma";
 import { createPaymentLink }         from "@/lib/paymongo";
-import { readFile }                  from "fs/promises";
-import path                          from "path";
-
-const CONFIG_PATH = path.join(process.cwd(), "src", "config", "maintenance-plans.json");
 
 const PKG_NAMES: Record<string, string> = {
   BASIC:    "Basic Maintenance",
@@ -23,11 +19,12 @@ const PKG_NAMES: Record<string, string> = {
 
 async function getPkgPrice(pkg: string): Promise<number> {
   try {
-    const raw = await readFile(CONFIG_PATH, "utf-8");
-    const cfg = JSON.parse(raw);
-    return cfg[pkg]?.price ?? 0;
+    const rows = await prisma.$queryRaw<{ price: number }[]>`
+      SELECT price FROM "MaintenancePlan" WHERE package = ${pkg} LIMIT 1
+    `;
+    return rows[0]?.price ?? 0;
   } catch {
-    // Fallback defaults if config file is unreadable
+    // Fallback defaults if table not yet migrated
     const fallback: Record<string, number> = { BASIC: 4500, PRIORITY: 8500, FULL: 15000 };
     return fallback[pkg] ?? 0;
   }
@@ -35,7 +32,7 @@ async function getPkgPrice(pkg: string): Promise<number> {
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "BUYER")
+  if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const userId = (session.user as any).id as string;

@@ -346,6 +346,17 @@ model MaintenanceOrder {
   @@index([userId])
 }
 
+// ── Maintenance Plan Config ──────────────────────────────────────────────
+// Seeded with 3 rows (BASIC, PRIORITY, FULL). Admin can update price/limits.
+// Buyer UI reads from here so prices are always in sync.
+model MaintenancePlan {
+  id            String @id @default(cuid())
+  package       String @unique  // BASIC | PRIORITY | FULL
+  price         Int             // PHP
+  bugLimit      Int
+  revisionLimit Int
+}
+
 // VC call request — buyer or admin can initiate.
 model VCSchedule {
   id                 String   @id @default(cuid())

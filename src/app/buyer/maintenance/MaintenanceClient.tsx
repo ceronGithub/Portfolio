@@ -96,8 +96,34 @@ function usageClass(used: number, limit: number) {
 
 // ── Package Selection ─────────────────────────────────────────────────────────
 function PackageSelection() {
-  const [loading, setLoading] = useState<Pkg | null>(null);
-  const [error, setError]     = useState("");
+  const [loading,   setLoading]   = useState<Pkg | null>(null);
+  const [error,     setError]     = useState("");
+  const [livePlans, setLivePlans] = useState<Record<Pkg, { price: number; bugLimit: number; revisionLimit: number }> | null>(null);
+
+  // Fetch live prices from DB on mount
+  useEffect(() => {
+    fetch("/api/maintenance/plans")
+      .then(r => r.json())
+      .then(d => { if (d.plans) setLivePlans(d.plans as any); })
+      .catch(() => {/* use PKG_CONFIG fallback */});
+  }, []);
+
+  // Merge live DB values into PKG_CONFIG (price, bugLimit, revisionLimit from DB; rest from static config)
+  function cfg(pkg: Pkg) {
+    const base = PKG_CONFIG[pkg];
+    const live = livePlans?.[pkg];
+    if (!live) return base;
+    const priceStr = `₱${live.price.toLocaleString()}`;
+    // Update feature labels that mention bug/revision counts
+    const features = base.features.map(f => {
+      if (f.label.match(/bug reports/i))
+        return { ...f, label: f.label.replace(/^\d+/, String(live.bugLimit)) };
+      if (f.label.match(/revision updates/i))
+        return { ...f, label: f.label.replace(/^\d+/, String(live.revisionLimit)) };
+      return f;
+    });
+    return { ...base, price: priceStr, bugLimit: live.bugLimit, revisionLimit: live.revisionLimit, features };
+  }
 
   // Redirects buyer to PayMongo checkout for the selected maintenance package.
   async function avail(pkg: Pkg) {
@@ -129,7 +155,7 @@ function PackageSelection() {
       {error && <div className="mxError">{error}</div>}
       <div className="mxPackageGrid">
         {(["BASIC", "PRIORITY", "FULL"] as Pkg[]).map(pkg => {
-          const c = PKG_CONFIG[pkg];
+          const c = cfg(pkg);
           return (
             <div key={pkg} className={`mxPackageCard${c.popular ? " popular" : ""}`}>
               {c.popular && <span className="mxPopularBadge">Most Popular</span>}

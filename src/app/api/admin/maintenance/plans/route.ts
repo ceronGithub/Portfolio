@@ -1,20 +1,12 @@
 export const dynamic = "force-dynamic";
-// PATCH /api/admin/maintenance/plans
-// Updates pricing and usage limits for maintenance packages.
-// Writes to /src/config/maintenance-plans.json — the shared source of truth
-// read by both the buyer UI (PKG_CONFIG) and the checkout route.
-// Admin-only.
+// GET  /api/admin/maintenance/plans — Return all 3 plan rows from DB.
+// PATCH /api/admin/maintenance/plans — Update price/limits for all 3 plans.
+// Admin-only. Uses raw SQL for safety after migrations.
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession }          from "next-auth";
 import { authOptions }               from "@/lib/auth";
-import { writeFile, readFile }       from "fs/promises";
-import path                          from "path";
-
-const CONFIG_PATH = path.join(process.cwd(), "src", "config", "maintenance-plans.json");
-
-type PkgUpdate = { price: number; bugLimit: number; revisionLimit: number };
-type PlansBody = { BASIC: PkgUpdate; PRIORITY: PkgUpdate; FULL: PkgUpdate };
+import { prisma }                    from "@/lib/prisma";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -22,11 +14,19 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const raw   = await readFile(CONFIG_PATH, "utf-8");
-    const plans = JSON.parse(raw);
+    const rows = await prisma.$queryRaw<any[]>`
+      SELECT package, price, "bugLimit", "revisionLimit"
+      FROM "MaintenancePlan"
+      ORDER BY CASE package WHEN 'BASIC' THEN 1 WHEN 'PRIORITY' THEN 2 WHEN 'FULL' THEN 3 END
+    `;
+    // Return as { BASIC: {...}, PRIORITY: {...}, FULL: {...} }
+    const plans = Object.fromEntries(rows.map(r => [r.package, {
+      price: r.price, bugLimit: r.bugLimit, revisionLimit: r.revisionLimit
+    }]));
     return NextResponse.json({ plans });
-  } catch {
-    return NextResponse.json({ error: "Could not read plans config." }, { status: 500 });
+  } catch (err) {
+    console.error("[GET /api/admin/maintenance/plans]", err);
+    return NextResponse.json({ error: "Failed to load plans." }, { status: 500 });
   }
 }
 
@@ -35,9 +35,8 @@ export async function PATCH(req: NextRequest) {
   if (!session || (session.user as any)?.role !== "ADMIN")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body: PlansBody = await req.json();
+  const body = await req.json();
 
-  // Validate presence of all 3 packages
   for (const key of ["BASIC", "PRIORITY", "FULL"] as const) {
     const pkg = body[key];
     if (typeof pkg?.price !== "number" || typeof pkg?.bugLimit !== "number" || typeof pkg?.revisionLimit !== "number")
@@ -46,17 +45,26 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: `${key} values must be >= 0` }, { status: 400 });
   }
 
-  const updated = {
-    BASIC:    { price: body.BASIC.price,    bugLimit: body.BASIC.bugLimit,    revisionLimit: body.BASIC.revisionLimit    },
-    PRIORITY: { price: body.PRIORITY.price, bugLimit: body.PRIORITY.bugLimit, revisionLimit: body.PRIORITY.revisionLimit },
-    FULL:     { price: body.FULL.price,     bugLimit: body.FULL.bugLimit,     revisionLimit: body.FULL.revisionLimit     },
-  };
-
   try {
-    await writeFile(CONFIG_PATH, JSON.stringify(updated, null, 2), "utf-8");
-    return NextResponse.json({ ok: true, plans: updated });
+    await prisma.$executeRaw`
+      UPDATE "MaintenancePlan" SET price = ${body.BASIC.price},    "bugLimit" = ${body.BASIC.bugLimit},    "revisionLimit" = ${body.BASIC.revisionLimit}    WHERE package = 'BASIC'
+    `;
+    await prisma.$executeRaw`
+      UPDATE "MaintenancePlan" SET price = ${body.PRIORITY.price}, "bugLimit" = ${body.PRIORITY.bugLimit}, "revisionLimit" = ${body.PRIORITY.revisionLimit} WHERE package = 'PRIORITY'
+    `;
+    await prisma.$executeRaw`
+      UPDATE "MaintenancePlan" SET price = ${body.FULL.price},     "bugLimit" = ${body.FULL.bugLimit},     "revisionLimit" = ${body.FULL.revisionLimit}     WHERE package = 'FULL'
+    `;
+
+    const rows = await prisma.$queryRaw<any[]>`
+      SELECT package, price, "bugLimit", "revisionLimit" FROM "MaintenancePlan"
+    `;
+    const plans = Object.fromEntries(rows.map(r => [r.package, {
+      price: r.price, bugLimit: r.bugLimit, revisionLimit: r.revisionLimit
+    }]));
+    return NextResponse.json({ ok: true, plans });
   } catch (err) {
     console.error("[PATCH /api/admin/maintenance/plans]", err);
-    return NextResponse.json({ error: "Failed to write plans config." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update plans." }, { status: 500 });
   }
 }
