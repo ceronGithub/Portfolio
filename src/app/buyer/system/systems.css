@@ -1239,6 +1239,110 @@
 }
 
 /* ════════════════════════════════════════════════════
+   CARD — DESIGN TIER STRIP
+════════════════════════════════════════════════════ */
+
+/* Tier strip wrapper — sits between features and browser preview */
+.vSysCardTierStrip {
+  padding: 0 1.75rem 1rem;
+}
+
+/* Strip label */
+.vSysCardTierStripLabel {
+  font-family:    'DM Mono', monospace;
+  font-size:      8px;
+  font-weight:    500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.22);
+  margin:         0 0 0.5rem;
+}
+
+/* 2-column grid of tier buttons */
+.vSysCardTierGrid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   0.35rem;
+}
+
+/* Individual tier button */
+.vSysCardTierBtn {
+  position:       relative;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.15rem;
+  padding:        0.5rem 0.6rem;
+  border-radius:  8px;
+  border:         1px solid rgba(255,255,255,0.07);
+  background:     rgba(255,255,255,0.03);
+  cursor:         default;
+  text-align:     left;
+  transition:     border-color 0.18s, background 0.18s;
+}
+
+/* Only allow pointer + hover interactions on active card */
+.vSysCarouselCardActive .vSysCardTierBtn {
+  cursor: pointer;
+}
+.vSysCarouselCardActive .vSysCardTierBtn:hover {
+  border-color: rgba(255,255,255,0.16);
+  background:   rgba(255,255,255,0.055);
+}
+
+/* Top row: name + price */
+.vSysCardTierBtnTop {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             0.3rem;
+}
+
+.vSysCardTierBtnName {
+  font-family:    'DM Mono', monospace;
+  font-size:      0.62rem;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          rgba(255,255,255,0.7);
+  transition:     color 0.18s;
+}
+
+.vSysCardTierBtnPrice {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.58rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vSysCardTierBtnIncluded {
+  font-family: 'DM Mono', monospace;
+  font-size:   0.55rem;
+  color:       #22c55e;
+  white-space: nowrap;
+}
+
+/* Tagline */
+.vSysCardTierBtnTagline {
+  font-size:   0.6rem;
+  color:       rgba(255,255,255,0.3);
+  line-height: 1.35;
+  margin:      0;
+}
+
+/* Active checkmark badge */
+.vSysCardTierBtnCheck {
+  position:        absolute;
+  top:             0.35rem;
+  right:           0.35rem;
+  width:           14px;
+  height:          14px;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+
+/* ════════════════════════════════════════════════════
    DEMO MODAL
 ════════════════════════════════════════════════════ */
 .demoModalOverlay {

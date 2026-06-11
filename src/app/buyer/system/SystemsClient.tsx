@@ -331,6 +331,12 @@ function SystemCard({
   onClick: () => void; onPreviewClick: () => void;
   isWishlisted?: boolean; onToggleWishlist?: (id: string) => void;
 }) {
+  // Design tier selection state — local to each card, defaults to first tier
+  const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
+  const activeTier       = item.designTiers?.[selectedTierIdx] ?? null;
+  const tierPriceBonus   = activeTier?.priceModifier ?? 0;
+  const displayPrice     = item.basePrice + tierPriceBonus;
+
   // displayStatus controls what's shown on the card
   const isComingSoon = item.displayStatus === "coming_soon";
   const isOngoing    = item.displayStatus === "ongoing";
@@ -406,6 +412,45 @@ function SystemCard({
           )}
         </div>
 
+        {/* Design tier selector strip — shown only for systems with tiers and when not locked */}
+        {!isLocked && item.designTiers?.length > 0 && (
+          <div className="vSysCardTierStrip">
+            <p className="vSysCardTierStripLabel">Website Design Style</p>
+            <div className="vSysCardTierGrid">
+              {item.designTiers.map((tier, idx) => {
+                const isTierActive = selectedTierIdx === idx;
+                return (
+                  <button
+                    key={tier.id}
+                    className={"vSysCardTierBtn" + (isTierActive ? " vSysCardTierBtnActive" : "")}
+                    style={isTierActive ? { borderColor: item.accent, background: item.accent + "12" } : {}}
+                    onClick={e => { e.stopPropagation(); if (isActive) setSelectedTierIdx(idx); }}
+                  >
+                    <div className="vSysCardTierBtnTop">
+                      <span className="vSysCardTierBtnName" style={isTierActive ? { color: item.accent } : {}}>{tier.name}</span>
+                      {tier.priceModifier > 0 ? (
+                        <span className="vSysCardTierBtnPrice" style={{ color: item.accent }}>+{fmt(tier.priceModifier)}</span>
+                      ) : (
+                        <span className="vSysCardTierBtnIncluded">Incl.</span>
+                      )}
+                    </div>
+                    {tier.tagline && (
+                      <p className="vSysCardTierBtnTagline">{tier.tagline}</p>
+                    )}
+                    {isTierActive && (
+                      <div className="vSysCardTierBtnCheck" style={{ background: item.accent }}>
+                        <svg width="7" height="7" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Browser preview mockup — hidden when locked */}
         {!isLocked && (
           <div className="vSysCardPreview" onClick={e => { e.stopPropagation(); if (isActive) onPreviewClick(); }}>
@@ -446,8 +491,8 @@ function SystemCard({
         {/* Price + buttons */}
         <div className="vSysCardFooter">
           <div className="vSysCardPriceBlock">
-            <span className="vSysCardPriceLabel">Starts at</span>
-            <span className="vSysCardPrice" style={{ color: item.accent }}>{fmt(item.basePrice)}</span>
+            <span className="vSysCardPriceLabel">{tierPriceBonus > 0 ? activeTier?.name + " tier" : "Starts at"}</span>
+            <span className="vSysCardPrice" style={{ color: item.accent }}>{fmt(displayPrice)}</span>
             <span className="vSysCardPriceSub">one-time license</span>
           </div>
           <div className="vSysCardBtns">
