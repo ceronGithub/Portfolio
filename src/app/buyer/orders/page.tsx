@@ -44,7 +44,19 @@ export default async function OrdersPage() {
       orders={orders.map((o: any) => ({
         id:           o.id,
         productId:    o.product?.id ?? null,
-        productName:  o.product?.name ?? "Unknown",
+        productName:  o.product?.name ?? (() => {
+          // Derive display name for maintenance orders from deliveryNote (format: "maintenance:BASIC")
+          if (typeof o.deliveryNote === "string" && o.deliveryNote.startsWith("maintenance:")) {
+            const packageType = o.deliveryNote.replace("maintenance:", "");
+            const packageLabels: Record<string, string> = {
+              BASIC:    "Maintenance — Basic",
+              PRIORITY: "Maintenance — Priority",
+              FULL:     "Maintenance — Full",
+            };
+            return packageLabels[packageType] ?? `Maintenance — ${packageType}`;
+          }
+          return "Unknown";
+        })(),
         amount:       o.amountPaid ?? (o.product?.priceFullPack || o.product?.priceStandard || o.product?.priceMeshOnly || 0),
         status:       o.status,
         deliveryNote: (o.deliveryNote as string | null) ?? null,

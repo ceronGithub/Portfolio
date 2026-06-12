@@ -90,11 +90,15 @@ export async function verifyWebhookSignature(
   if (!secret) return false;
 
   // sig header format: "t=<timestamp>,te=<test_sig>,li=<live_sig>"
-  const parts = Object.fromEntries(
-    sigHeader.split(",").map(p => p.split("=") as [string, string])
-  );
+  // Use indexOf("=") to split on FIRST "=" only — prevents truncation if value contains "="
+  const parts: Record<string, string> = {};
+  for (const segment of sigHeader.split(",")) {
+    const eqIndex = segment.indexOf("=");
+    if (eqIndex === -1) continue;
+    parts[segment.slice(0, eqIndex)] = segment.slice(eqIndex + 1);
+  }
   const timestamp = parts["t"];
-  const signature = parts["te"] ?? parts["li"];
+  const signature = parts["li"] ?? parts["te"];
   if (!timestamp || !signature) return false;
 
   const message = `${timestamp}.${rawBody}`;
