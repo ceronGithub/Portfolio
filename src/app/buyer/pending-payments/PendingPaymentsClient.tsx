@@ -8,7 +8,7 @@ import "./pending-payments.css";
 import { useToast }  from "@/app/buyer/shared/useToast";
 import ToastStack    from "@/app/buyer/shared/ToastStack";
 
-type CategoryType = "character" | "weapon" | "interior" | "exterior" | "system";
+type CategoryType = "character" | "weapon" | "interior" | "exterior" | "system" | "maintenance";
 
 interface PendingOrder {
   id:              string;
@@ -36,11 +36,12 @@ function fmt(p: number): string {
  */
 function toDisplayCategory(cat: CategoryType): string {
   const map: Record<CategoryType, string> = {
-    character: "Character",
-    weapon:    "Weapon",
-    interior:  "Interior",
-    exterior:  "Exterior",
-    system:    "System",
+    character:   "Character",
+    weapon:      "Weapon",
+    interior:    "Interior",
+    exterior:    "Exterior",
+    system:      "System",
+    maintenance: "Maintenance",
   };
   return map[cat] ?? cat;
 }
@@ -50,11 +51,12 @@ function toDisplayCategory(cat: CategoryType): string {
  */
 function categoryAccent(cat: CategoryType): string {
   const map: Record<CategoryType, string> = {
-    character: "var(--accent-green)",
-    weapon:    "var(--accent-amber)",
-    interior:  "var(--accent-blue)",
-    exterior:  "var(--accent-purple)",
-    system:    "var(--accent-orange)",
+    character:   "var(--accent-green)",
+    weapon:      "var(--accent-amber)",
+    interior:    "var(--accent-blue)",
+    exterior:    "var(--accent-purple)",
+    system:      "var(--accent-orange)",
+    maintenance: "var(--accent-green)",
   };
   return map[cat] ?? "rgba(255,255,255,0.4)";
 }
@@ -97,6 +99,13 @@ function CategoryIcon({ category }: { category: CategoryType }) {
       </svg>
     );
   }
+  if (category === "maintenance") {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      </svg>
+    );
+  }
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="3" width="9" height="9" rx="2" />
@@ -106,7 +115,6 @@ function CategoryIcon({ category }: { category: CategoryType }) {
     </svg>
   );
 }
-
 /**
  * Format date to readable string
  */
@@ -178,6 +186,24 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
     return initial;
   });
 
+  // ── On mount: if a maintenance order is already PAID, fulfill + redirect ──
+  // Handles the case where PayMongo's QR payment was confirmed before the page
+  // loaded (webhook fired while the user was on another page/tab).
+  useEffect(() => {
+    orders.forEach(order => {
+      if (order.status === "PAID" && order.productCategory === "maintenance") {
+        fetch("/api/maintenance/fulfill", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ orderId: order.id }),
+        }).finally(() => {
+          window.location.href = "/buyer/maintenance";
+        });
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Auto-mark expired orders on mount ───────────────────────────────
   // For every order whose payment link has passed the 24h window, silently
   // call the expire endpoint so admin sees LINK_EXPIRED status immediately.
@@ -216,17 +242,36 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
 
         setStatusMap(prev => {
           const updated = { ...prev };
-          let anyNewlyPaid = false;
+          const newlyPaidIds: string[] = [];
 
           for (const [orderId, newStatus] of Object.entries(data.statuses)) {
             if (prev[orderId] !== "PAID" && newStatus === "PAID") {
-              anyNewlyPaid = true;
+              newlyPaidIds.push(orderId);
             }
             updated[orderId] = newStatus;
           }
 
-          if (anyNewlyPaid) {
-            showToast("✓ Payment confirmed! Your order is now paid.", "success");
+          if (newlyPaidIds.length > 0) {
+            showToast("✓ Payment confirmed! Redirecting…", "success");
+
+            // For each newly paid order: if maintenance, call fulfill then redirect
+            // to /buyer/maintenance. Otherwise redirect to /buyer.
+            newlyPaidIds.forEach(paidOrderId => {
+              const paidOrder = orders.find(o => o.id === paidOrderId);
+              const isMaint   = paidOrder?.productCategory === "maintenance";
+
+              if (isMaint) {
+                fetch("/api/maintenance/fulfill", {
+                  method:  "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body:    JSON.stringify({ orderId: paidOrderId }),
+                }).finally(() => {
+                  setTimeout(() => { window.location.href = "/buyer/maintenance"; }, 2000);
+                });
+              } else {
+                setTimeout(() => { window.location.href = "/buyer"; }, 2000);
+              }
+            });
           }
 
           return updated;
@@ -254,13 +299,40 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
   }, []);
 
   /**
-   * Retry payment — fetch PayMongo link and redirect to checkout
+   * Retry payment — checks DB status first.
+   * If already PAID: fulfill (if maintenance) then redirect internally.
+   * If still PENDING: open PayMongo checkout in a new tab.
    */
   async function handleRetryPayment(order: PendingOrder) {
     if (loadingId) return;
     setLoadingId(order.id);
 
     try {
+      // ── Step 1: Check current DB status before hitting PayMongo ──────────
+      const statusRes = await fetch(
+        `/api/buyer/pending-payment/statuses?ids=${encodeURIComponent(order.id)}`
+      );
+      if (statusRes.ok) {
+        const { statuses } = await statusRes.json() as { statuses: Record<string, string> };
+        if (statuses[order.id] === "PAID") {
+          // Already paid — fulfill if maintenance then redirect
+          if (order.productCategory === "maintenance") {
+            showToast("✓ Payment already confirmed! Activating package…", "success");
+            await fetch("/api/maintenance/fulfill", {
+              method:  "POST",
+              headers: { "Content-Type": "application/json" },
+              body:    JSON.stringify({ orderId: order.id }),
+            });
+            setTimeout(() => { window.location.href = "/buyer/maintenance"; }, 1500);
+          } else {
+            showToast("✓ Payment already confirmed! Redirecting…", "success");
+            setTimeout(() => { window.location.href = "/buyer"; }, 1500);
+          }
+          return;
+        }
+      }
+
+      // ── Step 2: Still PENDING — get PayMongo link and open in new tab ────
       const res = await fetch(`/api/buyer/pending-payment/${order.id}`);
 
       if (!res.ok) {

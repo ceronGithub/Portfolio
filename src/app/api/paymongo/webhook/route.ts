@@ -75,8 +75,7 @@ export async function POST(req: NextRequest) {
           data:  { status: "PAID" },
         });
 
-        // Auto-unlock Ownership ONLY for product orders (not system orders)
-        // System orders have productId = null — no Ownership row exists for systems.
+        // Auto-unlock Ownership for product orders, activate MaintenanceOrder for maintenance orders
         if (order.productId) {
           await (prisma.ownership as any).upsert({
             where:  { userId_productId: { userId: order.userId, productId: order.productId } },
@@ -85,6 +84,33 @@ export async function POST(req: NextRequest) {
           });
           console.log(
             `[PayMongo Webhook] Unlocked product ${order.productId} for user ${order.userId} at tier ${grantedTier}`
+          );
+        } else if (order.deliveryNote?.startsWith("maintenance:")) {
+          // Maintenance order — activate a MaintenanceOrder for this buyer
+          const packageType = order.deliveryNote.replace("maintenance:", "");
+          const expiresAt   = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 30);
+
+          // Expire any non-active maintenance orders for this buyer
+          await prisma.maintenanceOrder.updateMany({
+            where: { userId: order.userId, status: { not: "ACTIVE" } },
+            data:  { status: "EXPIRED" },
+          });
+
+          // Create new MaintenanceOrder only if none is already active (idempotent)
+          const existing = await prisma.maintenanceOrder.findFirst({
+            where: { userId: order.userId, status: "ACTIVE" },
+          });
+          if (!existing) {
+            await prisma.maintenanceOrder.create({
+              data: { userId: order.userId, package: packageType, expiresAt },
+            });
+          }
+
+          revalidatePath("/buyer/maintenance", "layout");
+          revalidatePath("/admin/maintenance", "layout");
+          console.log(
+            `[PayMongo Webhook] Maintenance order ${order.id} activated for user ${order.userId} — package: ${packageType}`
           );
         } else {
           console.log(
