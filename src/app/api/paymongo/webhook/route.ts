@@ -59,10 +59,30 @@ export async function POST(req: NextRequest) {
       ? new Date((paymentData.attributes.paid_at as number) * 1000)
       : new Date();
 
-    // Find all orders tied to this PayMongo link
-    const orders = await prisma.order.findMany({
+    // Find all orders tied to this PayMongo link.
+    // Primary: match by paymongoOrderId (link ID).
+    // Fallback: if no match (e.g. buyer paid an old link after a new one was
+    //   saved via retry), extract the order ID from the remarks field
+    //   (format: "Order: <orderId>") and look up directly by order ID.
+    let orders = await prisma.order.findMany({
       where: { paymongoOrderId: linkId },
     });
+
+    if (orders.length === 0) {
+      const remarksValue: string =
+        event?.data?.attributes?.data?.attributes?.remarks ?? "";
+      const remarksMatch = remarksValue.match(/^Order:\s*(\S+)$/);
+      const orderIdFromRemarks = remarksMatch?.[1];
+
+      if (orderIdFromRemarks) {
+        console.warn(
+          `[PayMongo Webhook] No match by linkId — falling back to remarks orderId: ${orderIdFromRemarks}`
+        );
+        orders = await prisma.order.findMany({
+          where: { id: orderIdFromRemarks },
+        });
+      }
+    }
 
     if (orders.length === 0) {
       console.warn("[PayMongo Webhook] No orders found for link:", linkId);

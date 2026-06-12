@@ -112,6 +112,21 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
       const res  = await fetch(`/api/buyer/pending-payment/${order.id}`);
       const data = await res.json();
       if (!res.ok) { payWin?.close(); setCheckState("error"); return; }
+
+      // PayMongo link is already "paid" but webhook hasn't updated DB yet —
+      // call fulfill directly to mark the order PAID without opening a new checkout.
+      if (data.alreadyPaid) {
+        payWin?.close();
+        await fetch("/api/fulfill", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ orderIds: [order.id] }),
+        });
+        setCheckState("paid");
+        setTimeout(() => { window.location.reload(); }, 1500);
+        return;
+      }
+
       if (data.checkoutUrl) {
         setPayUrl(data.checkoutUrl);
         setCheckState("unpaid");

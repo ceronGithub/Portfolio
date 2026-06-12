@@ -110,6 +110,8 @@ export async function GET(
     const failedUrl   = `${appUrl}/checkout/failed?orders=${encodeURIComponent(order.id)}`;
 
     // ── 1. Try to re-use existing PayMongo link if still valid ───────────────
+    // If the link is already "paid", the buyer has already completed payment —
+    // return alreadyPaid so the UI triggers fulfill instead of opening a new checkout.
     if (order.paymongoOrderId) {
       try {
         const existing    = await getPaymentLink(order.paymongoOrderId);
@@ -118,6 +120,10 @@ export async function GET(
 
         if (checkoutUrl && linkStatus === "unpaid") {
           return NextResponse.json({ checkoutUrl, orderId: order.id, amount: amountPHP });
+        }
+
+        if (linkStatus === "paid") {
+          return NextResponse.json({ alreadyPaid: true, orderId: order.id });
         }
       } catch {
         // Link retrieval failed — fall through to create a new one
