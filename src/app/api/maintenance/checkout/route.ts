@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     where: { userId, deliveryNote: `maintenance:${packageType}`, status: "PENDING" },
   });
   if (pendingOrder)
-    return NextResponse.json({ checkoutUrl: null, alreadyPending: true }, { status: 200 });
+    return NextResponse.json({ checkoutUrl: null, alreadyPending: true, orderId: pendingOrder.id }, { status: 200 });
 
   const amount    = await getPkgPrice(packageType);
   const itemName  = PKG_NAMES[packageType];

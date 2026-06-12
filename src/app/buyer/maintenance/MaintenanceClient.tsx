@@ -139,8 +139,16 @@ function PackageSelection() {
       if (res.ok && data.checkoutUrl) {
         window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
       } else if (res.ok && data.alreadyPending) {
-        // Pending order exists — redirect to pending payments page
-        window.location.href = "/buyer/pending-payments";
+        // Pending order exists — fetch existing checkout URL and open in new tab
+        const retryRes  = await fetch(`/api/buyer/pending-payment/${data.orderId}`);
+        const retryData = await retryRes.json();
+        if (retryData.checkoutUrl) {
+          window.open(retryData.checkoutUrl, "_blank", "noopener,noreferrer");
+        } else if (retryData.alreadyPaid) {
+          window.location.reload();
+        } else {
+          setError("Could not retrieve checkout link. Please try again.");
+        }
       } else {
         setError(data.error ?? "Something went wrong.");
       }
