@@ -94,6 +94,21 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
     // Open blank window BEFORE async — avoids popup blocker
     const payWin = window.open("", "_blank");
     try {
+      // ── Step 1: Check DB status first — webhook may have already fired ──
+      const statusRes = await fetch(
+        `/api/buyer/pending-payment/statuses?ids=${encodeURIComponent(order.id)}`
+      );
+      if (statusRes.ok) {
+        const { statuses } = await statusRes.json() as { statuses: Record<string, string> };
+        if (statuses[order.id] === "PAID") {
+          payWin?.close();
+          setCheckState("paid");
+          setTimeout(() => { window.location.reload(); }, 1500);
+          return;
+        }
+      }
+
+      // ── Step 2: Still PENDING — get checkout URL and open in new tab ────
       const res  = await fetch(`/api/buyer/pending-payment/${order.id}`);
       const data = await res.json();
       if (!res.ok) { payWin?.close(); setCheckState("error"); return; }
@@ -102,19 +117,21 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
         setCheckState("unpaid");
         if (payWin) payWin.location.href = data.checkoutUrl;
         else window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
-        // Poll fulfill after opening — auto-refresh orders when paid
+        // Poll DB status after opening — auto-refresh when paid
         let attempts = 0;
         const pollId = setInterval(async () => {
           attempts++;
           try {
-            const r = await fetch("/api/fulfill", {
-              method:  "POST",
-              headers: { "Content-Type": "application/json" },
-              body:    JSON.stringify({ orderIds: [order.id] }),
-            });
-            if (r.ok) {
-              clearInterval(pollId);
-              window.location.reload();
+            const pollRes = await fetch(
+              `/api/buyer/pending-payment/statuses?ids=${encodeURIComponent(order.id)}`
+            );
+            if (pollRes.ok) {
+              const { statuses } = await pollRes.json() as { statuses: Record<string, string> };
+              if (statuses[order.id] === "PAID") {
+                clearInterval(pollId);
+                setCheckState("paid");
+                setTimeout(() => { window.location.reload(); }, 1500);
+              }
             }
           } catch { /* keep polling */ }
           if (attempts >= 36) clearInterval(pollId);
@@ -122,6 +139,7 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
       } else {
         payWin?.close();
         setCheckState("paid");
+        setTimeout(() => { window.location.reload(); }, 1500);
       }
     } catch {
       payWin?.close();

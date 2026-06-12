@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./pending-payments.css";
 import { useToast }  from "@/app/buyer/shared/useToast";
 import ToastStack    from "@/app/buyer/shared/ToastStack";
@@ -223,6 +223,11 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
   // ── Poll payment statuses while any order is still PENDING ──────────
   // Fires every POLL_INTERVAL_MS. Stops automatically once all orders are settled.
   // Shows a toast the moment a PENDING order flips to PAID.
+  // statusMapRef mirrors statusMap so the interval callback reads the latest value
+  // without a stale closure (setInterval captures the initial statusMap snapshot).
+  const statusMapRef = useRef<Record<string, string>>(statusMap);
+  useEffect(() => { statusMapRef.current = statusMap; }, [statusMap]);
+
   useEffect(() => {
     const pendingIds = orders
       .filter(o => !isLinkExpired(o.createdAt))
@@ -282,8 +287,8 @@ export default function PendingPaymentsClient({ orders = [] }: Props) {
     }
 
     const intervalId = setInterval(() => {
-      // Stop polling if all tracked orders are no longer PENDING
-      const allSettled = pendingIds.every(id => statusMap[id] !== "PENDING");
+      // Stop polling if all tracked orders are no longer PENDING — reads ref to avoid stale closure
+      const allSettled = pendingIds.every(id => statusMapRef.current[id] !== "PENDING");
       if (allSettled) {
         clearInterval(intervalId);
         return;
