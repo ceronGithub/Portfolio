@@ -943,6 +943,9 @@ export default function AdminMaintenanceClient({ orders }: { orders: Order[] }) 
                   <p className="amClientEmail">{o.user.email}</p>
                   <div className="amClientMeta">
                     <span className="amPkgBadge">{PKG_LABELS[o.package]}</span>
+                    {o.status === "EXPIRED" && (
+                      <span className="amExpiredBadge">EXPIRED</span>
+                    )}
                     <span className="amStatBadge">
                       {o.tasks.length}T/R · {o.bugReports.length}B · {o.vcSchedules.length}VC
                     </span>

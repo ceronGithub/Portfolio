@@ -14,8 +14,14 @@ export default async function AdminMaintenancePage() {
 
   const adminName = session.user?.name ?? session.user?.email ?? "Admin";
 
+  // Auto-expire any ACTIVE orders past their expiresAt date
+  await prisma.maintenanceOrder.updateMany({
+    where: { status: "ACTIVE", expiresAt: { lt: new Date() } },
+    data:  { status: "EXPIRED" },
+  });
+
   const orders = await prisma.maintenanceOrder.findMany({
-    where:   { status: "ACTIVE" },
+    where:   { status: { in: ["ACTIVE", "EXPIRED"] } },
     include: {
       user:        { select: { id: true, name: true, email: true } },
       vcSchedules: { orderBy: { createdAt: "desc" } },

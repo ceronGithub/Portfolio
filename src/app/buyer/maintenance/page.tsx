@@ -15,7 +15,14 @@ export default async function MaintenancePage() {
 
   const userId = (session.user as any).id as string;
 
-  const order = await prisma.maintenanceOrder.findFirst({
+  // Auto-expire any ACTIVE orders past their expiresAt date
+  await prisma.maintenanceOrder.updateMany({
+    where: { userId, status: "ACTIVE", expiresAt: { lt: new Date() } },
+    data:  { status: "EXPIRED" },
+  });
+
+  // Fetch active order first, then most recent expired order as fallback
+  let order = await prisma.maintenanceOrder.findFirst({
     where:   { userId, status: "ACTIVE" },
     include: {
       vcSchedules: { orderBy: { createdAt: "desc" } },
@@ -23,6 +30,19 @@ export default async function MaintenancePage() {
       tasks:       { orderBy: { updatedAt: "desc" } },
     },
   });
+
+  // If no active order, check for most recent expired order (to show renew prompt)
+  if (!order) {
+    order = await (prisma as any).maintenanceOrder.findFirst({
+      where:   { userId, status: "EXPIRED" },
+      include: {
+        vcSchedules: { orderBy: { createdAt: "desc" } },
+        bugReports:  { orderBy: { createdAt: "desc" } },
+        tasks:       { orderBy: { updatedAt: "desc" } },
+      },
+      orderBy: { expiresAt: "desc" },
+    });
+  }
 
   return <MaintenanceClient order={order as any} />;
 }

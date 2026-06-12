@@ -614,12 +614,57 @@ function ActiveOrder({ order }: { order: MaintenanceOrder }) {
   );
 }
 
+// ── Expired Order Banner ─────────────────────────────────────────────────────
+function ExpiredOrder({ order }: { order: MaintenanceOrder }) {
+  const [loading, setLoading] = useState<Pkg | null>(null);
+  const [error,   setError]   = useState("");
+
+  async function renew(pkg: Pkg) {
+    setLoading(pkg);
+    setError("");
+    try {
+      const res  = await fetch("/api/maintenance/checkout", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ packageType: pkg }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Failed to renew."); setLoading(null); return; }
+      if (data.checkoutUrl) window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
+    } catch { setError("Network error."); }
+    setLoading(null);
+  }
+
+  return (
+    <div className="mxExpired">
+      <div className="mxExpiredBadge">EXPIRED</div>
+      <h2 className="mxExpiredTitle">Your {order.package} Maintenance Plan has expired</h2>
+      <p className="mxExpiredSub">
+        Plan expired on {new Date(order.expiresAt).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}.
+        Renew to continue receiving support.
+      </p>
+      {error && <p className="mxExpiredError">{error}</p>}
+      <button
+        className="mxRenewBtn"
+        onClick={() => renew(order.package)}
+        disabled={loading !== null}
+      >
+        {loading ? "Redirecting…" : `Renew ${order.package} Plan`}
+      </button>
+    </div>
+  );
+}
+
 // ── Main Export ───────────────────────────────────────────────────────────────
 export default function MaintenanceClient({ order }: { order: MaintenanceOrder | null }) {
+  const isExpired = order?.status === "EXPIRED";
+
   return (
     <div className="mxPage">
       <div className="mxInner">
-        {order ? <ActiveOrder order={order} /> : <PackageSelection />}
+        {!order           && <PackageSelection />}
+        {order && isExpired  && <ExpiredOrder order={order} />}
+        {order && !isExpired && <ActiveOrder order={order} />}
       </div>
     </div>
   );
