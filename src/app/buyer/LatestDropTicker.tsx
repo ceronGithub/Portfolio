@@ -64,7 +64,11 @@ export default function LatestDropTicker({
               </span>
               <span className="latestDropTickerName">{product.name}</span>
               <span className="latestDropTickerPrice">
-                ₱{product.priceMeshOnly.toLocaleString()}
+                ₱{(
+                  (product.category === "interior" || product.category === "exterior")
+                    ? product.priceFullPack
+                    : product.priceMeshOnly
+                ).toLocaleString()}
               </span>
             </span>
           ))}

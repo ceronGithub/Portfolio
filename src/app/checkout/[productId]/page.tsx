@@ -41,18 +41,24 @@ export default async function CheckoutPage({ params }: Props) {
   // Fall back to Product table (assets) — resolve by cuid id only (Product table has no slug field)
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, description: true },
+    select: { id: true, name: true, priceMeshOnly: true, priceStandard: true, priceFullPack: true, description: true, category: true },
   });
 
   if (!product) notFound();
+
+  // Interior/Exterior architecture assets use a single flat price — always full_pack tier.
+  const isArchitecture = product.category === "interior" || product.category === "exterior";
+  const resolvedTier   = isArchitecture ? "full_pack" : "mesh_only";
+  const resolvedPrice  = isArchitecture ? product.priceFullPack : product.priceFullPack;
 
   return (
     <CheckoutClient
       checkoutProductId={product.id}
       productName={product.name}
-      price={product.priceFullPack}
+      price={resolvedPrice}
       description={product.description ?? ""}
       timeline=""
+      grantedTier={resolvedTier}
     />
   );
 }

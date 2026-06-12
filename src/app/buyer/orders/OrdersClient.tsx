@@ -225,12 +225,21 @@ function OrderCard({ order, isOwned }: { order: Order; isOwned: boolean }) {
       )}
 
       {/* Delivery note */}
-      {order.deliveryNote && (
-        <div className="ohNote">
-          <span className="ohNoteIcon">💬</span>
-          <p className="ohNoteText">{order.deliveryNote}</p>
-        </div>
-      )}
+      {order.deliveryNote && (() => {
+        // Translate internal tier tags to readable labels for the buyer
+        const tierLabels: Record<string, string> = {
+          "tier:mesh_only":  "Package: Mesh Only (OBJ + FBX)",
+          "tier:standard":   "Package: Standard (OBJ + FBX + 5 Animations)",
+          "tier:full_pack":  "Package: Full Pack (OBJ + FBX + GLB + 7 Animations)",
+        };
+        const displayNote = tierLabels[order.deliveryNote] ?? order.deliveryNote;
+        return (
+          <div className="ohNote">
+            <span className="ohNoteIcon">💬</span>
+            <p className="ohNoteText">{displayNote}</p>
+          </div>
+        );
+      })()}
 
       {isFailed && (
         <div className="ohFailedNote">

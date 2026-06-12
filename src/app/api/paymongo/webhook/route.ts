@@ -49,13 +49,14 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Extract payment capture fields from webhook payload (Rule 30.2) ──
-    // PayMongo attaches the payment object inside the link's payments array.
+    // PayMongo wraps each payment inside a { data: { id, attributes } } envelope.
     const payments: any[] =
       event?.data?.attributes?.data?.attributes?.payments ?? [];
-    const paymongoPaymentId: string | null = payments[0]?.id ?? null;
-    const paymentStatus:     string        = payments[0]?.attributes?.status ?? "paid";
-    const paidAt:            Date          = payments[0]?.attributes?.paid_at
-      ? new Date((payments[0].attributes.paid_at as number) * 1000)
+    const paymentData                        = payments[0]?.data;
+    const paymongoPaymentId: string | null   = paymentData?.id ?? null;
+    const paymentStatus:     string          = paymentData?.attributes?.status ?? "paid";
+    const paidAt:            Date            = paymentData?.attributes?.paid_at
+      ? new Date((paymentData.attributes.paid_at as number) * 1000)
       : new Date();
 
     // Find all orders tied to this PayMongo link

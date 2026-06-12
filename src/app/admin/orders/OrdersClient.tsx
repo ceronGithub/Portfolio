@@ -100,7 +100,9 @@ function DeliveryPanel({
   estimatedAt: string | null;
   onSaved:     (id: string, note: string | null, est: string | null) => void;
 }) {
-  const [noteVal, setNote] = useState(note ?? "");
+  // Strip internal tier tags from the note — admin should see a clean textarea, not "tier:mesh_only"
+  const cleanNote = (note ?? "").startsWith("tier:") ? "" : (note ?? "");
+  const [noteVal, setNote] = useState(cleanNote);
   const [estVal,  setEst]  = useState(
     estimatedAt ? new Date(estimatedAt).toISOString().slice(0, 10) : ""
   );
