@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import "./admin-appointments.css";
 import { sanitize }  from "@/lib/utils";
 import { useToast }  from "@/app/buyer/shared/useToast";
@@ -94,22 +94,22 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
   // Filter by status tab
   const filtered = filterStatus === "ALL"
     ? appointments
-    : appointments.filter(a => a.status === filterStatus);
+    : appointments.filter((a: AppointmentRow) => a.status === filterStatus);
 
   // Counts per tab
   const countFor = (s: AppointmentStatus | "ALL") =>
-    s === "ALL" ? appointments.length : appointments.filter(a => a.status === s).length;
+    s === "ALL" ? appointments.length : appointments.filter((a: AppointmentRow) => a.status === s).length;
 
   // Helper — merge comment changes into one appointment
   function updateComments(id: string, updater: (prev: ApptComment[]) => ApptComment[]) {
-    setAppointments(prev => prev.map(a =>
+    setAppointments((prev: AppointmentRow[]) => prev.map((a: AppointmentRow) =>
       a.id === id ? { ...a, comments: updater(a.comments) } : a
     ));
   }
 
   // ── Update status ─────────────────────────────────────────────────────────
   const handleStatusUpdate = useCallback(async (id: string, newStatus: AppointmentStatus) => {
-    setUpdatingStatus(prev => ({ ...prev, [id]: true }));
+    setUpdatingStatus((prev: Record<string, boolean>) => ({ ...prev, [id]: true }));
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
         method:  "PATCH",
@@ -117,17 +117,17 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
         body:    JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) { showToast("✕ Failed to update status.", "error"); return; }
-      setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
+      setAppointments((prev: AppointmentRow[]) => prev.map((a: AppointmentRow) => a.id === id ? { ...a, status: newStatus } : a));
       showToast(`✓ Status updated to ${STATUS_CONFIG[newStatus].label}.`, "success");
     } finally {
-      setUpdatingStatus(prev => ({ ...prev, [id]: false }));
+      setUpdatingStatus((prev: Record<string, boolean>) => ({ ...prev, [id]: false }));
     }
   }, []);
 
   // ── Save admin note ───────────────────────────────────────────────────────
   const handleSaveNote = useCallback(async (id: string) => {
     const note = editingNote[id] ?? "";
-    setSavingNote(prev => ({ ...prev, [id]: true }));
+    setSavingNote((prev: Record<string, boolean>) => ({ ...prev, [id]: true }));
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
         method:  "PATCH",
@@ -135,11 +135,11 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
         body:    JSON.stringify({ adminNote: note }),
       });
       if (!res.ok) { showToast("✕ Note failed to save.", "error"); return; }
-      setAppointments(prev => prev.map(a => a.id === id ? { ...a, adminNote: note } : a));
-      setEditingNote(prev => { const n = { ...prev }; delete n[id]; return n; });
+      setAppointments((prev: AppointmentRow[]) => prev.map((a: AppointmentRow) => a.id === id ? { ...a, adminNote: note } : a));
+      setEditingNote((prev: Record<string, string>) => { const n = { ...prev }; delete n[id]; return n; });
       showToast("✓ Admin note saved.", "success");
     } finally {
-      setSavingNote(prev => ({ ...prev, [id]: false }));
+      setSavingNote((prev: Record<string, boolean>) => ({ ...prev, [id]: false }));
     }
   }, [editingNote]);
 
@@ -149,7 +149,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
     const key     = parentId ? `${id}_reply_${parentId}` : id;
     const content = (commentText[key] ?? "").trim();
     if (!content) return;
-    setPostingComment(prev => ({ ...prev, [key]: true }));
+    setPostingComment((prev: Record<string, boolean>) => ({ ...prev, [key]: true }));
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
         method:  "POST",
@@ -171,10 +171,10 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
           );
         }
       });
-      setCommentText(prev => { const n = { ...prev }; delete n[key]; return n; });
+      setCommentText((prev: Record<string, string>) => { const n = { ...prev }; delete n[key]; return n; });
       showToast("✓ Comment posted.", "success");
     } finally {
-      setPostingComment(prev => ({ ...prev, [key]: false }));
+      setPostingComment((prev: Record<string, boolean>) => ({ ...prev, [key]: false }));
     }
   }, [commentText]);
 
@@ -184,7 +184,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, { method: "DELETE" });
       if (!res.ok) { showToast("✕ Delete failed.", "error"); return; }
-      setAppointments(prev => prev.filter(a => a.id !== id));
+      setAppointments((prev: AppointmentRow[]) => prev.filter((a: AppointmentRow) => a.id !== id));
       setConfirmDelete(null);
       showToast("✓ Appointment deleted.", "success");
     } finally {
@@ -222,7 +222,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
 
       {/* Appointment rows */}
       <div className="adminApList">
-        {filtered.map(a => {
+        {filtered.map((a: AppointmentRow) => {
           const statusConfig = STATUS_CONFIG[a.status];
           const nextStatus   = STATUS_CYCLE[a.status];
           const canAdvance   = nextStatus !== a.status;
@@ -232,8 +232,8 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
           const confirmingDel = confirmDelete === a.id;
 
           // Separate admin root comments from buyer root notes
-          const adminRootComments = (a.comments ?? []).filter(c => c.role === "ADMIN" && !c.parentId);
-          const buyerRootNotes    = (a.comments ?? []).filter(c => c.role === "BUYER" && !c.parentId);
+          const adminRootComments = (a.comments ?? []).filter((c: ApptComment) => c.role === "ADMIN" && !c.parentId);
+          const buyerRootNotes    = (a.comments ?? []).filter((c: ApptComment) => c.role === "BUYER" && !c.parentId);
 
           return (
             <div key={a.id} className="adminApCard">
@@ -322,7 +322,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                 <div className="adminApCardAddons">
                   <p className="adminApCardAddonsLabel">Add-ons selected</p>
                   <div className="adminApCardAddonsList">
-                    {a.selectedAddons.map(ad => (
+                    {a.selectedAddons.map((ad: AddonSnapshot) => (
                       <div key={ad.id} className="adminApCardAddonRow">
                         <span>{ad.label}</span>
                         <span>+{fmt(ad.price)}</span>
@@ -348,7 +348,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                   rows={2}
                   placeholder="Internal note visible only to admin…"
                   value={editingNote[a.id] ?? (a.adminNote ?? "")}
-                  onChange={e => setEditingNote(prev => ({ ...prev, [a.id]: sanitize(e.target.value) }))}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditingNote((prev: Record<string, string>) => ({ ...prev, [a.id]: sanitize(e.target.value) }))}
                 />
                 {isDirty && (
                   <button
@@ -371,7 +371,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                 </p>
 
                 {/* Existing admin root comments + buyer replies */}
-                {adminRootComments.map(c => (
+                {adminRootComments.map((c: ApptComment) => (
                   <div key={c.id} className="adminApCommentBlock">
                     <div className="adminApCommentItem adminApCommentItemAdmin">
                       <div className="adminApCommentMeta">
@@ -380,7 +380,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                       </div>
                       <p className="adminApCommentText">{c.content}</p>
                     </div>
-                    {(c.replies ?? []).map(r => (
+                    {(c.replies ?? []).map((r: Omit<ApptComment, "replies">) => (
                       <div key={r.id} className="adminApCommentItem adminApCommentItemBuyer">
                         <div className="adminApCommentMeta">
                           <span className="adminApCommentBadge adminApCommentBadgeBuyer">Buyer</span>
@@ -396,7 +396,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                 {buyerRootNotes.length > 0 && (
                   <div className="adminApBuyerNoteList">
                     <p className="adminApBuyerNotesHeader">Buyer Notes</p>
-                    {buyerRootNotes.map(note => {
+                    {buyerRootNotes.map((note: ApptComment) => {
                       const replyKey = `${a.id}_reply_${note.id}`;
                       return (
                         <div key={note.id} className="adminApCommentBlock">
@@ -407,7 +407,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                             </div>
                             <p className="adminApCommentText">{note.content}</p>
                           </div>
-                          {(note.replies ?? []).map(r => (
+                          {(note.replies ?? []).map((r: Omit<ApptComment, "replies">) => (
                             <div key={r.id} className="adminApCommentItem adminApCommentItemAdmin">
                               <div className="adminApCommentMeta">
                                 <span className="adminApCommentBadge adminApCommentBadgeAdmin">Admin</span>
@@ -423,7 +423,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                               rows={2}
                               placeholder="Reply to buyer note…"
                               value={commentText[replyKey] ?? ""}
-                              onChange={e => setCommentText(prev => ({ ...prev, [replyKey]: sanitize(e.target.value) }))}
+                              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCommentText((prev: Record<string, string>) => ({ ...prev, [replyKey]: sanitize(e.target.value) }))}
                             />
                             {(commentText[replyKey] ?? "").trim() && (
                               <button
@@ -448,7 +448,7 @@ export default function AdminAppointmentsClient({ appointments: initial }: Props
                     rows={2}
                     placeholder="Post a comment to the buyer…"
                     value={commentText[a.id] ?? ""}
-                    onChange={e => setCommentText(prev => ({ ...prev, [a.id]: sanitize(e.target.value) }))}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCommentText((prev: Record<string, string>) => ({ ...prev, [a.id]: sanitize(e.target.value) }))}
                   />
                   {(commentText[a.id] ?? "").trim() && (
                     <button
