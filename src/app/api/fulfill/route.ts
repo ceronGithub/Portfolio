@@ -1,10 +1,9 @@
 export const dynamic = "force-dynamic";
-// POST /api/fulfill — Called by the success page and orders client after PayMongo redirects.
-// Strategy:
-//   1. For each order, fetch its PayMongo link and confirm status === "paid".
-//   2. If paid → mark order PAID + upsert Ownership (product orders only).
-//   3. If not yet paid → return 402 so the caller keeps polling.
-// This ensures fulfillment works on localhost AND production identically.
+// POST /api/fulfill — Called by the success page after PayMongo redirects.
+// Strategy (Rule 30.3):
+//   1. Check Order.paymentStatus === "paid" OR Order.status === "PAID" (set by webhook).
+//   2. If confirmed → mark order PAID + upsert Ownership (product orders only).
+//   3. If webhook hasn't fired yet → fall back to PayMongo link check (retry path only).
 // Idempotent: orders already PAID are skipped safely.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -29,12 +28,13 @@ export async function POST(req: NextRequest) {
   const orders = await prisma.order.findMany({
     where: { id: { in: orderIds }, userId },
     select: {
-      id:              true,
-      userId:          true,
-      status:          true,
-      productId:       true,
-      deliveryNote:    true,
-      paymongoOrderId: true,
+      id:                true,
+      userId:            true,
+      status:            true,
+      productId:         true,
+      deliveryNote:      true,
+      paymongoOrderId:   true,
+      paymentStatus:     true,  // set by webhook (Rule 30.2)
     },
   });
 
@@ -48,13 +48,17 @@ export async function POST(req: NextRequest) {
     orders.map(async (order: {
       id: string; userId: string; status: string;
       productId: string | null; deliveryNote: string | null;
-      paymongoOrderId: string | null;
+      paymongoOrderId: string | null; paymentStatus: string | null;
     }) => {
       // Already fulfilled — skip
       if (order.status === "PAID") { fulfilledCount++; return; }
 
-      // Verify PayMongo link status before fulfilling
-      if (order.paymongoOrderId) {
+      // ── Rule 30.3: Check DB payment status first (set by webhook) ──────────
+      // If webhook already fired and saved paymentStatus = "paid", proceed immediately.
+      // Only fall back to PayMongo API query if webhook hasn't fired yet.
+      const confirmedByWebhook = order.paymentStatus === "paid";
+
+      if (!confirmedByWebhook && order.paymongoOrderId) {
         try {
           const link       = await getPaymentLink(order.paymongoOrderId);
           const linkStatus = link?.attributes?.status as string | undefined;
@@ -93,12 +97,12 @@ export async function POST(req: NextRequest) {
     })
   );
 
-  revalidatePath("/buyer/downloads",       "layout");
-  revalidatePath("/buyer/orders",          "layout");
-  revalidatePath("/buyer/pending-payments","layout");
-  revalidatePath("/admin/orders",          "layout");
+  revalidatePath("/buyer/downloads",        "layout");
+  revalidatePath("/buyer/orders",           "layout");
+  revalidatePath("/buyer/pending-payments", "layout");
+  revalidatePath("/admin/orders",           "layout");
 
-  // 402 = payment not yet confirmed by PayMongo — caller should retry
+  // 402 = payment not yet confirmed — caller should retry
   if (anyStillPending && fulfilledCount === 0)
     return NextResponse.json({ ok: false, pending: true }, { status: 402 });
 

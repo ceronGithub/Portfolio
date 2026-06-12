@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 // POST /api/maintenance/fulfill
-// Called by checkout/success page after PayMongo redirects.
-// 1. Verifies PayMongo link status === "paid".
-// 2. Marks Order as PAID.
-// 3. Creates (or reactivates) a MaintenanceOrder for the buyer.
+// Called by checkout/success page and PendingPaymentsClient after PayMongo redirects.
+// Strategy (Rule 30.3):
+//   1. Check Order.paymentStatus === "paid" OR Order.status === "PAID" (set by webhook).
+//   2. If confirmed → mark Order PAID + create/activate MaintenanceOrder.
+//   3. Only fall back to PayMongo link check if webhook hasn't fired yet.
 // Idempotent: safe to call multiple times.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -28,11 +29,12 @@ export async function POST(req: NextRequest) {
   const order = await (prisma as any).order.findFirst({
     where: { id: orderId, userId },
     select: {
-      id:              true,
-      userId:          true,
-      status:          true,
-      deliveryNote:    true,
-      paymongoOrderId: true,
+      id:                true,
+      userId:            true,
+      status:            true,
+      deliveryNote:      true,
+      paymongoOrderId:   true,
+      paymentStatus:     true,  // set by webhook (Rule 30.2)
     },
   });
 
@@ -43,12 +45,16 @@ export async function POST(req: NextRequest) {
   if (!order.deliveryNote?.startsWith("maintenance:"))
     return NextResponse.json({ error: "Not a maintenance order" }, { status: 400 });
 
-  // Already fulfilled — return success immediately
+  // Already fulfilled — return success immediately (idempotent)
   if (order.status === "PAID")
     return NextResponse.json({ ok: true, already: true });
 
-  // Verify PayMongo link is actually paid
-  if (order.paymongoOrderId) {
+  // ── Rule 30.3: Check DB payment status first (set by webhook) ──────────────
+  // If webhook already fired and saved paymentStatus = "paid", proceed immediately.
+  // Only fall back to PayMongo API query if webhook hasn't fired yet.
+  const confirmedByWebhook = order.paymentStatus === "paid";
+
+  if (!confirmedByWebhook && order.paymongoOrderId) {
     try {
       const link       = await getPaymentLink(order.paymongoOrderId);
       const linkStatus = link?.attributes?.status as string | undefined;

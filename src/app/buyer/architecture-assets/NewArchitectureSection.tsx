@@ -2,6 +2,7 @@
 // Receives latest products as props from buyer/page.tsx (Server Component).
 // Falls back to "Coming Soon" when no isLatest products exist.
 // Background video loops through both interior and exterior preview videos.
+// Price displayed is priceFullPack — matches what checkout/[productId]/page.tsx charges.
 
 "use client";
 
@@ -107,7 +108,8 @@ export default function NewArchitectureSection({ latestInterior, latestExterior,
             {latestExterior && (
               <div className="newArchMetaItem">
                 <p className="newArchMetaName">{latestExterior.name}</p>
-                <p className="newArchMetaPrice">₱{latestExterior.priceMeshOnly.toLocaleString()}</p>
+                {/* Use priceFullPack — matches checkout/[productId]/page.tsx price prop */}
+                <p className="newArchMetaPrice">₱{latestExterior.priceFullPack.toLocaleString()}</p>
                 <p className="newArchMetaNote">Exterior · editable Blender file</p>
                 {ownedAssetIds.has(latestExterior.id) ? (
                   <span className="newArchOwnedBadge">✓ Owned</span>
@@ -124,7 +126,8 @@ export default function NewArchitectureSection({ latestInterior, latestExterior,
             {latestInterior && (
               <div className="newArchMetaItem">
                 <p className="newArchMetaName">{latestInterior.name}</p>
-                <p className="newArchMetaPrice">₱{latestInterior.priceMeshOnly.toLocaleString()}</p>
+                {/* Use priceFullPack — matches checkout/[productId]/page.tsx price prop */}
+                <p className="newArchMetaPrice">₱{latestInterior.priceFullPack.toLocaleString()}</p>
                 <p className="newArchMetaNote">Interior · editable Blender file</p>
                 {ownedAssetIds.has(latestInterior.id) ? (
                   <span className="newArchOwnedBadge">✓ Owned</span>

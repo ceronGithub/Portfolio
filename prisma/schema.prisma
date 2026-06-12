@@ -113,17 +113,20 @@ model Product {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  productId       String?     // nullable — set for 3D asset orders
-  systemId        String?     // nullable — set for System orders
-  status          OrderStatus @default(PENDING)
-  paymongoOrderId String?
-  amountPaid      Int?
-  deliveryNote    String?     // Admin-set note for current stage
-  estimatedAt     DateTime?   // Estimated delivery date
-  deliveredAt     DateTime?   // Actual delivery timestamp
-  createdAt       DateTime    @default(now())
+  id                 String      @id @default(cuid())
+  userId             String
+  productId          String?     // nullable — set for 3D asset orders
+  systemId           String?     // nullable — set for System orders
+  status             OrderStatus @default(PENDING)
+  paymongoOrderId    String?     // PayMongo link ID
+  paymongoPaymentId  String?     // PayMongo payment ID — e.g. "pay_xxx" (set by webhook on payment)
+  paymentStatus      String?     // PayMongo payment status — e.g. "paid" (set by webhook)
+  paidAt             DateTime?   // Timestamp of payment confirmation (set by webhook)
+  amountPaid         Int?
+  deliveryNote       String?     // Admin-set note for current stage
+  estimatedAt        DateTime?   // Estimated delivery date
+  deliveredAt        DateTime?   // Actual delivery timestamp
+  createdAt          DateTime    @default(now())
 
   user    User     @relation(fields: [userId], references: [id])
   product Product? @relation(fields: [productId], references: [id])
@@ -468,12 +471,6 @@ model Appointment {
 }
 
 // ── Appointment Comment Thread ─────────────────────────────────────────────
-// Threaded comments on a consultation appointment.
-// root (parentId = null):
-//   role = "ADMIN"  → admin comment visible to buyer
-//   role = "BUYER"  → buyer standalone note
-// child (parentId = root.id):
-//   buyer replies to an admin comment, or admin replies to a buyer note
 model AppointmentComment {
   id            String   @id @default(cuid())
   appointmentId String

@@ -73,9 +73,10 @@ export default function ArchitectureBuySection({
   const [exteriorAssets, setExteriorAssets] = useState<ArchAssetItem[]>([]);
   const [assetsLoading,  setAssetsLoading]  = useState(false);
 
-  // Fetch first interior asset on mount to show a default background video
+  // Fetch the isLatest interior asset on mount to show the correct default background video.
+  // Uses latest=true so only the admin-designated latest product's video plays, not all products.
   useEffect(() => {
-    fetch("/api/products?category=interior")
+    fetch("/api/products?category=interior&latest=true")
       .then(r => r.json())
       .then(data => {
         const firstVideo = (data.products ?? []).find((p: any) => p.previewVideoUrl)?.previewVideoUrl;

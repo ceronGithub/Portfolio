@@ -1,10 +1,12 @@
 // POST /api/paymongo/webhook — Handles PayMongo webhook events.
 // On link.payment.paid:
-//   1. Finds all orders with matching paymongoOrderId (link ID)
-//   2. Updates each order status to PAID
-//   3. Upserts Ownership ONLY for product orders (productId non-null)
+//   1. Extracts paymentId, paymentStatus, paidAt from webhook payload (Rule 30.2)
+//   2. Finds all orders with matching paymongoOrderId (link ID)
+//   3. Updates each order: status = PAID, paymongoPaymentId, paymentStatus, paidAt
+//   4. Upserts Ownership ONLY for product orders (productId non-null)
 //      System orders (systemId set, productId null) are skipped — no Ownership row needed.
-//   4. Revalidates /buyer/downloads and /buyer/orders
+//      Maintenance orders (deliveryNote starts with "maintenance:") activate MaintenanceOrder.
+//   5. Revalidates /buyer/downloads and /buyer/orders
 import { NextRequest, NextResponse } from "next/server";
 import { prisma }                    from "@/lib/prisma";
 import { verifyWebhookSignature }    from "@/lib/paymongo";
@@ -37,9 +39,7 @@ export async function POST(req: NextRequest) {
   console.log("[PayMongo Webhook] Event:", eventType);
 
   // ── link.payment.paid / payment.paid ────────────────────────────────────
-  // PayMongo may send either event type depending on API version and webhook config.
   if (eventType === "link.payment.paid" || eventType === "payment.paid") {
-    // linkId may be at different paths depending on event type
     const linkId: string | undefined =
       event?.data?.attributes?.data?.id ??
       event?.data?.attributes?.data?.attributes?.links?.[0] ??
@@ -47,6 +47,16 @@ export async function POST(req: NextRequest) {
     if (!linkId) {
       return NextResponse.json({ error: "No link ID in event" }, { status: 400 });
     }
+
+    // ── Extract payment capture fields from webhook payload (Rule 30.2) ──
+    // PayMongo attaches the payment object inside the link's payments array.
+    const payments: any[] =
+      event?.data?.attributes?.data?.attributes?.payments ?? [];
+    const paymongoPaymentId: string | null = payments[0]?.id ?? null;
+    const paymentStatus:     string        = payments[0]?.attributes?.status ?? "paid";
+    const paidAt:            Date          = payments[0]?.attributes?.paid_at
+      ? new Date((payments[0].attributes.paid_at as number) * 1000)
+      : new Date();
 
     // Find all orders tied to this PayMongo link
     const orders = await prisma.order.findMany({
@@ -69,10 +79,15 @@ export async function POST(req: NextRequest) {
         const tierMatch   = (order.deliveryNote ?? "").match(/^tier:(.+)$/);
         const grantedTier = tierMatch?.[1] ?? "mesh_only";
 
-        // Mark order as PAID
+        // Mark order as PAID — save payment capture fields (Rule 30.2)
         await prisma.order.update({
           where: { id: order.id },
-          data:  { status: "PAID" },
+          data:  {
+            status:            "PAID",
+            paymongoPaymentId: paymongoPaymentId,
+            paymentStatus:     paymentStatus,
+            paidAt:            paidAt,
+          },
         });
 
         // Auto-unlock Ownership for product orders, activate MaintenanceOrder for maintenance orders
@@ -120,10 +135,10 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    revalidatePath("/buyer/downloads",       "layout");
-    revalidatePath("/buyer/orders",          "layout");
+    revalidatePath("/buyer/downloads",        "layout");
+    revalidatePath("/buyer/orders",           "layout");
     revalidatePath("/buyer/pending-payments", "layout");
-    revalidatePath("/admin/orders",          "layout");
+    revalidatePath("/admin/orders",           "layout");
 
     return NextResponse.json({ ok: true, unlocked: orders.length });
   }
@@ -136,7 +151,7 @@ export async function POST(req: NextRequest) {
     if (linkId) {
       await prisma.order.updateMany({
         where: { paymongoOrderId: linkId },
-        data:  { status: "FAILED" },
+        data:  { status: "FAILED", paymentStatus: "failed" },
       });
       console.log("[PayMongo Webhook] Marked orders as FAILED for link:", linkId);
     }
