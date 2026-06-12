@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     const link = await createPaymentLink({
       amount:      total,  // total is PHP; createPaymentLink converts to centavos internally
       description: `Bundle Purchase — ${products.length} items`,
-      remarks:     `Orders: ${allOrderIds}`,
+      remarks:     `Order: ${allOrderIds[0]}`,
       referenceId: primaryOrderId,
       successUrl:  `${appUrl}/checkout/success?bundle=1&orders=${encodeURIComponent(allOrderIds)}`,
       failedUrl:   `${appUrl}/checkout/failed?bundle=1&orders=${encodeURIComponent(allOrderIds)}`,

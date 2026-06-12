@@ -92,7 +92,7 @@ export async function POST(
     const link = await createPaymentLink({
       amount:      correctAmt,
       description: `Payment — ${itemName}`,
-      remarks:     `Order ${order.id} · Tier: ${tier}`,
+      remarks:     `Order: ${order.id}`,
       referenceId: order.id,
       successUrl:  `${appUrl}/checkout/success?orders=${encodeURIComponent(order.id)}`,
       failedUrl:   `${appUrl}/checkout/failed?orders=${encodeURIComponent(order.id)}`,

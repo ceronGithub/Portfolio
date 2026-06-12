@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const link = await createPaymentLink({
       amount,
       description: `${itemName} — 1 month`,
-      remarks:     `Order ${order.id} · ${packageType} maintenance`,
+      remarks:     `Order: ${order.id}`,
       referenceId: order.id,
       successUrl:  `${appUrl}/checkout/success?orders=${encodeURIComponent(order.id)}&type=maintenance`,
       failedUrl:   `${appUrl}/checkout/failed?orders=${encodeURIComponent(order.id)}`,

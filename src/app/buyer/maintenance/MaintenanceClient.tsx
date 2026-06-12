@@ -137,7 +137,7 @@ function PackageSelection() {
       });
       const data = await res.json();
       if (res.ok && data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+        window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
       } else if (res.ok && data.alreadyPending) {
         // Pending order exists — redirect to pending payments page
         window.location.href = "/buyer/pending-payments";

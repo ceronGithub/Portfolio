@@ -1,0 +1,189 @@
+================================================================================
+PAYMONGO WEBHOOK BUG REPORT
+Date: June 12, 2026
+Project: Matthew Studio (Portfolio/shop branch)
+================================================================================
+
+SUMMARY
+-------
+Ang PayMongo webhook ay hindi nagre-record ng payment data sa database kahit
+successful ang payment ng buyer. Ang order ay nananatiling PENDING kahit paid
+na sa PayMongo side.
+
+
+================================================================================
+ROOT CAUSES (6 bugs)
+================================================================================
+
+BUG 1 — MALING WEBHOOK ENDPOINT URL
+-------------------------------------
+Problema:
+  Ang naka-set na Endpoint URL sa PayMongo dashboard ay:
+    https://three-tips-tap.loca.lt
+  
+  Dapat:
+    https://three-tips-tap.loca.lt/api/paymongo/webhook
+
+  Kaya ang POST request ng PayMongo ay napupunta sa "/" (homepage)
+  imbes na sa actual webhook handler.
+
+Solusyon:
+  I-edit ang webhook sa PayMongo dashboard →
+  Settings → Webhooks → Edit →
+  Ilagay ang buong path: https://<your-tunnel-url>/api/paymongo/webhook
+
+
+--------------------------------------------------------------------------------
+
+BUG 2 — MALING PAYMONGO_WEBHOOK_SECRET SA .ENV
+------------------------------------------------
+Problema:
+  Ang .env file ay may maling webhook secret key:
+    PAYMONGO_WEBHOOK_SECRET=whsk_nz5ztkMwoWibiJBsVWSA3ikq
+
+  Ang tama (mula sa PayMongo dashboard):
+    PAYMONGO_WEBHOOK_SECRET=whsk_ZALPorFMqgD2aqkahfrQUNvT
+
+  Kaya ang signature verification ay laging nagfa-fail → 401 Unauthorized →
+  PayMongo nag-reretry nang paulit-ulit.
+
+Solusyon:
+  I-copy ang exact Secret Key mula sa:
+  PayMongo dashboard → Settings → Webhooks → Overview → Secret Key
+  I-paste sa .env.local.
+
+
+--------------------------------------------------------------------------------
+
+BUG 3 — .ENV LANG, WALANG .ENV.LOCAL
+--------------------------------------
+Problema:
+  Next.js ay hindi nagre-read ng .env file sa runtime —
+  kailangan .env.local para ma-pick up ang environment variables.
+  Kaya kahit tama na ang secret key sa .env, hindi pa rin nakikita ng app.
+
+Solusyon:
+  Sa project root, gumawa ng .env.local:
+    cp .env .env.local
+  
+  O manu-manong gumawa ng .env.local at i-paste lahat ng laman ng .env.
+  Tapos i-restart ang server: Ctrl+C → npm run dev
+
+
+--------------------------------------------------------------------------------
+
+BUG 4 — SIGNATURE PARSING BUG SA paymongo.ts
+----------------------------------------------
+Problema:
+  Ang verifyWebhookSignature() ay gumagamit ng:
+    sigHeader.split(",").map(p => p.split("=") as [string, string])
+  
+  Ang as [string, string] ay nagta-truncate sa first "=" lang —
+  posibleng mawala ang buong signature value kung may "=" sa value.
+  
+  Dagdag pa, ang priority ay "te" (test) bago "li" (live) —
+  dapat "li" muna kasi live mode ang ginagamit.
+
+Solusyon (sa src/lib/paymongo.ts):
+  Palitan ng indexOf("=") para split sa first "=" lang:
+  
+    const parts: Record<string, string> = {};
+    for (const segment of sigHeader.split(",")) {
+      const eqIndex = segment.indexOf("=");
+      if (eqIndex === -1) continue;
+      parts[segment.slice(0, eqIndex)] = segment.slice(eqIndex + 1);
+    }
+    const signature = parts["li"] ?? parts["te"];  // li muna (live mode)
+
+
+--------------------------------------------------------------------------------
+
+BUG 5 — "CHECK IF PAID" GUMAGAWA NG BAGONG LINK KAHIT PAID NA
+---------------------------------------------------------------
+Problema:
+  Kapag nag-click ang buyer ng "Check if Paid":
+  1. Kinukuha ang existing PayMongo link
+  2. Kung status ay "paid" (hindi "unpaid"), gumagawa ng BAGONG link
+  3. Ino-overwrite ang paymongoOrderId sa DB ng bagong link ID
+  4. Kapag nag-fire ang webhook para sa lumang link, wala na siyang
+     makitang order sa DB → "No matching orders" → DB hindi nag-update
+
+  Resulta: Bawat "Check if Paid" click = bagong PayMongo link,
+  walang katapusang loop.
+
+Solusyon (sa src/app/api/buyer/pending-payment/[orderId]/route.ts):
+  Kapag existing link status ay "paid" → i-return { alreadyPaid: true }
+  imbes na gumawa ng bagong link:
+
+    if (linkStatus === "paid") {
+      return NextResponse.json({ alreadyPaid: true, orderId: order.id });
+    }
+
+  At sa OrdersClient.tsx, i-handle ang alreadyPaid response:
+  
+    if (data.alreadyPaid) {
+      await fetch("/api/fulfill", {
+        method: "POST",
+        body: JSON.stringify({ orderIds: [order.id] }),
+      });
+      setCheckState("paid");
+      setTimeout(() => { window.location.reload(); }, 1500);
+      return;
+    }
+
+
+--------------------------------------------------------------------------------
+
+BUG 6 — WEBHOOK ORDER LOOKUP FAIL KAPAG REPLACED ANG LINK
+-----------------------------------------------------------
+Problema:
+  Kapag nag-click ang buyer ng "Check if Paid" nang maraming beses,
+  maraming bagong PayMongo link ang nagagawa. Ang paymongoOrderId sa DB
+  ay palaging nino-overwrite ng pinakabagong link ID.
+
+  Kapag nag-fire ang webhook para sa lumang (paid) link,
+  ang findMany({ where: { paymongoOrderId: oldLinkId } }) ay
+  nagre-return ng 0 results → order hindi na-update.
+
+Solusyon (sa src/app/api/paymongo/webhook/route.ts):
+  Mag-add ng remarks-based fallback lookup:
+  
+    // Primary: match by link ID
+    let orders = await prisma.order.findMany({
+      where: { paymongoOrderId: linkId },
+    });
+    
+    // Fallback: extract order ID from remarks field
+    if (orders.length === 0) {
+      const remarksValue = event?.data?.attributes?.data?.attributes?.remarks ?? "";
+      const match = remarksValue.match(/^Order:\s*(\S+)$/);
+      if (match?.[1]) {
+        orders = await prisma.order.findMany({
+          where: { id: match[1] },
+        });
+      }
+    }
+
+
+================================================================================
+ADDITIONAL NOTES
+================================================================================
+
+LOCALTUNNEL LIMITATION:
+  Ang localtunnel URL (https://three-tips-tap.loca.lt) ay nagbabago o
+  nag-eexpire kapag na-restart. Kailangan i-update ang webhook URL sa
+  PayMongo dashboard bawat pagkakataon.
+
+  PERMANENT SOLUTION: I-deploy ang app sa Vercel o Railway para fixed
+  na ang webhook URL at hindi na kailangan ng localtunnel.
+
+FILES CHANGED:
+  - src/lib/paymongo.ts
+  - src/app/api/paymongo/webhook/route.ts
+  - src/app/api/buyer/pending-payment/[orderId]/route.ts
+  - src/app/buyer/orders/OrdersClient.tsx
+  - src/app/buyer/orders/page.tsx (fix "Unknown" maintenance order name)
+
+================================================================================
+END OF REPORT
+================================================================================
