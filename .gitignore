@@ -44,3 +44,6 @@ Thumbs.db
 dev.db
 dev.db-shm
 dev.db-wal
+
+# Prisma 7 generated client (regenerate via npx prisma generate)
+/src/generated/prisma

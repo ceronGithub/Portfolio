@@ -2,8 +2,13 @@
 // Run: npx tsx --env-file=.env prisma/seedSystems.ts
 // All prices, addons, and Public Website pages synced to PRICELIST_MATTHEW_STUDIO.
 
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import "dotenv/config";
+import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+// Prisma 7 requires a driver adapter — bare PrismaClient() no longer connects.
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 const systemsData = [
   // ── 01. PAYROLL & HR SYSTEM ──────────────────────────────────────────────
