@@ -2681,6 +2681,85 @@
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Service Tiers (informational only, inside Systems Showcase) ────── */
+.vServiceTiersWrap {
+  max-width: 1080px;
+  margin: 4rem auto 0;
+  padding: 0 2rem;
+}
+.vServiceTiersEyebrow {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+.vServiceTiersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-lg, 1.5rem);
+}
+.vServiceTierCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease);
+}
+.vServiceTierCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.vServiceTierName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f4f4f5;
+  letter-spacing: -0.01em;
+}
+.vServiceTierTagline {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+.vServiceTierPrice {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.02em;
+}
+.vServiceTierFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.vServiceTierFeatureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+}
+.vServiceTierFeatureDot {
+  flex-shrink: 0;
+  width: 4px;
+  height: 4px;
+  margin-top: 0.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+@media (max-width: 640px) {
+  .vServiceTiersGrid { grid-template-columns: 1fr; }
+}
+
 /* ── Sprint & Agile Methodology Section ─────────────────────────────── */
 
 .vSprintInner {
@@ -4972,6 +5051,35 @@
 .vConfigModalLeft::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
+}
+
+/* Pricing mode toggle — One-time vs Subscription, only shown when a system offers both */
+.vPricingModeToggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+.vPricingModeBtn {
+  flex: 1 1 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease), color var(--transition-fast, 0.15s ease);
+}
+.vPricingModeBtn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+.vPricingModeBtn.active {
+  font-weight: 700;
 }
 
 /* Base features */
