@@ -213,6 +213,45 @@
   margin: 0;
 }
 
+/*
+ * .authAutofillRow / .authAutofillBtn
+ * Dev-only credential shortcut row, shown above the sign-in form.
+ * Two equal-width buttons that fill in the seeded ADMIN/BUYER
+ * email + password so testers don't retype them every time.
+ */
+.authAutofillRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.authAutofillBtn {
+  flex: 1 1 120px;
+  background: rgba(125, 201, 160, 0.08);
+  border: 0.5px solid rgba(125, 201, 160, 0.3);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  color: #7dc9a0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease);
+  touch-action: manipulation;
+}
+
+.authAutofillBtn:hover,
+.authAutofillBtn:focus-visible,
+.authAutofillBtn:active {
+  background: rgba(125, 201, 160, 0.16);
+  border-color: rgba(125, 201, 160, 0.5);
+}
+
 /* Form */
 .authForm {
   display: flex;

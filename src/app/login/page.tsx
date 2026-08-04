@@ -258,6 +258,34 @@ export default function LoginPage() {
             <p className="authCardSub">Access your dashboard and systems.</p>
           </div>
 
+          {/* Dev-only autofill — quickly fills the seeded ADMIN or BUYER
+              credentials so testing doesn't require retyping them each time.
+              Only rendered outside production so it never ships to real users. */}
+          {process.env.NODE_ENV !== "production" && (
+            <div className="authAutofillRow">
+              <button
+                type="button"
+                className="authAutofillBtn"
+                onClick={() => {
+                  setEmail("admin@matthew-studio.com");
+                  setPassword("admin123");
+                }}
+              >
+                Autofill Admin
+              </button>
+              <button
+                type="button"
+                className="authAutofillBtn"
+                onClick={() => {
+                  setEmail("buyer@matthew-studio.com");
+                  setPassword("buyer123");
+                }}
+              >
+                Autofill Buyer
+              </button>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="authForm">
 
             <div className="authField">
