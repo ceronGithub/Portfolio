@@ -2613,6 +2613,10 @@ export default function ProductsClient({ products, systems }: Props) {
   const [globalToast, setGlobalToast]   = useState<{ msg: string; type: "ok" | "err" } | null>(null);
   const headerRef                       = useReveal();
 
+  // Active tab — splits the long Products page into "products" and "systems"
+  // panels so admins no longer scroll through both sections at once.
+  const [activeTab, setActiveTab] = useState<"products" | "systems">("products");
+
   // Show Drive connection result from OAuth callback query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -2681,35 +2685,67 @@ export default function ProductsClient({ products, systems }: Props) {
         </p>
       </div>
 
-      {/* ── Legacy Products ───────────────────────── */}
-      <ProductsSection
-        products={productList}
-        onToggle={handleToggleActive}
-        togglingId={togglingId}
-      />
-
-      {/* ── Systems Catalog ───────────────────────── */}
-      <div className="apSectionHeader apReveal">
-        <span className="apSectionEyebrow">Catalog</span>
-        <h2 className="apSectionTitle">Systems</h2>
+      {/* ── Tab nav — switches between Products and Systems panels ──── */}
+      <div className="apTabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "products"}
+          className={"apTabBtn" + (activeTab === "products" ? " apTabBtnActive" : "")}
+          onClick={() => setActiveTab("products")}
+        >
+          Products
+          <span className="apTabCount">{products.length}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "systems"}
+          className={"apTabBtn" + (activeTab === "systems" ? " apTabBtnActive" : "")}
+          onClick={() => setActiveTab("systems")}
+        >
+          Systems
+          <span className="apTabCount">{systems.length}</span>
+        </button>
       </div>
 
-      <div className="apSystemsList">
-        {systems.map(sys => (
-          <SystemCard
-            key={sys.id}
-            system={sys}
-            isExpanded={expandedSystem === sys.id}
-            onToggleExpand={() => setExpandedSystem(prev => prev === sys.id ? null : sys.id)}
+      {/* ── Legacy Products panel ─────────────────── */}
+      {activeTab === "products" && (
+        <div role="tabpanel">
+          <ProductsSection
+            products={productList}
+            onToggle={handleToggleActive}
+            togglingId={togglingId}
           />
-        ))}
-        {systems.length === 0 && (
-          <div className="apEmpty">
-            <p className="apEmptyTitle">No systems in catalog</p>
-            <p className="apEmptyHint">Run the seed script to populate systems.</p>
+        </div>
+      )}
+
+      {/* ── Systems Catalog panel ─────────────────── */}
+      {activeTab === "systems" && (
+        <div role="tabpanel">
+          <div className="apSectionHeader apReveal">
+            <span className="apSectionEyebrow">Catalog</span>
+            <h2 className="apSectionTitle">Systems</h2>
           </div>
-        )}
-      </div>
+
+          <div className="apSystemsList">
+            {systems.map(sys => (
+              <SystemCard
+                key={sys.id}
+                system={sys}
+                isExpanded={expandedSystem === sys.id}
+                onToggleExpand={() => setExpandedSystem(prev => prev === sys.id ? null : sys.id)}
+              />
+            ))}
+            {systems.length === 0 && (
+              <div className="apEmpty">
+                <p className="apEmptyTitle">No systems in catalog</p>
+                <p className="apEmptyHint">Run the seed script to populate systems.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Page footer — GDrive setup note ──────── */}
       <footer className="apPageFooter">

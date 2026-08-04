@@ -80,6 +80,61 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Tab nav ──────────────────────────────────────────
+   .apTabs / .apTabBtn
+   Splits the page into "Products" and "Systems" panels so admins
+   scroll one section at a time instead of the whole long page. */
+.apTabs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  padding-bottom: 0;
+}
+
+.apTabBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 0.9rem;
+  color: var(--sidebar-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  touch-action: manipulation;
+}
+
+.apTabBtn:hover,
+.apTabBtn:focus-visible {
+  color: var(--content-color);
+}
+
+.apTabBtnActive {
+  color: #c9a96e;
+  border-bottom-color: #c9a96e;
+}
+
+.apTabCount {
+  background: var(--sidebar-border);
+  color: var(--sidebar-text);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.apTabBtnActive .apTabCount {
+  background: rgba(201, 169, 110, 0.16);
+  color: #c9a96e;
+}
+
 /* ── Section divider header ───────────────────────── */
 .apSectionHeader {
   display: flex;
