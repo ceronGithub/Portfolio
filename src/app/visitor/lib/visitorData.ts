@@ -20,7 +20,8 @@ export const techStack = [
 // This type is used for the carousel cards and the configurator modal.
 export type DesignTierEntry = {
   id: string; name: string; slug: string; tagline: string;
-  priceModifier: number; demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
+  priceModifier: number; features: string[];
+  demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
 };
 // pricingType "fixed" → use `price` only, exact amount.
 // pricingType "range" → use `priceMin`/`priceMax` (quote-based, e.g. complex custom integrations).

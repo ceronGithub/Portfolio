@@ -212,6 +212,7 @@ model DesignTier {
   slug          String                   // "static" | "dynamic" | "modern" | "ai-powered"
   tagline       String?                  // Short description shown under the name
   priceModifier Int      @default(0)     // Added to system basePrice (in PHP)
+  features      String[] @default([])    // This tier's own package details — replaces the old shared "base package" list; empty means "fall back to System.features" until an admin fills these in
   demoVideoUrl  String?                  // Tier-specific demo video
   liveUrl       String?                  // Live demo website link
   sortOrder     Int      @default(0)

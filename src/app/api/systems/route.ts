@@ -47,20 +47,35 @@ export async function GET() {
       },
     });
 
-    // Fetch designTiers via raw SQL — safe even if Prisma client is stale after migration
+    // Fetch designTiers via raw SQL — safe even if Prisma client is stale after migration.
+    // Tries the "features" column first (per-tier package details); if that migration
+    // hasn't run yet on this deploy, falls back to the legacy shape so the configurator
+    // still renders — just without per-tier details until the migration completes.
     let designTiersMap: Record<string, any[]> = {};
     try {
       const rawTiers = await prisma.$queryRaw<any[]>`
-        SELECT id, "systemId", name, slug, tagline, "priceModifier", "demoVideoUrl", "liveUrl", "sortOrder"
+        SELECT id, "systemId", name, slug, tagline, "priceModifier", features, "demoVideoUrl", "liveUrl", "sortOrder"
         FROM "DesignTier"
         ORDER BY "systemId", "sortOrder" ASC
       `;
       for (const tier of rawTiers) {
         if (!designTiersMap[tier.systemId]) designTiersMap[tier.systemId] = [];
-        designTiersMap[tier.systemId].push(tier);
+        designTiersMap[tier.systemId].push({ ...tier, features: tier.features ?? [] });
       }
     } catch {
-      designTiersMap = {};
+      try {
+        const rawTiersLegacy = await prisma.$queryRaw<any[]>`
+          SELECT id, "systemId", name, slug, tagline, "priceModifier", "demoVideoUrl", "liveUrl", "sortOrder"
+          FROM "DesignTier"
+          ORDER BY "systemId", "sortOrder" ASC
+        `;
+        for (const tier of rawTiersLegacy) {
+          if (!designTiersMap[tier.systemId]) designTiersMap[tier.systemId] = [];
+          designTiersMap[tier.systemId].push({ ...tier, features: [] });
+        }
+      } catch {
+        designTiersMap = {};
+      }
     }
 
     // Read setupFee/monthlyFee via raw SQL — survives stale Prisma client right after migration,

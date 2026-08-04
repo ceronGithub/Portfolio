@@ -15,76 +15,17 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { DesignTierEntry, ServiceTierEntry, VisitorSystemEntry } from "../lib/visitorData";
 
-type AddOn = {
-  id: string; label: string; category: string; desc?: string; weeks?: number;
-  pricingType: "fixed" | "range"; price: number; priceMin: number | null; priceMax: number | null;
-};
 type ConfigSystem = {
   tag: string; title: string; base: number; accent: string;
   setupFee: number | null; monthlyFee: number | null;
-  baseFeatures: string[]; addons: AddOn[];
+  baseFeatures: string[];
   timeline?: string;
   designTiers: DesignTierEntry[];
 };
 
 // configuratorSystems is built from DB data at runtime in SystemsCarousel.
-// The hardcoded array has been removed — all system/addon data comes from /api/systems.
+// The hardcoded array has been removed — all system data comes from /api/systems.
 const configuratorSystems: ConfigSystem[] = [];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  "Dashboard":      "#7eb8d4",
-  "Data Analysis":  "#86efac",
-  "Invoices":       "#c4b5fd",
-  "Core Invoice":   "#c4b5fd",
-  "Email":          "#fcd34d",
-  "Payments":       "#f9a8d4",
-  "Accounting":     "#67e8f9",
-  "AI":             "#c4b5fd",
-  "AI & Automation":"#fcd34d",
-  "Automation":     "#fcd34d",
-  "Finance":        "#f9a8d4",
-  "Operations":     "#7dc9a0",
-  "HR":             "#67e8f9",
-  "Portal":         "#b8a0d4",
-  "E-commerce":     "#fdba74",
-  "Core POS":       "#fdba74",
-  "Delivery":       "#67e8f9",
-  "CRM":            "#fcd34d",
-  "Core CRM":       "#fcd34d",
-  "Sales":          "#fcd34d",
-  "Marketing":      "#f9a8d4",
-  "Support":        "#67e8f9",
-  "Analytics":      "#86efac",
-  "ERP":            "#7eb8d4",
-  "Planning":       "#7eb8d4",
-  "Core":           "#8fc99a",
-  "Barcode & RFID": "#f9a8d4",
-  "Orders":         "#67e8f9",
-  "Shipping":       "#7eb8d4",
-  "Procurement":    "#fcd34d",
-  "Security":       "#c4b5fd",
-  "Mobile":         "#fdba74",
-  "Core Modules":   "#7dc9a0",
-  "Estimation":     "#86efac",
-  "Scheduling":     "#7eb8d4",
-  "BIM":            "#f9a8d4",
-  "Workforce":      "#67e8f9",
-  "Field & Mobile": "#fdba74",
-  "Enterprise":     "#c4b5fd",
-  "Compliance":     "#b8a0d4",
-  "Equipment":      "#7dc9a0",
-  "IoT":            "#86efac",
-  "Integrations":   "#f9a8d4",
-  "Scanning":       "#fcd34d",
-  "Logistics":      "#67e8f9",
-  "Inventory":      "#8fc99a",
-  "Payroll":        "#67e8f9",
-  "Attendance":     "#7dc9a0",
-  "HR Mgmt":        "#b8a0d4",
-  "Recruitment":    "#fcd34d",
-  "Performance":    "#86efac",
-  "Academic":       "#86efac",
-};
 
 /* ServiceTiersBlock — informational-only cards explaining Basic/Standard/Premium
    service levels. Deliberately has no click/select behavior and no price math —
@@ -153,16 +94,6 @@ export function SystemsCarousel() {
           timeline:     s.timeline,
           baseFeatures: s.features,
           designTiers:  (s.designTiers ?? []) as DesignTierEntry[],
-          addons:       s.addons.map(a => ({
-            id:          a.id,
-            label:       a.label,
-            category:    a.category,
-            desc:        a.description ?? undefined,
-            pricingType: a.pricingType ?? "fixed",
-            price:       a.price,
-            priceMin:    a.priceMin,
-            priceMax:    a.priceMax,
-          })),
         }));
         setDbConfigSystems(cfgSystems);
         setSystemsLoaded(true);
@@ -181,8 +112,6 @@ export function SystemsCarousel() {
 
   /* ── Modal state ─────────────────────────────────────────────────── */
   const [modalSys,  setModalSys]  = useState<ConfigSystem | null>(null);
-  const [selected,  setSelected]  = useState<Record<string, boolean>>({});
-  const [activeCat, setActiveCat] = useState("All");
   // Design tier selection — reset to 0 when modal opens
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
   // Pricing mode toggle — "one_time" (base price) vs "subscription" (setup fee + monthly fee).
@@ -197,24 +126,7 @@ export function SystemsCarousel() {
     const cfg = activeConfigSystems.find(c => c.tag === s.tag) ?? null;
     if (!cfg) return;
 
-    // Pre-check add-ons whose label matches any of the carousel card features
-    const preChecked: Record<string, boolean> = {};
-    cfg.addons.forEach(addon => {
-      const addonLower = addon.label.toLowerCase();
-      const matches = s.features.some(feat => {
-        const featLower = feat.toLowerCase();
-        // Match if either contains key words of the other
-        return addonLower.includes(featLower) ||
-               featLower.includes(addonLower) ||
-               addonLower.split(" ").some(w => w.length > 3 && featLower.includes(w)) ||
-               featLower.split(" ").some(w => w.length > 3 && addonLower.includes(w));
-      });
-      if (matches) preChecked[addon.id] = true;
-    });
-
-    setSelected(preChecked);
     setSelectedTierIdx(0);
-    setActiveCat("All");
     setPricingMode("one_time");
     setModalSys(cfg);
     document.body.style.overflow = "hidden";
@@ -232,58 +144,26 @@ export function SystemsCarousel() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  /* Toggle add-on */
-  function toggle(id: string) {
-    setSelected(prev => ({ ...prev, [id]: !prev[id] }));
-  }
-
-  /* Live price */
-  const selectedAddons = modalSys?.addons.filter(a => selected[a.id]) ?? [];
-  const categories   = modalSys ? ["All", ...Array.from(new Set(modalSys.addons.map(a => a.category)))] : [];
-  const visibleAddons = modalSys ? (activeCat === "All" ? modalSys.addons : modalSys.addons.filter(a => a.category === activeCat)) : [];
-
   // Whether this system offers a subscription option — needs both setupFee and monthlyFee.
   const hasSubscriptionOption = !!(modalSys?.setupFee != null && modalSys?.monthlyFee != null);
   // Effective pricing mode — falls back to one_time if subscription isn't available for this system.
   const effectivePricingMode = hasSubscriptionOption ? pricingMode : "one_time";
 
-  // Add-ons total: fixed add-ons contribute an exact amount to both min and max.
-  // Ranged add-ons (quote-based) contribute priceMin to the min side and priceMax (or
-  // stay open-ended, flagged via hasOpenEndedAddon) to the max side.
-  let addonsMin = 0;
-  let addonsMax = 0;
-  let hasRangeAddon = false;
-  let hasOpenEndedAddon = false;
-  selectedAddons.forEach(a => {
-    if (a.pricingType === "range") {
-      hasRangeAddon = true;
-      addonsMin += a.priceMin ?? 0;
-      if (a.priceMax != null) addonsMax += a.priceMax;
-      else { hasOpenEndedAddon = true; addonsMax += a.priceMin ?? 0; }
-    } else {
-      addonsMin += a.price;
-      addonsMax += a.price;
-    }
-  });
-  // Used only for the exact (non-range) CTA subtext — equals addonsMin/addonsMax when no ranged add-on is selected.
-  const addonsTotal = addonsMin;
-
   // Base cost depends on pricing mode: one-time base price, or setup fee (monthly fee shown separately).
   const baseCost = effectivePricingMode === "subscription" ? (modalSys?.setupFee ?? 0) : (modalSys?.base ?? 0);
-  const totalMin = baseCost + addonsMin + tierPriceBonus;
-  const totalMax = baseCost + addonsMax + tierPriceBonus;
-  // Only show an estimated range when a ranged add-on is actually selected — otherwise show the exact total as before.
-  const showEstimatedRange = hasRangeAddon;
-  const totalPrice = totalMin; // exact total when no ranged add-on is selected (totalMin === totalMax in that case)
+  // Total is base cost plus the selected design tier's price modifier — no add-ons anymore.
+  const totalPrice = baseCost + tierPriceBonus;
 
-  /* Delivery estimate: pulled directly from system timeline, addons stack on top */
+  // Package details shown below the tier selector — the selected tier's own list when it
+  // has one, otherwise this system's shared feature list (covers tiers not yet filled in).
+  const activeTierFeatures =
+    activeTier && activeTier.features.length > 0 ? activeTier.features : (modalSys?.baseFeatures ?? []);
+
+  /* Delivery estimate: pulled directly from system timeline */
   const [baseMinWks, baseMaxWks] = modalSys?.timeline
     ? modalSys.timeline.replace(" weeks","").split("–").map(Number)
     : [6, 8];
-  const addonWeeks = Math.round(selectedAddons.length * 0.3 * 2) / 2;
-  const minWks = baseMinWks + addonWeeks;
-  const maxWks = baseMaxWks + addonWeeks;
-  const deliveryEst = `${minWks % 1 === 0 ? minWks : minWks.toFixed(1)}–${maxWks % 1 === 0 ? maxWks : maxWks.toFixed(1)} weeks`;
+  const deliveryEst = `${baseMinWks}–${baseMaxWks} weeks`;
 
   /* Carousel navigation */
   const goTo = (idx: number) => {
@@ -544,17 +424,22 @@ export function SystemsCarousel() {
                   </div>
                 )}
 
-                {/* Base features — locked/pre-checked */}
+                {/* Package details — this is the SELECTED TIER's own list, not a
+                    shared "included in every tier" list. Falls back to the
+                    system's general feature list only when the active tier
+                    hasn't had its own package details filled in yet. */}
                 <div className="vConfigModalSection">
                   <p className="vConfigModalSectionLabel">
-                    {effectivePricingMode === "subscription" ? (
+                    {activeTier ? (
+                      <>Package details — {activeTier.name}</>
+                    ) : effectivePricingMode === "subscription" ? (
                       <>Base package — ₱{(modalSys.setupFee ?? 0).toLocaleString()} setup + ₱{(modalSys.monthlyFee ?? 0).toLocaleString()}/mo <span className="vConfigModalIncluded">included</span></>
                     ) : (
                       <>Base package — ₱{modalSys.base.toLocaleString()} <span className="vConfigModalIncluded">included</span></>
                     )}
                   </p>
                   <div className="vConfigModalBaseList">
-                    {modalSys.baseFeatures.map((f, i) => (
+                    {activeTierFeatures.map((f, i) => (
                       <div key={i} className="vConfigModalBaseItem">
                         <div className="vConfigModalCheck vConfigModalCheckLocked" style={{ background: modalSys.accent, borderColor: modalSys.accent }}>
                           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -566,55 +451,6 @@ export function SystemsCarousel() {
                       </div>
                     ))}
                   </div>
-                </div>
-
-                {/* Category filter */}
-                <div className="vConfigModalCats">
-                  {categories.map(cat => (
-                    <button
-                      key={cat}
-                      className={"vConfigModalCat" + (activeCat === cat ? " active" : "")}
-                      style={activeCat === cat ? { borderColor: modalSys.accent, color: modalSys.accent } : {}}
-                      onClick={() => setActiveCat(cat)}
-                    >{cat}</button>
-                  ))}
-                </div>
-
-                {/* Add-ons */}
-                <div className="vConfigModalAddons">
-                  {visibleAddons.map(addon => {
-                    const isOn = !!selected[addon.id];
-                    const catColor = CATEGORY_COLORS[addon.category] || "#fff";
-                    return (
-                      <button
-                        key={addon.id}
-                        className={"vConfigModalAddon" + (isOn ? " on" : "")}
-                        style={isOn ? { borderColor: modalSys.accent + "60", background: modalSys.accent + "0d" } : {}}
-                        onClick={() => toggle(addon.id)}
-                      >
-                        <div className="vConfigModalAddonLeft">
-                          <div className={"vConfigModalCheck" + (isOn ? " on" : "")}
-                            style={isOn ? { background: "#22c55e", borderColor: "#22c55e" } : {}}>
-                            {isOn && (
-                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                <path d="M2 5l2.5 2.5L8 3" stroke="#000" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            )}
-                          </div>
-                          <div>
-                            <span className="vConfigModalAddonLabel">{addon.label}</span>
-                            <span className="vConfigModalAddonCat" style={{ color: catColor }}>{addon.category}</span>
-                            {addon.desc && <span className="vConfigModalAddonDesc">{addon.desc}</span>}
-                          </div>
-                        </div>
-                        <span className="vConfigModalAddonPrice">
-                          {addon.pricingType === "range"
-                            ? `₱${(addon.priceMin ?? 0).toLocaleString()}–₱${addon.priceMax != null ? addon.priceMax.toLocaleString() : ""}${addon.priceMax == null ? "+" : ""}`
-                            : `+₱${addon.price.toLocaleString()}`}
-                        </span>
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
 
@@ -650,37 +486,15 @@ export function SystemsCarousel() {
                       <span>₱{tierPriceBonus.toLocaleString()}</span>
                     </div>
                   )}
-                  {selectedAddons.length > 0 && (
-                    <div className="vConfigModalAddonRows">
-                      {selectedAddons.map(a => (
-                        <div key={a.id} className="vConfigModalRow vConfigModalRowAddon">
-                          <span>+ {a.label}</span>
-                          <span>
-                            {a.pricingType === "range"
-                              ? `₱${(a.priceMin ?? 0).toLocaleString()}–₱${a.priceMax != null ? a.priceMax.toLocaleString() : ""}${a.priceMax == null ? "+" : ""}`
-                              : `₱${a.price.toLocaleString()}`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {selectedAddons.length === 0 && (
-                    <p className="vConfigModalEmpty">No add-ons yet.<br/>Select features on the left.</p>
-                  )}
                   <div className="vConfigModalDivider" />
                   <div className="vConfigModalTotal">
-                    <span>{showEstimatedRange ? "Estimated total" : "Total"}</span>
+                    <span>Total</span>
                     <span className="vConfigModalTotalPrice" style={{ color: modalSys.accent }}>
-                      {showEstimatedRange
-                        ? `₱${totalMin.toLocaleString()} – ₱${totalMax.toLocaleString()}${hasOpenEndedAddon ? "+" : ""}`
-                        : `₱${totalPrice.toLocaleString()}`}
+                      ₱{totalPrice.toLocaleString()}
                     </span>
                   </div>
                   {effectivePricingMode === "subscription" && (
                     <p className="vConfigModalTerms">+ ₱{(modalSys.monthlyFee ?? 0).toLocaleString()}/month recurring</p>
-                  )}
-                  {showEstimatedRange && (
-                    <p className="vConfigModalTerms">Quote-based add-ons — final price confirmed after scoping</p>
                   )}
                   <p className="vConfigModalTerms">30% downpayment · 70% on delivery</p>
                   <div className="vConfigModalDelivery">
@@ -707,9 +521,6 @@ export function SystemsCarousel() {
                         </div>
                       </div>
                     </div>
-                    {selectedAddons.length > 0 && (
-                      <span className="vConfigModalDeliveryNote">+{(addonWeeks).toFixed(1)} wks from {selectedAddons.length} add-on{selectedAddons.length !== 1 ? "s" : ""}</span>
-                    )}
                   </div>
                 </div>
                 </div>{/* end vConfigModalResultScroll */}
@@ -720,14 +531,11 @@ export function SystemsCarousel() {
                     href={`/register`}
                     className="vConfigModalCta"
                   >
-                    Start This Build →
+                    Proceed →
                   </a>
-                  <p className="vConfigModalCtaSub">
-                    {selectedAddons.length} add-on{selectedAddons.length !== 1 ? "s" : ""} selected
-                    {showEstimatedRange
-                      ? ` · +₱${addonsMin.toLocaleString()}–₱${addonsMax.toLocaleString()}${hasOpenEndedAddon ? "+" : ""}`
-                      : ` · +₱${addonsTotal.toLocaleString()}`}
-                  </p>
+                  {activeTier && (
+                    <p className="vConfigModalCtaSub">{activeTier.name} design selected</p>
+                  )}
                 </div>
               </div>
 
