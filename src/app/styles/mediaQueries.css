@@ -219,3 +219,696 @@
     font-size: 1rem;
   }
 }
+/* ════════════════════════════════════════════════════════════════════
+   VISITOR PAGE — moved out of visitor/visitor.css (Rule 9 compliance).
+   Grouped in original file order; label = first selector in the block.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* — .vNav (Navbar) — */
+@media (max-width: 900px) {
+
+  /* Navbar */
+  .vNav {
+    padding: 0 1.5rem;
+  }
+  .vNavLinks {
+    display: none;
+  }
+
+  /* Hero */
+  .vHeroContent {
+    padding: 0 1.5rem;
+  }
+
+  /* Systems */
+  .vSystemsGrid {
+    grid-template-columns: 1fr;
+  }
+  .vSystems {
+    padding: 5rem 1.5rem;
+  }
+
+  /* Process */
+  .vProcess {
+    padding: 5rem 1.5rem;
+  }
+
+  /* About */
+  .vAboutInner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .vAbout {
+    padding: 5rem 1.5rem;
+  }
+
+  /* CTA */
+  .vCta {
+    padding: 6rem 1.5rem;
+  }
+
+  /* Footer */
+  .vFooter {
+    padding: 3rem 1.5rem;
+  }
+
+  .vAboutStats {
+    gap: 2rem;
+  }
+
+  /* AI Section */
+  .vAiGrid {
+    grid-template-columns: 1fr;
+  }
+  .vAiCardWide {
+    flex-direction: column;
+  }
+  .vAiCardWide .vAiPreview {
+    height: 260px;
+    flex: none;
+  }
+  .vAiCardWide .vAiCardBody {
+    padding: 1.75rem 2rem 2rem;
+  }
+  .vAiSectionInner {
+    padding: 0 1.5rem;
+  }
+  .vAiCardWide .vAiCardTitle {
+    font-size: 1.3rem;
+  }
+  .vAiWideTitle {
+    font-size: 1.4rem !important;
+  }
+  .vAiSteps {
+    gap: 0.9rem;
+  }
+  .vAiSubGrid {
+    grid-template-columns: 1fr;
+  }
+  .vAiHowGrid {
+    grid-template-columns: 1fr;
+  }
+  .vAiCtaBlock {
+    padding: 3rem 1.5rem;
+  }
+
+  /* Magazine split */
+  .vMagSection {
+    grid-template-columns: 1fr;
+  }
+  .vMagRight {
+    min-height: 420px;
+  }
+  .vMagLeftInner {
+    padding: 2rem 1.75rem;
+  }
+  .vSlideCardActive {
+    flex: none;
+    min-height: 260px;
+  }
+  .vSlideCardBelow {
+    flex: none;
+    min-height: 120px;
+  }
+
+  /* Pricing & Badges */
+  .vPriceFactors {
+    grid-template-columns: 1fr;
+  }
+  .vPriceSection {
+    padding: 5rem 1.5rem;
+  }
+  .vBadgeGrid {
+    grid-template-columns: 1fr;
+  }
+  .vTrustBadges {
+    padding: 5rem 1.5rem;
+  }
+
+  /* Maintenance */
+  .vMaintenanceTiers {
+    grid-template-columns: 1fr;
+  }
+  .vMaintenanceTierHighlight {
+    transform: none;
+  }
+
+  /* Weapon section */
+  .vWeaponSection {
+    grid-template-columns: 1fr;
+  }
+  .vWeaponRight {
+    display: none;
+  }
+}
+
+/* — .vHeroTitle (Hero) — */
+@media (max-width: 640px) {
+
+  /* Hero */
+  .vHeroTitle {
+    font-size: clamp(2.2rem, 8vw, 3rem);
+  }
+  .vHeroSub {
+    font-size: 0.92rem;
+  }
+  .vHeroActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .vHeroBtnPrimary,
+  .vHeroBtnSecondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Trust marquee */
+  .vTrust {
+    padding: 3.5rem 0 3rem;
+  }
+
+  /* Sprint steps */
+  .vSprintStep {
+    grid-template-columns: 40px 44px 1fr;
+    gap: 0 1rem;
+  }
+  .vSprintLine {
+    left: 32px;
+  }
+  .vSprintStepList {
+    grid-template-columns: 1fr;
+  }
+  .vSprintCta {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  /* Testimonials */
+  .tSideCard {
+    display: none;
+  }
+  .tCarouselWrap {
+    min-height: 420px;
+  }
+  .tFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Comparison table */
+  .vCompare {
+    padding: 5rem 1.25rem;
+  }
+  .vCompareTable {
+    overflow-x: auto;
+  }
+  .vCompareHeader,
+  .vCompareRow {
+    grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr;
+    min-width: 560px;
+  }
+  .vCompareHeaderCell,
+  .vCompareCell {
+    padding: 0.75rem 0.75rem;
+  }
+  .vCompareFeatureText {
+    font-size: 0.78rem;
+  }
+
+  /* Config modal */
+  .vConfigModalBody {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .vConfigModalResult {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  /* About stats — wrap to 2 cols */
+  .vAboutStats {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .vAboutStat {
+    min-width: calc(50% - 0.75rem);
+  }
+}
+
+/* — .vNavSignIn (Nav) — */
+@media (max-width: 480px) {
+
+  /* Navbar */
+  .vNavSignIn {
+    display: none;
+  }
+
+  /* Hero */
+  .vHero {
+    min-height: 600px;
+  }
+  .vHeroContent {
+    padding: 0 1.1rem;
+  }
+  .vHeroTitle {
+    font-size: 2.2rem;
+    margin-bottom: 1.25rem;
+  }
+  .vHeroSub {
+    font-size: 0.88rem;
+    margin-bottom: 2rem;
+  }
+  .vHeroEyebrow {
+    font-size: 0.65rem;
+    margin-bottom: 1.25rem;
+  }
+  .vScrollHint {
+    display: none;
+  }
+
+  /* Systems */
+  .vSystems {
+    padding: 4rem 1.1rem;
+  }
+  .vSystemCard {
+    padding: 1.75rem 1.25rem;
+  }
+  .vSystemTitle {
+    font-size: 1.05rem;
+  }
+
+  /* Process */
+  .vProcess {
+    padding: 4rem 1.1rem;
+  }
+  .vProcessItem {
+    grid-template-columns: 56px 1fr;
+    gap: 1rem;
+    padding: 1.75rem 0;
+  }
+  .vProcessTitle {
+    font-size: 1.1rem;
+  }
+  .vProcessDesc {
+    font-size: 0.82rem;
+  }
+
+  /* About */
+  .vAbout {
+    padding: 4rem 1.1rem;
+  }
+  .vAboutTitle {
+    font-size: 1.75rem;
+  }
+  .vAboutStatNum {
+    font-size: 1.6rem;
+  }
+  .vAboutStats {
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    margin-top: 1.75rem;
+  }
+
+  /* CTA */
+  .vCta {
+    padding: 5rem 1.1rem;
+  }
+  .vCtaTitle {
+    font-size: 2.2rem;
+  }
+  .vCtaSub {
+    font-size: 0.88rem;
+  }
+  .vCtaActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .vCtaBtn,
+  .vCtaBtnGhost {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Footer */
+  .vFooter {
+    padding: 2.5rem 1.1rem;
+  }
+  .vFooterLogoText {
+    font-size: 0.82rem;
+  }
+  .vFooterLink {
+    font-size: 0.75rem;
+  }
+  .vFooterCopy,
+  .vFooterTagline {
+    font-size: 0.68rem;
+  }
+  .vNavLogoImg {
+    height: clamp(38px, 10vw, 56px);
+    width:  clamp(38px, 10vw, 56px);
+  }
+
+  /* AI section */
+  .vAiSection {
+    padding: 4rem 0;
+  }
+  .vAiSectionInner {
+    padding: 0 1.1rem;
+  }
+  .vAiHeader {
+    margin-bottom: 3rem;
+  }
+  .vAiMainTitle {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+  }
+
+  /* Testimonials */
+  .vTestimonials {
+    padding: 5rem 1.1rem;
+  }
+
+  /* FAQ */
+  .vFaq {
+    padding: 4rem 1.1rem;
+  }
+  .vFaqQ {
+    font-size: 0.92rem;
+  }
+
+  /* Pricing */
+  .vPriceSection {
+    padding: 4rem 1.1rem;
+  }
+
+  /* Trust badges */
+  .vTrustBadges {
+    padding: 4rem 1.1rem;
+  }
+
+  /* Comparison */
+  .vCompare {
+    padding: 4rem 1.1rem;
+  }
+
+  /* Section header shared */
+  .vSectionTitle {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+  }
+  .vSectionSub {
+    font-size: 0.88rem;
+  }
+  .vSectionHeader {
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* — .vHeroTitle (Hero, small mobile) — */
+@media (max-width: 375px) {
+
+  .vHeroTitle {
+    font-size: 1.9rem;
+  }
+  .vHeroContent {
+    padding: 0 0.85rem;
+  }
+  .vHeroSub {
+    font-size: 0.82rem;
+  }
+
+  .vSystems,
+  .vProcess,
+  .vAbout,
+  .vCta {
+    padding: 3.5rem 0.85rem;
+  }
+
+  .vFooter {
+    padding: 2rem 0.85rem;
+  }
+
+  .vAiSectionInner {
+    padding: 0 0.85rem;
+  }
+
+  .vTestimonials {
+    padding: 4rem 0.85rem;
+  }
+
+  .vFaq {
+    padding: 3.5rem 0.85rem;
+  }
+
+  .vPriceSection,
+  .vTrustBadges,
+  .vCompare {
+    padding: 3.5rem 0.85rem;
+  }
+
+  .vCtaTitle {
+    font-size: 1.85rem;
+  }
+
+  .vAboutStatNum {
+    font-size: 1.4rem;
+  }
+
+  .vSystemCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .vProcessItem {
+    grid-template-columns: 44px 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* — .vAiGrid (AI Visual Systems) — */
+@media (max-width: 900px) {
+  .vAiGrid {
+    grid-template-columns: 1fr;
+  }
+  .vAiCardWide {
+    flex-direction: column;
+  }
+  .vAiCardWide .vAiPreview {
+    height: 260px;
+    flex: none;
+  }
+  .vAiCardWide .vAiCardBody {
+    padding: 1.75rem 2rem 2rem;
+  }
+  .vAiSectionInner {
+    padding: 0 1.5rem;
+  }
+  .vAiCardWide .vAiCardTitle {
+    font-size: 1.3rem;
+  }
+}
+
+/* — .vAiWideTitle (Wide card) — */
+@media (max-width: 900px) {
+  .vAiWideTitle {
+    font-size: 1.4rem !important;
+  }
+  .vAiSteps {
+    gap: 0.9rem;
+  }
+}
+
+/* — .vAiSubGrid (Sub-grid) — */
+@media (max-width: 900px) {
+  .vAiSubGrid {
+    grid-template-columns: 1fr;
+  }
+  .vAiHowGrid {
+    grid-template-columns: 1fr;
+  }
+  .vAiCtaBlock {
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* — .vMagCardRow (Magazine card) — */
+@media (max-width: 900px) {
+  .vMagCardRow {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
+  .vMagCard {
+    min-height: 340px;
+  }
+  .vMagCardVideo {
+    min-height: 260px;
+    max-height: 320px;
+  }
+}
+
+/* — .vMagCardRow (Magazine card, mobile) — */
+@media (max-width: 480px) {
+  .vMagCardRow {
+    padding: 0.5rem;
+  }
+  .vMagCard {
+    min-height: 280px;
+  }
+  .vMagCardVideo {
+    min-height: 220px;
+    max-height: 260px;
+  }
+  .vMagCardInfo {
+    padding: 1.5rem 1.25rem;
+  }
+  .vMagCardTitle {
+    font-size: 1.4rem;
+  }
+}
+
+/* — .vMagSection (Old magazine section) — */
+@media (max-width: 900px) {
+  .vMagSection {
+    grid-template-columns: 1fr;
+  }
+  .vMagRight {
+    min-height: 420px;
+  }
+  .vMagLeftInner {
+    padding: 2rem 1.75rem;
+  }
+  .vSlideCardActive {
+    flex: none;
+    min-height: 260px;
+  }
+  .vSlideCardBelow {
+    flex: none;
+    min-height: 120px;
+  }
+}
+
+/* — .vServiceTiersGrid (Service Tiers) — */
+@media (max-width: 640px) {
+  .vServiceTiersGrid { grid-template-columns: 1fr; }
+}
+
+/* — .vSprintStep (Sprint/Agile) — */
+@media (max-width: 640px) {
+  .vSprintStep {
+    grid-template-columns: 40px 44px 1fr;
+    gap: 0 1rem;
+  }
+
+  .vSprintLine {
+    left: 32px;
+  }
+
+  .vSprintStepList {
+    grid-template-columns: 1fr;
+  }
+
+  .vSprintCta {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+}
+
+/* — .tSideCard (Testimonial side card) — */
+@media (max-width: 768px) {
+  .tSideCard {
+    display: none;
+  }
+  .tCarouselWrap {
+    min-height: 420px;
+  }
+  .tFormGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* — .vFaq (FAQ) — */
+@media (max-width: 768px) {
+  .vFaq {
+    padding: 4rem 1.25rem;
+  }
+  .vFaqQ {
+    font-size: 0.97rem;
+  }
+}
+
+/* — .vPriceFactors (Pricing) — */
+@media (max-width: 900px) {
+  .vPriceFactors {
+    grid-template-columns: 1fr;
+  }
+  .vPriceSection {
+    padding: 5rem 1.5rem;
+  }
+}
+
+/* — .vBadgeGrid (Badges) — */
+@media (max-width: 900px) {
+  .vBadgeGrid {
+    grid-template-columns: 1fr;
+  }
+  .vTrustBadges {
+    padding: 5rem 1.5rem;
+  }
+}
+
+/* — .vCompare (Compare) — */
+@media (max-width: 768px) {
+  .vCompare {
+    padding: 5rem 1.25rem;
+  }
+  .vCompareTable {
+    overflow-x: auto;
+  }
+  .vCompareHeader,
+  .vCompareRow {
+    grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr;
+    min-width: 560px;
+  }
+  .vCompareHeaderCell,
+  .vCompareCell {
+    padding: 0.75rem 0.75rem;
+  }
+  .vCompareFeatureText {
+    font-size: 0.78rem;
+  }
+}
+
+/* — .vMaintenanceTiers (Maintenance) — */
+@media (max-width: 768px) {
+  .vMaintenanceTiers {
+    grid-template-columns: 1fr;
+  }
+  .vMaintenanceTierHighlight {
+    transform: none;
+  }
+}
+
+/* — .vWeaponSection (Weapon section) — */
+@media (max-width: 768px) {
+  .vWeaponSection {
+    grid-template-columns: 1fr;
+  }
+  .vWeaponRight {
+    display: none;
+  }
+}
+
+/* — .vConfigModalBody (Configurator modal) — */
+@media (max-width: 640px) {
+  .vConfigModalBody {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .vConfigModalResult {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
