@@ -1,0 +1,249 @@
+/*
+ * .showcasePageMain
+ * Standalone page wrapper, same top-level padding pattern as
+ * .roomsPageMain — centered content column on the site's max width.
+ */
+.showcasePageMain {
+  width: 100%;
+  max-width: var(--max-width-content);
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+.showcasePageHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.showcasePageEyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.showcasePageTitle {
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.showcasePageSubtitle {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+  max-width: 55ch;
+}
+
+/*
+ * .showcaseConfigurator
+ * Outer wrapper for the tier selector + sidebar. Padding here keeps
+ * the whole configurator from touching the page edge on mobile
+ * before the columns split apart in mediaQueries.css.
+ */
+.showcaseConfigurator {
+  width: 100%;
+  padding: 0 var(--space-sm);
+}
+
+/*
+ * .showcaseColumns
+ * Mobile-first: stacked single column. Widened into a two-column
+ * layout (main + sidebar) at the 1024px breakpoint in mediaQueries.css.
+ */
+.showcaseColumns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.showcaseMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.showcaseSectionLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.showcaseDetailsLabel {
+  margin-top: var(--space-sm);
+}
+
+/*
+ * .showcaseTierList
+ * One card per service tier. Cards are full-width buttons (not radio
+ * inputs) so the whole card is a large, easy tap target on mobile.
+ */
+.showcaseTierList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.showcaseTierCard {
+  width: 100%;
+  text-align: left;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius, 8px);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.showcaseTierCard:hover,
+.showcaseTierCard:focus-visible {
+  border-color: var(--color-border-hover);
+}
+
+/*
+ * .showcaseTierCardActive
+ * Selected tier — accent border + tinted background, same visual
+ * language as the site's other "active/selected" states.
+ */
+.showcaseTierCardActive {
+  border: 2px solid var(--color-accent);
+  background: var(--color-surface);
+}
+
+.showcaseTierCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.showcaseTierName {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.showcaseTierPrice {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.showcaseTierNote {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/*
+ * .showcaseDetailsList
+ * Per-tier inclusions — swaps entirely when a different tier is
+ * selected, never a merged "included in every tier" list.
+ */
+.showcaseDetailsList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.showcaseDetailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.showcaseDetailIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-success);
+}
+
+/*
+ * .showcaseSidebar
+ * Build summary card — mirrors the selected tier, always in sync
+ * since both panels read from the same selectedTier object.
+ */
+.showcaseSidebar {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius, 8px);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+}
+
+.showcaseSidebarLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.showcaseSidebarTierName {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.showcaseSidebarPrice {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-top: var(--space-md);
+}
+
+.showcaseSidebarNote {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+/*
+ * .showcaseProceedButton
+ * Primary CTA — full width, accent fill, matches the site's other
+ * primary buttons (e.g. booking submit).
+ */
+.showcaseProceedButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: var(--radius, 8px);
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.showcaseProceedButton:hover,
+.showcaseProceedButton:focus-visible {
+  background: var(--color-accent-hover);
+}

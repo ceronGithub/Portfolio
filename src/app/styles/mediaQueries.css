@@ -1,914 +1,373 @@
-/* ================================================
-   mediaQueries.css — All responsive breakpoints.
-   Never put breakpoints inside component CSS files.
-   ================================================ */
+/* ============================================================
+ * MEDIA QUERIES
+ * All responsive breakpoints live here — never inside component CSS files.
+ * Mobile-first: base CSS is mobile layout. Overrides go upward with min-width.
+ * ============================================================ */
 
-/* — Tablet: 768px and below — */
-@media (max-width: 768px) {
-
-  /* Navbar */
-  .navbar {
-    padding: 0 1.25rem;
-  }
-
-  .navLinks {
-    gap: 0.85rem;
-  }
-
-  /* Hero */
-  .heroPage {
-    padding: 5rem 1.25rem 2rem;
-  }
-
-  .heroActions {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .heroBtnPrimary,
-  .heroBtnSecondary {
-    width: 100%;
-    text-align: center;
-  }
-
-  /* Systems */
-  .systemsPage {
-    padding: 5rem 1.25rem 3rem;
-  }
-
-  .systemsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Dashboards */
-  .adminPage,
-  .dashboardPage {
-    padding: 4.5rem 1.25rem 2rem;
-  }
-
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  }
-
-  /* User table — stack on tablet */
-  .userTableHeader,
-  .userTableRow {
-    grid-template-columns: 1fr 2fr 1fr;
-  }
-
-  /* Hide less critical columns on tablet */
-  .userTableHeader span:nth-child(n+4),
-  .userTableRow span:nth-child(n+4),
-  .userTableRow > div:nth-child(n+4) {
-    display: none;
+/* ============================================================
+ * 480px — Small phones
+ * ============================================================ */
+@media (min-width: 480px) {
+  .heroTitle {
+    font-size: 2.5rem;
   }
 }
 
-/* ≤1000px: pill is hidden — hamburger takes over (see Navbar.tsx isMobile) */
-
-/* — Admin Shell: Tablet — */
-@media (max-width: 768px) {
-  .adminSidebar {
-    width: 64px;
-  }
-
-  .adminSidebarLogo,
-  .adminNavItemLabel,
-  .adminThemeToggleLabel,
-  .adminSidebarAdminName,
-  .adminNavItemDot {
-    display: none;
-  }
-
-  .adminMain {
-    margin-left: 64px;
-  }
-
-  .adminStatsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .adminOverviewBottom {
-    grid-template-columns: 1fr;
-  }
-
-  .adminOverviewPage,
-  .adminUsersPage,
-  .adminProductsPage,
-  .adminOrdersPage,
-  .uploadsPage {
-    padding: 1.5rem;
-  }
-
-  .adminUsersTableHeader,
-  .adminUsersTableRow {
-    grid-template-columns: 1.5fr 2fr 1fr;
-  }
-
-  .adminUsersTableHeader span:nth-child(n+4),
-  .adminUsersTableRow span:nth-child(n+4) {
-    display: none;
-  }
-
-  .adminOrdersTableHeader,
-  .adminOrdersTableRow {
-    grid-template-columns: 1fr 2fr 1.5fr 1fr;
-  }
-
-  .adminOrdersTableHeader span:nth-child(n+5),
-  .adminOrdersTableRow span:nth-child(n+5) {
-    display: none;
-  }
-}
-
-/* — Mobile: 480px and below — */
-@media (max-width: 480px) {
-
-  /* Navbar */
-  .navBadge {
-    display: none;
-  }
-
+/* ============================================================
+ * 768px — Tablet / landscape phones
+ * ============================================================ */
+@media (min-width: 768px) {
   /* Hero */
-  .heroPage {
-    padding: 4.5rem 1rem 2rem;
+  .heroTitle {
+    font-size: 3rem;
   }
 
-  /* Systems */
-  .systemCard {
-    padding: 1.5rem;
-  }
-
-  .systemCardFooter {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .systemCardBtn {
-    width: 100%;
-    text-align: center;
-  }
-
-  /* Dashboards */
-  .statsGrid {
+  /* Footer grid — two columns on tablet */
+  .footerContainer {
     grid-template-columns: 1fr 1fr;
   }
+}
 
-  .adminTitle,
-  .dashboardTitle {
-    font-size: 1.4rem;
+/* ============================================================
+ * HEADER — hamburger stays through tablet sizes.
+ * Mobile + tablet (up to 1023px): hamburger menu only.
+ * 1024px+ (small laptop/desktop): full horizontal nav + Book Now.
+ * Kept in its own block, separate from the general 768px/1024px
+ * blocks above, so this breakpoint can move independently of the
+ * hero/footer tablet overrides.
+ * Every rule here uses !important on BOTH sides of the toggle —
+ * Header.css's own base rules (.headerNav display:flex,
+ * .headerBookButton display:inline-flex, etc.) load AFTER this file
+ * in Next.js's actual CSS bundle order (component-level CSS loads
+ * after root-level CSS regardless of import position in this file),
+ * so a plain override here would silently lose the cascade and the
+ * "mobile" nav would render in full, overflowing off-screen instead
+ * of collapsing into the hamburger.
+ * ============================================================ */
+@media (max-width: 1023px) {
+  .headerNav {
+    display: none !important;
   }
 
-  /* Login card */
-  .loginCard {
-    padding: 1.75rem 1.25rem;
+  .headerBookButton {
+    display: none !important;
+  }
+
+  /* Already duplicated as .headerMobileLoginLink inside the dropdown
+     menu below — showing both here left "Login" text sitting right
+     next to the hamburger icon on every mobile/tablet screen. */
+  .headerLoginLink {
+    display: none !important;
+  }
+
+  .headerHamburger {
+    display: flex !important;
   }
 }
-/* — Uploads page: Tablet — */
-@media (max-width: 768px) {
-  .uploadsLayout {
+
+@media (min-width: 1024px) {
+  .headerHamburger {
+    display: none !important;
+  }
+
+  .headerNav {
+    display: flex !important;
+  }
+
+  .headerBookButton {
+    display: inline-flex !important;
+  }
+
+  .headerLoginLink {
+    display: inline-flex !important;
+  }
+
+  .headerMobileMenu {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+ * 1024px — Small laptop / desktop
+ * ============================================================ */
+@media (min-width: 1024px) {
+  /* Hero */
+  .heroTitle {
+    font-size: 3.5rem;
+  }
+
+  /* Footer — back to full three columns */
+  .footerContainer {
+    grid-template-columns: 1.6fr 1fr 1fr;
+  }
+
+  /* Sections — wider padding on desktop */
+  .featuredRoomsSection,
+  .amenitiesHighlightSection,
+  .testimonialsSection,
+  .ctaSection {
+    padding-left: var(--space-2xl);
+    padding-right: var(--space-2xl);
+  }
+}
+
+/* ============================================================
+ * Mobile-only overrides (max-width: 767px)
+ * (Header hamburger/nav toggle now lives in its own block above,
+ * scoped to max-width: 1023px so it also covers tablet sizes.)
+ * ============================================================ */
+@media (max-width: 767px) {
+  /* Admin top bar — Date/Time/Event/Season badges take up too much
+     width alongside the session timer + user menu on narrow screens;
+     hidden here rather than shrunk further, since truncated versions
+     of these labels would be more confusing than simply absent. */
+  .adminHeaderInfoGroup {
+    display: none;
+  }
+
+  /* Footer — single column on mobile */
+  .footerContainer {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .footerTagline {
+    max-width: 100%;
+  }
+
+  /* CTA buttons — stack on mobile */
+  .ctaActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .ctaButtonPrimary,
+  .ctaButtonSecondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Hero text scale */
+  .heroTitle {
+    font-size: 2.25rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  /* Hero CTA stack */
+  .heroActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .heroCtaPrimary,
+  .heroCtaSecondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Section titles */
+  .featuredRoomsTitle,
+  .amenitiesHighlightTitle,
+  .testimonialsTitle,
+  .ctaTitle {
+    font-size: 1.65rem;
+  }
+
+  /* Footer bottom — stack on mobile */
+  .footerBottomContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+}
+
+/* ============================================================
+ * POLICIES PAGE — RESPONSIVE
+ * ============================================================ */
+
+/* Mobile: collapse sidebar above content, single column */
+@media (max-width: 767px) {
+  .policiesBodyContainer {
     grid-template-columns: 1fr;
   }
 
-  .uploadsFilesPanel {
+  .policiesSidebar {
     position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
   }
 
-  .uploadsHeader {
+  .policiesSidebarLabel {
+    display: none;
+  }
+
+  .policiesSidebarList {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .policiesSidebarLink {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-left: 2px solid transparent;
+    border-radius: 999px;
+  }
+
+  .policiesTitle {
+    font-size: 1.75rem;
+  }
+
+  .policiesRefundTableHeader,
+  .policiesRefundTableRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+
+  .policiesContactPrompt {
     flex-direction: column;
     align-items: flex-start;
   }
 }
 
-/* — Uploads page: Mobile — */
-@media (max-width: 480px) {
-  .uploadsFolderGrid {
-    gap: 0.4rem;
+/* ============================================================
+ * BOOKING FORM — app/visitor/booking/BookingForm.css
+ * ============================================================ */
+@media (min-width: 768px) {
+  .bookingFormRow {
+    flex-direction: row;
   }
 
-  .uploadsFolderChip {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.65rem;
+  .bookingConfirmSummary dd {
+    text-align: left;
   }
 }
 
-/* ── Bundle Checkout: Tablet (768px) ── */
-@media (max-width: 768px) {
-  .bundleWrap {
-    grid-template-columns: 1fr;
+/* ============================================================
+ * ROOM DETAIL PAGE — app/visitor/rooms/[slug]/RoomDetail.css
+ * ============================================================ */
+@media (min-width: 768px) {
+  .roomDetailTitle {
+    font-size: 2.25rem;
+  }
+
+  .roomDetailThumbnail {
+    flex: 0 0 110px;
+    width: 110px;
   }
 }
 
-/* ── Bundle Checkout: Mobile (375px) ── */
-@media (max-width: 375px) {
-  .bundlePage {
-    padding: 5rem 1rem 4rem;
-  }
-
-  .bundleLeft,
-  .bundleRight {
-    padding: 1.5rem;
-  }
-
-  .bundleDueAmount {
-    font-size: 1rem;
-  }
-}
-/* ════════════════════════════════════════════════════════════════════
-   VISITOR PAGE — moved out of visitor/visitor.css (Rule 9 compliance).
-   Grouped in original file order; label = first selector in the block.
-   ════════════════════════════════════════════════════════════════════ */
-
-/* — .vNav (Navbar) — */
-@media (max-width: 900px) {
-
-  /* Navbar */
-  .vNav {
-    padding: 0 1.5rem;
-  }
-  .vNavLinks {
-    display: none;
-  }
-
-  /* Hero */
-  .vHeroContent {
-    padding: 0 1.5rem;
-  }
-
-  /* Systems */
-  .vSystemsGrid {
-    grid-template-columns: 1fr;
-  }
-  .vSystems {
-    padding: 5rem 1.5rem;
-  }
-
-  /* Process */
-  .vProcess {
-    padding: 5rem 1.5rem;
-  }
-
-  /* About */
-  .vAboutInner {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-  .vAbout {
-    padding: 5rem 1.5rem;
-  }
-
-  /* CTA */
-  .vCta {
-    padding: 6rem 1.5rem;
-  }
-
-  /* Footer */
-  .vFooter {
-    padding: 3rem 1.5rem;
-  }
-
-  .vAboutStats {
-    gap: 2rem;
-  }
-
-  /* AI Section */
-  .vAiGrid {
-    grid-template-columns: 1fr;
-  }
-  .vAiCardWide {
+@media (max-width: 767px) {
+  .roomDetailFooter {
     flex-direction: column;
-  }
-  .vAiCardWide .vAiPreview {
-    height: 260px;
-    flex: none;
-  }
-  .vAiCardWide .vAiCardBody {
-    padding: 1.75rem 2rem 2rem;
-  }
-  .vAiSectionInner {
-    padding: 0 1.5rem;
-  }
-  .vAiCardWide .vAiCardTitle {
-    font-size: 1.3rem;
-  }
-  .vAiWideTitle {
-    font-size: 1.4rem !important;
-  }
-  .vAiSteps {
-    gap: 0.9rem;
-  }
-  .vAiSubGrid {
-    grid-template-columns: 1fr;
-  }
-  .vAiHowGrid {
-    grid-template-columns: 1fr;
-  }
-  .vAiCtaBlock {
-    padding: 3rem 1.5rem;
+    align-items: flex-start;
   }
 
-  /* Magazine split */
-  .vMagSection {
-    grid-template-columns: 1fr;
-  }
-  .vMagRight {
-    min-height: 420px;
-  }
-  .vMagLeftInner {
-    padding: 2rem 1.75rem;
-  }
-  .vSlideCardActive {
-    flex: none;
-    min-height: 260px;
-  }
-  .vSlideCardBelow {
-    flex: none;
-    min-height: 120px;
-  }
-
-  /* Pricing & Badges */
-  .vPriceFactors {
-    grid-template-columns: 1fr;
-  }
-  .vPriceSection {
-    padding: 5rem 1.5rem;
-  }
-  .vBadgeGrid {
-    grid-template-columns: 1fr;
-  }
-  .vTrustBadges {
-    padding: 5rem 1.5rem;
-  }
-
-  /* Maintenance */
-  .vMaintenanceTiers {
-    grid-template-columns: 1fr;
-  }
-  .vMaintenanceTierHighlight {
-    transform: none;
-  }
-
-  /* Weapon section */
-  .vWeaponSection {
-    grid-template-columns: 1fr;
-  }
-  .vWeaponRight {
-    display: none;
-  }
-}
-
-/* — .vHeroTitle (Hero) — */
-@media (max-width: 640px) {
-
-  /* Hero */
-  .vHeroTitle {
-    font-size: clamp(2.2rem, 8vw, 3rem);
-  }
-  .vHeroSub {
-    font-size: 0.92rem;
-  }
-  .vHeroActions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-  .vHeroBtnPrimary,
-  .vHeroBtnSecondary {
+  .roomDetailBookButton {
     width: 100%;
-    justify-content: center;
-    text-align: center;
   }
 
-  /* Trust marquee */
-  .vTrust {
-    padding: 3.5rem 0 3rem;
-  }
-
-  /* Sprint steps */
-  .vSprintStep {
-    grid-template-columns: 40px 44px 1fr;
-    gap: 0 1rem;
-  }
-  .vSprintLine {
-    left: 32px;
-  }
-  .vSprintStepList {
-    grid-template-columns: 1fr;
-  }
-  .vSprintCta {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-
-  /* Testimonials */
-  .tSideCard {
-    display: none;
-  }
-  .tCarouselWrap {
-    min-height: 420px;
-  }
-  .tFormGrid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Comparison table */
-  .vCompare {
-    padding: 5rem 1.25rem;
-  }
-  .vCompareTable {
-    overflow-x: auto;
-  }
-  .vCompareHeader,
-  .vCompareRow {
-    grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr;
-    min-width: 560px;
-  }
-  .vCompareHeaderCell,
-  .vCompareCell {
-    padding: 0.75rem 0.75rem;
-  }
-  .vCompareFeatureText {
-    font-size: 0.78rem;
-  }
-
-  /* Config modal */
-  .vConfigModalBody {
-    grid-template-columns: 1fr;
-    overflow-y: auto;
-  }
-  .vConfigModalResult {
-    max-height: none;
-    overflow-y: visible;
-  }
-
-  /* About stats — wrap to 2 cols */
-  .vAboutStats {
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-  .vAboutStat {
-    min-width: calc(50% - 0.75rem);
+  .roomDetailLightboxNav {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
   }
 }
 
-/* — .vNavSignIn (Nav) — */
-@media (max-width: 480px) {
-
-  /* Navbar */
-  .vNavSignIn {
-    display: none;
+/* ============================================================
+ * SUPER-ADMIN SIDEBAR + HEADER — same 1024px hamburger cutover
+ * convention as the visitor Header above, and the SAME reason every
+ * rule uses !important on both sides: Sidebar.css/AdminHeader.css's
+ * own base rules load after this file in Next.js's real bundle
+ * order, so a plain override here would silently lose the cascade
+ * (see the HEADER block's comment above for the full explanation).
+ * Mobile + tablet (up to 1023px): Sidebar becomes an off-canvas
+ * drawer (hidden by default, slid in via .adminSidebar--open),
+ * AdminHeader shows a hamburger to toggle it, and content no longer
+ * reserves the 260px sidebar gutter.
+ * 1024px+ (small laptop/desktop): Sidebar stays permanently visible
+ * exactly as before, hamburger hidden, content keeps its 260px gutter.
+ * ============================================================ */
+@media (max-width: 1023px) {
+  .adminSidebar {
+    transform: translateX(-100%) !important;
+    /* Above regular sticky content (header/backdrop) while sliding
+       in as a true overlay drawer, not a permanent column. */
+    z-index: var(--z-drawer) !important;
   }
 
-  /* Hero */
-  .vHero {
-    min-height: 600px;
-  }
-  .vHeroContent {
-    padding: 0 1.1rem;
-  }
-  .vHeroTitle {
-    font-size: 2.2rem;
-    margin-bottom: 1.25rem;
-  }
-  .vHeroSub {
-    font-size: 0.88rem;
-    margin-bottom: 2rem;
-  }
-  .vHeroEyebrow {
-    font-size: 0.65rem;
-    margin-bottom: 1.25rem;
-  }
-  .vScrollHint {
-    display: none;
+  .adminSidebar.adminSidebar--open {
+    transform: translateX(0) !important;
+    box-shadow: var(--shadow-xl) !important;
   }
 
-  /* Systems */
-  .vSystems {
-    padding: 4rem 1.1rem;
-  }
-  .vSystemCard {
-    padding: 1.75rem 1.25rem;
-  }
-  .vSystemTitle {
-    font-size: 1.05rem;
+  /* No more permanent 260px gutter to reserve — the drawer now
+     overlays content instead of sitting beside it. */
+  .superAdminBody {
+    margin-left: 0 !important;
   }
 
-  /* Process */
-  .vProcess {
-    padding: 4rem 1.1rem;
-  }
-  .vProcessItem {
-    grid-template-columns: 56px 1fr;
-    gap: 1rem;
-    padding: 1.75rem 0;
-  }
-  .vProcessTitle {
-    font-size: 1.1rem;
-  }
-  .vProcessDesc {
-    font-size: 0.82rem;
+  .adminHeaderHamburger {
+    display: flex !important;
   }
 
-  /* About */
-  .vAbout {
-    padding: 4rem 1.1rem;
-  }
-  .vAboutTitle {
-    font-size: 1.75rem;
-  }
-  .vAboutStatNum {
-    font-size: 1.6rem;
-  }
-  .vAboutStats {
-    gap: 1.25rem;
-    padding-top: 1.5rem;
-    margin-top: 1.75rem;
-  }
-
-  /* CTA */
-  .vCta {
-    padding: 5rem 1.1rem;
-  }
-  .vCtaTitle {
-    font-size: 2.2rem;
-  }
-  .vCtaSub {
-    font-size: 0.88rem;
-  }
-  .vCtaActions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-  .vCtaBtn,
-  .vCtaBtnGhost {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-  }
-
-  /* Footer */
-  .vFooter {
-    padding: 2.5rem 1.1rem;
-  }
-  .vFooterLogoText {
-    font-size: 0.82rem;
-  }
-  .vFooterLink {
-    font-size: 0.75rem;
-  }
-  .vFooterCopy,
-  .vFooterTagline {
-    font-size: 0.68rem;
-  }
-  .vNavLogoImg {
-    height: clamp(38px, 10vw, 56px);
-    width:  clamp(38px, 10vw, 56px);
-  }
-
-  /* AI section */
-  .vAiSection {
-    padding: 4rem 0;
-  }
-  .vAiSectionInner {
-    padding: 0 1.1rem;
-  }
-  .vAiHeader {
-    margin-bottom: 3rem;
-  }
-  .vAiMainTitle {
-    font-size: clamp(1.6rem, 6vw, 2.2rem);
-  }
-
-  /* Testimonials */
-  .vTestimonials {
-    padding: 5rem 1.1rem;
-  }
-
-  /* FAQ */
-  .vFaq {
-    padding: 4rem 1.1rem;
-  }
-  .vFaqQ {
-    font-size: 0.92rem;
-  }
-
-  /* Pricing */
-  .vPriceSection {
-    padding: 4rem 1.1rem;
-  }
-
-  /* Trust badges */
-  .vTrustBadges {
-    padding: 4rem 1.1rem;
-  }
-
-  /* Comparison */
-  .vCompare {
-    padding: 4rem 1.1rem;
-  }
-
-  /* Section header shared */
-  .vSectionTitle {
-    font-size: clamp(1.6rem, 6vw, 2.2rem);
-  }
-  .vSectionSub {
-    font-size: 0.88rem;
-  }
-  .vSectionHeader {
-    margin-bottom: 2.5rem;
+  /* Date/Time/Event/Season badges — four wide pills that have no
+     room left once the hamburger is added to an already-tight mobile
+     header; hidden here rather than left to wrap into a second row
+     that pushes the user menu around. */
+  .adminHeaderInfoGroup {
+    display: none !important;
   }
 }
 
-/* — .vHeroTitle (Hero, small mobile) — */
-@media (max-width: 375px) {
-
-  .vHeroTitle {
-    font-size: 1.9rem;
-  }
-  .vHeroContent {
-    padding: 0 0.85rem;
-  }
-  .vHeroSub {
-    font-size: 0.82rem;
+@media (min-width: 1024px) {
+  .adminSidebar {
+    transform: none !important;
   }
 
-  .vSystems,
-  .vProcess,
-  .vAbout,
-  .vCta {
-    padding: 3.5rem 0.85rem;
+  .adminSidebarBackdrop {
+    display: none !important;
   }
 
-  .vFooter {
-    padding: 2rem 0.85rem;
+  .superAdminBody {
+    margin-left: 260px !important;
   }
 
-  .vAiSectionInner {
-    padding: 0 0.85rem;
+  .adminHeaderHamburger {
+    display: none !important;
   }
 
-  .vTestimonials {
-    padding: 4rem 0.85rem;
-  }
-
-  .vFaq {
-    padding: 3.5rem 0.85rem;
-  }
-
-  .vPriceSection,
-  .vTrustBadges,
-  .vCompare {
-    padding: 3.5rem 0.85rem;
-  }
-
-  .vCtaTitle {
-    font-size: 1.85rem;
-  }
-
-  .vAboutStatNum {
-    font-size: 1.4rem;
-  }
-
-  .vSystemCard {
-    padding: 1.5rem 1rem;
-  }
-
-  .vProcessItem {
-    grid-template-columns: 44px 1fr;
-    gap: 0.75rem;
+  .adminHeaderInfoGroup {
+    display: flex !important;
   }
 }
+/*
+ * Visitor showcase — /visitor/showcase
+ * Splits the tier configurator into a main column + sticky-width
+ * sidebar once there's enough horizontal room; stays single-column
+ * (stacked) below 1024px so the sidebar never gets squeezed.
+ */
+@media (min-width: 1024px) {
+  .showcaseColumns {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-2xl);
+  }
 
-/* — .vAiGrid (AI Visual Systems) — */
-@media (max-width: 900px) {
-  .vAiGrid {
-    grid-template-columns: 1fr;
+  .showcaseMain {
+    flex: 1 1 auto;
   }
-  .vAiCardWide {
-    flex-direction: column;
-  }
-  .vAiCardWide .vAiPreview {
-    height: 260px;
-    flex: none;
-  }
-  .vAiCardWide .vAiCardBody {
-    padding: 1.75rem 2rem 2rem;
-  }
-  .vAiSectionInner {
-    padding: 0 1.5rem;
-  }
-  .vAiCardWide .vAiCardTitle {
-    font-size: 1.3rem;
+
+  .showcaseSidebar {
+    flex: 0 0 280px;
+    position: sticky;
+    top: var(--space-xl);
   }
 }
-
-/* — .vAiWideTitle (Wide card) — */
-@media (max-width: 900px) {
-  .vAiWideTitle {
-    font-size: 1.4rem !important;
-  }
-  .vAiSteps {
-    gap: 0.9rem;
-  }
-}
-
-/* — .vAiSubGrid (Sub-grid) — */
-@media (max-width: 900px) {
-  .vAiSubGrid {
-    grid-template-columns: 1fr;
-  }
-  .vAiHowGrid {
-    grid-template-columns: 1fr;
-  }
-  .vAiCtaBlock {
-    padding: 3rem 1.5rem;
-  }
-}
-
-/* — .vMagCardRow (Magazine card) — */
-@media (max-width: 900px) {
-  .vMagCardRow {
-    grid-template-columns: 1fr;
-    padding: 0.75rem;
-  }
-  .vMagCard {
-    min-height: 340px;
-  }
-  .vMagCardVideo {
-    min-height: 260px;
-    max-height: 320px;
-  }
-}
-
-/* — .vMagCardRow (Magazine card, mobile) — */
-@media (max-width: 480px) {
-  .vMagCardRow {
-    padding: 0.5rem;
-  }
-  .vMagCard {
-    min-height: 280px;
-  }
-  .vMagCardVideo {
-    min-height: 220px;
-    max-height: 260px;
-  }
-  .vMagCardInfo {
-    padding: 1.5rem 1.25rem;
-  }
-  .vMagCardTitle {
-    font-size: 1.4rem;
-  }
-}
-
-/* — .vMagSection (Old magazine section) — */
-@media (max-width: 900px) {
-  .vMagSection {
-    grid-template-columns: 1fr;
-  }
-  .vMagRight {
-    min-height: 420px;
-  }
-  .vMagLeftInner {
-    padding: 2rem 1.75rem;
-  }
-  .vSlideCardActive {
-    flex: none;
-    min-height: 260px;
-  }
-  .vSlideCardBelow {
-    flex: none;
-    min-height: 120px;
-  }
-}
-
-/* — .vServiceTiersGrid (Service Tiers) — */
-@media (max-width: 640px) {
-  .vServiceTiersGrid { grid-template-columns: 1fr; }
-}
-
-/* — .vSprintStep (Sprint/Agile) — */
-@media (max-width: 640px) {
-  .vSprintStep {
-    grid-template-columns: 40px 44px 1fr;
-    gap: 0 1rem;
-  }
-
-  .vSprintLine {
-    left: 32px;
-  }
-
-  .vSprintStepList {
-    grid-template-columns: 1fr;
-  }
-
-  .vSprintCta {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-}
-
-/* — .tSideCard (Testimonial side card) — */
-@media (max-width: 768px) {
-  .tSideCard {
-    display: none;
-  }
-  .tCarouselWrap {
-    min-height: 420px;
-  }
-  .tFormGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* — .vFaq (FAQ) — */
-@media (max-width: 768px) {
-  .vFaq {
-    padding: 4rem 1.25rem;
-  }
-  .vFaqQ {
-    font-size: 0.97rem;
-  }
-}
-
-/* — .vPriceFactors (Pricing) — */
-@media (max-width: 900px) {
-  .vPriceFactors {
-    grid-template-columns: 1fr;
-  }
-  .vPriceSection {
-    padding: 5rem 1.5rem;
-  }
-}
-
-/* — .vBadgeGrid (Badges) — */
-@media (max-width: 900px) {
-  .vBadgeGrid {
-    grid-template-columns: 1fr;
-  }
-  .vTrustBadges {
-    padding: 5rem 1.5rem;
-  }
-}
-
-/* — .vCompare (Compare) — */
-@media (max-width: 768px) {
-  .vCompare {
-    padding: 5rem 1.25rem;
-  }
-  .vCompareTable {
-    overflow-x: auto;
-  }
-  .vCompareHeader,
-  .vCompareRow {
-    grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr;
-    min-width: 560px;
-  }
-  .vCompareHeaderCell,
-  .vCompareCell {
-    padding: 0.75rem 0.75rem;
-  }
-  .vCompareFeatureText {
-    font-size: 0.78rem;
-  }
-}
-
-/* — .vMaintenanceTiers (Maintenance) — */
-@media (max-width: 768px) {
-  .vMaintenanceTiers {
-    grid-template-columns: 1fr;
-  }
-  .vMaintenanceTierHighlight {
-    transform: none;
-  }
-}
-
-/* — .vWeaponSection (Weapon section) — */
-@media (max-width: 768px) {
-  .vWeaponSection {
-    grid-template-columns: 1fr;
-  }
-  .vWeaponRight {
-    display: none;
-  }
-}
-
-/* — .vConfigModalBody (Configurator modal) — */
-@media (max-width: 640px) {
-  .vConfigModalBody {
-    grid-template-columns: 1fr;
-    overflow-y: auto;
-  }
-  .vConfigModalResult {
-    max-height: none;
-    overflow-y: visible;
-  }
-}
-
