@@ -33,7 +33,7 @@ interface Task {
 }
 
 interface Order {
-  id: string; package: Pkg; bugsUsed: number; revisionsUsed: number;
+  id: string; package: Pkg; status: string; bugsUsed: number; revisionsUsed: number;
   startedAt: string; expiresAt: string;
   user: { id: string; name: string; email: string };
   vcSchedules: VCSchedule[]; bugReports: BugReport[]; tasks: Task[];

@@ -12,7 +12,7 @@ import "./dashboard.css";
 
 // Returns label for last N months e.g. ["Dec","Jan","Feb"...]
 function getLastNMonths(n: number): { label: string; year: number; month: number }[] {
-  const result = [];
+  const result: { label: string; year: number; month: number }[] = [];
   const now = new Date();
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -27,7 +27,7 @@ function getLastNMonths(n: number): { label: string; year: number; month: number
 
 // Returns label for last N weeks e.g. ["Wk1","Wk2"...]
 function getLastNWeeks(n: number): { label: string; start: Date; end: Date }[] {
-  const result = [];
+  const result: { label: string; start: Date; end: Date }[] = [];
   const now = new Date();
   for (let i = n - 1; i >= 0; i--) {
     const end   = new Date(now);

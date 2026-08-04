@@ -485,6 +485,7 @@ model Appointment {
   referenceNo    String            @unique
   status         AppointmentStatus @default(PENDING)
   adminNote      String?           // admin-only note
+  deletedAt      DateTime?         // soft delete — buyer-removed PENDING appointments (Rule 6 standard)
 
   // Relation
   userId         String
