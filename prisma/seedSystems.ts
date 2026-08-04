@@ -699,23 +699,118 @@ async function main() {
 
   // ── Seed DesignTiers for external systems (those with public websites) ──
   // Internal systems (HR, Warehouse, Inventory, Finance) have no website — skip.
-  // Four tiers: Static (base, included), Dynamic, Modern, AI-Powered.
+  // Four engagement tiers, same structure the Villa Azure Service Agreement
+  // uses (Section 2): Managed Rental, Full Buyout, Build-to-Own, Full Custom.
+  // Villa Azure's own numbers (base ₱350,000) become the ratios below, then
+  // get scaled to each system's own basePrice — so a ₱22,500 system and a
+  // ₱45,000 system both get proportionally equivalent tiers.
   const externalSystemTags = ["Construction", "Education", "E-commerce", "CRM", "Booking", "Restaurant"];
 
-  const designTierTemplates = [
-    { name: "Static",     slug: "static",     tagline: "Clean, fast, content-focused website. No animations.",          priceModifier: 0,     sortOrder: 0 },
-    { name: "Dynamic",    slug: "dynamic",    tagline: "Smooth page transitions, scroll effects & interactive sections.", priceModifier: 8000,  sortOrder: 1 },
-    { name: "Modern",     slug: "modern",     tagline: "Premium UI with GSAP animations, parallax & motion design.",     priceModifier: 15000, sortOrder: 2 },
-    { name: "AI-Powered", slug: "ai-powered", tagline: "AI chat widget, smart content blocks & personalized UX.",        priceModifier: 35000, sortOrder: 3 },
-  ];
+  // Ratios derived from the Villa Azure agreement (base ₱350,000 = Tier 2 Full Buyout):
+  //   Tier 1 setup = monthly = ₱15,000 / ₱350,000 = 0.042857
+  //   Tier 3 monthly         = ₱20,000 / ₱350,000 = 0.057143  (×36mo ≈ 2.06× the buyout price)
+  //   Tier 4 premium         = (₱400,000 - ₱350,000) / ₱350,000 = 0.142857 added on top of buyout
+  const TIER1_RATIO = 15000 / 350000;
+  const TIER3_RATIO = 20000 / 350000;
+  const TIER4_RATIO = (400000 - 350000) / 350000;
+  const roundToHundred = (n: number) => Math.round(n / 100) * 100;
+
+  // Package details are generic (not resort-specific) since this template
+  // applies to every external system — CRM, Booking, Construction, etc.
+  // Wording is adapted from the agreement's own "what's included" sections.
+  const TIER_FEATURES = {
+    managedRental: [
+      "Full deployment & hosting setup",
+      "Custom branding — logo, colors, business name",
+      "Content population — your data, images, pricing",
+      "Full admin dashboard access",
+      "24/7 automated security monitoring",
+      "Uptime monitoring — 99% SLA target",
+      "10 hours/week of developer support",
+    ],
+    fullBuyout: [
+      "Complete customization — logo, colors, fonts, branding",
+      "Content population — fully populated with your data",
+      "Full admin dashboard, every feature included",
+      "Enterprise security features",
+      "Email automation & notifications",
+      "Database setup with Row Level Security",
+      "GitHub repository & full source code transferred",
+      "2-week free post-launch support",
+    ],
+    buildToOwn: [
+      "Fully custom design — not a resellable template",
+      "All features built to your specifications",
+      "Admin dashboard customized to your workflow",
+      "Content population — fully populated with your data",
+      "Email automation & notification system",
+      "Security monitoring & intrusion detection",
+      "Complete source code documentation",
+      "2-week free post-launch support",
+    ],
+    fullCustom: [
+      "Fully custom design — zero template code",
+      "Custom database design & schema",
+      "All features from your Scope Document",
+      "Mobile-responsive design",
+      "Completely custom admin dashboard layout",
+      "Email system & automation",
+      "Full ownership transfer on delivery",
+      "2-week free post-launch support",
+    ],
+  };
 
   for (const tag of externalSystemTags) {
     const system = await prisma.system.findUnique({ where: { tag } });
     if (!system) { console.log(`⚠ System not found: ${tag}`); continue; }
 
+    const base = system.basePrice;
+    const tier1Fee  = roundToHundred(base * TIER1_RATIO);   // setup = monthly, same amount
+    const tier3Fee  = roundToHundred(base * TIER3_RATIO);   // monthly, × 36
+    const tier4Bump = roundToHundred(base * TIER4_RATIO);   // one-time modifier on top of base
+
+    const designTierTemplates = [
+      {
+        name: "Tier 1 — Managed Rental", slug: "managed-rental",
+        tagline: `+₱${tier1Fee.toLocaleString()} setup · month-to-month after 3-month lock-in`,
+        pricingType: "monthly", basePrice: null, priceModifier: 0,
+        setupFee: tier1Fee, monthlyFee: tier1Fee, minMonthsLock: 3,
+        installmentAmount: null, installmentMonths: null,
+        features: TIER_FEATURES.managedRental, sortOrder: 0,
+      },
+      {
+        name: "Tier 2 — Full Buyout", slug: "full-buyout",
+        tagline: "One-time · complete ownership handover after launch",
+        pricingType: "one-time", basePrice: base, priceModifier: 0,
+        setupFee: null, monthlyFee: null, minMonthsLock: null,
+        installmentAmount: null, installmentMonths: null,
+        features: TIER_FEATURES.fullBuyout, sortOrder: 1,
+      },
+      {
+        name: "Tier 3 — Build-to-Own", slug: "build-to-own",
+        tagline: `₱${tier3Fee.toLocaleString()}/mo × 36 · own everything after`,
+        pricingType: "installment", basePrice: null, priceModifier: 0,
+        setupFee: null, monthlyFee: null, minMonthsLock: null,
+        installmentAmount: tier3Fee, installmentMonths: 36,
+        features: TIER_FEATURES.buildToOwn, sortOrder: 2,
+      },
+      {
+        name: "Tier 4 — Full Custom", slug: "full-custom",
+        tagline: "One-time · built from scratch, full IP from day one",
+        pricingType: "one-time", basePrice: base + tier4Bump, priceModifier: 0,
+        setupFee: null, monthlyFee: null, minMonthsLock: null,
+        installmentAmount: null, installmentMonths: null,
+        features: TIER_FEATURES.fullCustom, sortOrder: 3,
+      },
+    ];
+
     for (const tier of designTierTemplates) {
       await prisma.$executeRaw`
-        INSERT INTO "DesignTier" (id, "systemId", name, slug, tagline, "priceModifier", "sortOrder", "createdAt")
+        INSERT INTO "DesignTier" (
+          id, "systemId", name, slug, tagline, "priceModifier", "pricingType", "basePrice",
+          "setupFee", "monthlyFee", "minMonthsLock", "installmentAmount", "installmentMonths",
+          features, "sortOrder", "createdAt"
+        )
         VALUES (
           gen_random_uuid(),
           ${system.id},
@@ -723,6 +818,14 @@ async function main() {
           ${tier.slug},
           ${tier.tagline},
           ${tier.priceModifier},
+          ${tier.pricingType},
+          ${tier.basePrice},
+          ${tier.setupFee},
+          ${tier.monthlyFee},
+          ${tier.minMonthsLock},
+          ${tier.installmentAmount},
+          ${tier.installmentMonths},
+          ${tier.features},
           ${tier.sortOrder},
           NOW()
         )
@@ -730,10 +833,18 @@ async function main() {
           SET name = EXCLUDED.name,
               tagline = EXCLUDED.tagline,
               "priceModifier" = EXCLUDED."priceModifier",
+              "pricingType" = EXCLUDED."pricingType",
+              "basePrice" = EXCLUDED."basePrice",
+              "setupFee" = EXCLUDED."setupFee",
+              "monthlyFee" = EXCLUDED."monthlyFee",
+              "minMonthsLock" = EXCLUDED."minMonthsLock",
+              "installmentAmount" = EXCLUDED."installmentAmount",
+              "installmentMonths" = EXCLUDED."installmentMonths",
+              features = EXCLUDED.features,
               "sortOrder" = EXCLUDED."sortOrder"
       `;
     }
-    console.log("✓ DesignTiers seeded: " + tag);
+    console.log(`✓ DesignTiers seeded: ${tag} (base ₱${base.toLocaleString()})`);
   }
 
   console.log("Done. All design tiers seeded.");

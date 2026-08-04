@@ -14,9 +14,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { DesignTierEntry, ServiceTierEntry, VisitorSystemEntry } from "../lib/visitorData";
-import { getFormattedPrice } from "@/utils/pricingCalculator";
-import { PricingDisplay } from "./PricingDisplay";
-import "../styles/pricingDisplay.css";
 
 type ConfigSystem = {
   tag: string; title: string; base: number; accent: string;
@@ -29,6 +26,20 @@ type ConfigSystem = {
 // configuratorSystems is built from DB data at runtime in SystemsCarousel.
 // The hardcoded array has been removed — all system data comes from /api/systems.
 const configuratorSystems: ConfigSystem[] = [];
+
+// Payment terms text per tier — sourced from the agreement's Section 4
+// (Payment Terms — Detailed, 4A-4D). Each tier has a genuinely different
+// structure, not a single "30% / 70%" split applied everywhere:
+//   Tier 1 (Managed Rental)  — no deposit/balance split at all, just setup + monthly
+//   Tier 2 (Full Buyout)     — 50% deposit / 50% on delivery
+//   Tier 3 (Build-to-Own)    — no upfront deposit, first month starts the work
+//   Tier 4 (Full Custom)     — 50% deposit / 50% on delivery
+const TIER_PAYMENT_TERMS: Record<string, string> = {
+  "managed-rental": "Setup fee due at signing · billed monthly on the 1st",
+  "full-buyout":    "50% deposit · 50% on delivery",
+  "build-to-own":   "No deposit · first month's payment starts development",
+  "full-custom":    "50% deposit · 50% on delivery",
+};
 
 /* ServiceTiersBlock — informational-only cards explaining Basic/Standard/Premium
    service levels. Deliberately has no click/select behavior and no price math —
@@ -117,29 +128,15 @@ export function SystemsCarousel() {
   const [modalSys,  setModalSys]  = useState<ConfigSystem | null>(null);
   // Design tier selection — reset to 0 when modal opens
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
-  // Pricing mode toggle — "one_time" (base price) vs "subscription" (setup fee + monthly fee).
-  // Subscription mode is only offered when the system has both setupFee and monthlyFee set.
-  const [pricingMode, setPricingMode] = useState<"one_time" | "subscription">("one_time");
   const activeTier     = modalSys?.designTiers?.[selectedTierIdx] ?? null;
   const tierPriceBonus = activeTier?.priceModifier ?? 0;
 
-  // NEW: whether this tier has been configured with the flexible pricing model
-  // (subscription / payment-plan, or one-time with a real basePrice set by admin).
-  // Tiers not yet migrated to the new model keep using the legacy base + priceModifier calc below.
-  const usesNewPricingModel = !!(
-    activeTier?.pricingType &&
-    (activeTier.pricingType !== "one-time" || (activeTier.pricingType === "one-time" && activeTier.basePrice))
-  );
-  const newModelPrice = usesNewPricingModel && activeTier ? getFormattedPrice(activeTier as any) : null;
-
-  /* Open modal — match carousel system tag to DB configurator data,
-     then pre-check any add-on whose label fuzzy-matches a carousel feature */
+  /* Open modal — match carousel system tag to DB configurator data */
   function openModal(s: VisitorSystemEntry) {
     const cfg = activeConfigSystems.find(c => c.tag === s.tag) ?? null;
     if (!cfg) return;
 
     setSelectedTierIdx(0);
-    setPricingMode("one_time");
     setModalSys(cfg);
     document.body.style.overflow = "hidden";
   }
@@ -156,16 +153,20 @@ export function SystemsCarousel() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Whether this system offers a subscription option — needs both setupFee and monthlyFee.
-  const hasSubscriptionOption = !!(modalSys?.setupFee != null && modalSys?.monthlyFee != null);
-  // Effective pricing mode — falls back to one_time if subscription isn't available for this system.
-  const effectivePricingMode = hasSubscriptionOption ? pricingMode : "one_time";
+  // Pricing now comes straight from the selected tier's pricingType — this is
+  // the real column the live DB uses, not an inferred heuristic.
+  const isMonthlyTier     = activeTier?.pricingType === "monthly";
+  const isInstallmentTier = activeTier?.pricingType === "installment";
 
-  // Base cost depends on pricing mode: one-time base price, or setup fee (monthly fee shown separately).
-  const baseCost = effectivePricingMode === "subscription" ? (modalSys?.setupFee ?? 0) : (modalSys?.base ?? 0);
-  // Total is base cost plus the selected design tier's price modifier — no add-ons anymore.
-  // NEW: if the active tier has the flexible pricing model configured, its total takes over.
-  const totalPrice = usesNewPricingModel ? (newModelPrice?.raw.total ?? 0) : (baseCost + tierPriceBonus);
+  // "Total today":
+  //   monthly     → the setup fee (if any) due at signing
+  //   installment → the first installment (no separate deposit — Section 4C)
+  //   one-time    → the tier's own basePrice if set, else system base + modifier (legacy fallback)
+  const totalPrice = isMonthlyTier
+    ? (activeTier?.setupFee ?? 0)
+    : isInstallmentTier
+    ? (activeTier?.installmentAmount ?? 0)
+    : (activeTier?.basePrice ?? ((modalSys?.base ?? 0) + tierPriceBonus));
 
   // Package details shown below the tier selector — the selected tier's own list when it
   // has one, otherwise this system's shared feature list (covers tiers not yet filled in).
@@ -367,7 +368,7 @@ export function SystemsCarousel() {
                 {(modalSys.designTiers?.length ?? 0) > 0 && (
                   <div className="vDesignTiers">
                     <p className="vConfigModalSectionLabel" style={{ marginBottom: "0.5rem" }}>
-                      Website Design Style
+                      Service Tier
                     </p>
                     <div className="vDesignTierGrid">
                       {modalSys.designTiers.map((tier, idx) => {
@@ -381,7 +382,15 @@ export function SystemsCarousel() {
                           >
                             <div className="vDesignTierTop">
                               <span className="vDesignTierName" style={isActive ? { color: modalSys.accent } : {}}>{tier.name}</span>
-                              {tier.priceModifier > 0 ? (
+                              {tier.pricingType === "monthly" ? (
+                                <span className="vDesignTierPrice" style={{ color: modalSys.accent }}>₱{(tier.monthlyFee ?? 0).toLocaleString()}/mo</span>
+                              ) : tier.pricingType === "installment" ? (
+                                <span className="vDesignTierPrice" style={{ color: modalSys.accent }}>₱{(tier.installmentAmount ?? 0).toLocaleString()}/mo × {tier.installmentMonths ?? 0}</span>
+                              ) : tier.basePrice != null && modalSys.base != null && tier.basePrice > modalSys.base ? (
+                                <span className="vDesignTierPrice" style={{ color: modalSys.accent }}>₱{tier.basePrice.toLocaleString()}</span>
+                              ) : tier.basePrice != null ? (
+                                <span className="vDesignTierIncluded">Included</span>
+                              ) : tier.priceModifier > 0 ? (
                                 <span className="vDesignTierPrice" style={{ color: modalSys.accent }}>+₱{tier.priceModifier.toLocaleString()}</span>
                               ) : (
                                 <span className="vDesignTierIncluded">Included</span>
@@ -417,27 +426,6 @@ export function SystemsCarousel() {
                   </div>
                 )}
 
-                {/* Pricing mode toggle — only shown when this system offers a subscription option
-                    AND the active tier isn't already controlling its own pricing via the new model */}
-                {hasSubscriptionOption && !usesNewPricingModel && (
-                  <div className="vPricingModeToggle">
-                    <button
-                      className={"vPricingModeBtn" + (effectivePricingMode === "one_time" ? " active" : "")}
-                      style={effectivePricingMode === "one_time" ? { borderColor: modalSys.accent, color: modalSys.accent, background: modalSys.accent + "12" } : {}}
-                      onClick={() => setPricingMode("one_time")}
-                    >
-                      One-time
-                    </button>
-                    <button
-                      className={"vPricingModeBtn" + (effectivePricingMode === "subscription" ? " active" : "")}
-                      style={effectivePricingMode === "subscription" ? { borderColor: modalSys.accent, color: modalSys.accent, background: modalSys.accent + "12" } : {}}
-                      onClick={() => setPricingMode("subscription")}
-                    >
-                      Subscription
-                    </button>
-                  </div>
-                )}
-
                 {/* Package details — this is the SELECTED TIER's own list, not a
                     shared "included in every tier" list. Falls back to the
                     system's general feature list only when the active tier
@@ -446,8 +434,6 @@ export function SystemsCarousel() {
                   <p className="vConfigModalSectionLabel">
                     {activeTier ? (
                       <>Package details — {activeTier.name}</>
-                    ) : effectivePricingMode === "subscription" ? (
-                      <>Base package — ₱{(modalSys.setupFee ?? 0).toLocaleString()} setup + ₱{(modalSys.monthlyFee ?? 0).toLocaleString()}/mo <span className="vConfigModalIncluded">included</span></>
                     ) : (
                       <>Base package — ₱{modalSys.base.toLocaleString()} <span className="vConfigModalIncluded">included</span></>
                     )}
@@ -466,13 +452,6 @@ export function SystemsCarousel() {
                     ))}
                   </div>
                 </div>
-
-                {/* NEW: flexible pricing display — only shown for tiers configured with
-                    the new pricing model (subscription / payment-plan / real one-time price).
-                    Legacy tiers keep the old sidebar-only price breakdown further below. */}
-                {usesNewPricingModel && activeTier && (
-                  <PricingDisplay tier={activeTier as any} showDescription={true} />
-                )}
               </div>
 
               {/* Right — live price summary */}
@@ -484,50 +463,61 @@ export function SystemsCarousel() {
                     <span className="vConfigModalResultLabel">Your Build</span>
                     <span className="vConfigModalResultTag" style={{ color: modalSys.accent, borderColor: modalSys.accent + "40", background: modalSys.accent + "12" }}>{modalSys.tag}</span>
                   </div>
-                  {usesNewPricingModel && newModelPrice ? (
-                    /* NEW: flexible pricing model — simplified summary row, since the
-                       full breakdown (setup/monthly/installments) is already shown
-                       in the PricingDisplay component above the tier's package details. */
-                    <div className="vConfigModalRow">
-                      <span>{activeTier?.name} — {newModelPrice.primary}</span>
-                      <span>{newModelPrice.secondary ?? ""}</span>
-                    </div>
-                  ) : effectivePricingMode === "subscription" ? (
+                  {isMonthlyTier ? (
                     <>
-                      <div className="vConfigModalRow">
-                        <span>Setup fee</span>
-                        <span>₱{(modalSys.setupFee ?? 0).toLocaleString()}</span>
-                      </div>
+                      {activeTier?.setupFee != null && (
+                        <div className="vConfigModalRow">
+                          <span>Setup fee</span>
+                          <span>₱{activeTier.setupFee.toLocaleString()}</span>
+                        </div>
+                      )}
                       <div className="vConfigModalRow vConfigModalRowAddon">
                         <span>Monthly fee</span>
-                        <span>₱{(modalSys.monthlyFee ?? 0).toLocaleString()}/mo</span>
+                        <span>₱{(activeTier?.monthlyFee ?? 0).toLocaleString()}/mo</span>
                       </div>
                     </>
-                  ) : (
-                    <div className="vConfigModalRow">
-                      <span>Base system</span>
-                      <span>₱{modalSys.base.toLocaleString()}</span>
-                    </div>
-                  )}
-                  {!usesNewPricingModel && activeTier && tierPriceBonus > 0 && (
+                  ) : isInstallmentTier ? (
                     <div className="vConfigModalRow vConfigModalRowAddon">
-                      <span>+ {activeTier.name} design</span>
-                      <span>₱{tierPriceBonus.toLocaleString()}</span>
+                      <span>Monthly installment</span>
+                      <span>₱{(activeTier?.installmentAmount ?? 0).toLocaleString()}/mo</span>
                     </div>
+                  ) : (
+                    <>
+                      <div className="vConfigModalRow">
+                        <span>Base system</span>
+                        <span>₱{(activeTier?.basePrice ?? modalSys.base).toLocaleString()}</span>
+                      </div>
+                      {activeTier && tierPriceBonus > 0 && (
+                        <div className="vConfigModalRow vConfigModalRowAddon">
+                          <span>+ {activeTier.name}</span>
+                          <span>₱{tierPriceBonus.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </>
                   )}
                   <div className="vConfigModalDivider" />
                   <div className="vConfigModalTotal">
-                    <span>Total</span>
+                    <span>{isMonthlyTier || isInstallmentTier ? "Total today" : "Total"}</span>
                     <span className="vConfigModalTotalPrice" style={{ color: modalSys.accent }}>
                       ₱{totalPrice.toLocaleString()}
                     </span>
                   </div>
-                  {!usesNewPricingModel && effectivePricingMode === "subscription" && (
-                    <p className="vConfigModalTerms">+ ₱{(modalSys.monthlyFee ?? 0).toLocaleString()}/month recurring</p>
+                  {isMonthlyTier && (
+                    <p className="vConfigModalTerms">
+                      + ₱{(activeTier?.monthlyFee ?? 0).toLocaleString()}/month recurring
+                      {activeTier?.minMonthsLock ? ` · ${activeTier.minMonthsLock}-month minimum` : ""}
+                    </p>
                   )}
-                  {!usesNewPricingModel && (
-                    <p className="vConfigModalTerms">30% downpayment · 70% on delivery</p>
+                  {isInstallmentTier && (
+                    <p className="vConfigModalTerms">
+                      Then ₱{(activeTier?.installmentAmount ?? 0).toLocaleString()}/mo for {(activeTier?.installmentMonths ?? 1) - 1} more months
+                    </p>
                   )}
+                  <p className="vConfigModalTerms">
+                    {activeTier && TIER_PAYMENT_TERMS[activeTier.slug]
+                      ? TIER_PAYMENT_TERMS[activeTier.slug]
+                      : "50% deposit · 50% on delivery"}
+                  </p>
                   <div className="vConfigModalDelivery">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, opacity: 0.5 }}>
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
