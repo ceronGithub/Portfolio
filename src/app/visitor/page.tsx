@@ -695,22 +695,6 @@ function SystemsCarousel() {
                         Responsive design included
                       </div>
                     </div>
-                    <div className="vSysCardTermsRow">
-                      <div className="vSysCardTerm">
-                        <span className="vSysCardTermNum" style={{ color: s.accent }}>30%</span>
-                        <span className="vSysCardTermLabel">downpayment to start</span>
-                      </div>
-                      <div className="vSysCardTermDivider" />
-                      <div className="vSysCardTerm">
-                        <span className="vSysCardTermNum" style={{ color: s.accent }}>70%</span>
-                        <span className="vSysCardTermLabel">on final delivery</span>
-                      </div>
-                      <div className="vSysCardTermDivider" />
-                      <div className="vSysCardTerm">
-                        <span className="vSysCardTermNum" style={{ color: s.accent }}>100%</span>
-                        <span className="vSysCardTermLabel">source code yours</span>
-                      </div>
-                    </div>
                     <div className="vSysCardPolicy">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
