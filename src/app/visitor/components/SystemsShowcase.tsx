@@ -14,6 +14,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { DesignTierEntry, ServiceTierEntry, VisitorSystemEntry } from "../lib/visitorData";
+import { getFormattedPrice } from "@/utils/pricingCalculator";
+import { PricingDisplay } from "./PricingDisplay";
+import "../styles/pricingDisplay.css";
 
 type ConfigSystem = {
   tag: string; title: string; base: number; accent: string;
@@ -120,6 +123,15 @@ export function SystemsCarousel() {
   const activeTier     = modalSys?.designTiers?.[selectedTierIdx] ?? null;
   const tierPriceBonus = activeTier?.priceModifier ?? 0;
 
+  // NEW: whether this tier has been configured with the flexible pricing model
+  // (subscription / payment-plan, or one-time with a real basePrice set by admin).
+  // Tiers not yet migrated to the new model keep using the legacy base + priceModifier calc below.
+  const usesNewPricingModel = !!(
+    activeTier?.pricingType &&
+    (activeTier.pricingType !== "one-time" || (activeTier.pricingType === "one-time" && activeTier.basePrice))
+  );
+  const newModelPrice = usesNewPricingModel && activeTier ? getFormattedPrice(activeTier as any) : null;
+
   /* Open modal — match carousel system tag to DB configurator data,
      then pre-check any add-on whose label fuzzy-matches a carousel feature */
   function openModal(s: VisitorSystemEntry) {
@@ -152,7 +164,8 @@ export function SystemsCarousel() {
   // Base cost depends on pricing mode: one-time base price, or setup fee (monthly fee shown separately).
   const baseCost = effectivePricingMode === "subscription" ? (modalSys?.setupFee ?? 0) : (modalSys?.base ?? 0);
   // Total is base cost plus the selected design tier's price modifier — no add-ons anymore.
-  const totalPrice = baseCost + tierPriceBonus;
+  // NEW: if the active tier has the flexible pricing model configured, its total takes over.
+  const totalPrice = usesNewPricingModel ? (newModelPrice?.raw.total ?? 0) : (baseCost + tierPriceBonus);
 
   // Package details shown below the tier selector — the selected tier's own list when it
   // has one, otherwise this system's shared feature list (covers tiers not yet filled in).
@@ -404,8 +417,9 @@ export function SystemsCarousel() {
                   </div>
                 )}
 
-                {/* Pricing mode toggle — only shown when this system offers a subscription option */}
-                {hasSubscriptionOption && (
+                {/* Pricing mode toggle — only shown when this system offers a subscription option
+                    AND the active tier isn't already controlling its own pricing via the new model */}
+                {hasSubscriptionOption && !usesNewPricingModel && (
                   <div className="vPricingModeToggle">
                     <button
                       className={"vPricingModeBtn" + (effectivePricingMode === "one_time" ? " active" : "")}
@@ -452,6 +466,13 @@ export function SystemsCarousel() {
                     ))}
                   </div>
                 </div>
+
+                {/* NEW: flexible pricing display — only shown for tiers configured with
+                    the new pricing model (subscription / payment-plan / real one-time price).
+                    Legacy tiers keep the old sidebar-only price breakdown further below. */}
+                {usesNewPricingModel && activeTier && (
+                  <PricingDisplay tier={activeTier as any} showDescription={true} />
+                )}
               </div>
 
               {/* Right — live price summary */}
@@ -463,7 +484,15 @@ export function SystemsCarousel() {
                     <span className="vConfigModalResultLabel">Your Build</span>
                     <span className="vConfigModalResultTag" style={{ color: modalSys.accent, borderColor: modalSys.accent + "40", background: modalSys.accent + "12" }}>{modalSys.tag}</span>
                   </div>
-                  {effectivePricingMode === "subscription" ? (
+                  {usesNewPricingModel && newModelPrice ? (
+                    /* NEW: flexible pricing model — simplified summary row, since the
+                       full breakdown (setup/monthly/installments) is already shown
+                       in the PricingDisplay component above the tier's package details. */
+                    <div className="vConfigModalRow">
+                      <span>{activeTier?.name} — {newModelPrice.primary}</span>
+                      <span>{newModelPrice.secondary ?? ""}</span>
+                    </div>
+                  ) : effectivePricingMode === "subscription" ? (
                     <>
                       <div className="vConfigModalRow">
                         <span>Setup fee</span>
@@ -480,7 +509,7 @@ export function SystemsCarousel() {
                       <span>₱{modalSys.base.toLocaleString()}</span>
                     </div>
                   )}
-                  {activeTier && tierPriceBonus > 0 && (
+                  {!usesNewPricingModel && activeTier && tierPriceBonus > 0 && (
                     <div className="vConfigModalRow vConfigModalRowAddon">
                       <span>+ {activeTier.name} design</span>
                       <span>₱{tierPriceBonus.toLocaleString()}</span>
@@ -493,10 +522,12 @@ export function SystemsCarousel() {
                       ₱{totalPrice.toLocaleString()}
                     </span>
                   </div>
-                  {effectivePricingMode === "subscription" && (
+                  {!usesNewPricingModel && effectivePricingMode === "subscription" && (
                     <p className="vConfigModalTerms">+ ₱{(modalSys.monthlyFee ?? 0).toLocaleString()}/month recurring</p>
                   )}
-                  <p className="vConfigModalTerms">30% downpayment · 70% on delivery</p>
+                  {!usesNewPricingModel && (
+                    <p className="vConfigModalTerms">30% downpayment · 70% on delivery</p>
+                  )}
                   <div className="vConfigModalDelivery">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, opacity: 0.5 }}>
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>

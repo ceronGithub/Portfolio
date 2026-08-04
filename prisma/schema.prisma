@@ -208,11 +208,28 @@ model SystemAddon {
 model DesignTier {
   id            String   @id @default(cuid())
   systemId      String
-  name          String                   // "Static" | "Dynamic" | "Modern" | "AI-Powered"
-  slug          String                   // "static" | "dynamic" | "modern" | "ai-powered"
+  name          String                   // "Static" | "Dynamic" | "Modern" | "AI-Powered" OR "Tier 1 — Managed Rental"
+  slug          String                   // "static" | "dynamic" | "modern" | "ai-powered" OR "tier-1-managed"
   tagline       String?                  // Short description shown under the name
-  priceModifier Int      @default(0)     // Added to system basePrice (in PHP)
-  features      String[] @default([])    // This tier's own package details — replaces the old shared "base package" list; empty means "fall back to System.features" until an admin fills these in
+  
+  // ── Flexible Pricing Model (supports one-time, subscription, payment-plan) ──────
+  pricingType   String   @default("one-time")  // enum-like: "one-time" | "subscription" | "payment-plan"
+  
+  // One-time pricing (used when pricingType = "one-time")
+  basePrice     Int?                           // total one-time cost in PHP (e.g. 350000)
+  
+  // Subscription pricing (used when pricingType = "subscription")
+  setupFee      Int?                           // one-time setup fee in PHP (e.g. 15000)
+  monthlyFee    Int?                           // recurring monthly fee in PHP (e.g. 15000)
+  minMonthsLock Int?  @default(3)              // minimum lock-in period (e.g. 3 months)
+  
+  // Payment plan pricing (used when pricingType = "payment-plan")
+  installmentMonths  Int?                      // number of months to pay (e.g. 36)
+  installmentAmount  Int?                      // monthly payment amount in PHP (e.g. 20000)
+  
+  // ── Legacy & metadata ──────────────────────────────────────────────────────────
+  priceModifier Int      @default(0)     // LEGACY: Added to system basePrice (for backward compat)
+  features      String[] @default([])    // This tier's own package details
   demoVideoUrl  String?                  // Tier-specific demo video
   liveUrl       String?                  // Live demo website link
   sortOrder     Int      @default(0)
@@ -222,6 +239,7 @@ model DesignTier {
 
   @@unique([systemId, slug])
   @@index([systemId])
+  @@index([pricingType])
 }
 
 // ── Service Tiers ──────────────────────────────────────────────────

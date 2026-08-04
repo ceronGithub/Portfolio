@@ -22,6 +22,17 @@ export type DesignTierEntry = {
   id: string; name: string; slug: string; tagline: string;
   priceModifier: number; features: string[];
   demoVideoUrl: string | null; liveUrl: string | null; sortOrder: number;
+  // Flexible pricing model fields — optional so legacy tiers (priceModifier only)
+  // keep working untouched. When pricingType is "subscription" or "payment-plan",
+  // or "one-time" with a real basePrice, the configurator uses these instead of
+  // the legacy system-level base + priceModifier calculation.
+  pricingType?: string;              // "one-time" | "subscription" | "payment-plan"
+  basePrice?: number | null;         // one-time total cost
+  setupFee?: number | null;          // subscription setup fee
+  monthlyFee?: number | null;        // subscription monthly fee
+  minMonthsLock?: number | null;     // subscription lock-in period
+  installmentMonths?: number | null; // payment-plan duration
+  installmentAmount?: number | null; // payment-plan monthly amount
 };
 // pricingType "fixed" → use `price` only, exact amount.
 // pricingType "range" → use `priceMin`/`priceMax` (quote-based, e.g. complex custom integrations).

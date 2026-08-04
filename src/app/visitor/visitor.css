@@ -4397,6 +4397,99 @@
   border-radius: 2px;
 }
 
+/* ── Design Tier Selector (Website Design Style) ─────────────────────
+   These classes exist in SystemsShowcase.tsx but were never styled —
+   without display/sizing rules, the check badge div rendered as a
+   full-width block bar and the name/tagline collapsed onto one line. */
+.vDesignTiers {
+  margin-bottom: 1rem;
+}
+.vDesignTierGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.vDesignTierCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 2.25rem 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.vDesignTierCard:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.vDesignTierCardActive {
+  border-width: 1.5px;
+}
+.vDesignTierTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.vDesignTierName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+}
+.vDesignTierPrice {
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.vDesignTierIncluded {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.vDesignTierTagline {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.5;
+}
+.vDesignTierCheck {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.vDesignTierLiveLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+.vDesignTierLiveLink:hover {
+  opacity: 0.8;
+}
+
 /* Pricing mode toggle — One-time vs Subscription, only shown when a system offers both */
 .vPricingModeToggle {
   display: flex;

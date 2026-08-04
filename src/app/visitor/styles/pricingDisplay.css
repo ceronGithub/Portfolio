@@ -1,0 +1,156 @@
+/**
+ * FILE: visitor/styles/pricingDisplay.css
+ * PURPOSE:
+ * Styles for the PricingDisplay and PricingComparison components.
+ * Used in the configurator modal to show pricing information.
+ * Dark theme: bg #0d0d0f, text #e8e8ea, borders #2a2a2d, accent #7f77dd
+ */
+
+/* ─────────────────────────────────────────────────────────────────
+   PRICING DISPLAY — Primary pricing block in modal
+   ───────────────────────────────────────────────────────────────── */
+
+.vPricingDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  margin-top: 1.5rem;
+}
+
+/* Primary price — large, main display */
+.vPricingPrimary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.vPricingPrimaryLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.vPricingPrimaryValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #7fd99a; /* Green accent for prices */
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* Secondary details — lock-in, payment terms, etc. */
+.vPricingSecondary {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Total cost breakdown — shown for subscription & payment-plan tiers */
+.vPricingTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vPricingTotalLabel {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+}
+
+.vPricingTotalValue {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #7fd99a;
+}
+
+/* Description — explains what's included */
+.vPricingDescription {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   PRICING COMPARISON — Side-by-side tier comparison
+   ───────────────────────────────────────────────────────────────── */
+
+.vPricingComparison {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.vPricingComparisonRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vPricingComparisonLabel {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  flex: 1;
+}
+
+.vPricingComparisonPrice {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #7fd99a;
+  white-space: nowrap;
+}
+
+.vPricingComparisonSavings {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: right;
+}
+
+.vPricingComparisonSavings .savings {
+  font-size: 0.85rem;
+  color: #7fd99a;
+  font-weight: 600;
+}
+
+.vPricingComparisonSavings .upsell {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile adjustments
+   ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .vPricingDisplay {
+    padding: 1.25rem;
+  }
+
+  .vPricingPrimaryValue {
+    font-size: 1.5rem;
+  }
+
+  .vPricingTotalValue {
+    font-size: 1.1rem;
+  }
+}

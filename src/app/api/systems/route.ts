@@ -52,9 +52,17 @@ export async function GET() {
     // hasn't run yet on this deploy, falls back to the legacy shape so the configurator
     // still renders — just without per-tier details until the migration completes.
     let designTiersMap: Record<string, any[]> = {};
+    // Fallback defaults applied when the flexible-pricing columns aren't queryable yet
+    // (migration not run on this deploy) — tier behaves exactly like before (legacy calc).
+    const legacyPricingDefaults = {
+      pricingType: "one-time", basePrice: null, setupFee: null, monthlyFee: null,
+      minMonthsLock: 3, installmentMonths: null, installmentAmount: null,
+    };
     try {
+      // Attempt 1 — full flexible pricing model columns (Rule: one-time / subscription / payment-plan)
       const rawTiers = await prisma.$queryRaw<any[]>`
-        SELECT id, "systemId", name, slug, tagline, "priceModifier", features, "demoVideoUrl", "liveUrl", "sortOrder"
+        SELECT id, "systemId", name, slug, tagline, "priceModifier", features, "demoVideoUrl", "liveUrl", "sortOrder",
+               "pricingType", "basePrice", "setupFee", "monthlyFee", "minMonthsLock", "installmentMonths", "installmentAmount"
         FROM "DesignTier"
         ORDER BY "systemId", "sortOrder" ASC
       `;
@@ -64,17 +72,31 @@ export async function GET() {
       }
     } catch {
       try {
-        const rawTiersLegacy = await prisma.$queryRaw<any[]>`
-          SELECT id, "systemId", name, slug, tagline, "priceModifier", "demoVideoUrl", "liveUrl", "sortOrder"
+        // Attempt 2 — pre-flexible-pricing shape (features column exists, pricing columns don't yet)
+        const rawTiersMid = await prisma.$queryRaw<any[]>`
+          SELECT id, "systemId", name, slug, tagline, "priceModifier", features, "demoVideoUrl", "liveUrl", "sortOrder"
           FROM "DesignTier"
           ORDER BY "systemId", "sortOrder" ASC
         `;
-        for (const tier of rawTiersLegacy) {
+        for (const tier of rawTiersMid) {
           if (!designTiersMap[tier.systemId]) designTiersMap[tier.systemId] = [];
-          designTiersMap[tier.systemId].push({ ...tier, features: [] });
+          designTiersMap[tier.systemId].push({ ...tier, features: tier.features ?? [], ...legacyPricingDefaults });
         }
       } catch {
-        designTiersMap = {};
+        try {
+          // Attempt 3 — oldest legacy shape (no features column either)
+          const rawTiersLegacy = await prisma.$queryRaw<any[]>`
+            SELECT id, "systemId", name, slug, tagline, "priceModifier", "demoVideoUrl", "liveUrl", "sortOrder"
+            FROM "DesignTier"
+            ORDER BY "systemId", "sortOrder" ASC
+          `;
+          for (const tier of rawTiersLegacy) {
+            if (!designTiersMap[tier.systemId]) designTiersMap[tier.systemId] = [];
+            designTiersMap[tier.systemId].push({ ...tier, features: [], ...legacyPricingDefaults });
+          }
+        } catch {
+          designTiersMap = {};
+        }
       }
     }
 
